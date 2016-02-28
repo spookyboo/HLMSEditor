@@ -1,0 +1,59 @@
+Texture / sampler:
+=================
+
+Texture
+-------
+
+Texture type
+------------
+
+Enabled
+-------
+
+Min filter
+----------
+
+Mag filter
+----------
+
+Mip filter
+----------
+
+Texture Addressing Mode U
+-------------------------
+
+Texture Addressing Mode V
+-------------------------
+
+Texture Addressing Mode W
+-------------------------
+
+Mip LOD bias
+------------
+
+Max anisotropy
+--------------
+
+Compare Function
+----------------
+
+Min LOD
+-------
+
+Max LOD
+-------
+
+Border colour [0..255]
+----------------------
+
+UV set [0..7]
+-------------
+
+Blend mode
+----------
+Sets the blending mode (how the texture unit gets layered
+ on top of the previous texture units). In case of Unlit this applies to all attached textures/samplers.
+In case of PBS, blend mode are only used in case 'Texture type' = detail map 0, 1, 2 or 3.
+
+Map weight
+----------

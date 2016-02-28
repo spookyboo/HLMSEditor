@@ -1,0 +1,18 @@
+Short term bugs and updates:
+===========================
+- Implement material browser
+- Listbox after loading a json file, so it is possible to select a datablock
+- Widget to scale the mesh (scale, position, orientation)
+- Detail weight map (how to use?)
+
+
+Bugs:
+====
+- fresnel not set properly when loading json file (in pbs) => posted on forum
+
+
+Later:
+=====
+- Combine multiple json files / datablocks into 1 and take care of duplicate macroblocks and blendblocks
+- asset_propertywidget_color.h => does not take current colour into account
+- QtAssetWidget signal when an action icon on the property is clicked
