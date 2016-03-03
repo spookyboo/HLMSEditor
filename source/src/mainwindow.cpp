@@ -205,8 +205,7 @@ void MainWindow::doOpenDatablockMenuAction(void)
         }
         file.close();
 
-        // TODO: Get the list of datablocks and assign the first one to the current 'item' to be rendered
-        // Note: It is possible to present a picklist with datablocks.
+        // Get the (list of) datablocks and assign the first one to the current 'item' to be rendered
         getAndSetFirstDatablock();
     }
 }
@@ -215,19 +214,20 @@ void MainWindow::doOpenDatablockMenuAction(void)
 void MainWindow::destroyAllDatablocks(void)
 {
     // Get the datablock from the item and remove it
-    Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
     Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
-    item->setDatablock(hlmsManager->getDefaultDatablock());
+    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
+    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
 
     // Iterate through all pbs datablocks and remove them
-    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
     Ogre::Hlms::HlmsDatablockMap::const_iterator itorPbs = hlmsPbs->getDatablockMap().begin();
     Ogre::Hlms::HlmsDatablockMap::const_iterator endPbs  = hlmsPbs->getDatablockMap().end();
     Ogre::HlmsPbsDatablock* pbsDatablock;
     while( itorPbs != endPbs)
     {
         pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itorPbs->second.datablock);
-        if (*pbsDatablock->getFullName() != *hlmsManager->getDefaultDatablock()->getFullName())
+        if (pbsDatablock != hlmsPbs->getDefaultDatablock() &&
+                pbsDatablock != hlmsUnlit->getDefaultDatablock())
         {
             hlmsPbs->destroyDatablock(pbsDatablock->getName());
             itorPbs = hlmsPbs->getDatablockMap().begin(); // Start from the beginning again
@@ -237,14 +237,14 @@ void MainWindow::destroyAllDatablocks(void)
     }
 
     // Iterate through all unlit datablocks and remove them
-    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT) );
     Ogre::Hlms::HlmsDatablockMap::const_iterator itorUnlit = hlmsUnlit->getDatablockMap().begin();
     Ogre::Hlms::HlmsDatablockMap::const_iterator endUnlit  = hlmsUnlit->getDatablockMap().end();
     Ogre::HlmsUnlitDatablock* unlitDatablock;
     while( itorUnlit != endUnlit)
     {
         unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itorUnlit->second.datablock);
-        if (*unlitDatablock->getFullName() != *hlmsManager->getDefaultDatablock()->getFullName())
+        if (pbsDatablock != hlmsPbs->getDefaultDatablock() &&
+                pbsDatablock != hlmsUnlit->getDefaultDatablock())
         {
             hlmsUnlit->destroyDatablock(unlitDatablock->getName());
             itorUnlit = hlmsUnlit->getDatablockMap().begin(); // Start from the beginning again
@@ -257,46 +257,101 @@ void MainWindow::destroyAllDatablocks(void)
 //****************************************************************************/
 void MainWindow::getAndSetFirstDatablock(void)
 {
-    // Determine whether the HlmsManager contains a HLMS_PBS datablock or a HLMS_UNLIT datablock.
-    // Depending on the result, the datablock of that type is retrieved and set in the mesh (item).
-    // TODO
-
     // Get the name/fullname from the current item in the renderwindow
     Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
     Ogre::HlmsDatablock* oldDatablock = item->getSubItem(0)->getDatablock();
     Ogre::String oldDatablockName = *oldDatablock->getFullName();
     Ogre::IdString oldDatablockId = oldDatablock->getName();
 
-    // Iterate through the pbs datablocks and get the first datablock that is encountered
+    // Determine whether the HlmsManager contains a HLMS_PBS datablock or a HLMS_UNLIT datablock.
+    // Depending on the result, the datablock of that type is retrieved and set in the mesh (item).
     Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
-    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
-    Ogre::Hlms::HlmsDatablockMap::const_iterator itor = hlmsPbs->getDatablockMap().begin();
-    Ogre::Hlms::HlmsDatablockMap::const_iterator end  = hlmsPbs->getDatablockMap().end();
-    Ogre::String defaultDatablockName = *(hlmsManager->getDefaultDatablock()->getFullName());
-    Ogre::HlmsPbsDatablock* newDatablock;
-    Ogre::String newDatablockName;
-    while( itor != end )
+    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
+    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+    if (hlmsPbs)
     {
-        newDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itor->second.datablock);
-        newDatablockName = *newDatablock->getFullName();
-        if (newDatablockName != defaultDatablockName)
+        int size = hlmsPbs->getDatablockMap().size();
+        //QMessageBox::information(0, QString("info"), QVariant(size).toString());
+        if (size> 1)
         {
-            // Get the first datablock (TODO: Later this must be a listbox)
-            if (oldDatablockName != newDatablockName)
+            // It is a PBS; Note, that there is also a default (so always 1)
+            Ogre::Hlms::HlmsDatablockMap::const_iterator itor = hlmsPbs->getDatablockMap().begin();
+            Ogre::Hlms::HlmsDatablockMap::const_iterator end  = hlmsPbs->getDatablockMap().end();
+            Ogre::HlmsPbsDatablock* newDatablock;
+            Ogre::String newDatablockName;
+            while( itor != end )
             {
-                // Assign the datablock to the item (and destroy the items' old datablock, if still available)
-                item->setDatablock(newDatablock);
-                if (oldDatablockName != defaultDatablockName)
-                    hlmsPbs->destroyDatablock(oldDatablockId);
+                newDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itor->second.datablock);
+                if (newDatablock != hlmsPbs->getDefaultDatablock() && newDatablock != hlmsUnlit->getDefaultDatablock())
+                {
+                    // Get the first datablock
+                    newDatablockName = *newDatablock->getFullName();
+                    if (oldDatablockName != newDatablockName)
+                    {
+                        // Assign the datablock to the item (and destroy the items' old datablock, if still available)
+                        item->setDatablock(newDatablock);
+                        if (oldDatablock != hlmsPbs->getDefaultDatablock() && oldDatablock != hlmsUnlit->getDefaultDatablock())
+                        {
+                            if (oldDatablock->getCreator()->getType() == Ogre::HLMS_PBS)
+                                hlmsPbs->destroyDatablock(oldDatablockId);
+                            else if (hlmsUnlit && oldDatablock->getCreator()->getType() == Ogre::HLMS_UNLIT)
+                                hlmsUnlit->destroyDatablock(oldDatablockId);
+                        }
 
-                // Create the node structure
-                QString s = newDatablockName.c_str();
-                mNodeEditorDockWidget->createPbsNodeStructure(s);
-                mHlmsName = s;
-                break;
+                        // Create the node structure
+                        QString s = newDatablockName.c_str();
+                        mNodeEditorDockWidget->createPbsNodeStructure(s);
+                        mHlmsName = s;
+                        break;
+                    }
+                }
+                ++itor;
             }
+            return;
         }
-        ++itor;
+    }
+
+    if (hlmsUnlit)
+    {
+        int size = hlmsUnlit->getDatablockMap().size();
+        //QMessageBox::information(0, QString("info"), QVariant(size).toString());
+        if (size > 1)
+        {
+            // It is an Unlit; Note, that there is also a default (so always 1)
+            Ogre::Hlms::HlmsDatablockMap::const_iterator itor = hlmsUnlit->getDatablockMap().begin();
+            Ogre::Hlms::HlmsDatablockMap::const_iterator end  = hlmsUnlit->getDatablockMap().end();
+            Ogre::HlmsUnlitDatablock* newDatablock;
+            Ogre::String newDatablockName;
+            while( itor != end )
+            {
+                newDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itor->second.datablock);
+                if (newDatablock != hlmsPbs->getDefaultDatablock() && newDatablock != hlmsUnlit->getDefaultDatablock())
+                {
+                    // Get the first datablock
+                    newDatablockName = *newDatablock->getFullName();
+                    if (oldDatablockName != newDatablockName)
+                    {
+                        // Assign the datablock to the item (and destroy the items' old datablock, if still available)
+                        item->setDatablock(newDatablock);
+                        if (oldDatablock != hlmsPbs->getDefaultDatablock() && oldDatablock != hlmsUnlit->getDefaultDatablock())
+                        {
+                            if (oldDatablock->getCreator()->getType() == Ogre::HLMS_UNLIT)
+                                hlmsUnlit->destroyDatablock(oldDatablockId);
+                            else if (hlmsPbs && oldDatablock->getCreator()->getType() == Ogre::HLMS_PBS)
+                                hlmsPbs->destroyDatablock(oldDatablockId);
+                        }
+
+                        // Create the node structure
+                        QString s = newDatablockName.c_str();
+                        mNodeEditorDockWidget->createUnlitNodeStructure(s);
+                        mHlmsName = s;
+                        break;
+                    }
+                }
+                ++itor;
+            }
+            return;
+        }
     }
 }
 

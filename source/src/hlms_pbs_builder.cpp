@@ -42,41 +42,33 @@ HlmsPbsBuilder::~HlmsPbsBuilder(void)
 //****************************************************************************/
 void HlmsPbsBuilder::deletePbsDatablock (Magus::OgreManager* ogreManager, const QString& datablockName)
 {
+    Ogre::String name = datablockName.toStdString();
+    if (name == DEFAULT_DATABLOCK_NAME)
+        return;
+
     // Get the ogre manager, root and hlms managers
     Ogre::Root* root = ogreManager->getOgreRoot();
     Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
     Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
-    Ogre::String name = datablockName.toStdString();
     if (hlmsPbs->getDatablock(name))
     {
         // Destroy any existing datablock with that name
-        Ogre::Item* item = ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
-        //item->setDatablock(DEFAULT_DATABLOCK_NAME); // Set default datablock temporary, to release the datablock with name "HlmsDatablock"
-        item->setDatablock(hlmsManager->getDefaultDatablock());
+        ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
         hlmsPbs->destroyDatablock(name);
     }
 }
 
 //****************************************************************************/
 Ogre::HlmsPbsDatablock* HlmsPbsBuilder::createPbsDatablock (Magus::OgreManager* ogreManager,
-                                                            QString latestDatablockName,
                                                             HlmsNodePbsDatablock* pbsnode)
 {
     // Get the ogre manager and root
     Ogre::Root* root = ogreManager->getOgreRoot();
 
     // Create a Pbs datablock
-    Ogre::String datablockName = latestDatablockName.toStdString();
     Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
     Ogre::HlmsTextureManager* hlmsTextureManager = hlmsManager->getTextureManager();
     Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
-    Ogre::Item* item = ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
-
-    // First destroy any existing datablock with that name
-    //item->setDatablock(DEFAULT_DATABLOCK_NAME); // Set default datablock temporary, to release the datablock with name "HlmsDatablock"
-    item->setDatablock(hlmsManager->getDefaultDatablock());
-    if (hlmsPbs->getDatablock(datablockName))
-        hlmsPbs->destroyDatablock(datablockName);
 
     // Determine whether a macro node is attached (and enabled)
     Ogre::HlmsMacroblock macroblock;
@@ -100,9 +92,13 @@ Ogre::HlmsPbsDatablock* HlmsPbsBuilder::createPbsDatablock (Magus::OgreManager* 
             enrichBlendblock(blendnode, &blendblock);
     }
 
+    // First destroy any existing datablock with that name
+    Ogre::String datablockName = pbsnode->getName().toStdString();
+    Ogre::HlmsDatablock* latestDatablock = hlmsPbs->getDatablock(datablockName);
+    if (latestDatablock && latestDatablock != hlmsPbs->getDefaultDatablock())
+        hlmsPbs->destroyDatablock(latestDatablock->getName());
+
     // Create a new datablock and use the (new) name defined in the node
-    latestDatablockName = pbsnode->getName();
-    datablockName = latestDatablockName.toStdString();
     Ogre::HlmsPbsDatablock* datablock = static_cast<Ogre::HlmsPbsDatablock*>(
                 hlmsPbs->createDatablock( datablockName,
                                           datablockName,
@@ -168,6 +164,7 @@ Ogre::HlmsPbsDatablock* HlmsPbsBuilder::createPbsDatablock (Magus::OgreManager* 
     }
 
     // Set the datablock in the item
+    Ogre::Item* item = ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
     item->setDatablock(datablock);
     return datablock;
 }
@@ -189,6 +186,7 @@ HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNodeStructure(Magus::OgreManager*
 
         // Create the pbs node
         pbsnode = createPbsNode();
+        repositionPbsNode(pbsnode);
         enrichPbsNode(pbsnode, datablock);
 
         // Get all textures from the pbs
@@ -251,7 +249,7 @@ HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNodeStructure(Magus::OgreManager*
               macroblock->mPolygonMode == Ogre::PM_SOLID))
         {
             // It is not a default macroblock, so create a new macro node and and set it in the pbs
-            HlmsNodeMacroblock* macronode = createMacroNode();
+            HlmsNodeMacroblock* macronode = createMacroNode(mNodeEditor);
             macronode->setMacroblockEnabled(true);
             macronode->setScissorTestEnabled(macroblock->mScissorTestEnabled);
             macronode->setDepthCheck(macroblock->mDepthCheck);
@@ -302,7 +300,7 @@ HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNodeStructure(Magus::OgreManager*
               blendblock->mBlendOperationAlpha == Ogre::SBO_ADD))
         {
             // It is not a default blendblock, so create a new blend node and set it in the pbs
-            HlmsNodeBlendblock* blendnode = createBlendNode();
+            HlmsNodeBlendblock* blendnode = createBlendNode(mNodeEditor);
             blendnode->setBlendblockEnabled(true);
             blendnode->setAlphaToCoverageEnabled(blendblock->mAlphaToCoverageEnabled);
             switch (blendblock->mBlendChannelMask)
@@ -537,7 +535,7 @@ HlmsNodeSamplerblock* HlmsPbsBuilder::createSamplerNode(Ogre::HlmsPbsDatablock* 
     tex = datablock->getTexture(textureType);
     if (!tex.isNull())
     {
-        samplernode = createSamplerNode();
+        samplernode = createSamplerNode(mNodeEditor);
         connectNodes(pbsnode, samplernode); // Connect both nodes
     }
 
@@ -545,30 +543,16 @@ HlmsNodeSamplerblock* HlmsPbsBuilder::createSamplerNode(Ogre::HlmsPbsDatablock* 
 }
 
 //****************************************************************************/
-HlmsNodeSamplerblock* HlmsPbsBuilder::createSamplerNode(void)
+void HlmsPbsBuilder::repositionPbsNode(HlmsNodePbsDatablock* pbsnode)
 {
-    HlmsNodeSamplerblock* node = new HlmsNodeSamplerblock(NODE_TITLE_SAMPLERBLOCK);
-    node->setType(NODE_TYPE_SAMPLERBLOCK);
-    mNodeEditor->addNode(node);
-    return node;
-}
+    if (!pbsnode)
+        return;
 
-//****************************************************************************/
-HlmsNodeMacroblock* HlmsPbsBuilder::createMacroNode(void)
-{
-    HlmsNodeMacroblock* node = new HlmsNodeMacroblock(NODE_TITLE_MACROBLOCK);
-    node->setType(NODE_TYPE_MACROBLOCK);
-    mNodeEditor->addNode(node);
-    return node;
-}
-
-//****************************************************************************/
-HlmsNodeBlendblock* HlmsPbsBuilder::createBlendNode(void)
-{
-    HlmsNodeBlendblock* node = new HlmsNodeBlendblock(NODE_TITLE_BLENDBLOCK);
-    node->setType(NODE_TYPE_BLENDBLOCK);
-    mNodeEditor->addNode(node);
-    return node;
+    // Reposition the pbs node (this is only done once)
+    QPointF pos = pbsnode->pos();
+    pos.setX(-1.5f * pbsnode->getWidth());
+    pos.setY(-1.5f * pbsnode->getHeigth());
+    pbsnode->setPos(pos);
 }
 
 //****************************************************************************/
@@ -581,12 +565,6 @@ void HlmsPbsBuilder::connectNodes(HlmsNodePbsDatablock* pbsnode,
     if (!samplernode)
         return;
 
-    // Reposition the pbs node (this is only done once)
-    QPointF pos = pbsnode->pos();
-    pos.setX(-1.5f * pbsnode->getWidth());
-    pos.setY(-1.5f * pbsnode->getHeigth());
-    pbsnode->setPos(pos);
-
     // Connect pbs and sampler
     Magus::QtPort* portPbs = pbsnode->getFirstFreePort(PORT_ID_PBS_DATABLOCK, PORT_ID_PBS_DATABLOCK + 7);
     pbsnode->connectNode(PORT_ID_PBS_DATABLOCK,
@@ -595,6 +573,7 @@ void HlmsPbsBuilder::connectNodes(HlmsNodePbsDatablock* pbsnode,
                          PORT_ID_SAMPLERBLOCK);
 
     // Reposition the sampler node
+    QPointF pos = pbsnode->pos();
     pos.setX(pos.x() + pbsnode->getWidth() + 2 * portPbs->pos().y());
     pos.setY(portPbs->pos().y() - pbsnode->getHeigth());
     samplernode->setPos(pos);
@@ -733,7 +712,7 @@ void HlmsPbsBuilder::enrichSamplerblock (Ogre::HlmsPbsDatablock* datablock,
     // Don't set it for environment maps
     Ogre::PbsTextureTypes textureType = getPbsTextureTypeFromSamplerNode(samplernode);
     if (textureType < Ogre::NUM_PBSM_SOURCES)
-        datablock->setTextureUvSource(textureType, samplernode->getUvSet()); // test
+        datablock->setTextureUvSource(textureType, samplernode->getUvSet());
 
     // ******** Blend mode ********
     Ogre::PbsBlendModes blendMode = getBlendModeFromIndex (samplernode->getBlendMode());
@@ -809,7 +788,6 @@ unsigned int HlmsPbsBuilder::getDetailNormalMapIndexFromTextureType (Ogre::PbsTe
     }
     return 999;
 }
-
 
 //****************************************************************************/
 unsigned int HlmsPbsBuilder::getIndexFromBlendMode (Ogre::PbsBlendModes blendMode)

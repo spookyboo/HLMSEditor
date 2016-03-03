@@ -51,6 +51,7 @@ namespace Magus
             void createRenderWindow(OgreManager* ogreManager);
             void createScene();
             Ogre::Item* getItem(void) {return mItem;}
+            void setDefaultDatablockItem(void);
 
             // Create item and use the current datablock of the previous item (if available)
             void createItem(const Ogre::String& itemName,

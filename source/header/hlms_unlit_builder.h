@@ -44,7 +44,6 @@ class HlmsUnlitBuilder : public HlmsBuilder
 
         // Create a Hlms Unlit datablock
         Ogre::HlmsUnlitDatablock* createUnlitDatablock (Magus::OgreManager* ogreManager,
-                                                        QString latestDatablockName,
                                                         HlmsNodeUnlitDatablock* unlitnode);
 
         // Create a node structure (HlmsNodeUnlitDatablock, HlmsNodeSamplerblock, HlmsNodeBlendblock and
@@ -59,9 +58,18 @@ class HlmsUnlitBuilder : public HlmsBuilder
         // Create an Unlit node and add it to the node editor canvas
         HlmsNodeUnlitDatablock* createUnlitNode(void);
 
+        // Set the Unlit node to an initial position
+        void repositionUnlitNode(HlmsNodeUnlitDatablock* unlitnode);
+
         // Connect Unlit node and Sampler node in the editor canvas
         void connectNodes(HlmsNodeUnlitDatablock* unlitnode,
                           HlmsNodeSamplerblock* samplerNode);
+
+        void connectNodes(HlmsNodeUnlitDatablock* unlitnode,
+                          HlmsNodeMacroblock* macronode);
+
+        void connectNodes(HlmsNodeUnlitDatablock* unlitnode,
+                          HlmsNodeBlendblock* blendnode);
 
     private:
         Magus::QtNodeEditor* mNodeEditor;
@@ -71,10 +79,17 @@ class HlmsUnlitBuilder : public HlmsBuilder
         void enrichUnlitDatablock(Ogre::HlmsUnlitDatablock* datablock,
                                   HlmsNodeUnlitDatablock* unlitnode);
 
+        // The ublit node is enriched with values from a given unlit datablock
+        void enrichUnlitNode(HlmsNodeUnlitDatablock* unlitnode,
+                             Ogre::HlmsUnlitDatablock* datablock);
+
         // The samplerblock is enriched with values from a sampler node
         void enrichSamplerblock (Ogre::HlmsUnlitDatablock* datablock,
                                  Ogre::HlmsSamplerblock* samplerblock,
                                  HlmsNodeSamplerblock* samplernode);
+
+        unsigned int getIndexFromBlendMode (Ogre::UnlitBlendModes blendMode);
+        Ogre::UnlitBlendModes getBlendModeFromIndex (unsigned int index);
 };
 
 #endif

@@ -46,6 +46,7 @@ class HlmsNodeSamplerblock : public Magus::QtNode
         const QString getBaseNameTexture(void) const {return mBaseNameTexture;}
         const QString getPathTexture(void) const {return mPathTexture;}
         unsigned int getTextureType(void) const {return mTextureType;}
+        unsigned int getTextureIndex(void) const {return mTextureIndex;}
         bool getSamplerblockEnabled(void) const {return mSamplerblockEnabled;}
         unsigned int getTextureMinFilter(void) const {return mTextureMinFilter;}
         unsigned int getTextureMagFilter(void) const {return mTextureMagFilter;}
@@ -71,6 +72,7 @@ class HlmsNodeSamplerblock : public Magus::QtNode
         void setBaseNameTexture(const QString baseNameTexture) {mBaseNameTexture = baseNameTexture;}
         void setPathTexture(const QString pathTexture) {mPathTexture = pathTexture;}
         void setTextureType(unsigned int textureType) {mTextureType = textureType;}
+        void setTextureIndex(unsigned int textureIndex) {mTextureIndex = textureIndex;}
         void setSamplerblockEnabled (bool samplerblockEnabled) {mSamplerblockEnabled = samplerblockEnabled;}
         void setTextureMinFilter(unsigned int textureMinFilter) {mTextureMinFilter = textureMinFilter;}
         void setTextureMagFilter(unsigned int textureMagFilter) {mTextureMagFilter = textureMagFilter;}
@@ -98,7 +100,8 @@ class HlmsNodeSamplerblock : public Magus::QtNode
         QString mFileNameTexture;
         QString mBaseNameTexture;
         QString mPathTexture;
-        unsigned int mTextureType;
+        unsigned int mTextureType; // Only used for Hlms Pbs
+        unsigned int mTextureIndex; // Only used for Hlms Unlit
         unsigned int mTextureMinFilter;
         unsigned int mTextureMagFilter;
         unsigned int mTextureMipFilter;

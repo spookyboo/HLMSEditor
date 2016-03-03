@@ -36,6 +36,9 @@ PropertiesDockWidget::PropertiesDockWidget(QString title, MainWindow* parent, Qt
     mTextViewer->setReadOnly(true);
     mTextViewer->setWindowFlags(Qt::WindowStaysOnTopHint);
     mTextViewer->setTextInteractionFlags(mTextViewer->textInteractionFlags() & Qt::TextSelectableByKeyboard);
+    mTextViewer->setLineWrapMode(QPlainTextEdit::WidgetWidth);
+    QFont font("Courier", 9);
+    mTextViewer->setFont(font);
 
     mInnerMain = new QMainWindow();
     setWidget(mInnerMain);
@@ -57,7 +60,6 @@ PropertiesDockWidget::PropertiesDockWidget(QString title, MainWindow* parent, Qt
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     QRect rec = QApplication::desktop()->screenGeometry();
     setMinimumWidth(0.3 * rec.width());
-    setMinimumHeight(0.3 * rec.height());
     layout()->setSizeConstraint(QLayout::SetMinimumSize);
 }
 

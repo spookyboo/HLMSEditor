@@ -41,41 +41,33 @@ HlmsUnlitBuilder::~HlmsUnlitBuilder(void)
 //****************************************************************************/
 void HlmsUnlitBuilder::deleteUnlitDatablock (Magus::OgreManager* ogreManager, const QString& datablockName)
 {
+    Ogre::String name = datablockName.toStdString();
+    if (name == DEFAULT_DATABLOCK_NAME)
+        return;
+
     // Get the ogre manager, root and hlms managers
     Ogre::Root* root = ogreManager->getOgreRoot();
     Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
     Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT) );
-    Ogre::String name = datablockName.toStdString();
     if (hlmsUnlit->getDatablock(name))
     {
         // Destroy any existing datablock with that name
-        Ogre::Item* item = ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
-        //item->setDatablock(DEFAULT_DATABLOCK_NAME); // Set default datablock temporary, to release the datablock with name "HlmsDatablock"
-        item->setDatablock(hlmsManager->getDefaultDatablock());
+        ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
         hlmsUnlit->destroyDatablock(name);
     }
 }
 
 //****************************************************************************/
 Ogre::HlmsUnlitDatablock* HlmsUnlitBuilder::createUnlitDatablock (Magus::OgreManager* ogreManager,
-                                                                  QString latestDatablockName,
                                                                   HlmsNodeUnlitDatablock* unlitnode)
 {
     // Get the ogre manager and root
     Ogre::Root* root = ogreManager->getOgreRoot();
 
-    // Create a Unlit datablock
-    Ogre::String datablockName = latestDatablockName.toStdString();
+    // Create an Unlit datablock
     Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
     Ogre::HlmsTextureManager* hlmsTextureManager = hlmsManager->getTextureManager();
     Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT) );
-    Ogre::Item* item = ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
-
-    // First destroy any existing datablock with that name
-    //item->setDatablock(DEFAULT_DATABLOCK_NAME); // Set default datablock temporary, to release the datablock with name "HlmsDatablock"
-    item->setDatablock(hlmsManager->getDefaultDatablock());
-    if (hlmsUnlit->getDatablock(datablockName))
-        hlmsUnlit->destroyDatablock(datablockName);
 
     // Determine whether a macro node is attached (and enabled)
     Ogre::HlmsMacroblock macroblock;
@@ -99,9 +91,13 @@ Ogre::HlmsUnlitDatablock* HlmsUnlitBuilder::createUnlitDatablock (Magus::OgreMan
             enrichBlendblock(blendnode, &blendblock);
     }
 
+    // First destroy any existing datablock with that name
+    Ogre::String datablockName = unlitnode->getName().toStdString();
+    Ogre::HlmsDatablock* latestDatablock = hlmsUnlit->getDatablock(datablockName);
+    if (latestDatablock && latestDatablock != hlmsUnlit->getDefaultDatablock())
+        hlmsUnlit->destroyDatablock(latestDatablock->getName());
+
     // Create a new datablock and use the (new) name defined in the node
-    latestDatablockName = unlitnode->getName();
-    datablockName = latestDatablockName.toStdString();
     Ogre::HlmsUnlitDatablock* datablock = static_cast<Ogre::HlmsUnlitDatablock*>(
                 hlmsUnlit->createDatablock( datablockName,
                                             datablockName,
@@ -147,6 +143,7 @@ Ogre::HlmsUnlitDatablock* HlmsUnlitBuilder::createUnlitDatablock (Magus::OgreMan
 
                             // Create a samplerblock and add it to the datablock
                             Ogre::HlmsSamplerblock samplerblock;
+                            samplernode->setTextureIndex(texUnit); // Needed to identify the corresponding texture when enriching the samplerblock
                             enrichSamplerblock(datablock, &samplerblock, samplernode);
                             datablock->setTexture(texUnit, texLocation.xIdx, texLocation.texture);
                             datablock->setSamplerblock(texUnit, samplerblock);
@@ -163,6 +160,7 @@ Ogre::HlmsUnlitDatablock* HlmsUnlitBuilder::createUnlitDatablock (Magus::OgreMan
     }
 
     // Set the datablock in the item
+    Ogre::Item* item = ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
     item->setDatablock(datablock);
     return datablock;
 }
@@ -171,8 +169,123 @@ Ogre::HlmsUnlitDatablock* HlmsUnlitBuilder::createUnlitDatablock (Magus::OgreMan
 HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNodeStructure(Magus::OgreManager* ogreManager,
                                                                    const QString& datablockName)
 {
-    // TODO
-    return 0;
+    // Get the datablock
+    HlmsNodeUnlitDatablock* unlitnode;
+    Ogre::Root* root = ogreManager->getOgreRoot();
+    Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
+    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT) );
+    Ogre::String name = datablockName.toStdString();
+    Ogre::HlmsUnlitDatablock* datablock = static_cast<Ogre::HlmsUnlitDatablock*>(hlmsUnlit->getDatablock(name));
+    if (datablock)
+    {
+        mNodeEditor->clear();
+
+        // Create the unlit node
+        unlitnode = createUnlitNode();
+        repositionUnlitNode(unlitnode);
+        enrichUnlitNode(unlitnode, datablock);
+
+        // Get all textures from the unlit
+        // Note, that each texture becomes one samplernode, while a datablock may contain multiple textures, but for example only one samplerblock
+        // TODO: Create all samplernodes
+
+        // Create and fill properties of the macronode with the values of the macroblock and connect the node to the unlit node
+        const Ogre::HlmsMacroblock* macroblock = datablock->getMacroblock(mNodeEditor);
+        if (!(!macroblock->mScissorTestEnabled &&
+              macroblock->mDepthCheck &&
+              macroblock->mDepthWrite &&
+              macroblock->mDepthFunc == Ogre::CMPF_LESS_EQUAL &&
+              macroblock->mDepthBiasConstant == 0.0f &&
+              macroblock->mDepthBiasSlopeScale == 0.0f &&
+              macroblock->mCullMode == Ogre::CULL_CLOCKWISE &&
+              macroblock->mPolygonMode == Ogre::PM_SOLID))
+        {
+            // It is not a default macroblock, so create a new macro node and and set it in the unlit
+            HlmsNodeMacroblock* macronode = createMacroNode(mNodeEditor);
+            macronode->setMacroblockEnabled(true);
+            macronode->setScissorTestEnabled(macroblock->mScissorTestEnabled);
+            macronode->setDepthCheck(macroblock->mDepthCheck);
+            macronode->setDepthWrite(macroblock->mDepthWrite);
+            macronode->setDepthFunc(getIndexFromCompareFunction(macroblock->mDepthFunc));
+            macronode->setDepthBiasConstant(macroblock->mDepthBiasConstant);
+            macronode->setDepthBiasSlopeScale(macroblock->mDepthBiasSlopeScale);
+
+            switch (macroblock->mCullMode)
+            {
+                case Ogre::CULL_NONE:
+                    macronode->setCullMode(0);
+                break;
+                case Ogre::CULL_CLOCKWISE:
+                    macronode->setCullMode(1);
+                break;
+                case Ogre::CULL_ANTICLOCKWISE:
+                    macronode->setCullMode(2);
+                break;
+            }
+
+            switch (macroblock->mPolygonMode)
+            {
+                case Ogre::PM_POINTS:
+                    macronode->setPolygonMode(0);
+                break;
+                case Ogre::PM_WIREFRAME:
+                    macronode->setPolygonMode(1);
+                break;
+                case Ogre::PM_SOLID:
+                    macronode->setPolygonMode(2);
+                break;
+            }
+            connectNodes(unlitnode, macronode); // Connect both nodes
+        }
+
+        // Create and fill properties of the blendnode with the values of the blendblock and connect the node to the unlit node
+        const Ogre::HlmsBlendblock* blendblock = datablock->getBlendblock(mNodeEditor);
+        if (!(!blendblock->mAlphaToCoverageEnabled &&
+              blendblock->mBlendChannelMask == Ogre::HlmsBlendblock::BlendChannelAll &&
+              !blendblock->mIsTransparent &&
+              !blendblock->mSeparateBlend &&
+              blendblock->mSourceBlendFactor == Ogre::SBF_ONE &&
+              blendblock->mDestBlendFactor == Ogre::SBF_ZERO &&
+              blendblock->mSourceBlendFactorAlpha == Ogre::SBF_ONE &&
+              blendblock->mDestBlendFactorAlpha == Ogre::SBF_ZERO &&
+              blendblock->mBlendOperation == Ogre::SBO_ADD &&
+              blendblock->mBlendOperationAlpha == Ogre::SBO_ADD))
+        {
+            // It is not a default blendblock, so create a new blend node and set it in the unlit
+            HlmsNodeBlendblock* blendnode = createBlendNode(mNodeEditor);
+            blendnode->setBlendblockEnabled(true);
+            blendnode->setAlphaToCoverageEnabled(blendblock->mAlphaToCoverageEnabled);
+            switch (blendblock->mBlendChannelMask)
+            {
+                case Ogre::HlmsBlendblock::BlendChannelRed:
+                    blendnode->setBlendChannelMask(0);
+                break;
+                case Ogre::HlmsBlendblock::BlendChannelGreen:
+                    blendnode->setBlendChannelMask(1);
+                break;
+                case Ogre::HlmsBlendblock::BlendChannelBlue:
+                    blendnode->setBlendChannelMask(2);
+                break;
+                case Ogre::HlmsBlendblock::BlendChannelAlpha:
+                    blendnode->setBlendChannelMask(3);
+                break;
+                case Ogre::HlmsBlendblock::BlendChannelAll:
+                    blendnode->setBlendChannelMask(4);
+                break;
+            }
+            blendnode->setTransparent(blendblock->mIsTransparent);
+            blendnode->setSeparateBlend(blendblock->mSeparateBlend);
+            blendnode->setSourceBlendFactor(getIndexFromSceneBlendFactor(blendblock->mSourceBlendFactor));
+            blendnode->setDestBlendFactor(getIndexFromSceneBlendFactor(blendblock->mDestBlendFactor));
+            blendnode->setSourceBlendFactorAlpha(getIndexFromSceneBlendFactor(blendblock->mSourceBlendFactorAlpha));
+            blendnode->setDestBlendFactorAlpha(getIndexFromSceneBlendFactor(blendblock->mDestBlendFactorAlpha));
+            blendnode->setBlendOperation(getIndexFromSceneBlendOperation(blendblock->mBlendOperation));
+            blendnode->setBlendOperationAlpha(getIndexFromSceneBlendOperation(blendblock->mBlendOperationAlpha));
+            connectNodes(unlitnode, blendnode); // Connect both nodes
+        }
+    }
+
+    return unlitnode;
 }
 
 //****************************************************************************/
@@ -201,11 +314,34 @@ void HlmsUnlitBuilder::enrichUnlitDatablock(Ogre::HlmsUnlitDatablock* datablock,
     // Set the colour
     datablock->setColour(colour);
 
+    // ******** Texture Swizzle ********
+    // TODO: Not yet implemented (is it needed?)
+
     // ******** Alphatest threshold ********
     datablock->setAlphaTest(getCompareFunctionFromIndex(unlitnode->getAlphaTest()));
 
     // ******** Alphatest threshold ********
     datablock->setAlphaTestThreshold(unlitnode->getAlphaTestThreshold());
+}
+
+//****************************************************************************/
+void HlmsUnlitBuilder::enrichUnlitNode(HlmsNodeUnlitDatablock* unlitnode,
+                                       Ogre::HlmsUnlitDatablock* datablock)
+{
+    // ******** Name ********
+    unlitnode->setName(datablock->getFullName()->c_str());
+
+    // ******** Colour ********
+    // TODO
+
+    // ******** Texture Swizzle ********
+    // TODO: Not yet implemented (is it needed?)
+
+    // ******** Alphatest ********
+    unlitnode->setAlphaTest(getIndexFromCompareFunction(datablock->getAlphaTest()));
+
+    // ******** Alphatest threshold ********
+    unlitnode->setAlphaTestThreshold(datablock->getAlphaTestThreshold());
 }
 
 //****************************************************************************/
@@ -216,7 +352,18 @@ void HlmsUnlitBuilder::enrichSamplerblock (Ogre::HlmsUnlitDatablock* datablock,
     // ******** Generic properties ********
     enrichSamplerBlockGeneric(samplerblock, samplernode);
 
-    // TODO: Specific properties
+    // ******** UV set ********
+    datablock->setTextureUvSource(samplernode->getTextureIndex(), samplernode->getUvSet());
+
+    // ******** Blend mode ********
+    Ogre::UnlitBlendModes blendMode = getBlendModeFromIndex (samplernode->getBlendMode());
+    datablock->setBlendMode(samplernode->getTextureIndex(), blendMode);
+
+    // ******** Animation Matrix ********
+    // TODO: Not yet implemented
+
+    // ******** Map weight ********
+    // Not applicable; unlit does not use this
 }
 
 //****************************************************************************/
@@ -229,6 +376,19 @@ HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNode(void)
 }
 
 //****************************************************************************/
+void HlmsUnlitBuilder::repositionUnlitNode(HlmsNodeUnlitDatablock* unlitnode)
+{
+    if (!unlitnode)
+        return;
+
+    // Reposition the unlit node (this is only done once)
+    QPointF pos = unlitnode->pos();
+    pos.setX(-1.5f * unlitnode->getWidth());
+    pos.setY(-1.5f * unlitnode->getHeigth());
+    unlitnode->setPos(pos);
+}
+
+//****************************************************************************/
 void HlmsUnlitBuilder::connectNodes(HlmsNodeUnlitDatablock* unlitnode,
                                     HlmsNodeSamplerblock* samplernode)
 {
@@ -238,12 +398,6 @@ void HlmsUnlitBuilder::connectNodes(HlmsNodeUnlitDatablock* unlitnode,
     if (!samplernode)
         return;
 
-    // Reposition the unlit node (this is only done once)
-    QPointF pos = unlitnode->pos();
-    pos.setX(-1.5f * unlitnode->getWidth());
-    pos.setY(-1.5f * unlitnode->getHeigth());
-    unlitnode->setPos(pos);
-
     // Connect unlit and sampler
     Magus::QtPort* portUnlit = unlitnode->getFirstFreePort(PORT_ID_UNLIT_DATABLOCK, PORT_ID_UNLIT_DATABLOCK + 7);
     unlitnode->connectNode(PORT_ID_UNLIT_DATABLOCK,
@@ -252,7 +406,146 @@ void HlmsUnlitBuilder::connectNodes(HlmsNodeUnlitDatablock* unlitnode,
                            PORT_ID_SAMPLERBLOCK);
 
     // Reposition the sampler node
+    QPointF pos = unlitnode->pos();
     pos.setX(pos.x() + unlitnode->getWidth() + 2 * portUnlit->pos().y());
     pos.setY(portUnlit->pos().y() - unlitnode->getHeigth());
     samplernode->setPos(pos);
+}
+
+//****************************************************************************/
+void HlmsUnlitBuilder::connectNodes(HlmsNodeUnlitDatablock* unlitnode,
+                                    HlmsNodeMacroblock* macronode)
+{
+    if (!unlitnode)
+        return;
+
+    if (!macronode)
+        return;
+
+    // Connect unlitnode and macro
+    Magus::QtPort* portUnlit = unlitnode->getPort(PORT_MACROBLOCK);
+    unlitnode->connectNode(PORT_MACROBLOCK, macronode, PORT_ID_MACROBLOCK);
+
+    // Reposition the macro node
+    QPointF pos = unlitnode->pos();
+    pos.setX(pos.x() + unlitnode->getWidth() + 2 * portUnlit->pos().y());
+    pos.setY(portUnlit->pos().y() - unlitnode->getHeigth());
+    macronode->setPos(pos);
+}
+
+//****************************************************************************/
+void HlmsUnlitBuilder::connectNodes(HlmsNodeUnlitDatablock* unlitnode,
+                                    HlmsNodeBlendblock* blendnode)
+{
+    if (!unlitnode)
+        return;
+
+    if (!blendnode)
+        return;
+
+    // Connect unlitnode and blend
+    Magus::QtPort* portUnlit = unlitnode->getPort(PORT_MACROBLOCK);
+    unlitnode->connectNode(PORT_BLENDBLOCK, blendnode, PORT_ID_BLENDBLOCK);
+
+    // Reposition the blend node
+    QPointF pos = unlitnode->pos();
+    pos.setX(pos.x() + unlitnode->getWidth() + 2 * portUnlit->pos().y());
+    pos.setY(portUnlit->pos().y() - unlitnode->getHeigth());
+    blendnode->setPos(pos);
+}
+
+//****************************************************************************/
+unsigned int HlmsUnlitBuilder::getIndexFromBlendMode (Ogre::UnlitBlendModes blendMode)
+{
+    switch (blendMode)
+    {
+        case Ogre::UNLIT_BLEND_NORMAL_NON_PREMUL:
+            return 0;
+        break;
+        case Ogre::UNLIT_BLEND_NORMAL_PREMUL:
+            return 1;
+        break;
+        case Ogre::UNLIT_BLEND_ADD:
+            return 2;
+        break;
+        case Ogre::UNLIT_BLEND_SUBTRACT:
+            return 3;
+        break;
+        case Ogre::UNLIT_BLEND_MULTIPLY:
+            return 4;
+        break;
+        case Ogre::UNLIT_BLEND_MULTIPLY2X:
+            return 5;
+        break;
+        case Ogre::UNLIT_BLEND_SCREEN:
+            return 6;
+        break;
+        case Ogre::UNLIT_BLEND_OVERLAY:
+            return 7;
+        break;
+        case Ogre::UNLIT_BLEND_LIGHTEN:
+            return 8;
+        break;
+        case Ogre::UNLIT_BLEND_DARKEN:
+            return 9;
+        break;
+        case Ogre::UNLIT_BLEND_GRAIN_EXTRACT:
+            return 10;
+        break;
+        case Ogre::UNLIT_BLEND_GRAIN_MERGE:
+            return 11;
+        break;
+        case Ogre::UNLIT_BLEND_DIFFERENCE:
+            return 12;
+        break;
+    }
+    return 0;
+}
+
+//****************************************************************************/
+Ogre::UnlitBlendModes HlmsUnlitBuilder::getBlendModeFromIndex (unsigned int index)
+{
+    switch (index)
+    {
+        case 0:
+            return Ogre::UNLIT_BLEND_NORMAL_NON_PREMUL;
+        break;
+        case 1:
+            return Ogre::UNLIT_BLEND_NORMAL_PREMUL;
+        break;
+        case 2:
+            return Ogre::UNLIT_BLEND_ADD;
+        break;
+        case 3:
+            return Ogre::UNLIT_BLEND_SUBTRACT;
+        break;
+        case 4:
+            return Ogre::UNLIT_BLEND_MULTIPLY;
+        break;
+        case 5:
+            return Ogre::UNLIT_BLEND_MULTIPLY2X;
+        break;
+        case 6:
+            return Ogre::UNLIT_BLEND_SCREEN;
+        break;
+        case 7:
+            return Ogre::UNLIT_BLEND_OVERLAY;
+        break;
+        case 8:
+            return Ogre::UNLIT_BLEND_LIGHTEN;
+        break;
+        case 9:
+            return Ogre::UNLIT_BLEND_DARKEN;
+        break;
+        case 10:
+            return Ogre::UNLIT_BLEND_GRAIN_EXTRACT;
+        break;
+        case 11:
+            return Ogre::UNLIT_BLEND_GRAIN_MERGE;
+        break;
+        case 12:
+            return Ogre::UNLIT_BLEND_DIFFERENCE;
+        break;
+    }
+    return Ogre::UNLIT_BLEND_NORMAL_NON_PREMUL;
 }

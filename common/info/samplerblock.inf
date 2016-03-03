@@ -1,0 +1,81 @@
+**************************************** Texture / sampler ****************************************
+
+
+Texture
+=======
+Select an image file for this texture/sampler node.
+Note, that the resource location (directory) in which the image file is located, is added to the list of resource locations and stored in a
+configuration file. When the application is restarted and the image file is loaded again (When 'Open Hlms' is selected from the menu), the
+application searches the image file in one of the stored resource locations.
+
+Texture type
+============
+In case of PBS, a listbox is presented with the possible roles a texture can have (diffuse map, normal map, etc...).
+This property is not shown in case of Unlit.
+
+Enabled
+=======
+Enables/disables the texture from the Hlms. If set to disabled and the Hlms is generated, the texture is ignored.
+
+Min filter
+==========
+
+
+Mag filter
+==========
+
+
+Mip filter
+==========
+
+
+Texture Addressing Mode U
+=========================
+
+
+Texture Addressing Mode V
+=========================
+
+
+Texture Addressing Mode W
+=========================
+
+
+Mip LOD bias
+============
+
+
+Max anisotropy
+==============
+
+
+Compare Function
+================
+
+
+Min LOD
+=======
+
+
+Max LOD
+=======
+
+
+Border colour [0..255]
+======================
+
+
+UV set [0..7]
+=============
+Sets which UV set to use for the given texture.
+
+Blend mode
+==========
+Sets the blending mode (how the texture unit gets layered on top of the previous texture units). In case of Unlit this applies to all attached 
+textures/samplers.In case of PBS, blend mode are only used in case 'Texture type' = detail map 0, 1, 2 or 3.
+
+Map weight
+==========
+In case of PBS: Sets the weight of detail map. Affects both diffuse and normal at the same time. This setting only has effect when 
+'Texture type' = detail map 0, 1, 2 or 3, or if 'Texture type' = detail normal map 0, 1, 2 or 3.
+Not applicable in case of Unlit.

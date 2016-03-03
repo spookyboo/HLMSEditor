@@ -47,8 +47,7 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
 
     // Create container - General
     Magus::QtContainerWidget* container = 0;
-    container = mAssetWidget->createContainer(CONTAINER_SAMPLERBLOCK_GENERAL, QString("General"));
-    container->setHeaderHidden(true);
+    container = mAssetWidget->createContainer(CONTAINER_SAMPLERBLOCK_GENERAL, QString(""));
 
     // Create properties
     // ******** Texture ********
@@ -175,7 +174,6 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
                                           Magus::QtProperty::SELECT));
     selectCompareFunctionProperty->addValues(stringListCompareFunction);
 
-
     // ******** Min LOD ********
     mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
                                  PROPERTY_SAMPLERBLOCK_MIN_LOD,
@@ -224,14 +222,17 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
                                           Magus::QtProperty::SELECT));
     selectProperty->addValues(stringListBlendMode);
 
-    // ******** Map weight ********
+    // ******** Map weight (pbs only) ********
     mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
                                  PROPERTY_SAMPLERBLOCK_MAP_WEIGTH,
                                  QString("Map weight"),
                                  Magus::QtProperty::DECIMAL);
 
     // ******** Offset scale ********
-    // TODO: No Vector 4 property available yet
+    // TODO: Not implemented yet; vector 4 property available yet
+
+    // ******** Animation Matrix (unlit only) ********
+    // TODO: Not implemented yet
 
     // Layout
     mainLayout->addWidget(mAssetWidget);

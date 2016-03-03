@@ -43,8 +43,7 @@ HlmsPropertiesBlendblock::HlmsPropertiesBlendblock(const QString& fileNameIcon, 
 
     // Create container - General
     Magus::QtContainerWidget* container = 0;
-    container = mAssetWidget->createContainer(CONTAINER_BLENDBLOCK_GENERAL, QString("General"));
-    container->setHeaderHidden(true);
+    container = mAssetWidget->createContainer(CONTAINER_BLENDBLOCK_GENERAL, QString(""));
 
     // Create properties
     // ******** Enabled ********

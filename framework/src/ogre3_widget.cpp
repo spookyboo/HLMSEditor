@@ -29,6 +29,7 @@
 #include "OgreTextureManager.h"
 #include "OgreTimer.h"
 #include "OgreHlmsPbs.h"
+#include "OgreHlmsUnlit.h"
 #include "OgreHlmsManager.h"
 #include "constants.h"
 
@@ -163,7 +164,7 @@ namespace Magus
         Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
         Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
 
-        mItem->setDatablock(DEFAULT_DATABLOCK_NAME);
+        setDefaultDatablockItem();
         if (hlmsPbs->getDatablock(DATABLOCK_DEBUG_CUBE))
             hlmsPbs->destroyDatablock(DATABLOCK_DEBUG_CUBE);
 
@@ -187,7 +188,7 @@ namespace Magus
         if (mItem)
         {
             datablockName = *(mItem->getSubItem(0)->getDatablock()->getFullName());
-            mItem->setDatablock(DEFAULT_DATABLOCK_NAME);
+            setDefaultDatablockItem();
             mSceneNode->detachAllObjects();
             mSceneManager->destroyItem(mItem);
         }
@@ -202,6 +203,24 @@ namespace Magus
         mSceneNode->setScale(scale);
         if (!datablockName.empty())
             mItem->setDatablock(datablockName);
+    }
+
+
+    //****************************************************************************/
+    void QOgreWidget::setDefaultDatablockItem(void)
+    {
+        Ogre::HlmsDatablock* itemDatablock = mItem->getSubItem(0)->getDatablock();
+        Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+        Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
+        Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+
+        if (itemDatablock != hlmsUnlit->getDefaultDatablock())
+            mItem->setDatablock(hlmsUnlit->getDefaultDatablock());
+        else
+            if (itemDatablock != hlmsPbs->getDefaultDatablock())
+                mItem->setDatablock(hlmsPbs->getDefaultDatablock());
+            else
+                mItem->setDatablock(DEFAULT_DATABLOCK_NAME);
     }
 
     //****************************************************************************/

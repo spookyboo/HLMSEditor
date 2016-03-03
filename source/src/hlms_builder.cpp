@@ -37,6 +37,33 @@ HlmsBuilder::~HlmsBuilder(void)
 }
 
 //****************************************************************************/
+HlmsNodeSamplerblock* HlmsBuilder::createSamplerNode(Magus::QtNodeEditor* nodeEditor)
+{
+    HlmsNodeSamplerblock* node = new HlmsNodeSamplerblock(NODE_TITLE_SAMPLERBLOCK);
+    node->setType(NODE_TYPE_SAMPLERBLOCK);
+    nodeEditor->addNode(node);
+    return node;
+}
+
+//****************************************************************************/
+HlmsNodeMacroblock* HlmsBuilder::createMacroNode(Magus::QtNodeEditor* nodeEditor)
+{
+    HlmsNodeMacroblock* node = new HlmsNodeMacroblock(NODE_TITLE_MACROBLOCK);
+    node->setType(NODE_TYPE_MACROBLOCK);
+    nodeEditor->addNode(node);
+    return node;
+}
+
+//****************************************************************************/
+HlmsNodeBlendblock* HlmsBuilder::createBlendNode(Magus::QtNodeEditor* nodeEditor)
+{
+    HlmsNodeBlendblock* node = new HlmsNodeBlendblock(NODE_TITLE_BLENDBLOCK);
+    node->setType(NODE_TYPE_BLENDBLOCK);
+    nodeEditor->addNode(node);
+    return node;
+}
+
+//****************************************************************************/
 void HlmsBuilder::enrichSamplerBlockGeneric (Ogre::HlmsSamplerblock* samplerblock,
                                              HlmsNodeSamplerblock* samplernode)
 {

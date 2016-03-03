@@ -51,11 +51,11 @@ static const QString ICON_COLOUR = QString("../common/icons/colour.png");
 static const QString ICON_INFO = QString("../common/icons/info.png");
 static const QString HLMS_GROUP = "[Hlms]\n";
 static const QString HLMS_DO_NOT_USE_AS_RESOURCE = "DoNotUseAsResource = ../common/ogre3\n"; // This must be the location where the HLMS templates are
-static const QString INFO_PBS  = QString("hlms_pbs.inf");
-static const QString INFO_UNLIT  = QString("hlms_unlit.inf");
-static const QString INFO_SAMPLERBLOCK = QString("samplerblock.inf");
-static const QString INFO_MACROBLOCK  = QString("macroblock.inf");
-static const QString INFO_BLENDBLOCK  = QString("blendblock.inf");
+static const QString INFO_PBS  = QString("../common/info/hlms_pbs.inf");
+static const QString INFO_UNLIT  = QString("../common/info/hlms_unlit.inf");
+static const QString INFO_SAMPLERBLOCK = QString("../common/info/samplerblock.inf");
+static const QString INFO_MACROBLOCK  = QString("../common/info/macroblock.inf");
+static const QString INFO_BLENDBLOCK  = QString("../common/info/blendblock.inf");
 
 static const Ogre::String DEFAULT_DATABLOCK_NAME = "[Default]";
 static const Ogre::String DATABLOCK_DEBUG_CUBE = "DebugCube";

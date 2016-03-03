@@ -49,7 +49,6 @@ HlmsPropertiesPbsDatablock::HlmsPropertiesPbsDatablock(const QString& fileNameIc
     // Create container - General
     Magus::QtContainerWidget* container = 0;
     container = mAssetWidget->createContainer(CONTAINER_PBS_DATABLOCK_GENERAL, QString(""));
-    container->setHeaderHidden(true);
 
     // Create properties
     // ******** Name ********

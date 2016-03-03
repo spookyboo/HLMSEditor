@@ -39,6 +39,9 @@ class HlmsPbsBuilder : public HlmsBuilder
         HlmsPbsBuilder(Magus::QtNodeEditor* nodeEditor);
         ~HlmsPbsBuilder(void);
 
+        // Create a Sampler node and add it to the node editor canvas
+        virtual HlmsNodeSamplerblock* createSamplerNode(Magus::QtNodeEditor* nodeEditor) {return HlmsBuilder::createSamplerNode(nodeEditor);}
+
         // Create a HlmsPbsDatablock and return the pointer.
         // Note:
         // In addition, this function sets the datablock in the current (ogre) item of the renderwindow.
@@ -46,7 +49,6 @@ class HlmsPbsBuilder : public HlmsBuilder
         // but the createPbsDatablock function also removes the current datablock from the item,
         // so for convenience it also sets the new datablock.
         Ogre::HlmsPbsDatablock* createPbsDatablock (Magus::OgreManager* ogreManager,
-                                                    QString latestDatablockName,
                                                     HlmsNodePbsDatablock* pbsnode);
 
         // Delete a Hlms Pbs datablock with a certain name
@@ -61,14 +63,8 @@ class HlmsPbsBuilder : public HlmsBuilder
         // Create a Pbs node and add it to the node editor canvas
         HlmsNodePbsDatablock* createPbsNode(void);
 
-        // Create a Sampler node and add it to the node editor canvas
-        HlmsNodeSamplerblock* createSamplerNode(void);
-
-        // Create a Macro node and add it to the node editor canvas
-        HlmsNodeMacroblock* createMacroNode(void);
-
-        // Create a Blend node and add it to the node editor canvas
-        HlmsNodeBlendblock* createBlendNode(void);
+        // Set the PBS node to an initial position
+        void repositionPbsNode(HlmsNodePbsDatablock* pbsnode);
 
         // Connect PBS node and Sampler node in the editor canvas
         void connectNodes(HlmsNodePbsDatablock* pbsnode,

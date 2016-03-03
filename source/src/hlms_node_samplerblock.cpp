@@ -28,6 +28,7 @@
 HlmsNodeSamplerblock::HlmsNodeSamplerblock(QString title, QGraphicsItem* parent) :
     Magus::QtNode(title, parent),
     mTextureType(0),
+    mTextureIndex(0),
     mSamplerblockEnabled(true),
     mTextureMinFilter(0),
     mTextureMagFilter(0),

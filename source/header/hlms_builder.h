@@ -27,6 +27,7 @@
 #include "hlms_node_samplerblock.h"
 #include "hlms_node_macroblock.h"
 #include "hlms_node_blenddblock.h"
+#include "node_editorwidget.h"
 
 /****************************************************************************
  This class is the base class for other builder classes, responsible for
@@ -41,6 +42,15 @@ class HlmsBuilder
 
         // Save all resource locations to the Ogre resource file
         void saveAllResourcesLocations(void);
+
+        // Create a Sampler node and add it to the node editor canvas
+        virtual HlmsNodeSamplerblock* createSamplerNode(Magus::QtNodeEditor* nodeEditor);
+
+        // Create a Macro node and add it to the node editor canvas
+        virtual HlmsNodeMacroblock* createMacroNode(Magus::QtNodeEditor* nodeEditor);
+
+        // Create a Blend node and add it to the node editor canvas
+        virtual HlmsNodeBlendblock* createBlendNode(Magus::QtNodeEditor* nodeEditor);
 
     protected:
         bool isResourceLocationExisting(const Ogre::String& path);

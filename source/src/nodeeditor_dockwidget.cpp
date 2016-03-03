@@ -157,6 +157,7 @@ void NodeEditorDockWidget::newHlmsUnlitAndSampler()
 HlmsNodePbsDatablock* NodeEditorDockWidget::createPbsNodeStructure(const QString& pbsDatablock)
 {
     mHlmsPbsDatablockNode = mHlmsPbsBuilder->createPbsNodeStructure(mParent->getOgreManager(), pbsDatablock);
+    mHlmsUnlitDatablockNode = 0;
     return mHlmsPbsDatablockNode;
 }
 
@@ -164,6 +165,7 @@ HlmsNodePbsDatablock* NodeEditorDockWidget::createPbsNodeStructure(const QString
 HlmsNodeUnlitDatablock* NodeEditorDockWidget::createUnlitNodeStructure(const QString& unlitDatablock)
 {
     mHlmsUnlitDatablockNode = mHlmsUnlitBuilder->createUnlitNodeStructure(mParent->getOgreManager(), unlitDatablock);
+    mHlmsPbsDatablockNode = 0;
     return mHlmsUnlitDatablockNode;
 }
 
@@ -217,7 +219,7 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::doNewHlmsUnlitDatablockAction(void
 //****************************************************************************/
 HlmsNodeSamplerblock* NodeEditorDockWidget::doNewSamplerblockAction(void)
 {
-    return mHlmsPbsBuilder->createSamplerNode();
+    return mHlmsPbsBuilder->createSamplerNode(mNodeEditor);
 }
 
 //****************************************************************************/
@@ -245,7 +247,7 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
         mCurrentDatablockName = mHlmsPbsDatablockNode->getName();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
         mParent->initDatablocks();
-        Ogre::HlmsPbsDatablock* datablock = mHlmsPbsBuilder->createPbsDatablock(ogreManager, mLatestDatablockName, mHlmsPbsDatablockNode);
+        Ogre::HlmsPbsDatablock* datablock = mHlmsPbsBuilder->createPbsDatablock(ogreManager, mHlmsPbsDatablockNode);
         if (datablock)
             mLatestDatablockName = mHlmsPbsDatablockNode->getName();
     }
@@ -254,7 +256,7 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
         mCurrentDatablockName = mHlmsUnlitDatablockNode->getName();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
         mParent->initDatablocks();
-        Ogre::HlmsUnlitDatablock* datablock = mHlmsUnlitBuilder->createUnlitDatablock(ogreManager, mLatestDatablockName, mHlmsUnlitDatablockNode);
+        Ogre::HlmsUnlitDatablock* datablock = mHlmsUnlitBuilder->createUnlitDatablock(ogreManager, mHlmsUnlitDatablockNode);
         if (datablock)
             mLatestDatablockName = mHlmsUnlitDatablockNode->getName();
     }
