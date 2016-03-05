@@ -25,6 +25,7 @@
 #include "asset_assetwidget.h"
 #include "hlms_node_samplerblock.h"
 #include "asset_propertywidget_select.h"
+#include "asset_propertywidget_decimal.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -41,8 +42,9 @@ class HlmsPropertiesSamplerblock : public QWidget
         virtual ~HlmsPropertiesSamplerblock(void);
         void setObject (HlmsNodeSamplerblock* hlmsNodeSamplerblock);
 
-        // Set TextureTypeProperty visible/invisible
+        // Set properties visible/invisible
         void setTextureTypePropertyVisible (bool visible);
+        void setMapWeightPropertyVisible (bool visible);
 
     private slots:
         void propertyValueChanged(QtProperty* property);
@@ -52,6 +54,7 @@ class HlmsPropertiesSamplerblock : public QWidget
         HlmsNodeSamplerblock* mHlmsNodeSamplerblock;
         Magus::QtAssetWidget* mAssetWidget;
         Magus::QtSelectProperty* mTextureTypeSelectProperty;
+        Magus::QtDecimalProperty* mMapWeightSelectProperty;
 };
 
 #endif

@@ -144,6 +144,12 @@ void PropertiesDockWidget::setTextureTypePropertyVisible(bool visible)
 }
 
 //****************************************************************************/
+void PropertiesDockWidget::setMapWeightPropertyVisible(bool visible)
+{
+    mHlmsPropertiesSamplerblock->setMapWeightPropertyVisible(visible);
+}
+
+//****************************************************************************/
 void PropertiesDockWidget::displayInfo(const QString& fileName, const QString& headerText)
 {
     QFile file(fileName);

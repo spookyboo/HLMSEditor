@@ -187,9 +187,11 @@ HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNodeStructure(Magus::OgreMa
 
         // Get all textures from the unlit
         // Note, that each texture becomes one samplernode, while a datablock may contain multiple textures, but for example only one samplerblock
-        // TODO: Create all samplernodes
+        createSamplerNodes(ogreManager, unlitnode, datablock);
 
         // Create and fill properties of the macronode with the values of the macroblock and connect the node to the unlit node
+        // Note, that the default macroblock of an Unlit datablock has cull mode == CULL_ANTICLOCKWISE (this differs from PBS)
+        // Is this correct?
         const Ogre::HlmsMacroblock* macroblock = datablock->getMacroblock(mNodeEditor);
         if (!(!macroblock->mScissorTestEnabled &&
               macroblock->mDepthCheck &&
@@ -197,7 +199,7 @@ HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNodeStructure(Magus::OgreMa
               macroblock->mDepthFunc == Ogre::CMPF_LESS_EQUAL &&
               macroblock->mDepthBiasConstant == 0.0f &&
               macroblock->mDepthBiasSlopeScale == 0.0f &&
-              macroblock->mCullMode == Ogre::CULL_CLOCKWISE &&
+              macroblock->mCullMode == Ogre::CULL_ANTICLOCKWISE &&
               macroblock->mPolygonMode == Ogre::PM_SOLID))
         {
             // It is not a default macroblock, so create a new macro node and and set it in the unlit
@@ -332,7 +334,12 @@ void HlmsUnlitBuilder::enrichUnlitNode(HlmsNodeUnlitDatablock* unlitnode,
     unlitnode->setName(datablock->getFullName()->c_str());
 
     // ******** Colour ********
-    // TODO
+    QColor colour;
+    colour.setRed(255.0f * datablock->getColour().r);
+    colour.setGreen(255.0f * datablock->getColour().g);
+    colour.setBlue(255.0f * datablock->getColour().b);
+    colour.setAlpha(255.0f * datablock->getColour().a);
+    unlitnode->setColour(colour);
 
     // ******** Texture Swizzle ********
     // TODO: Not yet implemented (is it needed?)
@@ -342,6 +349,36 @@ void HlmsUnlitBuilder::enrichUnlitNode(HlmsNodeUnlitDatablock* unlitnode,
 
     // ******** Alphatest threshold ********
     unlitnode->setAlphaTestThreshold(datablock->getAlphaTestThreshold());
+}
+
+//****************************************************************************/
+HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNode(void)
+{
+    HlmsNodeUnlitDatablock* node = new HlmsNodeUnlitDatablock(NODE_TITLE_UNLIT_DATABLOCK);
+    node->setType(NODE_TYPE_UNLIT_DATABLOCK);
+    mNodeEditor->addNode(node);
+    return node;
+}
+
+//****************************************************************************/
+void HlmsUnlitBuilder::createSamplerNodes (Magus::OgreManager* ogreManager,
+                                           HlmsNodeUnlitDatablock* unlitnode,
+                                           Ogre::HlmsUnlitDatablock* datablock)
+{
+    Ogre::uint8 max = Ogre::UnlitTextureTypes::NUM_UNLIT_TEXTURE_TYPES;
+    Ogre::uint8 i;
+    const Ogre::HlmsSamplerblock* samplerblock;
+    HlmsNodeSamplerblock* samplernode;
+    for (i = 0; i < max; ++i)
+    {
+        samplerblock = datablock->getSamplerblock(i);
+        if (samplerblock)
+        {
+            samplernode = createSamplerNode(mNodeEditor);
+            enrichSamplerNode (ogreManager, samplernode, samplerblock, datablock, i);
+            connectNodes(unlitnode, samplernode);
+        }
+    }
 }
 
 //****************************************************************************/
@@ -366,13 +403,72 @@ void HlmsUnlitBuilder::enrichSamplerblock (Ogre::HlmsUnlitDatablock* datablock,
     // Not applicable; unlit does not use this
 }
 
+
 //****************************************************************************/
-HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNode(void)
+void HlmsUnlitBuilder::enrichSamplerNode (Magus::OgreManager* ogreManager,
+                                          HlmsNodeSamplerblock* samplernode,
+                                          const Ogre::HlmsSamplerblock* samplerblock,
+                                          Ogre::HlmsUnlitDatablock* datablock,
+                                          Ogre::uint8 textureType)
 {
-    HlmsNodeUnlitDatablock* node = new HlmsNodeUnlitDatablock(NODE_TITLE_UNLIT_DATABLOCK);
-    node->setType(NODE_TYPE_UNLIT_DATABLOCK);
-    mNodeEditor->addNode(node);
-    return node;
+    // ******** Texture (name) ********
+    // Getting the filename of the texture
+    Ogre::HlmsManager* hlmsManager = ogreManager->getOgreRoot()->getHlmsManager();
+    Ogre::HlmsTextureManager::TextureLocation texLocation;
+    texLocation.texture = datablock->getTexture(textureType);
+    Ogre::String basename;
+    if (!texLocation.texture.isNull())
+    {
+       texLocation.xIdx = textureType; // TODO: Not sure
+       texLocation.yIdx = 0;
+       texLocation.divisor = 1;
+       basename = *hlmsManager->getTextureManager()->findAliasName(texLocation);
+    }
+
+    // Search the file and path
+    Ogre::String filename;
+    Ogre::String path;
+    Ogre::FileInfoListPtr list = Ogre::ResourceGroupManager::getSingleton().listResourceFileInfo(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME) ;
+    Ogre::FileInfoList::iterator it;
+    Ogre::FileInfoList::iterator itStart = list->begin();
+    Ogre::FileInfoList::iterator itEnd = list->end();
+    for(it = itStart; it != itEnd; ++it)
+    {
+        Ogre::FileInfo& fileInfo = (*it);
+        if (fileInfo.basename == basename)
+        {
+            filename = fileInfo.filename;
+            path = fileInfo.archive->getName();
+            break;
+        }
+    }
+
+    // ******** Texture ********
+    samplernode->setFileNameTexture((path + "/" + basename).c_str());
+    samplernode->setPathTexture(path.c_str());
+    samplernode->setBaseNameTexture(basename.c_str());
+
+    // ******** Texture type ********
+    // Not applicable; unlit does not use this
+
+    // ******** Generic attributes ********
+    enrichSamplerNodeGeneric(samplernode, samplerblock);
+
+    // ******** UV set ********
+    Ogre::uint8 uvSource = 0;
+    if (textureType < Ogre::NUM_UNLIT_TEXTURE_TYPES)
+        uvSource = datablock->getTextureUvSource(textureType);
+    samplernode->setUvSet(uvSource);
+
+    // ******** Blend mode ********
+    unsigned int index = getIndexFromBlendMode(datablock->getBlendMode(textureType));
+    samplernode->setBlendMode(index);
+
+    // ******** Animation Matrix ********
+    // TODO: Not yet implemented
+
+    // ******** Map weight ********
+    // Not applicable; unlit does not use this
 }
 
 //****************************************************************************/

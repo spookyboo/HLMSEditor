@@ -1,6 +1,6 @@
 QT += widgets opengl multimedia
 
-OGREHOME = "C:/Users/Henry/Documents/Visual Studio 2015/Projects/Ogre2.1"
+OGREHOME = "C:/Users/Henry/Documents/Visual Studio 2015/Projects/ogre"
 
 
 HEADERS       = \
@@ -28,7 +28,6 @@ HEADERS       = \
     framework/header/asset_propertywidget_xy.h \
     framework/header/asset_propertywidget_xyz.h \
     framework/header/magus_core.h \
-    framework/header/magus_treewidget.h \
     framework/header/node_compound.h \
     framework/header/node_connection.h \
     framework/header/node_constants.h \
@@ -36,32 +35,10 @@ HEADERS       = \
     framework/header/node_node.h \
     framework/header/node_port.h \
     framework/header/node_porttype.h \
-    framework/header/node_scene.h \
     framework/header/ogre3_cameraman.h \
     framework/header/ogre3_renderman.h \
     framework/header/ogre3_widget.h \
-    framework/header/ogre_colouredrectangle.h \
     framework/header/ogre_prereqs.h \
-    framework/header/tool_audiowidget.h \
-    framework/header/tool_default_texturewidget.h \
-    framework/header/tool_extended_texturewidget.h \
-    framework/header/tool_filereader.h \
-    framework/header/tool_generic_assetwidget.h \
-    framework/header/tool_glspherewidget.h \
-    framework/header/tool_gradient.h \
-    framework/header/tool_gradientmarker.h \
-    framework/header/tool_gradientwidget.h \
-    framework/header/tool_layered_sceneviewwidget.h \
-    framework/header/tool_layerwidget.h \
-    framework/header/tool_resourcetree_widget.h \
-    framework/header/tool_resourcewidget.h \
-    framework/header/tool_resourcewidget_assets.h \
-    framework/header/tool_resourcewidget_collections.h \
-    framework/header/tool_resourcewidget_main.h \
-    framework/header/tool_resourcewidget_sources.h \
-    framework/header/tool_sceneviewwidget.h \
-    framework/header/tool_simple_texturemodel.h \
-    framework/header/tool_simple_texturewidget.h \
     source/header/hlms_node_pbs_datablock.h \
     source/header/hlms_node_porttypes.h \
     source/header/constants.h \
@@ -100,7 +77,6 @@ SOURCES       = \
     framework/src/asset_propertywidget_texture.cpp \
     framework/src/asset_propertywidget_xy.cpp \
     framework/src/asset_propertywidget_xyz.cpp \
-    framework/src/magus_treewidget.cpp \
     framework/src/node_compound.cpp \
     framework/src/node_connection.cpp \
     framework/src/node_editorwidget.cpp \
@@ -109,26 +85,6 @@ SOURCES       = \
     framework/src/node_porttype.cpp \
     framework/src/ogre3_renderman.cpp \
     framework/src/ogre3_widget.cpp \
-    framework/src/tool_audiowidget.cpp \
-    framework/src/tool_default_texturewidget.cpp \
-    framework/src/tool_extended_texturewidget.cpp \
-    framework/src/tool_filereader.cpp \
-    framework/src/tool_generic_assetwidget.cpp \
-    framework/src/tool_glspherewidget.cpp \
-    framework/src/tool_gradient.cpp \
-    framework/src/tool_gradientmarker.cpp \
-    framework/src/tool_gradientwidget.cpp \
-    framework/src/tool_layered_sceneviewwidget.cpp \
-    framework/src/tool_layerwidget.cpp \
-    framework/src/tool_resourcetree_widget.cpp \
-    framework/src/tool_resourcewidget.cpp \
-    framework/src/tool_resourcewidget_assets.cpp \
-    framework/src/tool_resourcewidget_collections.cpp \
-    framework/src/tool_resourcewidget_main.cpp \
-    framework/src/tool_resourcewidget_sources.cpp \
-    framework/src/tool_sceneviewwidget.cpp \
-    framework/src/tool_simple_texturemodel.cpp \
-    framework/src/tool_simple_texturewidget.cpp \
     source/src/hlms_node_pbs_datablock.cpp \
     source/src/hlms_node_porttypes.cpp \
     source/src/hlms_node_samplerblock.cpp \

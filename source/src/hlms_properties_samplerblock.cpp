@@ -223,10 +223,11 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
     selectProperty->addValues(stringListBlendMode);
 
     // ******** Map weight (pbs only) ********
-    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
-                                 PROPERTY_SAMPLERBLOCK_MAP_WEIGTH,
-                                 QString("Map weight"),
-                                 Magus::QtProperty::DECIMAL);
+    mMapWeightSelectProperty = static_cast<Magus::QtDecimalProperty*>
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+                                          PROPERTY_SAMPLERBLOCK_MAP_WEIGTH,
+                                          QString("Map weight"),
+                                          Magus::QtProperty::DECIMAL));
 
     // ******** Offset scale ********
     // TODO: Not implemented yet; vector 4 property available yet
@@ -249,6 +250,12 @@ HlmsPropertiesSamplerblock::~HlmsPropertiesSamplerblock(void)
 void HlmsPropertiesSamplerblock::setTextureTypePropertyVisible (bool visible)
 {
     mTextureTypeSelectProperty->setVisible(visible);
+}
+
+//****************************************************************************/
+void HlmsPropertiesSamplerblock::setMapWeightPropertyVisible (bool visible)
+{
+    mMapWeightSelectProperty->setVisible(visible);
 }
 
 //****************************************************************************/

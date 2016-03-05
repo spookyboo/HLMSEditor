@@ -58,6 +58,11 @@ class HlmsUnlitBuilder : public HlmsBuilder
         // Create an Unlit node and add it to the node editor canvas
         HlmsNodeUnlitDatablock* createUnlitNode(void);
 
+        // Enrich the unlit node with sampler nodes
+        void createSamplerNodes (Magus::OgreManager* ogreManager,
+                                 HlmsNodeUnlitDatablock* unlitnode,
+                                 Ogre::HlmsUnlitDatablock* datablock);
+
         // Set the Unlit node to an initial position
         void repositionUnlitNode(HlmsNodeUnlitDatablock* unlitnode);
 
@@ -87,6 +92,14 @@ class HlmsUnlitBuilder : public HlmsBuilder
         void enrichSamplerblock (Ogre::HlmsUnlitDatablock* datablock,
                                  Ogre::HlmsSamplerblock* samplerblock,
                                  HlmsNodeSamplerblock* samplernode);
+
+        // The sampler node is enriched with values from a sampler block
+        void enrichSamplerNode (Magus::OgreManager* ogreManager,
+                                HlmsNodeSamplerblock* samplernode,
+                                const Ogre::HlmsSamplerblock* samplerblock,
+                                Ogre::HlmsUnlitDatablock* datablock,
+                                Ogre::uint8 textType);
+
 
         unsigned int getIndexFromBlendMode (Ogre::UnlitBlendModes blendMode);
         Ogre::UnlitBlendModes getBlendModeFromIndex (unsigned int index);

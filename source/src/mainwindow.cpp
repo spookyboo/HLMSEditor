@@ -302,6 +302,8 @@ void MainWindow::getAndSetFirstDatablock(void)
                         QString s = newDatablockName.c_str();
                         mNodeEditorDockWidget->createPbsNodeStructure(s);
                         mHlmsName = s;
+                        mPropertiesDockWidget->setTextureTypePropertyVisible(true);
+                        mPropertiesDockWidget->setMapWeightPropertyVisible(true);
                         break;
                     }
                 }
@@ -345,6 +347,8 @@ void MainWindow::getAndSetFirstDatablock(void)
                         QString s = newDatablockName.c_str();
                         mNodeEditorDockWidget->createUnlitNodeStructure(s);
                         mHlmsName = s;
+                        mPropertiesDockWidget->setTextureTypePropertyVisible(false);
+                        mPropertiesDockWidget->setMapWeightPropertyVisible(false);
                         break;
                     }
                 }

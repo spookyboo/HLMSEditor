@@ -185,13 +185,18 @@ HlmsNodePbsDatablock* NodeEditorDockWidget::doNewHlmsPbsDatablockAction(void)
 {
     // If mHlmsUnlitDatablockNode, then just return
     if (mHlmsUnlitDatablockNode)
+    {
+        mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
+        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(false);
         return mHlmsPbsDatablockNode;
+    }
 
     // Add an mHlmsPbsDatablockNode; only 1 is allowed
     if (!mHlmsPbsDatablockNode)
     {
         mHlmsPbsDatablockNode = mHlmsPbsBuilder->createPbsNode();
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
+        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(true);
         mParent->initDatablocks();
     }
 
@@ -203,13 +208,18 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::doNewHlmsUnlitDatablockAction(void
 {
     // If mHlmsPbsDatablockNode, then just return
     if (mHlmsPbsDatablockNode)
+    {
+        mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
+        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(true);
         return mHlmsUnlitDatablockNode;
+    }
 
     // Add an mHlmsUnlitDatablockNode; only 1 is allowed
     if (!mHlmsUnlitDatablockNode)
     {
         mHlmsUnlitDatablockNode = mHlmsUnlitBuilder->createUnlitNode();
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
+        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(false);
         mParent->initDatablocks();
     }
 
@@ -220,6 +230,16 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::doNewHlmsUnlitDatablockAction(void
 HlmsNodeSamplerblock* NodeEditorDockWidget::doNewSamplerblockAction(void)
 {
     return mHlmsPbsBuilder->createSamplerNode(mNodeEditor);
+    if (mHlmsPbsDatablockNode)
+    {
+        mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
+        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(true);
+    }
+    else if (mHlmsUnlitDatablockNode)
+    {
+        mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
+        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(false);
+    }
 }
 
 //****************************************************************************/
@@ -244,6 +264,8 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
     // Construct a datablock and set it to the current item in the renderwindow
     if (mHlmsPbsDatablockNode)
     {
+        mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
+        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(true);
         mCurrentDatablockName = mHlmsPbsDatablockNode->getName();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
         mParent->initDatablocks();
@@ -253,6 +275,8 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
     }
     else if (mHlmsUnlitDatablockNode)
     {
+        mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
+        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(false);
         mCurrentDatablockName = mHlmsUnlitDatablockNode->getName();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
         mParent->initDatablocks();

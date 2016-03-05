@@ -242,7 +242,7 @@ float4 main( PS_INPUT inPs
 	float3 vTangent = normalize( inPs.tangent );
 
 	//Get the TBN matrix
-	float3 vBinormal	= normalize( cross( vTangent, geomNormal )@insertpiece( tbnApplyReflection ) );
+	float3 vBinormal	= normalize( cross( geomNormal, vTangent )@insertpiece( tbnApplyReflection ) );
 	float3x3 TBN		= float3x3( vTangent, vBinormal, geomNormal );
 
 	@property( normal_map_tex )nNormal = getTSNormal( float3( inPs.uv@value(uv_normal).xy, normalIdx ) );@end
@@ -290,7 +290,7 @@ float4 main( PS_INPUT inPs
 @end
 
 	//Everything's in Camera space
-@property( hlms_lights_spot || envprobe_map || hlms_forward3d )
+@property( hlms_lights_spot || ambient_hemisphere || envprobe_map || hlms_forward3d )
 	float3 viewDir	= normalize( -inPs.pos );
 	float NdotV		= saturate( dot( nNormal, viewDir ) );@end
 

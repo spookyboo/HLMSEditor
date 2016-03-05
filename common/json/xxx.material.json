@@ -1,0 +1,143 @@
+{
+	"samplers" :
+	{
+		"Sampler_2" :
+		{
+			"min" : "none",
+			"mag" : "none",
+			"mip" : "none",
+			"u" : "wrap",
+			"v" : "wrap",
+			"w" : "wrap",
+			"miplodbias" : 0,
+			"max_anisotropic" : 1,
+			"compare_function" : "disabled",
+			"border" :[1, 1, 1, 1],
+			"min_lod" : -3.40282e+38,
+			"max_lod" : 3.40282e+38
+		},
+		"Sampler_4" :
+		{
+			"min" : "anisotropic",
+			"mag" : "anisotropic",
+			"mip" : "anisotropic",
+			"u" : "wrap",
+			"v" : "wrap",
+			"w" : "wrap",
+			"miplodbias" : 0,
+			"max_anisotropic" : 1,
+			"compare_function" : "disabled",
+			"border" :[1, 1, 1, 1],
+			"min_lod" : -3.40282e+38,
+			"max_lod" : 3.40282e+38
+		}
+	},
+
+	"macroblocks" :
+	{
+		"Macroblock_0" :
+		{
+			"scissor_test" : false,
+			"depth_check" : true,
+			"depth_write" : true,
+			"depth_function" : "less_equal",
+			"depth_bias_constant" : 0,
+			"depth_bias_slope_scale" : 0,
+			"cull_mode" : "clockwise",
+			"polygon_mode" : "solid"
+		},
+		"Macroblock_2" :
+		{
+			"scissor_test" : false,
+			"depth_check" : false,
+			"depth_write" : true,
+			"depth_function" : "disabled",
+			"depth_bias_constant" : 0,
+			"depth_bias_slope_scale" : 0,
+			"cull_mode" : "none",
+			"polygon_mode" : "solid"
+		}
+	},
+
+	"blendblocks" :
+	{
+		"Blendblock_0" :
+		{
+			"alpha_to_coverage" : false,
+			"blendmask" : "rgba",
+			"separate_blend" : false,
+			"src_blend_factor" : "one",
+			"dst_blend_factor" : "zero",
+			"blend_operation" : "add"
+		}
+	},
+
+	"pbs" : 
+	{
+
+		"HlmsPbsTest2" :
+		{
+			"macroblock" : "Macroblock_2",
+			"blendblock" : "Blendblock_0",
+			"shadow_const_bias" : 0.01,
+			"workflow" : "specular_ogre",
+			"diffuse" :
+			{
+				"value" : [1, 0.592157, 0.298039],
+				"texture" : "egyptrockyfull.jpg",
+				"sampler" : "Sampler_2"
+			},
+			"specular" :
+			{
+				"value" : [0.298039, 0.592157, 0.298039]
+			},
+			"fresnel" :
+			{
+				"value" : 0.818,
+				"mode" : "coeff"
+			},
+			"roughness" :
+			{
+				"value" : 1,
+				"texture" : "Dirt.jpg",
+				"sampler" : "Sampler_2"
+			},
+			"detail_diffuse0" :
+			{
+				"value" : 2,
+				"texture" : "BumpyMetal.jpg",
+				"sampler" : "Sampler_2"
+			},
+			"detail_diffuse1" :
+			{
+				"value" : 1,
+				"texture" : "BeachStones.jpg",
+				"sampler" : "Sampler_2"
+			},
+			"detail_diffuse2" :
+			{
+				"value" : 1,
+				"texture" : "circuit.dds",
+				"sampler" : "Sampler_2"
+			},
+			"detail_diffuse3" :
+			{
+				"value" : 1,
+				"texture" : "Dirt.jpg",
+				"sampler" : "Sampler_2"
+			},
+			"detail_normal0" :
+			{
+				"value" : 1,
+				"texture" : "Rocks_Normal.tga",
+				"sampler" : "Sampler_4"
+			},
+			"detail_normal2" :
+			{
+				"value" : 1,
+				"texture" : "BumpyMetal.jpg",
+				"sampler" : "Sampler_2"
+			}
+		}
+	}
+}
