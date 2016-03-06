@@ -32,7 +32,9 @@
 #include "OgreHlmsManager.h"
 
 //****************************************************************************/
-MainWindow::MainWindow(void) : mIsClosing(false)
+MainWindow::MainWindow(void) :
+    mIsClosing(false),
+    mFirst(true)
 {
     installEventFilter(this);
 
@@ -448,6 +450,13 @@ void MainWindow::update(void)
 {
     if (mOgreManager)
         mOgreManager->renderOgreWidgetsOneFrame();
+
+    if (mFirst)
+    {
+        // Only do this once, otherwise it is not possible to change the widget manually (by means of keyboard)
+        mRenderwindowDockWidget->updateTransformationWidgetFromOgreWidget();
+        mFirst = false;
+    }
 }
 
 //****************************************************************************/

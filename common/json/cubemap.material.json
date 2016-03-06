@@ -44,7 +44,7 @@
 			"dst_blend_factor" : "zero",
 			"blend_operation" : "add"
 		},
-		"Blendblock_2" :
+		"Blendblock_1" :
 		{
 			"alpha_to_coverage" : false,
 			"blendmask" : "rgba",
@@ -61,7 +61,7 @@
 		"HlmsPbs" :
 		{
 			"macroblock" : "Macroblock_0",
-			"blendblock" : "Blendblock_0",
+			"blendblock" : "Blendblock_1",
 			"shadow_const_bias" : 0.01,
 			"workflow" : "metallic",
 			"transparency" :
@@ -77,11 +77,6 @@
 			"specular" :
 			{
 				"value" : [0.772549, 0.8, 0.772549]
-			},
-			"fresnel" :
-			{
-				"value" : 0.818,
-				"mode" : "coeff"
 			},
 			"metallness" :
 			{

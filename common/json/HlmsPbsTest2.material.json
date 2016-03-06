@@ -1,7 +1,7 @@
 {
 	"samplers" :
 	{
-		"Sampler_2" :
+		"Sampler_3" :
 		{
 			"min" : "none",
 			"mag" : "none",
@@ -45,6 +45,17 @@
 			"depth_bias_slope_scale" : 0,
 			"cull_mode" : "clockwise",
 			"polygon_mode" : "solid"
+		},
+		"Macroblock_3" :
+		{
+			"scissor_test" : false,
+			"depth_check" : true,
+			"depth_write" : true,
+			"depth_function" : "disabled",
+			"depth_bias_constant" : 0,
+			"depth_bias_slope_scale" : 0,
+			"cull_mode" : "clockwise",
+			"polygon_mode" : "solid"
 		}
 	},
 
@@ -66,16 +77,15 @@
 
 		"HlmsPbsTest2" :
 		{
-			"macroblock" : "Macroblock_0",
+			"macroblock" : "Macroblock_3",
 			"blendblock" : "Blendblock_0",
-			"alpha_test" : ["disabled", 0.5],
 			"shadow_const_bias" : 0.01,
 			"workflow" : "specular_ogre",
 			"diffuse" :
 			{
 				"value" : [1, 0.592157, 0.298039],
 				"texture" : "egyptrockyfull.jpg",
-				"sampler" : "Sampler_2"
+				"sampler" : "Sampler_3"
 			},
 			"specular" :
 			{
@@ -90,19 +100,43 @@
 			{
 				"value" : 1,
 				"texture" : "Dirt.jpg",
-				"sampler" : "Sampler_2"
+				"sampler" : "Sampler_3"
 			},
 			"detail_diffuse0" :
 			{
 				"value" : 2,
 				"texture" : "BumpyMetal.jpg",
-				"sampler" : "Sampler_2"
+				"sampler" : "Sampler_3"
+			},
+			"detail_diffuse1" :
+			{
+				"value" : 1,
+				"texture" : "BeachStones.jpg",
+				"sampler" : "Sampler_3"
+			},
+			"detail_diffuse2" :
+			{
+				"value" : 1,
+				"texture" : "circuit.dds",
+				"sampler" : "Sampler_3"
+			},
+			"detail_diffuse3" :
+			{
+				"value" : 1,
+				"texture" : "Dirt.jpg",
+				"sampler" : "Sampler_3"
 			},
 			"detail_normal0" :
 			{
 				"value" : 1,
 				"texture" : "Rocks_Normal.tga",
 				"sampler" : "Sampler_4"
+			},
+			"detail_normal2" :
+			{
+				"value" : 1,
+				"texture" : "BumpyMetal.jpg",
+				"sampler" : "Sampler_3"
 			}
 		}
 	}

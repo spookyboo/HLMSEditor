@@ -75,6 +75,7 @@ class MainWindow : public QMainWindow
 		void createDockWindows(void);
 		void closeEvent(QCloseEvent* event);
 
+        bool mFirst;
         QMenu* mFileMenu;
         QMenu* mWindowMenu;
         QAction* mNewHlmsPbsAction;

@@ -53,7 +53,8 @@ HEADERS       = \
     source/header/hlms_builder.h \
     source/header/hlms_properties_unlit_datablock.h \
     source/header/hlms_node_unlit_datablock.h \
-    source/header/hlms_unlit_builder.h
+    source/header/hlms_unlit_builder.h \
+    framework/header/tb_transformationwidget.h
 
 
 SOURCES       = \
@@ -98,7 +99,8 @@ SOURCES       = \
     source/src/hlms_builder.cpp \
     source/src/hlms_properties_unlit_datablock.cpp \
     source/src/hlms_node_unlit_datablock.cpp \
-    source/src/hlms_unlit_builder.cpp
+    source/src/hlms_unlit_builder.cpp \
+    framework/src/tb_transformationwidget.cpp
 
 
 INCLUDEPATH += "../HLMSEditor/source/header/"

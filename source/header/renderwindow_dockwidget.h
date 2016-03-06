@@ -28,7 +28,7 @@
 #include <QToolBar>
 #include <QTabWidget>
 #include "ogre3_renderman.h"
-
+#include "tb_transformationwidget.h"
 
 QT_BEGIN_NAMESPACE
 class QDockWidget;
@@ -55,9 +55,11 @@ class RenderwindowDockWidget : public QDockWidget
 		void createActions(void);
 		void createMenus(void);
 		void createToolBars(void);
+        void updateTransformationWidgetFromOgreWidget(void);
 
 	private slots:
         void doChangeItemAction(QAction* action);
+        void doTransformationWidgetValueChanged(void);
         void doChangeBackgroundAction(void);
 
 	private:
@@ -67,6 +69,7 @@ class RenderwindowDockWidget : public QDockWidget
         QAction* mChangeBackgroundAction;
         QToolBar* mHToolBar;
         QMap<QString, MeshStruct> mMeshMap;
+        Magus::TransformationWidget* mTransformationWidget;
 };
 
 #endif

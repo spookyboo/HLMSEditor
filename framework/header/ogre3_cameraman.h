@@ -82,6 +82,7 @@ namespace Magus
 		}
 
 		virtual ~CameraMan() {}
+        Ogre::SceneNode* mCameraNode;
 
 		/*-----------------------------------------------------------------------------
 		| Swaps the camera on our camera man for another camera.
@@ -94,8 +95,8 @@ namespace Magus
             mCameraNode->attachObject( mCamera );
             mCamera->setPosition( Ogre::Vector3( 0, 5, 15 ) );
             mCamera->lookAt( Ogre::Vector3( 0, 0, 0 ) );
-            mCamera->setNearClipDistance( 0.2f );
-            mCamera->setFarClipDistance( 1000.0f );
+            mCamera->setNearClipDistance( 0.1f );
+            mCamera->setFarClipDistance( 10000.0f );
             mCamera->setAutoAspectRatio( true );
             //mCameraNode->pitch( Ogre::Degree( -45.0f ) );
             //mCamera->setPosition( Ogre::Vector3::UNIT_Z * 50.0f );
@@ -457,11 +458,8 @@ namespace Magus
 		}
 
     protected:
-
 		Ogre::Camera* mCamera;
-
 		Ogre::SceneNode* mTarget;
-		Ogre::SceneNode* mCameraNode;
 
 		bool mOrbiting;
 		bool mShiftDown;

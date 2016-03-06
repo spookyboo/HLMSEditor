@@ -26,7 +26,7 @@
 //****************************************************************************/
 RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags) : 
 	QDockWidget (title, parent, flags), 
-	mParent(parent)
+    mParent(parent)
 {
     // Create the meshMap
     QFile file(QString("models.cfg"));
@@ -105,13 +105,19 @@ void RenderwindowDockWidget::createMenus(void)
 void RenderwindowDockWidget::createToolBars(void)
 {
     mHToolBar = new QToolBar();
+    mTransformationWidget = new Magus::TransformationWidget(mHToolBar);
+    mTransformationWidget->setMaximumWidth(344);
+    mTransformationWidget->setCurrentIndex(2); // Only scale is visible
+    mTransformationWidget->setListEnabled(false);
     mInnerMain->addToolBar(Qt::TopToolBarArea, mHToolBar);
     mHToolBar->setMinimumHeight(32);
     mHToolBar->setMinimumWidth(8 * 32);
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mHToolBar->addWidget(mTransformationWidget);
     mHToolBar->addWidget(spacer);
     mHToolBar->addAction(mChangeBackgroundAction);
+    connect(mTransformationWidget, SIGNAL(valueChanged()), this, SLOT(doTransformationWidgetValueChanged()));
 }
 
 //****************************************************************************/
@@ -131,7 +137,44 @@ void RenderwindowDockWidget::doChangeItemAction(QAction* action)
                                 meshStruct.scale.z());
             Ogre::String meshName = meshStruct.meshName.toStdString();
             mOgreWidget->createItem(meshName, scale);
+            updateTransformationWidgetFromOgreWidget();
         }
+    }
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::updateTransformationWidgetFromOgreWidget(void)
+{
+    if (!mOgreWidget)
+        return;
+
+    QVector3D v;
+
+    // Scale
+    v.setX(mOgreWidget->getItemScale().x);
+    v.setY(mOgreWidget->getItemScale().y);
+    v.setZ(mOgreWidget->getItemScale().z);
+    mTransformationWidget->setScale(v);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::doTransformationWidgetValueChanged(void)
+{
+    if (!mOgreWidget)
+        return;
+
+    // Replace the code in this function with your own code.
+    switch (mTransformationWidget->getCurrentTransformation())
+    {
+        case Magus::TransformationWidget::SCALE:
+        {
+            Ogre::Vector3 v;
+            v.x = mTransformationWidget->getScale().x();
+            v.y = mTransformationWidget->getScale().y();
+            v.z = mTransformationWidget->getScale().z();
+            mOgreWidget->setItemScale(v);
+        }
+        break;
     }
 }
 
@@ -143,4 +186,3 @@ void RenderwindowDockWidget::doChangeBackgroundAction(void)
     Ogre::ColourValue colour(c.red()/255.0f, c.green()/255.0f, c.blue()/255.0f, 1.0f);
     mOgreWidget->setBackgroundColour(colour);
 }
-

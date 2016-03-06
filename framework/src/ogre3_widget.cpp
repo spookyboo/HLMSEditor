@@ -358,4 +358,18 @@ namespace Magus
         if(mSystemInitialized)
             mCameraManager->injectMouseUp(e);
     }
+
+    //****************************************************************************/
+    const Ogre::Vector3& QOgreWidget::getItemScale(void)
+    {
+        if (mItem && mItem->getParentSceneNode())
+            return mItem->getParentSceneNode()->getScale();
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::setItemScale(const Ogre::Vector3& scale)
+    {
+        if (mItem && mItem->getParentSceneNode())
+            mItem->getParentSceneNode()->setScale(scale);
+    }
 }
