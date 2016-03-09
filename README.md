@@ -5,7 +5,7 @@ Editor to create Ogre3D High Level Material Shader materials (Ogre 2.0+)
 
 ![HLMS Editor](/HLMSEditor.png)
 
-Installation:  
+**Installation:**  
 Step 1. Download the zip or clone the 'HLMSEditor' repository from Github.  
 Step 2. Compile the sources of Ogre3D version 2.1 (from https://bitbucket.org/sinbad/ogre)  
 Step 3. Copy the following DLL's to the HLMSEditor/bin directory  
