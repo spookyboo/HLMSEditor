@@ -5,7 +5,7 @@ Editor to create Ogre3D High Level Material Shader materials (Ogre 2.0+)
 
 ![HLMS Editor](/HLMSEditor.png)
 
-Installation:
+Installation:  
 Step 1. Download the zip or clone the 'HLMSEditor' repository from Github.  
 Step 2. Compile the sources of Ogre3D version 2.1 (from https://bitbucket.org/sinbad/ogre)  
 Step 3. Copy the following DLL's to the HLMSEditor/bin directory  
@@ -17,8 +17,9 @@ Step 3. Copy the following DLL's to the HLMSEditor/bin directory
 * OgreMain_d.dll
 * RenderSystem_Direct3D11.dll
 * RenderSystem_Direct3D11_d.dll
-* RenderSystem_GL3Plus.dll
-* RenderSystem_GL3Plus_d.dll
+* RenderSystem_GL3Plus.dll  
+* RenderSystem_GL3Plus_d.dll  
+
 Step 4. Run 'Qt Creator'  
 Step 5. Open the 'HLMSEditor.pro' in Qt Creator  
 Step 6. Edit 'HLMSEditor.pro' file; change OGREHOME = "C:/Users/Henry/Documents/Visual Studio 2015/Projects/ogre" to the path that refers to your ogre root/home  
