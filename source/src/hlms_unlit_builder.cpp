@@ -417,12 +417,22 @@ void HlmsUnlitBuilder::enrichSamplerNode (Magus::OgreManager* ogreManager,
     Ogre::HlmsTextureManager::TextureLocation texLocation;
     texLocation.texture = datablock->getTexture(textureType);
     Ogre::String basename;
+    const Ogre::String* pBasename;
     if (!texLocation.texture.isNull())
     {
        texLocation.xIdx = textureType; // TODO: Not sure
        texLocation.yIdx = 0;
        texLocation.divisor = 1;
-       basename = *hlmsManager->getTextureManager()->findAliasName(texLocation);
+       pBasename = hlmsManager->getTextureManager()->findAliasName(texLocation); // findAliasName could return 0 pointer
+       if (pBasename)
+       {
+           basename = *pBasename;
+       }
+       else
+       {
+           QMessageBox::information(0, QString("Error"), QString("Cannot find image file. Hlms is incomplete!"));
+           return;
+       }
     }
 
     // Search the file and path

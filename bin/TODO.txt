@@ -1,11 +1,9 @@
 Short term updates:
 ==================
 - Implement material browser
-- Widget to scale the mesh (scale, position, orientation)
 
 Bugs:
 ====
-- fresnel not set properly when loading json file (in pbs) => posted on forum; fixed, but gives an assert (see http://www.ogre3d.org/forums/viewtopic.php?f=25&t=85157)
 - cubemap json generates a lot of warnings in the log when depth is enabled (this is with all non-depth textures); the log message is only in Debug
 
 Later:
