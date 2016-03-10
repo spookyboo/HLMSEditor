@@ -245,8 +245,8 @@ void MainWindow::destroyAllDatablocks(void)
     while( itorUnlit != endUnlit)
     {
         unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itorUnlit->second.datablock);
-        if (pbsDatablock != hlmsPbs->getDefaultDatablock() &&
-                pbsDatablock != hlmsUnlit->getDefaultDatablock())
+        if (unlitDatablock != hlmsPbs->getDefaultDatablock() &&
+                unlitDatablock != hlmsUnlit->getDefaultDatablock())
         {
             hlmsUnlit->destroyDatablock(unlitDatablock->getName());
             itorUnlit = hlmsUnlit->getDatablockMap().begin(); // Start from the beginning again

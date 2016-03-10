@@ -420,7 +420,7 @@ void HlmsUnlitBuilder::enrichSamplerNode (Magus::OgreManager* ogreManager,
     const Ogre::String* pBasename;
     if (!texLocation.texture.isNull())
     {
-       texLocation.xIdx = textureType; // TODO: Not sure
+       texLocation.xIdx = 0;
        texLocation.yIdx = 0;
        texLocation.divisor = 1;
        pBasename = hlmsManager->getTextureManager()->findAliasName(texLocation); // findAliasName could return 0 pointer
