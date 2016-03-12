@@ -124,7 +124,6 @@ namespace Magus
         mContextMenu->addAction(new QAction(NODE_ACTION_COLLAPSE_ALL, this));
         mContextMenu->addAction(new QAction(NODE_ACTION_EXPAND_ALL, this));
         mContextMenu->addAction(new QAction(NODE_ACTION_EXPAND_COMPOUNDS, this));
-        mContextMenu->addAction(new QAction(NODE_ACTION_CENTER, this));
 
         setMenuZoomEnabled(true);
         setMenuSelectionToCompoundEnabled(true);
