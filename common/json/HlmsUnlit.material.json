@@ -1,4 +1,22 @@
 {
+	"samplers" :
+	{
+		"Sampler_2" :
+		{
+			"min" : "none",
+			"mag" : "none",
+			"mip" : "none",
+			"u" : "wrap",
+			"v" : "wrap",
+			"w" : "wrap",
+			"miplodbias" : 0,
+			"max_anisotropic" : 1,
+			"compare_function" : "disabled",
+			"border" :[1, 1, 1, 1],
+			"min_lod" : -3.40282e+38,
+			"max_lod" : 3.40282e+38
+		}
+	},
 
 	"macroblocks" :
 	{
@@ -35,7 +53,18 @@
 		{
 			"macroblock" : "Macroblock_0",
 			"blendblock" : "Blendblock_0",
-			"shadow_const_bias" : 0.01
+			"shadow_const_bias" : 0.01,
+			"diffuse_map0" :
+			{
+				"texture" : "10points.png",
+				"sampler" : "Sampler_2"
+			},
+			"diffuse_map1" :
+			{
+				"texture" : "checker.png",
+				"sampler" : "Sampler_2",
+				"blendmode" : "GrainExtract"
+			}
 		}
 	}
 }

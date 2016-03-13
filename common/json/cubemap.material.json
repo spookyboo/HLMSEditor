@@ -1,7 +1,7 @@
 {
 	"samplers" :
 	{
-		"Sampler_3" :
+		"Sampler_2" :
 		{
 			"min" : "none",
 			"mag" : "none",
@@ -11,7 +11,7 @@
 			"w" : "wrap",
 			"miplodbias" : 0,
 			"max_anisotropic" : 1,
-			"compare_function" : "never",
+			"compare_function" : "disabled",
 			"border" :[1, 1, 1, 1],
 			"min_lod" : -3.40282e+38,
 			"max_lod" : 3.40282e+38
@@ -58,7 +58,7 @@
 	"pbs" : 
 	{
 
-		"HlmsPbs" :
+		"HlmsPbsCubeMap" :
 		{
 			"macroblock" : "Macroblock_0",
 			"blendblock" : "Blendblock_1",
@@ -89,7 +89,7 @@
 			"reflection" :
 			{
 				"texture" : "SaintPetersBasilica.dds",
-				"sampler" : "Sampler_3"
+				"sampler" : "Sampler_2"
 			}
 		}
 	}

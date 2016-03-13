@@ -54,7 +54,16 @@ HEADERS       = \
     source/header/hlms_properties_unlit_datablock.h \
     source/header/hlms_node_unlit_datablock.h \
     source/header/hlms_unlit_builder.h \
-    framework/header/tb_transformationwidget.h
+    framework/header/tb_transformationwidget.h \
+    framework/header/magus_treewidget.h \
+    framework/header/node_scene.h \
+    framework/header/tool_default_texturewidget.h \
+    framework/header/tool_resourcetree_widget.h \
+    framework/header/tool_resourcewidget.h \
+    framework/header/tool_resourcewidget_assets.h \
+    framework/header/tool_resourcewidget_main.h \
+    framework/header/tool_resourcewidget_sources.h \
+    source/header/browser_dialog.h
 
 
 SOURCES       = \
@@ -100,7 +109,15 @@ SOURCES       = \
     source/src/hlms_properties_unlit_datablock.cpp \
     source/src/hlms_node_unlit_datablock.cpp \
     source/src/hlms_unlit_builder.cpp \
-    framework/src/tb_transformationwidget.cpp
+    framework/src/tb_transformationwidget.cpp \
+    framework/src/magus_treewidget.cpp \
+    framework/src/tool_default_texturewidget.cpp \
+    framework/src/tool_resourcetree_widget.cpp \
+    framework/src/tool_resourcewidget.cpp \
+    framework/src/tool_resourcewidget_assets.cpp \
+    framework/src/tool_resourcewidget_main.cpp \
+    framework/src/tool_resourcewidget_sources.cpp \
+    source/src/browser_dialog.cpp
 
 
 INCLUDEPATH += "../HLMSEditor/source/header/"

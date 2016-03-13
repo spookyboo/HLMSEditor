@@ -468,13 +468,13 @@ void MainWindow::loadMaterialBrowserCfg(void)
                 info->resourceName = elements[3];
                 info->fullQualifiedName = elements[4];
 
-                if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_PBS && info->resourceType != TOOL_RESOURCETREE_KEY_TYPE_ASSET)
-                    info->iconName = Magus::TOOL_RESOURCE_ICON_PBS;
-                if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_UNLIT && info->resourceType != TOOL_RESOURCETREE_KEY_TYPE_ASSET)
-                    info->iconName = Magus::TOOL_RESOURCE_ICON_UNLIT;
-
                 if (elements.size() > 5)
                     info->resourceType = QVariant(elements[5]).toInt();
+
+                if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_PBS && info->resourceType != Magus::TOOL_RESOURCETREE_KEY_TYPE_ASSET)
+                    info->iconName = Magus::TOOL_RESOURCE_ICON_PBS;
+                if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_UNLIT && info->resourceType != Magus::TOOL_RESOURCETREE_KEY_TYPE_ASSET)
+                    info->iconName = Magus::TOOL_RESOURCE_ICON_UNLIT;
 
                 resources.append(info);
             }
