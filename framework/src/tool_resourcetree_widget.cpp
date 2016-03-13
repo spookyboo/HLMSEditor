@@ -279,6 +279,7 @@ namespace Magus
                                                  const QString& iconName)
     {
         QtResourceInfo* info = new QtResourceInfo();
+        info->topLevelId = 0;
         info->resourceId = resourceId;
         info->resourceName = resourceName;
         info->fullQualifiedName = fullQualifiedName;
@@ -531,7 +532,8 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QtResourceTreeWidget::addResource (int resourceId,
+    void QtResourceTreeWidget::addResource (int topLevelId,
+                                            int resourceId,
                                             int parentId,
                                             const QString& resourceName,
                                             const QString& fullQualifiedName,
@@ -622,7 +624,8 @@ namespace Magus
                                            bool suppressSignal)
     {
         int resourceId = generateUniqueResourceId();
-        addResource (resourceId, parentId, resourceName, fullQualifiedName, iconName, isAsset, suppressSignal);
+        int topLevelId = getToplevelParentId(resourceId);
+        addResource (topLevelId, resourceId, parentId, resourceName, fullQualifiedName, iconName, isAsset, suppressSignal);
         return resourceId;
     }
 
@@ -634,6 +637,7 @@ namespace Magus
         while (*it)
         {
             QtResourceInfo* info = new QtResourceInfo();
+            info->topLevelId = getToplevelParentIdFromItem(*it);
             info->resourceId = getResourceIdFromItem(*it);
             info->parentId = getParentIdFromItem(*it);
             info->resourceName = (*it)->text(0);
@@ -662,7 +666,8 @@ namespace Magus
         {
             info = it.next();
             isAsset = (info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_ASSET);
-            addResource (info->resourceId,
+            addResource (info->topLevelId,
+                         info->resourceId,
                          info->parentId,
                          info->resourceName,
                          info->fullQualifiedName,
@@ -684,6 +689,7 @@ namespace Magus
             type = getTypeFromItem(*it);
             if (type == TOOL_RESOURCETREE_KEY_TYPE_ASSET)
             {
+                info->topLevelId = getToplevelParentIdFromItem(*it);
                 info->resourceId = getResourceIdFromItem(*it);
                 info->parentId = getParentIdFromItem(*it);
                 info->resourceName = (*it)->text(0);
@@ -710,6 +716,7 @@ namespace Magus
             type = getTypeFromItem(*it);
             if (type == TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP || type == TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP)
             {
+                info->resourceId = getToplevelParentIdFromItem(*it);
                 info->resourceId = getResourceIdFromItem(*it);
                 info->parentId = getParentIdFromItem(*it);
                 info->resourceName = (*it)->text(0);
@@ -1177,24 +1184,9 @@ namespace Magus
     //****************************************************************************/
     void QtResourceTreeWidget::contextMenuItemSelected(QAction* action)
     {
-        if (mToplevelGroupSubMenu &&
-                action->parent() == mToplevelGroupSubMenu &&
-                mCreateTopLevelGroupContextMenuItemEnabled)
-        {
-            // ---------- Create toplevel group ----------
-            QtResourceInfo* info = getRegisteredResourceInfo (action->data().toInt());
-            if (info)
-            {
-                // Add toplevel group and disable it
-                addResource (info->resourceId, 0, info->resourceName, info->fullQualifiedName, info->iconName);
-                action->setCheckable(false);
-                action->setEnabled(false);
-            }
-            return;
-        }
-        else if (mSubGroupSubMenu &&
-                 action->parent() == mSubGroupSubMenu &&
-                 mCreateSubGroupContextMenuItemEnabled)
+        if (mSubGroupSubMenu &&
+                action->parent() == mSubGroupSubMenu &&
+                mCreateSubGroupContextMenuItemEnabled)
         {
             // ---------- Create subgroup, with the icon from the submenu ----------
             QtResourceInfo* info = getRegisteredResourceInfo (action->data().toInt());
@@ -1202,11 +1194,13 @@ namespace Magus
             {
                 // Add sublevel group
                 int parentId = getSelectedResource();
+                int topLevelId = getToplevelParentId(parentId);
                 if (parentId != 0)
                 {
                     // A subgroup may not be added to the toplevel
                     int resourceId = generateUniqueResourceId();
-                    addResource (resourceId,
+                    addResource (topLevelId,
+                                 resourceId,
                                  parentId,
                                  QString("<") + info->resourceName + QString(" subgroup>"),
                                  info->fullQualifiedName,
@@ -1231,7 +1225,9 @@ namespace Magus
                 {
                     // A subgroup may not be added to the toplevel
                     int resourceId = generateUniqueResourceId();
-                    addResource (resourceId,
+                    int topLevelId = getToplevelParentId(resourceId);
+                    addResource (topLevelId,
+                                 resourceId,
                                  parentId,
                                  QString("<") + item->text(0) + QString(" subgroup>"),
                                  QString(""),
@@ -1239,68 +1235,6 @@ namespace Magus
                     expand(parentId);
                 }
             }
-            return;
-        }
-        else if (action->text() == TOOL_RESOURCETREE_ACTION_CREATE_ASSET)
-        {
-            // ---------- Create asset ----------
-            QTreeWidgetItem* item = mResourceTree->currentItem();
-            if (isItemAsset(item))
-                return;
-
-            if (item)
-            {
-                int parentId = getResourceIdFromItem(item);
-                if (parentId != 0)
-                {
-                    // A subgroup may not be added to the toplevel
-                    int resourceId = generateUniqueResourceId();
-                    addResource (resourceId,
-                                 parentId,
-                                 QString("<Asset>"),
-                                 QString(""),
-                                 QString(""),
-                                 true);
-                    expand(parentId);
-                }
-            }
-
-            return;
-        }
-        else if (action->text() == TOOL_RESOURCETREE_ACTION_IMPORT_ASSET)
-        {
-            QTreeWidgetItem* item = mResourceTree->currentItem();
-            if (isItemAsset(item))
-                return;
-
-            if (item)
-            {
-                int resourceId = getResourceIdFromItem(item);
-                emit resourceImported(resourceId);
-            }
-
-            return;
-        }
-        else if (action->text() == TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET)
-        {
-            QTreeWidgetItem* item = mResourceTree->currentItem();
-            if (!isItemAsset(item))
-                return;
-
-            if (item)
-            {
-                int parentId = getParentIdFromItem(item);
-                QString fullName = getFullQualifiedNameFromItem(item);
-                int duplicateResourceId = generateUniqueResourceId();
-                addResource (duplicateResourceId,
-                             parentId,
-                             QString("Copy of ") + item->text(0),
-                             fullName,
-                             QString(""),
-                             true);
-                emit assetDuplicated(duplicateResourceId);
-            }
-
             return;
         }
         else if (action->text() == TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE)

@@ -37,8 +37,8 @@ namespace Magus
         setLayout(mainLayout);
 
         QRect rec = QApplication::desktop()->screenGeometry();
-        setMinimumWidth(0.8 * rec.width());
-        setMaximumWidth(0.8 * rec.width());
+        setMinimumWidth(0.7 * rec.width());
+        setMaximumWidth(0.7 * rec.width());
         setMinimumHeight(0.8 * rec.height());
         setMaximumHeight(0.8 * rec.height());
     }

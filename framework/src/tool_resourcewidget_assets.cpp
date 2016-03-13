@@ -41,14 +41,14 @@ namespace Magus
 
         // Create PBS selection widget
         mPbsSelection = new QtDefaultTextureWidget(this);
-        mPbsSelection->setTextureSize(QSize(112, 120));
+        mPbsSelection->setTextureSize(QSize(120, 120));
         connect(mPbsSelection, SIGNAL(selected(QString,QString)), this, SLOT(handleAssetSelected(QString,QString)));
         connect(mPbsSelection, SIGNAL(doubleClicked(QString,QString)), this, SLOT(handleAssetDoubleClicked(QString,QString)));
         connect(mPbsSelection, SIGNAL(assetDeleted(QString,QString)), this, SLOT(handleAssetDeleted(QString,QString)));
 
         // Create Unlit selection widget
         mUnlitSelection = new QtDefaultTextureWidget(this);
-        mUnlitSelection->setTextureSize(QSize(112, 120));
+        mUnlitSelection->setTextureSize(QSize(120, 120));
         connect(mUnlitSelection, SIGNAL(selected(QString,QString)), this, SLOT(handleAssetSelected(QString,QString)));
         connect(mUnlitSelection, SIGNAL(doubleClicked(QString,QString)), this, SLOT(handleAssetDoubleClicked(QString,QString)));
         connect(mUnlitSelection, SIGNAL(assetDeleted(QString,QString)), this, SLOT(handleAssetDeleted(QString,QString)));
@@ -92,6 +92,25 @@ namespace Magus
     //****************************************************************************/
     void QtAssetsDockWidget::createToolBars(void)
     {
+    }
+
+    //****************************************************************************/
+    void QtAssetsDockWidget::setResources(const QVector<QtResourceInfo*>& resources)
+    {
+        clearContent();
+        QVectorIterator<QtResourceInfo*> it(resources);
+        it.toFront();
+        QtResourceInfo* info;
+        QString baseNameThumb;
+        while (it.hasNext())
+        {
+            info = it.next();
+            if (info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_ASSET)
+            {
+                baseNameThumb = info->resourceName + QString (".png");
+                addAsset(info->topLevelId, 0, 0, THUMBS_PATH.c_str() + baseNameThumb, baseNameThumb);
+            }
+        }
     }
 
     //****************************************************************************/

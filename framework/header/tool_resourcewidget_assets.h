@@ -29,6 +29,7 @@
 #include <QTabWidget>
 #include "constants.h"
 #include "tool_default_texturewidget.h"
+#include "tool_resourcetree_widget.h"
 
 QT_BEGIN_NAMESPACE
 class QDockWidget;
@@ -56,6 +57,9 @@ namespace Magus
             // Add a tab to this widget. The tab represents an asset (mesh, texture, etc.). The widget is a widget that corresponds wuth
             // the asset type.
             void addTab(QWidget* widget, const QIcon& icon, const QString& name);
+
+            // Add material resources to both Pbs and Unlit widgets
+            void setResources(const QVector<QtResourceInfo*>& resources);
 
             // Add a material to the asset widget
             bool addMaterial(const QString& baseNameJson,

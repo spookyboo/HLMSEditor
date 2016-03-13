@@ -45,6 +45,8 @@ class MaterialBrowserDialog : public QDialog
                          const QString& fullNameJson,
                          const QString& baseNameThumb,
                          EditorHlmsTypes type);
+        QVector<Magus::QtResourceInfo*>& getResources (void);
+        void setResources (const QVector<Magus::QtResourceInfo*>& resources);
         const QString& getSelectedJsonFileName(void) const {return mSelectedFileName;}
 
     private slots:

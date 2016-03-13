@@ -27,8 +27,8 @@ MaterialBrowserDialog::MaterialBrowserDialog(QWidget* parent, Qt::WindowFlags f)
 {
     setWindowTitle(QString("Material Browser"));
     QRect rec = QApplication::desktop()->screenGeometry();
-    setMinimumWidth(0.8 * rec.width());
-    setMaximumWidth(0.8 * rec.width());
+    setMinimumWidth(0.7 * rec.width());
+    setMaximumWidth(0.7 * rec.width());
     setMinimumHeight(0.8 * rec.height());
     setMaximumHeight(0.8 * rec.height());
     mSelectedFileName = "";
@@ -51,6 +51,19 @@ void MaterialBrowserDialog::addMaterial(const QString& baseNameJson,
                                         EditorHlmsTypes type)
 {
     mResourceWidget->addMaterial(baseNameJson, fullNameJson, baseNameThumb, type);
+}
+
+//****************************************************************************/
+QVector<Magus::QtResourceInfo*>& MaterialBrowserDialog::getResources (void)
+{
+    // Delegate to mResourceWidget
+    return mResourceWidget->getResources();
+}
+
+//****************************************************************************/
+void MaterialBrowserDialog::setResources (const QVector<Magus::QtResourceInfo*>& resources)
+{
+    mResourceWidget->setResources(resources);
 }
 
 //****************************************************************************/

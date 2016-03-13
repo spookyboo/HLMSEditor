@@ -65,6 +65,7 @@ namespace Magus
     ***************************************************************************/
     struct QtResourceInfo
     {
+        int topLevelId;
         int resourceId;
         int parentId;
         QString iconName;
@@ -169,7 +170,8 @@ namespace Magus
             // An optional icon can be provided; the iconName is the name of the imagefile
             // If isAsset is false, the resource is a toplevel group or a subgroup
             // If suppressSignal is true, no signal is emitted, indicating that the resource was added
-            void addResource (int resourceId,
+            void addResource (int topLevelId,
+                              int resourceId,
                               int parentId,
                               const QString& resourceName,
                               const QString& fullQualifiedName,

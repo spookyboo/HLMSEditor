@@ -56,6 +56,7 @@ static const QString INFO_UNLIT = QString("../common/info/hlms_unlit.inf");
 static const QString INFO_SAMPLERBLOCK = QString("../common/info/samplerblock.inf");
 static const QString INFO_MACROBLOCK = QString("../common/info/macroblock.inf");
 static const QString INFO_BLENDBLOCK = QString("../common/info/blendblock.inf");
+static const QString FILE_MATERIAL_BROWSER = QString("materials.cfg");
 
 static const Ogre::String DEFAULT_DATABLOCK_NAME = "[Default]";
 static const Ogre::String DATABLOCK_DEBUG_CUBE = "DebugCube";

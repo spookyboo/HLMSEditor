@@ -22,6 +22,7 @@
 #include "constants.h"
 #include <QString>
 #include <QFile>
+#include <QTextStream>
 #include <QMenuBar>
 #include "mainwindow.h"
 #include "OgreItem.h"
@@ -50,6 +51,7 @@ MainWindow::MainWindow(void) :
     createStatusBar();
     createDockWindows();
     mMaterialBrowser = new MaterialBrowserDialog(this);
+    loadMaterialBrowserCfg();
 
     mOgreManager->initialize();
 
@@ -444,6 +446,46 @@ void MainWindow::saveDatablock(void)
 }
 
 //****************************************************************************/
+void MainWindow::loadMaterialBrowserCfg(void)
+{
+    QVector<Magus::QtResourceInfo*> resources;
+    QFile file(FILE_MATERIAL_BROWSER);
+    QString line;
+    if (file.open(QFile::ReadOnly))
+    {
+        QTextStream readFile(&file);
+        while (!readFile.atEnd())
+        {
+            line = readFile.readLine();
+            QStringList elements = line.split('\t', QString::SkipEmptyParts);
+            if (elements.size() == 5)
+            {
+                Magus::QtResourceInfo* info = new Magus::QtResourceInfo();
+                info->topLevelId = QVariant(elements[0]).toInt();
+                info->parentId = QVariant(elements[1]).toInt();
+                info->resourceId = QVariant(elements[2]).toInt();
+                info->resourceName = elements[3];
+                info->fullQualifiedName = elements[4];
+                resources.append(info);
+            }
+            if (elements.size() == 6)
+            {
+                Magus::QtResourceInfo* info = new Magus::QtResourceInfo();
+                info->topLevelId = QVariant(elements[0]).toInt();
+                info->parentId = QVariant(elements[1]).toInt();
+                info->resourceId = QVariant(elements[2]).toInt();
+                info->resourceName = elements[3];
+                info->fullQualifiedName = elements[4];
+                info->resourceType = QVariant(elements[5]).toInt();
+                resources.append(info);
+            }
+        }
+        mMaterialBrowser->setResources(resources);
+        file.close();
+    }
+}
+
+//****************************************************************************/
 void MainWindow::doMaterialBrowserMenuAction(void)
 {
     if (mMaterialBrowser->exec())
@@ -451,6 +493,35 @@ void MainWindow::doMaterialBrowserMenuAction(void)
         QString fileName = mMaterialBrowser->getSelectedJsonFileName();
         if (!fileName.isEmpty())
             loadDatablock(fileName);
+
+        // Save all current settings
+        QFile file(FILE_MATERIAL_BROWSER);
+        if (file.open(QFile::WriteOnly|QFile::Truncate))
+        {
+            QTextStream stream(&file);
+            const QVector<Magus::QtResourceInfo*>& resources = mMaterialBrowser->getResources();
+            QVectorIterator<Magus::QtResourceInfo*> it(resources);
+            it.toFront();
+            Magus::QtResourceInfo* info;
+            while (it.hasNext())
+            {
+                // Write a line to the cfg file
+                info = it.next();
+                stream << info->topLevelId
+                       << "\t"
+                       << info->parentId
+                       << "\t"
+                       << info->resourceId
+                       << "\t"
+                       << info->resourceName
+                       << "\t"
+                       << info->fullQualifiedName
+                       << "\t"
+                       << info->resourceType
+                       << "\n";
+            }
+            file.close();
+        }
     }
 }
 

@@ -79,6 +79,7 @@ class MainWindow : public QMainWindow
         void loadDatablock(const QString jsonFileName);
         void saveDatablock(void);
         QString getBaseFileName(QString& fileName);
+        void loadMaterialBrowserCfg(void);
 
         bool mFirst;
         QString mTempString;

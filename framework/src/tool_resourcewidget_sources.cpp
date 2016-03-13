@@ -72,7 +72,7 @@ namespace Magus
         QtSourcesInfo info;
 
         // HLMS PBS
-        mResourceTreeWidget->addResource (TOOL_SOURCES_LEVEL_X000_PBS, 0, QString("PBS"), QString(""), TOOL_RESOURCE_ICON_PBS);
+        mResourceTreeWidget->addResource (TOOL_SOURCES_LEVEL_X000_PBS, TOOL_SOURCES_LEVEL_X000_PBS, 0, QString("PBS"), QString(""), TOOL_RESOURCE_ICON_PBS);
         info.toplevelId = TOOL_SOURCES_LEVEL_X000_PBS;
         info.resourceId = TOOL_SOURCES_LEVEL_X000_PBS;
         info.parentId = 0;
@@ -83,7 +83,7 @@ namespace Magus
         mSourceInfo[TOOL_SOURCES_LEVEL_X000_PBS] = info;
 
         // HLMS UNLIT
-        mResourceTreeWidget->addResource (TOOL_SOURCES_LEVEL_X000_UNLIT, 0, QString("Unlit"), QString(""), TOOL_RESOURCE_ICON_UNLIT);
+        mResourceTreeWidget->addResource (TOOL_SOURCES_LEVEL_X000_UNLIT, TOOL_SOURCES_LEVEL_X000_UNLIT, 0, QString("Unlit"), QString(""), TOOL_RESOURCE_ICON_UNLIT);
         info.toplevelId = TOOL_SOURCES_LEVEL_X000_UNLIT;
         info.resourceId = TOOL_SOURCES_LEVEL_X000_UNLIT;
         info.parentId = 0;
@@ -112,8 +112,27 @@ namespace Magus
     //****************************************************************************/
     void QtSourcesDockWidget::setResources(const QVector<QtResourceInfo*>& resources)
     {
-        // Delegate to mResourceTreeWidget; this is the component that actually sets the data in the tree
-        mResourceTreeWidget->setResources(resources);
+        // Add resources to the resource tree
+        mResourceTreeWidget->setResources(resources, true);
+
+        // Iterate again through the list to make sure that the thumb info is set
+        QVectorIterator<QtResourceInfo*> it(resources);
+        it.toFront();
+        QtResourceInfo* resourceInfo;
+        while (it.hasNext())
+        {
+            resourceInfo = it.next();
+            QtSourcesInfo info;
+            info.toplevelId = resourceInfo->topLevelId;
+            info.resourceId = resourceInfo->resourceId;
+            info.parentId = resourceInfo->parentId;
+            info.fileName = resourceInfo->fullQualifiedName;
+            info.baseName = resourceInfo->resourceName;
+            info.baseNameThumb = resourceInfo->resourceName + QString (".png"); // Do not forget
+            mSourceInfo[resourceInfo->resourceId] = info;
+        }
+
+        mResourceTreeWidget->expandAll();
     }
 
     //****************************************************************************/

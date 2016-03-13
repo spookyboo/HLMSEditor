@@ -57,11 +57,10 @@ namespace Magus
     //****************************************************************************/
     void QtResourceMain::setResources (const QVector<QtResourceInfo*>& resources)
     {
-        // Clear the mAssetsDockWidget
-        mAssetsDockWidget->clearContent();
+        // Delegate to mAssetsDockWidget
+        mAssetsDockWidget->setResources(resources);
 
-        // Delegate to mSourcesDockWidget; mSourcesDockWidget signals a 'resourceAdded', which results in the fact that
-        // the resource (only in assets) is added to the mAssetsDockWidget.
+        // Delegate to mSourcesDockWidget
         mSourcesDockWidget->setResources(resources);
         mSelectedFileName = "";
     }
