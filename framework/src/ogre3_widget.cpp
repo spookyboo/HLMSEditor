@@ -53,7 +53,7 @@ namespace Magus
         resize(800,600);
         setFocusPolicy(Qt::StrongFocus);
         setMouseTracking(true);
-        mBackground = Ogre::ColourValue(0.7f, 0.7f, 1.0f);
+        mBackground = Ogre::ColourValue(0.1f, 0.1f, 0.1f);
         mAbsolute = Ogre::Vector2::ZERO;
         mRelative = Ogre::Vector2::ZERO;
     }
@@ -157,7 +157,7 @@ namespace Magus
         mCameraManager->setTarget(mSceneNode);
 
         // Create an item
-        Ogre::Vector3 scale(30.0f, 30.0f, 30.0f);
+        Ogre::Vector3 scale(25.0f, 25.0f, 25.0f);
         createItem ("cube.mesh", scale);
 
         // Remove the datablock currently set on this mesh
@@ -371,5 +371,11 @@ namespace Magus
     {
         if (mItem && mItem->getParentSceneNode())
             mItem->getParentSceneNode()->setScale(scale);
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::saveToFile(const Ogre::String& fileName)
+    {
+        mOgreRenderWindow->writeContentsToFile(fileName);
     }
 }

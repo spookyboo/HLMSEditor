@@ -54,6 +54,7 @@ namespace Magus
             const Ogre::Vector3& getItemScale(void);
             void setItemScale(const Ogre::Vector3& scale);
             void setDefaultDatablockItem(void);
+            void saveToFile(const Ogre::String& fileName);
 
             // Create item and use the current datablock of the previous item (if available)
             void createItem(const Ogre::String& itemName,

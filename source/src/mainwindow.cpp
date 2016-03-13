@@ -41,6 +41,7 @@ MainWindow::MainWindow(void) :
     // Create the Ogre Manager
     mOgreManager = new Magus::OgreManager();
     mHlmsName = QString("");
+    mTempString = QString("");
     
 	// Perform standard functions
     createActions();
@@ -48,6 +49,7 @@ MainWindow::MainWindow(void) :
     createToolBars();
     createStatusBar();
     createDockWindows();
+    mMaterialBrowser = new MaterialBrowserDialog(this);
 
     mOgreManager->initialize();
 
@@ -107,6 +109,8 @@ void MainWindow::createActions(void)
     connect(mSaveDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doSaveDatablockMenuAction()));
     mSaveAsDatablockMenuAction = new QAction(QString("Save Hlms as"), this);
     connect(mSaveAsDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doSaveAsDatablockMenuAction()));
+    mMaterialBrowserMenuAction = new QAction(QString("Open material browser"), this);
+    connect(mMaterialBrowserMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserMenuAction()));
     mQuitMenuAction = new QAction(QString("Quit"), this);
     connect(mQuitMenuAction, SIGNAL(triggered()), this, SLOT(doQuitMenuAction()));
     mResetWindowLayoutMenuAction = new QAction(QString("Reset Window Layout"), this);
@@ -124,6 +128,7 @@ void MainWindow::createMenus(void)
     mFileMenu->addAction(mOpenDatablockMenuAction);
     mFileMenu->addAction(mSaveDatablockMenuAction);
     mFileMenu->addAction(mSaveAsDatablockMenuAction);
+    mFileMenu->addAction(mMaterialBrowserMenuAction);
     mFileMenu->addAction(mQuitMenuAction);
     mWindowMenu = menuBar()->addMenu(QString("Window"));
     mWindowMenu->addAction(mResetWindowLayoutMenuAction);
@@ -174,11 +179,17 @@ void MainWindow::doOpenDatablockMenuAction(void)
 {
     // Load the materials
     QString fileName;
-    Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
     fileName = QFileDialog::getOpenFileName(this, QString("Open Hlms file"),
                                             QString(""),
                                             QString("Json material (*.json)"));
-    if (!fileName.isEmpty())
+    loadDatablock(fileName);
+}
+
+//****************************************************************************/
+void MainWindow::loadDatablock(const QString jsonFileName)
+{
+    // Load the materials
+    if (!jsonFileName.isEmpty())
     {
         // Read the json file as text file and feed it to the HlmsManager::loadMaterials() function
         // Note, that the resources (textures, etc.) must be present
@@ -188,13 +199,14 @@ void MainWindow::doOpenDatablockMenuAction(void)
         mPropertiesDockWidget->clear();
 
         // Read the json file
-        QFile file(fileName);
+        Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
+        QFile file(jsonFileName);
         file.open(QFile::ReadOnly | QFile::Text);
         QTextStream readFile(&file);
         QString jsonString = readFile.readAll();
         QByteArray ba = jsonString.toLatin1();
         char* jsonChar = ba.data();
-        Ogre::String fname = fileName.toStdString();
+        Ogre::String fname = jsonFileName.toStdString();
         Ogre::HlmsJson hlmsJson(hlmsManager);
         try
         {
@@ -303,7 +315,7 @@ void MainWindow::getAndSetFirstDatablock(void)
                         // Create the node structure
                         QString s = newDatablockName.c_str();
                         mNodeEditorDockWidget->createPbsNodeStructure(s);
-                        mHlmsName = s;
+                        //mHlmsName = s;
                         mPropertiesDockWidget->setTextureTypePropertyVisible(true);
                         mPropertiesDockWidget->setMapWeightPropertyVisible(true);
                         break;
@@ -348,7 +360,7 @@ void MainWindow::getAndSetFirstDatablock(void)
                         // Create the node structure
                         QString s = newDatablockName.c_str();
                         mNodeEditorDockWidget->createUnlitNodeStructure(s);
-                        mHlmsName = s;
+                        //mHlmsName = s;
                         mPropertiesDockWidget->setTextureTypePropertyVisible(false);
                         mPropertiesDockWidget->setMapWeightPropertyVisible(false);
                         break;
@@ -383,20 +395,9 @@ void MainWindow::getListOfResources(void)
 void MainWindow::doSaveDatablockMenuAction(void)
 {
     if (mHlmsName.isEmpty())
-    {
         doSaveAsDatablockMenuAction();
-    }
     else
-    {
-        // TODO: hlmsManager->saveMaterials for HLMS_UNLIT is not implemented (28-02-2016)
-        // Only an empty datablock body is saved, but not the samplerblocks and textures
-        Ogre::String fname = mHlmsName.toStdString();
-        Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
-        if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_PBS)
-            hlmsManager->saveMaterials (Ogre::HLMS_PBS, fname);
-        else if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_UNLIT)
-            hlmsManager->saveMaterials (Ogre::HLMS_UNLIT, fname);
-    }
+        saveDatablock();
 }
 
 //****************************************************************************/
@@ -415,15 +416,41 @@ void MainWindow::doSaveAsDatablockMenuAction(void)
 
     if (!fileName.isEmpty())
     {
-        // TODO: hlmsManager->saveMaterials for HLMS_UNLIT is not implemented (28-02-2016)
-        // Only an empty datablock body is saved, but not the samplerblocks and textures
         mHlmsName = fileName;
-        Ogre::String ogreFileName = fileName.toStdString();
-        Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
-        if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_PBS)
-            hlmsManager->saveMaterials (Ogre::HLMS_PBS, ogreFileName);
-        else if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_UNLIT)
-            hlmsManager->saveMaterials (Ogre::HLMS_UNLIT, ogreFileName);
+        saveDatablock();
+    }
+}
+
+//****************************************************************************/
+void MainWindow::saveDatablock(void)
+{
+    Ogre::String fname = mHlmsName.toStdString();
+    QString baseNameJson = mHlmsName;
+    baseNameJson = getBaseFileName(baseNameJson);
+    QString thumb = baseNameJson + ".png";
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->saveToFile(THUMBS_PATH + thumb.toStdString());
+
+    Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
+    if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_PBS)
+    {
+        hlmsManager->saveMaterials (Ogre::HLMS_PBS, fname);
+        mMaterialBrowser->addMaterial(baseNameJson, mHlmsName, thumb, HLMS_PBS);
+    }
+    else if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_UNLIT)
+    {
+        hlmsManager->saveMaterials (Ogre::HLMS_UNLIT, fname);
+        mMaterialBrowser->addMaterial(baseNameJson, mHlmsName, thumb, HLMS_UNLIT);
+    }
+}
+
+//****************************************************************************/
+void MainWindow::doMaterialBrowserMenuAction(void)
+{
+    if (mMaterialBrowser->exec())
+    {
+        QString fileName = mMaterialBrowser->getSelectedJsonFileName();
+        if (!fileName.isEmpty())
+            loadDatablock(fileName);
     }
 }
 
@@ -470,4 +497,18 @@ void MainWindow::initDatablocks(void)
 EditorHlmsTypes MainWindow::getCurrentDatablockType(void)
 {
     return mNodeEditorDockWidget->getCurrentDatablockType();
+}
+
+//****************************************************************************/
+QString MainWindow::getBaseFileName(QString& fileName)
+{
+    mTempString = fileName;
+    int index = mTempString.lastIndexOf('/');
+    if (index < 0)
+        index = mTempString.lastIndexOf('\\');
+
+    if (index != 0)
+        return mTempString.right(fileName.length() - index - 1);
+
+    return mTempString;
 }

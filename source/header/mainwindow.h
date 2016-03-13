@@ -30,6 +30,7 @@
 #include "renderwindow_dockwidget.h"
 #include "properties_dockwidget.h"
 #include "nodeeditor_dockwidget.h"
+#include "browser_dialog.h"
 #include "ogre3_renderman.h"
 #include "constants.h"
 
@@ -64,6 +65,7 @@ class MainWindow : public QMainWindow
         void doOpenDatablockMenuAction(void);
         void doSaveDatablockMenuAction(void);
         void doSaveAsDatablockMenuAction(void);
+        void doMaterialBrowserMenuAction(void);
         void doQuitMenuAction(void);
         void doResetWindowLayoutMenuAction(void);
 
@@ -74,8 +76,13 @@ class MainWindow : public QMainWindow
 		void createStatusBar(void);
 		void createDockWindows(void);
 		void closeEvent(QCloseEvent* event);
+        void loadDatablock(const QString jsonFileName);
+        void saveDatablock(void);
+        QString getBaseFileName(QString& fileName);
 
         bool mFirst;
+        QString mTempString;
+        MaterialBrowserDialog* mMaterialBrowser;
         QMenu* mFileMenu;
         QMenu* mWindowMenu;
         QAction* mNewHlmsPbsAction;
@@ -83,6 +90,7 @@ class MainWindow : public QMainWindow
         QAction* mOpenDatablockMenuAction;
         QAction* mSaveDatablockMenuAction;
         QAction* mSaveAsDatablockMenuAction;
+        QAction* mMaterialBrowserMenuAction;
         QAction* mQuitMenuAction;
         QAction* mResetWindowLayoutMenuAction;
         RenderwindowDockWidget* mRenderwindowDockWidget;
