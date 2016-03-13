@@ -841,6 +841,12 @@ namespace Magus
     }
 
     //****************************************************************************/
+    QTreeWidgetItem* QtResourceTreeWidget::getSelectedResourceItem (void)
+    {
+        return mResourceTree->currentItem();
+    }
+
+    //****************************************************************************/
     int QtResourceTreeWidget::getFirstInParent (int parentId)
     {
         QTreeWidgetItemIterator it(mResourceTree);
@@ -1184,6 +1190,7 @@ namespace Magus
     //****************************************************************************/
     void QtResourceTreeWidget::contextMenuItemSelected(QAction* action)
     {
+        // Revoved some action handling for situations that do not occur for the HLMS Editor
         if (mSubGroupSubMenu &&
                 action->parent() == mSubGroupSubMenu &&
                 mCreateSubGroupContextMenuItemEnabled)

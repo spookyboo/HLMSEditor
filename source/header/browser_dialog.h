@@ -51,6 +51,7 @@ class MaterialBrowserDialog : public QDialog
 
     private slots:
         void handleJsonFileSelectedToProcess(const QString& fullNameJson);
+        void handleOkAndAccept(void);
 
     private:
         Magus::QtResourceWidget* mResourceWidget;

@@ -79,6 +79,11 @@ namespace Magus
     resources:
     - Groups (or folders) in the most top-level and subgroups in deeper levels.
     - Assets are located in the lowest levels.
+
+    IMPORTANT:
+    =========
+    This class is changed to facilitate the HLMS editor. Do not use it as a
+    generic Magus class.
     ***************************************************************************/
     class QtResourceTreeWidget : public QWidget
     {
@@ -229,6 +234,7 @@ namespace Magus
 
             // Return the currently selected resource
             int getSelectedResource (void);
+            QTreeWidgetItem* getSelectedResourceItem (void);
 
             // Return the first resource of a parent. If resourceId == 0, the first top-level resource is returned
             int getFirstInParent (int parentId);

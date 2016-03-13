@@ -45,6 +45,11 @@ namespace Magus
     This widget can be used as a template for resource management. It can be
     used as is, but its main purpose is to provide a start and extend the widget
     for your own situation.
+
+    IMPORTANT:
+    =========
+    This class is changed to facilitate the HLMS editor. Do not use it as a
+    generic Magus class.
     ***************************************************************************/
     class QtResourceWidget : public QWidget
     {
@@ -68,20 +73,15 @@ namespace Magus
                              const QString& baseNameThumb,
                              EditorHlmsTypes type);
 
+            // Returns the qualified name of the currently selected item from the resource tree
+            const QString& getSelectedFullQualifiedName(void);
+
         signals:
             // Emitted when a json file is selected to process
             void jSonFileSelectedToProcess(const QString& fullNameJson);
 
-            // Emitted when the load button is clicked
-            void loadResources(void);
-
-            // Emitted when the save button is clicked
-            void saveResources(void);
-
         private slots:
             void handleJsonFileSelectedToProcess(const QString& fullNameJson);
-            void handleLoadResources(void);
-            void handleSaveResources(void);
 
         private:
             QtResourceMain* mResourceMain;

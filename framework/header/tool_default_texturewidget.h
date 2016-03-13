@@ -34,6 +34,11 @@ namespace Magus
 {
     /****************************************************************************
     Helper class to combine the texture name and the texture
+
+    IMPORTANT:
+    =========
+    This class is changed to facilitate the HLMS editor. Do not use it as a
+    generic Magus class.
     ***************************************************************************/
     class QtDefaultTextureAndText : public QWidget
     {

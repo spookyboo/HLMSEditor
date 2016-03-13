@@ -36,6 +36,19 @@ MaterialBrowserDialog::MaterialBrowserDialog(QWidget* parent, Qt::WindowFlags f)
     // Create the Resource widget
     mResourceWidget = new Magus::QtResourceWidget(QString("../common/icons/"), this);
     connect(mResourceWidget, SIGNAL(jSonFileSelectedToProcess(QString)), this, SLOT(handleJsonFileSelectedToProcess(QString)));
+
+    // Create a buttonbox
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+    connect(buttonBox, SIGNAL(accepted()), this, SLOT(handleOkAndAccept()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+
+    // Set the layout
+    QHBoxLayout* buttonsLayout = new QHBoxLayout;
+    buttonsLayout->addWidget(buttonBox);
+    QVBoxLayout* mainLayout = new QVBoxLayout;
+    mainLayout->addLayout(buttonsLayout);
+    mainLayout->addWidget(mResourceWidget);
+    setLayout(mainLayout);
 }
 
 //****************************************************************************/
@@ -73,3 +86,9 @@ void MaterialBrowserDialog::handleJsonFileSelectedToProcess(const QString& fullN
     accept();
 }
 
+//****************************************************************************/
+void MaterialBrowserDialog::handleOkAndAccept(void)
+{
+    mSelectedFileName = mResourceWidget->getSelectedFullQualifiedName();
+    accept();
+}

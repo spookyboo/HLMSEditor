@@ -42,6 +42,11 @@ namespace Magus
 
     /****************************************************************************
     This class represents a generic QtAssetsDockWidget
+
+    IMPORTANT:
+    =========
+    This class is changed to facilitate the HLMS editor. Do not use it as a
+    generic Magus class.
     ***************************************************************************/
     class QtAssetsDockWidget : public QDockWidget
     {

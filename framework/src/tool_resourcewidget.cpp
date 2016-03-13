@@ -31,8 +31,6 @@ namespace Magus
         QHBoxLayout* mainLayout = new QHBoxLayout;
         mResourceMain = new QtResourceMain(iconDir); // Don't set parent
         connect(mResourceMain, SIGNAL(jSonFileSelectedToProcess(QString)), this, SLOT(handleJsonFileSelectedToProcess(QString)));
-        connect(mResourceMain, SIGNAL(loadButtonClicked()), this, SLOT(handleLoadResources()));
-        connect(mResourceMain, SIGNAL(saveButtonClicked()), this, SLOT(handleSaveResources()));
         mainLayout->addWidget(mResourceMain);
         setLayout(mainLayout);
 
@@ -46,6 +44,12 @@ namespace Magus
     //****************************************************************************/
     QtResourceWidget::~QtResourceWidget(void)
     {
+    }
+
+    //****************************************************************************/
+    const QString& QtResourceWidget::getSelectedFullQualifiedName(void)
+    {
+        return mResourceMain->getSelectedFullQualifiedName();
     }
 
     //****************************************************************************/
@@ -74,17 +78,5 @@ namespace Magus
     void QtResourceWidget::handleJsonFileSelectedToProcess(const QString& fullNameJson)
     {
         emit jSonFileSelectedToProcess(fullNameJson);
-    }
-
-    //****************************************************************************/
-    void QtResourceWidget::handleLoadResources(void)
-    {
-        emit loadResources();
-    }
-
-    //****************************************************************************/
-    void QtResourceWidget::handleSaveResources(void)
-    {
-        emit saveResources();
     }
 }

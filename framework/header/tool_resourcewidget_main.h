@@ -39,6 +39,11 @@ namespace Magus
 {
     /****************************************************************************
     MainWindow is the main container window
+
+    IMPORTANT:
+    =========
+    This class is changed to facilitate the HLMS editor. Do not use it as a
+    generic Magus class.
     ***************************************************************************/
     class QtResourceMain : public QMainWindow
     {
@@ -60,6 +65,9 @@ namespace Magus
                              const QString& fullNameJson,
                              const QString& baseNameThumb,
                              EditorHlmsTypes type);
+
+            // Returns the qualified name of the currently selected item from the resource tree
+            const QString& getSelectedFullQualifiedName(void);
 
             void update(void);
             bool mIsClosing;

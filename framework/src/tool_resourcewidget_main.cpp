@@ -123,6 +123,12 @@ namespace Magus
     }
 
     //****************************************************************************/
+    const QString& QtResourceMain::getSelectedFullQualifiedName(void)
+    {
+        return mSourcesDockWidget->getSelectedFullQualifiedName();
+    }
+
+    //****************************************************************************/
     void QtResourceMain::update(void)
     {
     }
@@ -131,7 +137,8 @@ namespace Magus
     void QtResourceMain::handleResourceSelected(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName)
     {
         // Select the appropriate tab, based on the provided information
-        mAssetsDockWidget->selectTab(toplevelId, parentId, resourceId, name, baseName);
+        mAssetsDockWidget->selectTab(toplevelId, parentId, resourceId, name, baseName); // activate the corresponding tab
+        mAssetsDockWidget->setSelectThumb(toplevelId, baseName); // highlight the thumb
         mSelectedFileName = "";
     }
 

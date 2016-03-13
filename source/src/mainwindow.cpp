@@ -458,7 +458,8 @@ void MainWindow::loadMaterialBrowserCfg(void)
         {
             line = readFile.readLine();
             QStringList elements = line.split('\t', QString::SkipEmptyParts);
-            if (elements.size() == 5)
+
+            if (elements.size() > 4)
             {
                 Magus::QtResourceInfo* info = new Magus::QtResourceInfo();
                 info->topLevelId = QVariant(elements[0]).toInt();
@@ -466,17 +467,15 @@ void MainWindow::loadMaterialBrowserCfg(void)
                 info->resourceId = QVariant(elements[2]).toInt();
                 info->resourceName = elements[3];
                 info->fullQualifiedName = elements[4];
-                resources.append(info);
-            }
-            if (elements.size() == 6)
-            {
-                Magus::QtResourceInfo* info = new Magus::QtResourceInfo();
-                info->topLevelId = QVariant(elements[0]).toInt();
-                info->parentId = QVariant(elements[1]).toInt();
-                info->resourceId = QVariant(elements[2]).toInt();
-                info->resourceName = elements[3];
-                info->fullQualifiedName = elements[4];
-                info->resourceType = QVariant(elements[5]).toInt();
+
+                if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_PBS && info->resourceType != TOOL_RESOURCETREE_KEY_TYPE_ASSET)
+                    info->iconName = Magus::TOOL_RESOURCE_ICON_PBS;
+                if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_UNLIT && info->resourceType != TOOL_RESOURCETREE_KEY_TYPE_ASSET)
+                    info->iconName = Magus::TOOL_RESOURCE_ICON_UNLIT;
+
+                if (elements.size() > 5)
+                    info->resourceType = QVariant(elements[5]).toInt();
+
                 resources.append(info);
             }
         }
@@ -490,6 +489,7 @@ void MainWindow::doMaterialBrowserMenuAction(void)
 {
     if (mMaterialBrowser->exec())
     {
+        // A change is made in the material browser and accepted with ok or double click on an item
         QString fileName = mMaterialBrowser->getSelectedJsonFileName();
         if (!fileName.isEmpty())
             loadDatablock(fileName);
@@ -523,6 +523,8 @@ void MainWindow::doMaterialBrowserMenuAction(void)
             file.close();
         }
     }
+    else
+        loadMaterialBrowserCfg(); // Reverses all changes
 }
 
 //****************************************************************************/

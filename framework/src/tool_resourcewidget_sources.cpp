@@ -49,7 +49,6 @@ namespace Magus
         // properly deleted from the QtAssetsDockWidget).
         connect(mResourceTreeWidget, SIGNAL(resourceSelected(int)), this, SLOT(handleResourceSelected(int)));
         connect(mResourceTreeWidget, SIGNAL(resourceAdded(int)), this, SLOT(handleResourceAdded(int)));
-        connect(mResourceTreeWidget, SIGNAL(resourceImported(int)), this, SLOT(handleResourceImported(int)));
         connect(mResourceTreeWidget, SIGNAL(resourceDeleted(int)), this, SLOT(handleResourceDeleted(int)));
         connect(mResourceTreeWidget, SIGNAL(resourceMoved(int)), this, SLOT(handleResourceMoved(int)));
         connect(mResourceTreeWidget, SIGNAL(resourceSearched(QString)), this, SLOT(handleResourceSearched(QString)));
@@ -133,6 +132,19 @@ namespace Magus
         }
 
         mResourceTreeWidget->expandAll();
+    }
+
+    //****************************************************************************/
+    const QString& QtSourcesDockWidget::getSelectedFullQualifiedName(void)
+    {
+        QTreeWidgetItem* item = mResourceTreeWidget->getSelectedResourceItem ();
+        if (item)
+        {
+            if (mResourceTreeWidget->isItemAsset(item))
+                return mResourceTreeWidget->getFullQualifiedNameFromItem(item);
+        }
+
+        return mEmptyString;
     }
 
     //****************************************************************************/
@@ -269,11 +281,6 @@ namespace Magus
         // Do this only in case the resource is an asset
         if (mResourceTreeWidget->isResourceAsset(resourceId))
             emit resourceAdded(info.toplevelId, info.parentId, info.resourceId, info.fileName, info.baseName);
-    }
-
-    //****************************************************************************/
-    void QtSourcesDockWidget::handleResourceImported(int resourceId)
-    {
     }
 
     //****************************************************************************/

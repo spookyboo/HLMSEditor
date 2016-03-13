@@ -69,6 +69,11 @@ namespace Magus
     - Toplevel groups cannot be deleted
     - Subgroups and assets are not added up front
         => Add them by means of the contextmenu
+
+    IMPORTANT:
+    =========
+    This class is changed to facilitate the HLMS editor. Do not use it as a
+    generic Magus class.
     ***************************************************************************/
     class QtSourcesDockWidget : public QDockWidget
     {
@@ -125,13 +130,15 @@ namespace Magus
             // Return the resourceId based on the thumb name
             int getResourceId(const QString& baseNameThumb);
 
+            // Return the full qualified name of the currently selected resource
+            const QString& getSelectedFullQualifiedName(void);
+
         protected:
             void initializeResourceTree (void);
 
         signals:
             void resourceSelected(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
             void resourceAdded(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
-            void resourceImported(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
             void resourceDeleted(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
             void resourceSearched(const QString& searchPattern);
             void resourceSearchReset(void);
@@ -139,7 +146,6 @@ namespace Magus
         private slots:
             void handleResourceSelected(int resourceId);
             void handleResourceAdded(int resourceId);
-            void handleResourceImported(int resourceId);
             void handleResourceDeleted(int resourceId);
             void handleResourceMoved(int resourceId);
             void handleResourceSearched(const QString& searchPattern);
