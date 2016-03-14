@@ -506,6 +506,9 @@ void HlmsUnlitBuilder::connectNodes(HlmsNodeUnlitDatablock* unlitnode,
 
     // Connect unlit and sampler
     Magus::QtPort* portUnlit = unlitnode->getFirstFreePort(PORT_ID_UNLIT_DATABLOCK, PORT_ID_UNLIT_DATABLOCK + 7);
+    if (!portUnlit)
+        return;
+
     unlitnode->connectNode(PORT_ID_UNLIT_DATABLOCK,
                            PORT_ID_UNLIT_DATABLOCK + 7,
                            samplernode,
@@ -529,7 +532,10 @@ void HlmsUnlitBuilder::connectNodes(HlmsNodeUnlitDatablock* unlitnode,
         return;
 
     // Connect unlitnode and macro
-    Magus::QtPort* portUnlit = unlitnode->getPort(PORT_MACROBLOCK);
+    Magus::QtPort* portUnlit = unlitnode->getFirstFreePort(PORT_ID_UNLIT_DATABLOCK + 8, PORT_ID_UNLIT_DATABLOCK + 8);
+    if (!portUnlit)
+        return;
+
     unlitnode->connectNode(PORT_MACROBLOCK, macronode, PORT_ID_MACROBLOCK);
 
     // Reposition the macro node
@@ -550,7 +556,10 @@ void HlmsUnlitBuilder::connectNodes(HlmsNodeUnlitDatablock* unlitnode,
         return;
 
     // Connect unlitnode and blend
-    Magus::QtPort* portUnlit = unlitnode->getPort(PORT_MACROBLOCK);
+    Magus::QtPort* portUnlit = unlitnode->getFirstFreePort(PORT_ID_UNLIT_DATABLOCK + 9, PORT_ID_UNLIT_DATABLOCK + 9);
+    if (!portUnlit)
+        return;
+
     unlitnode->connectNode(PORT_BLENDBLOCK, blendnode, PORT_ID_BLENDBLOCK);
 
     // Reposition the blend node

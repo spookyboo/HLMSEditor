@@ -132,10 +132,7 @@ void NodeEditorDockWidget::newHlmsPbsAndSampler()
 
     // Create a pbs and a sampler for convenience
     doNewHlmsPbsDatablockAction();
-    HlmsNodeSamplerblock* samplerNode = doNewSamplerblockAction();
-
-    // Connect both nodes
-    mHlmsPbsBuilder->connectNodes(mHlmsPbsDatablockNode, samplerNode);
+    doNewSamplerblockAction();
 }
 
 //****************************************************************************/
@@ -147,10 +144,7 @@ void NodeEditorDockWidget::newHlmsUnlitAndSampler()
 
     // Create an unlit and a sampler for convenience
     doNewHlmsUnlitDatablockAction();
-    HlmsNodeSamplerblock* samplerNode = doNewSamplerblockAction();
-
-    // Connect both nodes
-    mHlmsUnlitBuilder->connectNodes(mHlmsUnlitDatablockNode, samplerNode);
+    doNewSamplerblockAction();
 }
 
 //****************************************************************************/
@@ -229,33 +223,54 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::doNewHlmsUnlitDatablockAction(void
 //****************************************************************************/
 HlmsNodeSamplerblock* NodeEditorDockWidget::doNewSamplerblockAction(void)
 {
-    return mHlmsPbsBuilder->createSamplerNode(mNodeEditor);
+    HlmsNodeSamplerblock* sampler = mHlmsPbsBuilder->createSamplerNode(mNodeEditor);
+    if (!sampler)
+        return 0;
+
     if (mHlmsPbsDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
         mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(true);
+        mHlmsPbsBuilder->connectNodes(mHlmsPbsDatablockNode, sampler);
     }
     else if (mHlmsUnlitDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
         mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(false);
+        mHlmsUnlitBuilder->connectNodes(mHlmsUnlitDatablockNode, sampler);
     }
+
+    return sampler;
 }
 
 //****************************************************************************/
 void NodeEditorDockWidget::doNewBlendblockAction(void)
 {
     HlmsNodeBlendblock* blendblock = new HlmsNodeBlendblock(NODE_TITLE_BLENDBLOCK);
+    if (!blendblock)
+        return;
+
     blendblock->setType(NODE_TYPE_BLENDBLOCK);
     mNodeEditor->addNode(blendblock);
+    if (mHlmsPbsDatablockNode)
+        mHlmsPbsBuilder->connectNodes(mHlmsPbsDatablockNode, blendblock);
+    else if (mHlmsUnlitDatablockNode)
+        mHlmsUnlitBuilder->connectNodes(mHlmsUnlitDatablockNode, blendblock);
 }
 
 //****************************************************************************/
 void NodeEditorDockWidget::doNewMacroblockAction(void)
 {
     HlmsNodeMacroblock* macroblock = new HlmsNodeMacroblock(NODE_TITLE_MACROBLOCK);
+    if (!macroblock)
+        return;
+
     macroblock->setType(NODE_TYPE_MACROBLOCK);
     mNodeEditor->addNode(macroblock);
+    if (mHlmsPbsDatablockNode)
+        mHlmsPbsBuilder->connectNodes(mHlmsPbsDatablockNode, macroblock);
+    else if (mHlmsUnlitDatablockNode)
+        mHlmsUnlitBuilder->connectNodes(mHlmsUnlitDatablockNode, macroblock);
 }
 
 //****************************************************************************/

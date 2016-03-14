@@ -89,8 +89,11 @@ namespace Magus
             // Add a node to the scene (editor widget).
             void addNode(QtNode* node);
 
-            // Add a node to the scene (editor widget).
+            // Get list of nodes in the editor widget
             QVector<QtNode*>getNodes(void);
+
+            // Get list of nodes of a certain type
+            QVector<QtNode*> getNodes(unsigned int nodeType);
 
             // Remove a node from the scene and destroy it.
             // If cascade = true, any compound node is expanded (the compound itself is deleted) and the nodes

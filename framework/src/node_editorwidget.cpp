@@ -839,6 +839,25 @@ namespace Magus
     }
 
     //****************************************************************************/
+    QVector<QtNode*> QtNodeEditor::getNodes(unsigned int nodeType)
+    {
+        QVector<QtNode*> nodeList;
+        QtNode* node;
+        QList<QGraphicsItem*> items = mScene->items();
+        foreach(QGraphicsItem* item, items)
+        {
+            if (isNode(item) && item->isVisible())
+            {
+                node = static_cast<QtNode*>(item);
+                if (nodeType == node->getType())
+                    nodeList.append(node);
+            }
+        }
+
+        return nodeList;
+    }
+
+    //****************************************************************************/
     void QtNodeEditor::removeNode(QtNode* node, bool cascade)
     {
         if (!node)

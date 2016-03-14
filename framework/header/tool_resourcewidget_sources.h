@@ -40,6 +40,10 @@ namespace Magus
     // defined in tool_resourcewidget_assets.h
     static const QString TOOL_SOURCES_FORMAT_PBS = QString("PBS (*.*)");
     static const QString TOOL_SOURCES_FORMAT_UNLIT = QString("Unlit (*.*)");
+    static const QString TOOL_RESOURCE_ICON_PBS = QString("pbs.png");
+    static const QString TOOL_RESOURCE_ICON_SMALL_PBS = QString("pbs_small.png");
+    static const QString TOOL_RESOURCE_ICON_UNLIT = QString("unlit.png");
+    static const QString TOOL_RESOURCE_ICON_SMALL_UNLIT = QString("unlit_small.png");
 
     /****************************************************************************
     Struct for source info
@@ -135,6 +139,7 @@ namespace Magus
 
         protected:
             void initializeResourceTree (void);
+            const QString& determineSubgroupIcon(int toplevelId);
 
         signals:
             void resourceSelected(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);

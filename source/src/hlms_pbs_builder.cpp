@@ -576,7 +576,10 @@ void HlmsPbsBuilder::connectNodes(HlmsNodePbsDatablock* pbsnode,
         return;
 
     // Connect pbs and sampler
-    Magus::QtPort* portPbs = pbsnode->getFirstFreePort(PORT_ID_PBS_DATABLOCK, PORT_ID_PBS_DATABLOCK + 7);
+    Magus::QtPort* portPbs = pbsnode->getFirstFreePort(PORT_ID_PBS_DATABLOCK, PORT_ID_PBS_DATABLOCK + 7); // Samplerblocks
+    if (!portPbs)
+        return;
+
     pbsnode->connectNode(PORT_ID_PBS_DATABLOCK,
                          PORT_ID_PBS_DATABLOCK + 7,
                          samplernode,
@@ -600,7 +603,10 @@ void HlmsPbsBuilder::connectNodes(HlmsNodePbsDatablock* pbsnode,
         return;
 
     // Connect pbs and macro
-    Magus::QtPort* portPbs = pbsnode->getPort(PORT_MACROBLOCK);
+    Magus::QtPort* portPbs = pbsnode->getFirstFreePort(PORT_ID_PBS_DATABLOCK + 8, PORT_ID_PBS_DATABLOCK + 8); // Macroblock
+    if (!portPbs)
+        return;
+
     pbsnode->connectNode(PORT_MACROBLOCK, macronode, PORT_ID_MACROBLOCK);
 
     // Reposition the macro node
@@ -621,7 +627,10 @@ void HlmsPbsBuilder::connectNodes(HlmsNodePbsDatablock* pbsnode,
         return;
 
     // Connect pbs and blend
-    Magus::QtPort* portPbs = pbsnode->getPort(PORT_MACROBLOCK);
+    Magus::QtPort* portPbs = pbsnode->getFirstFreePort(PORT_ID_PBS_DATABLOCK + 9, PORT_ID_PBS_DATABLOCK + 9); // Blendblock
+    if (!portPbs)
+        return;
+
     pbsnode->connectNode(PORT_BLENDBLOCK, blendnode, PORT_ID_BLENDBLOCK);
 
     // Reposition the blend node

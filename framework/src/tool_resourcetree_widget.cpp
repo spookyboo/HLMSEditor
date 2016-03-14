@@ -38,6 +38,8 @@ namespace Magus
         QVBoxLayout* mainLayout = new QVBoxLayout;
         mIconDir = iconDir;
         mMaxDepth = 4;
+        mCollapsed = true;
+        mSubgroupIconName = QString("");
         mTopLevelGroupItemEditable = false;
         mSubLevelGroupItemEditable = false;
         mAssetItemEditable = false;
@@ -86,6 +88,7 @@ namespace Magus
         mImportAssetContextMenuItemEnabled = true;
         mDuplicateAssetContextMenuItemEnabled = true;
         mDeleteResourceContextMenuItemEnabled = true;
+        mCollapseExpandContextMenuItemEnabled = true;
         buildContextMenu();
 
         // Layout
@@ -459,9 +462,22 @@ namespace Magus
     }
 
     //****************************************************************************/
+    void QtResourceTreeWidget::setCollapseExpandContextMenuItemEnabled(bool enabled)
+    {
+        mCollapseExpandContextMenuItemEnabled = enabled;
+        buildContextMenu();
+    }
+
+    //****************************************************************************/
     bool QtResourceTreeWidget::isDeleteResourceContextMenuItemEnabled(void)
     {
         return mDeleteResourceContextMenuItemEnabled;
+    }
+
+    //****************************************************************************/
+    bool QtResourceTreeWidget::isCollapseExpandContextMenuItemEnabled(void)
+    {
+        return mCollapseExpandContextMenuItemEnabled;
     }
 
     //****************************************************************************/
@@ -529,6 +545,10 @@ namespace Magus
         // Menu item for deleting an item from the resource tree
         if (mDeleteResourceContextMenuItemEnabled)
             mContextMenu->addAction(new QAction(TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, mResourceTree));
+
+        // Menu item for collapse/expand
+        if (mCollapseExpandContextMenuItemEnabled)
+            mContextMenu->addAction(new QAction(TOOL_RESOURCETREE_ACTION_COLLAPSE_EXPAND, mResourceTree));
     }
 
     //****************************************************************************/
@@ -956,6 +976,7 @@ namespace Magus
     void QtResourceTreeWidget::expandAll (void)
     {
         mResourceTree->expandAll();
+        mCollapsed = false;
     }
 
     //****************************************************************************/
@@ -973,6 +994,7 @@ namespace Magus
     void QtResourceTreeWidget::collapseAll (void)
     {
         mResourceTree->collapseAll();
+        mCollapsed = true;
     }
 
     //****************************************************************************/
@@ -1206,11 +1228,12 @@ namespace Magus
                 {
                     // A subgroup may not be added to the toplevel
                     int resourceId = generateUniqueResourceId();
+                    QString name = QString("<") + info->resourceName + QString(" subgroup>");
                     addResource (topLevelId,
                                  resourceId,
                                  parentId,
-                                 QString("<") + info->resourceName + QString(" subgroup>"),
-                                 info->fullQualifiedName,
+                                 name,
+                                 name,
                                  info->iconName);
                     expand(parentId);
                 }
@@ -1233,12 +1256,15 @@ namespace Magus
                     // A subgroup may not be added to the toplevel
                     int resourceId = generateUniqueResourceId();
                     int topLevelId = getToplevelParentId(resourceId);
+                    if (mSubgroupIconName.isEmpty())
+                        mSubgroupIconName = getIconNameFromItem(item);
+                    QString name = QString("<") + item->text(0) + QString(" subgroup>");
                     addResource (topLevelId,
                                  resourceId,
                                  parentId,
-                                 QString("<") + item->text(0) + QString(" subgroup>"),
-                                 QString(""),
-                                 getIconNameFromItem(item));
+                                 name,
+                                 name,
+                                 mSubgroupIconName);
                     expand(parentId);
                 }
             }
@@ -1270,6 +1296,13 @@ namespace Magus
                 }
             }
             return;
+        }
+        else if (action->text() == TOOL_RESOURCETREE_ACTION_COLLAPSE_EXPAND)
+        {
+            if (mCollapsed)
+                expandAll();
+            else
+                collapseAll();
         }
     }
 

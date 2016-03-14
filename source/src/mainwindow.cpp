@@ -471,10 +471,19 @@ void MainWindow::loadMaterialBrowserCfg(void)
                 if (elements.size() > 5)
                     info->resourceType = QVariant(elements[5]).toInt();
 
-                if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_PBS && info->resourceType != Magus::TOOL_RESOURCETREE_KEY_TYPE_ASSET)
+                if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_PBS &&
+                        info->resourceType == Magus::TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP)
                     info->iconName = Magus::TOOL_RESOURCE_ICON_PBS;
-                if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_UNLIT && info->resourceType != Magus::TOOL_RESOURCETREE_KEY_TYPE_ASSET)
+                else if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_PBS &&
+                         info->resourceType == Magus::TOOL_RESOURCETREE_KEY_TYPE_GROUP)
+                    info->iconName = Magus::TOOL_RESOURCE_ICON_SMALL_PBS;
+
+                if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_UNLIT &&
+                        info->resourceType == Magus::TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP)
                     info->iconName = Magus::TOOL_RESOURCE_ICON_UNLIT;
+                else if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_UNLIT &&
+                         info->resourceType == Magus::TOOL_RESOURCETREE_KEY_TYPE_GROUP)
+                    info->iconName = Magus::TOOL_RESOURCE_ICON_SMALL_UNLIT;
 
                 resources.append(info);
             }

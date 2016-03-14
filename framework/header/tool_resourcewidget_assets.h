@@ -37,9 +37,6 @@ QT_END_NAMESPACE
 
 namespace Magus
 {
-    static const QString TOOL_RESOURCE_ICON_PBS = QString("pbs.png");
-    static const QString TOOL_RESOURCE_ICON_UNLIT = QString("unlit.png");
-
     /****************************************************************************
     This class represents a generic QtAssetsDockWidget
 

@@ -54,6 +54,7 @@ namespace Magus
     static const QString TOOL_RESOURCETREE_ACTION_IMPORT_ASSET = QString("Import asset(s)");
     static const QString TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET = QString("Duplicate an asset");
     static const QString TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE = QString("Delete selected item");
+    static const QString TOOL_RESOURCETREE_ACTION_COLLAPSE_EXPAND = QString("Collapse / expand");
     static const QString TOOL_RESOURCETREE_WARNING_1 = QString("Toplevel groups may not be moved");
     static const QString TOOL_RESOURCETREE_WARNING_2 = QString("Attaching a subgroup to an asset is not allowed");
     static const QString TOOL_RESOURCETREE_WARNING_3 = QString("Attaching an asset to another asset is not allowed");
@@ -158,6 +159,10 @@ namespace Magus
             // If true, the context menu is extended with an option to delete a resource
             void setDeleteResourceContextMenuItemEnabled(bool enabled);
             bool isDeleteResourceContextMenuItemEnabled(void);
+
+            // If true, the context menu is extended with an option to collapse and expand the resource tree
+            void setCollapseExpandContextMenuItemEnabled(bool enabled);
+            bool isCollapseExpandContextMenuItemEnabled(void);
 
             // If true, the asset items can be editted (false is the default)
             void setAssetItemEditable(bool editable);
@@ -343,6 +348,12 @@ namespace Magus
             // Returns true if all the child items are hidden
             bool allChildrenHidden(int parentId);
 
+            // Get/Set the name of the icon of the subgroup
+            // If setInheritSubGroupIconFromParent is set to true, the icon of the subgroup can be set different
+            const QString& getSubgroupIconName (void) const {return mSubgroupIconName;}
+            void setSubgroupIconName (const QString& subgroupIconName) {mSubgroupIconName = subgroupIconName;}
+
+
         public slots:
             // Activated when a contextmenu item is selected
             void contextMenuItemSelected(QAction* action);
@@ -422,6 +433,7 @@ namespace Magus
             bool mImportAssetContextMenuItemEnabled;
             bool mDuplicateAssetContextMenuItemEnabled;
             bool mDeleteResourceContextMenuItemEnabled;
+            bool mCollapseExpandContextMenuItemEnabled;
             bool mAssetItemEditable;
             int mMaxDepth;
             QString mIconDir;
@@ -437,6 +449,8 @@ namespace Magus
             QLineEdit* mSearchLine;
             QLabel* mSearchLabel;
             QPushButton* mSearchClearButton;
+            QString mSubgroupIconName;
+            bool mCollapsed;
     };
 }
 

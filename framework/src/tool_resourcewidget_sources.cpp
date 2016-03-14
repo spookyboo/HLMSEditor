@@ -41,6 +41,7 @@ namespace Magus
         mResourceTreeWidget->setDeleteResourceContextMenuItemEnabled(true);
         mResourceTreeWidget->setImportAssetContextMenuItemEnabled(false);
         mResourceTreeWidget->setDuplicateAssetContextMenuItemEnabled(false);
+        mResourceTreeWidget->setInheritSubGroupIconFromParent(false);
 
         // Listen to events.
         // Note, that although the 'create asset' context menu is disabled, the QtSourcesDockWidget must still handle the 'resourceAdded'
@@ -258,6 +259,7 @@ namespace Magus
         if (it != mSourceInfo.end())
         {
             QtSourcesInfo info = it.value();
+            mResourceTreeWidget->setSubgroupIconName(determineSubgroupIcon(info.toplevelId));
             emit resourceSelected(info.toplevelId, info.parentId, info.resourceId, info.fileName, info.baseNameThumb);
             //QMessageBox::information(0, QString("this"), QVariant(info.toplevelId).toString()); // test
         }
@@ -367,6 +369,17 @@ namespace Magus
         }
 
         return -1;
+    }
+
+    //****************************************************************************/
+    const QString& QtSourcesDockWidget::determineSubgroupIcon(int toplevelId)
+    {
+        if (toplevelId == TOOL_SOURCES_LEVEL_X000_PBS)
+            return TOOL_RESOURCE_ICON_SMALL_PBS;
+        else if (toplevelId == TOOL_SOURCES_LEVEL_X000_UNLIT)
+            return TOOL_RESOURCE_ICON_SMALL_UNLIT;
+        else
+            return QString("");
     }
 }
 
