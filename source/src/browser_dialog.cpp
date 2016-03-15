@@ -80,6 +80,12 @@ void MaterialBrowserDialog::setResources (const QVector<Magus::QtResourceInfo*>&
 }
 
 //****************************************************************************/
+void MaterialBrowserDialog::initResourceTree(void)
+{
+    mResourceWidget->initResourceTree();
+}
+
+//****************************************************************************/
 void MaterialBrowserDialog::handleJsonFileSelectedToProcess(const QString& fullNameJson)
 {
     mSelectedFileName = fullNameJson;

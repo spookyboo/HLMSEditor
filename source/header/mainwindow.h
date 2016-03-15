@@ -65,7 +65,8 @@ class MainWindow : public QMainWindow
         void doOpenDatablockMenuAction(void);
         void doSaveDatablockMenuAction(void);
         void doSaveAsDatablockMenuAction(void);
-        void doMaterialBrowserMenuAction(void);
+        void doMaterialBrowserOpenMenuAction(void);
+        void doMaterialBrowserAddMenuAction(void);
         void doQuitMenuAction(void);
         void doResetWindowLayoutMenuAction(void);
 
@@ -80,18 +81,21 @@ class MainWindow : public QMainWindow
         void saveDatablock(void);
         QString getBaseFileName(QString& fileName);
         void loadMaterialBrowserCfg(void);
+        void saveMaterialBrowserCfg(void);
 
         bool mFirst;
         QString mTempString;
         MaterialBrowserDialog* mMaterialBrowser;
         QMenu* mFileMenu;
+        QMenu* mMaterialBrowserMenu;
         QMenu* mWindowMenu;
         QAction* mNewHlmsPbsAction;
         QAction* mNewHlmsUnlitAction;
         QAction* mOpenDatablockMenuAction;
         QAction* mSaveDatablockMenuAction;
         QAction* mSaveAsDatablockMenuAction;
-        QAction* mMaterialBrowserMenuAction;
+        QAction* mMaterialBrowserOpenMenuAction;
+        QAction* mMaterialBrowserAddMenuAction;
         QAction* mQuitMenuAction;
         QAction* mResetWindowLayoutMenuAction;
         RenderwindowDockWidget* mRenderwindowDockWidget;

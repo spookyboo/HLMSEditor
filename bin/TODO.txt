@@ -1,13 +1,12 @@
 Short term updates:
 ==================
 - Implement material browser
-- When adding a samplerblock, blendblock or macroblock => connect it automatically to the datablock
 
 
 Bugs:
 ====
-Material browser
-- Groups/subgroups do not have an icon
+- Material browser:
+   - In some cases the Hlms is saved, while it is not automatically added to the material browser
 - Cubemap json generates a lot of warnings in the log when depth is enabled (this is with all non-depth textures); the log message is only in Debug
 
 

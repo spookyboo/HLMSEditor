@@ -66,6 +66,9 @@ namespace Magus
                              const QString& baseNameThumb,
                              EditorHlmsTypes type);
 
+            // Initialise the resourcetree
+            void initResourceTree(void);
+
             // Returns the qualified name of the currently selected item from the resource tree
             const QString& getSelectedFullQualifiedName(void);
 
@@ -77,6 +80,7 @@ namespace Magus
 
         private slots:
             void handleResourceSelected(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
+            void handleResourceDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
             void handleResourceAdded(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
             void handleResourceDeleted(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
             void handleResourceSearched(const QString& searchPattern);

@@ -75,6 +75,12 @@ namespace Magus
     }
 
     //****************************************************************************/
+    void QtResourceWidget::initResourceTree(void)
+    {
+        mResourceMain->initResourceTree();
+    }
+
+    //****************************************************************************/
     void QtResourceWidget::handleJsonFileSelectedToProcess(const QString& fullNameJson)
     {
         emit jSonFileSelectedToProcess(fullNameJson);

@@ -237,6 +237,9 @@ namespace Magus
             // Select a resource in the resource tree of the current mouse position
             void selectResourceFromCursor (bool emitSignal = true);
 
+            // A resource in the resource tree of the current mouse position is double clicked
+            void doubleClickResourceFromCursor (bool emitSignal = true);
+
             // Return the currently selected resource
             int getSelectedResource (void);
             QTreeWidgetItem* getSelectedResourceItem (void);
@@ -353,7 +356,6 @@ namespace Magus
             const QString& getSubgroupIconName (void) const {return mSubgroupIconName;}
             void setSubgroupIconName (const QString& subgroupIconName) {mSubgroupIconName = subgroupIconName;}
 
-
         public slots:
             // Activated when a contextmenu item is selected
             void contextMenuItemSelected(QAction* action);
@@ -382,6 +384,9 @@ namespace Magus
 
             // Emitted when a resource is selected; the (current) resource is undetermined at that moment
             void resourceSelected (void);
+
+            // Emitted when a resource is double clicked
+            void resourceDoubleClicked (int resourceId);
 
             // Emitted when a resource is imported
             void resourceImported (int resourceId);
@@ -412,6 +417,7 @@ namespace Magus
             void enableContextMenuItem(const QString& menuItemText, bool enabled);
             QAction* getContextMenuAction(const QString& menuItemText);
             void mouseClickHandler(QMouseEvent* event);
+            void mouseDoubleClickHandler(QMouseEvent* event);
             void dragMoveHandler(QObject* object, QEvent* event);
             void dropHandler(QObject* object, QEvent* event);
             void resetSearch(void);

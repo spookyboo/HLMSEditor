@@ -76,6 +76,12 @@ namespace Magus
     }
 
     //****************************************************************************/
+    void QtResourceMain::initResourceTree(void)
+    {
+        mSourcesDockWidget->initializeResourceTree();
+    }
+
+    //****************************************************************************/
     void QtResourceMain::closeEvent(QCloseEvent* event)
     {
         mIsClosing = true;
@@ -107,6 +113,7 @@ namespace Magus
         // Sources (tree)
         mSourcesDockWidget = new QtSourcesDockWidget(mIconDir, QString("Sources"), this);
         connect(mSourcesDockWidget, SIGNAL(resourceSelected(int,int,int,const QString&,const QString&)), this, SLOT(handleResourceSelected(int,int,int,const QString&,const QString&)));
+        connect(mSourcesDockWidget, SIGNAL(resourceDoubleClicked(int,int,int,QString,QString)), this, SLOT(handleResourceDoubleClicked(int,int,int,const QString&,const QString&)));
         connect(mSourcesDockWidget, SIGNAL(resourceAdded(int,int,int,const QString&,const QString&)), this, SLOT(handleResourceAdded(int,int,int,const QString&,const QString&)));
         connect(mSourcesDockWidget, SIGNAL(resourceDeleted(int,int,int,const QString&,const QString&)), this, SLOT(handleResourceDeleted(int,int,int,const QString&,const QString&)));
         connect(mSourcesDockWidget, SIGNAL(resourceSearched(QString)), this, SLOT(handleResourceSearched(QString)));
@@ -120,6 +127,12 @@ namespace Magus
         connect(mAssetsDockWidget, SIGNAL(assetDoubleClicked(QString,QString)), this, SLOT(handleAssetDoubleClicked(QString,QString)));
         connect(mAssetsDockWidget, SIGNAL(assetDeleted(QString,QString)), this, SLOT(handleAssetDeleted(QString,QString)));
         addDockWidget(Qt::RightDockWidgetArea, mAssetsDockWidget);
+
+        // Determine width of mAssetsDockWidget
+        mAssetsDockWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+        QRect rec = QApplication::desktop()->screenGeometry();
+        mAssetsDockWidget->setMinimumWidth(0.45 * rec.width()); // Note that the parent is 0.7 * screenwidth
+        mAssetsDockWidget->layout()->setSizeConstraint(QLayout::SetMinimumSize);
     }
 
     //****************************************************************************/
@@ -140,6 +153,12 @@ namespace Magus
         mAssetsDockWidget->selectTab(toplevelId, parentId, resourceId, name, baseName); // activate the corresponding tab
         mAssetsDockWidget->setSelectThumb(toplevelId, baseName); // highlight the thumb
         mSelectedFileName = "";
+    }
+
+    //****************************************************************************/
+    void QtResourceMain::handleResourceDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName)
+    {
+        emit jSonFileSelectedToProcess(name);
     }
 
     //****************************************************************************/

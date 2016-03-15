@@ -92,5 +92,5 @@ void HlmsNodeSamplerblock::setFileNameTexture(const QString fileNameTexture)
 //****************************************************************************/
 void HlmsNodeSamplerblock::nodeConnected(QtPort* port, QtConnection* connection)
 {
-    QMessageBox::information(0, QString("Connected"), QString("Node connected"));
+    QMessageBox::information(0, QString("Info"), QString("Node connected"));
 }

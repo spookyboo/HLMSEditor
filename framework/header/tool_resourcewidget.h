@@ -73,6 +73,9 @@ namespace Magus
                              const QString& baseNameThumb,
                              EditorHlmsTypes type);
 
+            // Initialise the resourcetree
+            void initResourceTree(void);
+
             // Returns the qualified name of the currently selected item from the resource tree
             const QString& getSelectedFullQualifiedName(void);
 

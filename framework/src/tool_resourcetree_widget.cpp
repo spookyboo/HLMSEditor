@@ -130,7 +130,11 @@ namespace Magus
                 emit resourceSelected();
             break;
 
-            case QEvent::Drop:
+            case QEvent::MouseButtonDblClick:
+                mouseDoubleClickHandler(mouseEvent);
+            break;
+
+        case QEvent::Drop:
                 dropHandler(object, event);
             break;
         }
@@ -160,6 +164,19 @@ namespace Magus
                     enableContextMenuItemsForSelectedResource();
                     mContextMenu->popup(pos);
                 }
+            }
+            break;
+        }
+    }
+
+    //****************************************************************************/
+    void QtResourceTreeWidget::mouseDoubleClickHandler(QMouseEvent* event)
+    {
+        switch ((int) event->button())
+        {
+            case Qt::LeftButton:
+            {
+                doubleClickResourceFromCursor();
             }
             break;
         }
@@ -847,6 +864,20 @@ namespace Magus
 
             if (emitSignal)
                 emit resourceSelected(getResourceIdFromItem(item));
+        }
+    }
+
+    //****************************************************************************/
+    void QtResourceTreeWidget::doubleClickResourceFromCursor (bool emitSignal)
+    {
+        QPoint pos = mResourceTree->mapFromGlobal(QCursor::pos());
+        QTreeWidgetItem* item = mResourceTree->itemAt(pos);
+        if (item)
+        {
+            mResourceTree->setCurrentItem(item);
+
+            if (emitSignal)
+                emit resourceDoubleClicked(getResourceIdFromItem(item));
         }
     }
 

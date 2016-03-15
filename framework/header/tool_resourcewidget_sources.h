@@ -137,12 +137,14 @@ namespace Magus
             // Return the full qualified name of the currently selected resource
             const QString& getSelectedFullQualifiedName(void);
 
-        protected:
             void initializeResourceTree (void);
+
+        protected:
             const QString& determineSubgroupIcon(int toplevelId);
 
         signals:
             void resourceSelected(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
+            void resourceDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
             void resourceAdded(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
             void resourceDeleted(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
             void resourceSearched(const QString& searchPattern);
@@ -150,6 +152,7 @@ namespace Magus
 
         private slots:
             void handleResourceSelected(int resourceId);
+            void handleResourceDoubleClicked(int resourceId);
             void handleResourceAdded(int resourceId);
             void handleResourceDeleted(int resourceId);
             void handleResourceMoved(int resourceId);

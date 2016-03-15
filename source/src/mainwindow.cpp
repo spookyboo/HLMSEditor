@@ -101,6 +101,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 //****************************************************************************/
 void MainWindow::createActions(void)
 {
+    // File menu
     mNewHlmsPbsAction = new QAction(QString("Pbs"), this);
     connect(mNewHlmsPbsAction, SIGNAL(triggered()), this, SLOT(doNewHlmsPbsAction()));
     mNewHlmsUnlitAction = new QAction(QString("Unlit"), this);
@@ -111,28 +112,35 @@ void MainWindow::createActions(void)
     connect(mSaveDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doSaveDatablockMenuAction()));
     mSaveAsDatablockMenuAction = new QAction(QString("Save Hlms as"), this);
     connect(mSaveAsDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doSaveAsDatablockMenuAction()));
-    mMaterialBrowserMenuAction = new QAction(QString("Open material browser"), this);
-    connect(mMaterialBrowserMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserMenuAction()));
     mQuitMenuAction = new QAction(QString("Quit"), this);
     connect(mQuitMenuAction, SIGNAL(triggered()), this, SLOT(doQuitMenuAction()));
+
+    // Materials menu
+    mMaterialBrowserOpenMenuAction = new QAction(QString("Open browser"), this);
+    connect(mMaterialBrowserOpenMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserOpenMenuAction()));
+    mMaterialBrowserAddMenuAction = new QAction(QString("Add Hlms to browser"), this);
+    connect(mMaterialBrowserAddMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserAddMenuAction()));
+
+    // Window menu
     mResetWindowLayoutMenuAction = new QAction(QString("Reset Window Layout"), this);
     connect(mResetWindowLayoutMenuAction, SIGNAL(triggered()), this, SLOT(doResetWindowLayoutMenuAction()));
-
 }
 
 //****************************************************************************/
 void MainWindow::createMenus(void)
 {
     mFileMenu = menuBar()->addMenu(QString("&File"));
+    mMaterialBrowserMenu = menuBar()->addMenu(QString("&Materials"));
     QMenu* fileMenuAction = mFileMenu->addMenu("New Hlms");
     fileMenuAction->addAction(mNewHlmsPbsAction);
     fileMenuAction->addAction(mNewHlmsUnlitAction);
     mFileMenu->addAction(mOpenDatablockMenuAction);
     mFileMenu->addAction(mSaveDatablockMenuAction);
     mFileMenu->addAction(mSaveAsDatablockMenuAction);
-    mFileMenu->addAction(mMaterialBrowserMenuAction);
     mFileMenu->addAction(mQuitMenuAction);
-    mWindowMenu = menuBar()->addMenu(QString("Window"));
+    mMaterialBrowserMenu->addAction(mMaterialBrowserOpenMenuAction);
+    mMaterialBrowserMenu->addAction(mMaterialBrowserAddMenuAction);
+    mWindowMenu = menuBar()->addMenu(QString("&Window"));
     mWindowMenu->addAction(mResetWindowLayoutMenuAction);
 
 }
@@ -220,6 +228,7 @@ void MainWindow::loadDatablock(const QString jsonFileName)
             Ogre::LogManager::getSingleton().logMessage("MainWindow::doOpenDatablockMenuAction(); Could not load the materials\n");
         }
         file.close();
+        mHlmsName = jsonFileName;
 
         // Get the (list of) datablocks and assign the first one to the current 'item' to be rendered
         getAndSetFirstDatablock();
@@ -317,7 +326,6 @@ void MainWindow::getAndSetFirstDatablock(void)
                         // Create the node structure
                         QString s = newDatablockName.c_str();
                         mNodeEditorDockWidget->createPbsNodeStructure(s);
-                        //mHlmsName = s;
                         mPropertiesDockWidget->setTextureTypePropertyVisible(true);
                         mPropertiesDockWidget->setMapWeightPropertyVisible(true);
                         break;
@@ -362,7 +370,6 @@ void MainWindow::getAndSetFirstDatablock(void)
                         // Create the node structure
                         QString s = newDatablockName.c_str();
                         mNodeEditorDockWidget->createUnlitNodeStructure(s);
-                        //mHlmsName = s;
                         mPropertiesDockWidget->setTextureTypePropertyVisible(false);
                         mPropertiesDockWidget->setMapWeightPropertyVisible(false);
                         break;
@@ -454,22 +461,21 @@ void MainWindow::loadMaterialBrowserCfg(void)
     if (file.open(QFile::ReadOnly))
     {
         QTextStream readFile(&file);
+        Magus::QtResourceInfo* info;
         while (!readFile.atEnd())
         {
             line = readFile.readLine();
             QStringList elements = line.split('\t', QString::SkipEmptyParts);
 
-            if (elements.size() > 4)
+            if (elements.size() == 6)
             {
-                Magus::QtResourceInfo* info = new Magus::QtResourceInfo();
+                info = new Magus::QtResourceInfo();
                 info->topLevelId = QVariant(elements[0]).toInt();
                 info->parentId = QVariant(elements[1]).toInt();
                 info->resourceId = QVariant(elements[2]).toInt();
                 info->resourceName = elements[3];
                 info->fullQualifiedName = elements[4];
-
-                if (elements.size() > 5)
-                    info->resourceType = QVariant(elements[5]).toInt();
+                info->resourceType = QVariant(elements[5]).toInt();
 
                 if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_PBS &&
                         info->resourceType == Magus::TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP)
@@ -488,13 +494,45 @@ void MainWindow::loadMaterialBrowserCfg(void)
                 resources.append(info);
             }
         }
+
+        // In case the file is empty or contains garbage, add toplevel items
+        if (resources.size() == 0)
+        {
+             info = new Magus::QtResourceInfo();
+             info->topLevelId = TOOL_SOURCES_LEVEL_X000_PBS;
+             info->parentId = 0;
+             info->resourceId = TOOL_SOURCES_LEVEL_X000_PBS;
+             info->resourceName = QString("PBS");
+             info->fullQualifiedName = QString("PBS");
+             info->resourceType = TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP;
+             info->iconName = Magus::TOOL_RESOURCE_ICON_PBS;
+             resources.append(info);
+
+             info = new Magus::QtResourceInfo();
+             info->topLevelId = TOOL_SOURCES_LEVEL_X000_UNLIT;
+             info->parentId = 0;
+             info->resourceId = TOOL_SOURCES_LEVEL_X000_UNLIT;
+             info->resourceName = QString("Unlit");
+             info->fullQualifiedName = QString("Unlit");
+             info->resourceType = TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP;
+             info->iconName = Magus::TOOL_RESOURCE_ICON_UNLIT;
+             resources.append(info);
+        }
+
+        // Set the resources
         mMaterialBrowser->setResources(resources);
         file.close();
     }
 }
 
 //****************************************************************************/
-void MainWindow::doMaterialBrowserMenuAction(void)
+void MainWindow::doQuitMenuAction(void)
+{
+    close();
+}
+
+//****************************************************************************/
+void MainWindow::doMaterialBrowserOpenMenuAction(void)
 {
     if (mMaterialBrowser->exec())
     {
@@ -504,42 +542,62 @@ void MainWindow::doMaterialBrowserMenuAction(void)
             loadDatablock(fileName);
 
         // Save all current settings
-        QFile file(FILE_MATERIAL_BROWSER);
-        if (file.open(QFile::WriteOnly|QFile::Truncate))
-        {
-            QTextStream stream(&file);
-            const QVector<Magus::QtResourceInfo*>& resources = mMaterialBrowser->getResources();
-            QVectorIterator<Magus::QtResourceInfo*> it(resources);
-            it.toFront();
-            Magus::QtResourceInfo* info;
-            while (it.hasNext())
-            {
-                // Write a line to the cfg file
-                info = it.next();
-                stream << info->topLevelId
-                       << "\t"
-                       << info->parentId
-                       << "\t"
-                       << info->resourceId
-                       << "\t"
-                       << info->resourceName
-                       << "\t"
-                       << info->fullQualifiedName
-                       << "\t"
-                       << info->resourceType
-                       << "\n";
-            }
-            file.close();
-        }
+        saveMaterialBrowserCfg();
     }
     else
         loadMaterialBrowserCfg(); // Reverses all changes
 }
 
 //****************************************************************************/
-void MainWindow::doQuitMenuAction(void)
+void MainWindow::saveMaterialBrowserCfg(void)
 {
-    close();
+    // Save all current settings
+    QFile file(FILE_MATERIAL_BROWSER);
+    if (file.open(QFile::WriteOnly|QFile::Truncate))
+    {
+        QTextStream stream(&file);
+        const QVector<Magus::QtResourceInfo*>& resources = mMaterialBrowser->getResources();
+        QVectorIterator<Magus::QtResourceInfo*> it(resources);
+        it.toFront();
+        Magus::QtResourceInfo* info;
+        while (it.hasNext())
+        {
+            // Write a line to the cfg file
+            info = it.next();
+            stream << info->topLevelId
+                   << "\t"
+                   << info->parentId
+                   << "\t"
+                   << info->resourceId
+                   << "\t"
+                   << info->resourceName
+                   << "\t"
+                   << info->fullQualifiedName
+                   << "\t"
+                   << info->resourceType
+                   << "\n";
+        }
+        file.close();
+    }
+}
+
+//****************************************************************************/
+void MainWindow::doMaterialBrowserAddMenuAction(void)
+{
+    if (mHlmsName.isEmpty())
+        QMessageBox::information(0, QString("Error"), QString("Unknown filename. The Hlms must be saved first"));
+    else
+    {
+        QString baseNameJson = mHlmsName;
+        baseNameJson = getBaseFileName(baseNameJson);
+        QString thumb = baseNameJson + ".png";
+        if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_PBS)
+            mMaterialBrowser->addMaterial(baseNameJson, mHlmsName, thumb, HLMS_PBS);
+        else if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_UNLIT)
+            mMaterialBrowser->addMaterial(baseNameJson, mHlmsName, thumb, HLMS_UNLIT);
+
+        saveMaterialBrowserCfg();
+    }
 }
 
 //****************************************************************************/

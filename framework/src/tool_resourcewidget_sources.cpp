@@ -49,6 +49,7 @@ namespace Magus
         // mSourceInfo after creation, to be able to recursively delete any assets resided in subgroups (these assets must also be
         // properly deleted from the QtAssetsDockWidget).
         connect(mResourceTreeWidget, SIGNAL(resourceSelected(int)), this, SLOT(handleResourceSelected(int)));
+        connect(mResourceTreeWidget, SIGNAL(resourceDoubleClicked(int)), this, SLOT(handleResourceDoubleClicked(int)));
         connect(mResourceTreeWidget, SIGNAL(resourceAdded(int)), this, SLOT(handleResourceAdded(int)));
         connect(mResourceTreeWidget, SIGNAL(resourceDeleted(int)), this, SLOT(handleResourceDeleted(int)));
         connect(mResourceTreeWidget, SIGNAL(resourceMoved(int)), this, SLOT(handleResourceMoved(int)));
@@ -72,7 +73,7 @@ namespace Magus
         QtSourcesInfo info;
 
         // HLMS PBS
-        mResourceTreeWidget->addResource (TOOL_SOURCES_LEVEL_X000_PBS, TOOL_SOURCES_LEVEL_X000_PBS, 0, QString("PBS"), QString(""), TOOL_RESOURCE_ICON_PBS);
+        mResourceTreeWidget->addResource (TOOL_SOURCES_LEVEL_X000_PBS, TOOL_SOURCES_LEVEL_X000_PBS, 0, QString("PBS"), QString("PBS"), TOOL_RESOURCE_ICON_PBS);
         info.toplevelId = TOOL_SOURCES_LEVEL_X000_PBS;
         info.resourceId = TOOL_SOURCES_LEVEL_X000_PBS;
         info.parentId = 0;
@@ -83,7 +84,7 @@ namespace Magus
         mSourceInfo[TOOL_SOURCES_LEVEL_X000_PBS] = info;
 
         // HLMS UNLIT
-        mResourceTreeWidget->addResource (TOOL_SOURCES_LEVEL_X000_UNLIT, TOOL_SOURCES_LEVEL_X000_UNLIT, 0, QString("Unlit"), QString(""), TOOL_RESOURCE_ICON_UNLIT);
+        mResourceTreeWidget->addResource (TOOL_SOURCES_LEVEL_X000_UNLIT, TOOL_SOURCES_LEVEL_X000_UNLIT, 0, QString("Unlit"), QString("Unlit"), TOOL_RESOURCE_ICON_UNLIT);
         info.toplevelId = TOOL_SOURCES_LEVEL_X000_UNLIT;
         info.resourceId = TOOL_SOURCES_LEVEL_X000_UNLIT;
         info.parentId = 0;
@@ -194,7 +195,7 @@ namespace Magus
 
         // Suppress the signal that a resource was added, otherwise the signal causes the asset to
         // be added to the asset widget
-        int resourceId = mResourceTreeWidget->addResource(toplevelId, baseName, name, QString(""), true, true);
+        int resourceId = mResourceTreeWidget->addResource(toplevelId, baseName, name, name, true, true);
         mResourceTreeWidget->expand(toplevelId);
 
         // Also add it to mSourceInfo
@@ -262,6 +263,19 @@ namespace Magus
             mResourceTreeWidget->setSubgroupIconName(determineSubgroupIcon(info.toplevelId));
             emit resourceSelected(info.toplevelId, info.parentId, info.resourceId, info.fileName, info.baseNameThumb);
             //QMessageBox::information(0, QString("this"), QVariant(info.toplevelId).toString()); // test
+        }
+    }
+
+    //****************************************************************************/
+    void QtSourcesDockWidget::handleResourceDoubleClicked(int resourceId)
+    {
+        // Determine which type is selected
+        QMap<int, QtSourcesInfo>::iterator it = mSourceInfo.find(resourceId);
+        if (it != mSourceInfo.end())
+        {
+            QtSourcesInfo info = it.value();
+            mResourceTreeWidget->setSubgroupIconName(determineSubgroupIcon(info.toplevelId));
+            emit resourceDoubleClicked(info.toplevelId, info.parentId, info.resourceId, info.fileName, info.baseNameThumb);
         }
     }
 
@@ -379,7 +393,7 @@ namespace Magus
         else if (toplevelId == TOOL_SOURCES_LEVEL_X000_UNLIT)
             return TOOL_RESOURCE_ICON_SMALL_UNLIT;
         else
-            return QString("");
+            return mEmptyString;
     }
 }
 
