@@ -591,6 +591,8 @@ void MainWindow::doMaterialBrowserAddMenuAction(void)
         QString baseNameJson = mHlmsName;
         baseNameJson = getBaseFileName(baseNameJson);
         QString thumb = baseNameJson + ".png";
+        mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->saveToFile(THUMBS_PATH + thumb.toStdString());
+
         if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_PBS)
             mMaterialBrowser->addMaterial(baseNameJson, mHlmsName, thumb, HLMS_PBS);
         else if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_UNLIT)

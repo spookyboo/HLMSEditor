@@ -24,6 +24,7 @@
 #include <QTreeWidget>
 #include <QMimeData>
 #include <QStringList>
+#include <QFileInfo>
 #include <QMap>
 
 QT_BEGIN_NAMESPACE
@@ -61,7 +62,7 @@ namespace Magus
         }
 
         return false;
-    };
+    }
 
     /****************************************************************************
     * Strip leading slashes and backslashes
@@ -74,8 +75,19 @@ namespace Magus
             str = str.remove(0, 1);
             repeat = str.startsWith(QString("/")) || str.startsWith(QString("\\"));
         }
-    };
+    }
 
+    /****************************************************************************
+    * Strip leading slashes and backslashes
+    ***************************************************************************/
+    static bool fileExist(const QString& fileName)
+    {
+        QFileInfo checkFile(fileName);
+        if (checkFile.exists() && checkFile.isFile())
+            return true;
+        else
+            return false;
+    }
 }
 
 #endif

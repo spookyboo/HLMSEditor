@@ -1,4 +1,73 @@
-HLMS PBS:
-========
+**************************************** Hlms PBS ****************************************
 
-TODO: Add help text
+Name
+====
+The name of the Hlms.
+
+Diffuse
+=======
+The diffuse colour. The colour will be divided by PI for energy conservation.
+
+Specular
+========
+The specular colour.
+
+Roughness
+=========
+The roughness value.
+
+Workflow
+========
+Sets whether to use a specular workflow, or a metallic workflow.
+
+Metalness
+=========
+The metalness in a metallic workflow.
+
+Separate fresnel
+================
+'Checked': Fresnel values for each colour channel is used (X, Y and Z)
+'Unchecked': Only the X value is used. The Y and Z components are ignored.
+
+Fresnel
+=======
+The X value (no separate fresnel) or X, Y, Z (separate fresnel)
+
+Transparency value
+==================
+The amount of transparency (depending on 'Transparency mode')
+
+Transparency mode
+=================
+None        : No alpha blending.
+Transparent : Realistic transparency that preserves lighting reflections (particularly specular on 
+              the edges).
+              Great for glass, transparent plastic, most stuff
+Fade        : Regular alpha blending. Ideal for just fading out an object until it completely disappears.
+
+Use alpha from textures
+=======================
+When false, the alpha channel of the diffuse maps and detail maps will be ignored.
+It's a GPU performance optimization.
+
+Brdf
+====
+Default                       : Most physically accurate BRDF we have. Good for representing the majority
+                                of materials.
+Cook-Torrance                 : Implements Cook-Torrance BRDF.
+Default uncorrelated          : Same as Default, but the geometry term is not height-correlated which most 
+                                notably causes edges to be dimmer and is less correct.
+Def. separate diffuse fresnel : Same as Default but the fresnel of the diffuse is calculated differently. 
+CT separate diffuse fresnel   : Cook-Torrance separate diffuse fresnel. Ideal for shiny objects like 
+                                glass toy marbles, some types of rubber, silk, synthetic fabric.
+
+Alpha test
+==========
+Alpha testing works on the alpha channel of the diffuse texture. If there is no diffuse texture, 
+the first diffuse detail map after applying the blend weights (texture + params) is used. If there 
+are no diffuse nor detail-diffuse maps, the alpha test is compared against the value 1.0.
+Alpha test is a list with possible compare functions.
+
+Alpha test threshold
+====================
+See: Alpha test. This is the value to compare against.

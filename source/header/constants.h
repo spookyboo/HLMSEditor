@@ -60,6 +60,7 @@ static const QString INFO_SAMPLERBLOCK = QString("../common/info/samplerblock.in
 static const QString INFO_MACROBLOCK = QString("../common/info/macroblock.inf");
 static const QString INFO_BLENDBLOCK = QString("../common/info/blendblock.inf");
 static const QString FILE_MATERIAL_BROWSER = QString("materials.cfg");
+static const QString FILE_NO_IMAGE = QString("../common/icons/noImage.png");
 
 static const Ogre::String DEFAULT_DATABLOCK_NAME = "[Default]";
 static const Ogre::String DATABLOCK_DEBUG_CUBE = "DebugCube";

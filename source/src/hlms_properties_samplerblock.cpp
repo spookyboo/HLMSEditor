@@ -66,7 +66,7 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
     QStringList stringListTextureType;
     stringListTextureType << QString("Diffuse map") <<
                              QString("Normal map") <<
-                             QString("Specular map") <<
+                             QString("Specular / Metallic map") <<
                              QString("Roughness map") <<
                              QString("Detail weight map") <<
                              QString("Detail map 0") <<

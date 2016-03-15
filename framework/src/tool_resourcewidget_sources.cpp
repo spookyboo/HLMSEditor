@@ -198,7 +198,7 @@ namespace Magus
         int resourceId = mResourceTreeWidget->addResource(toplevelId, baseName, name, name, true, true);
         mResourceTreeWidget->expand(toplevelId);
 
-        // Also add it to mSourceInfo
+        // Also add/set it to mSourceInfo
         QtSourcesInfo info;
         info.toplevelId = toplevelId;
         info.resourceId = resourceId;

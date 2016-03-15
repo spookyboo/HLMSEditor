@@ -1,12 +1,14 @@
 Short term updates:
 ==================
 - Implement material browser
-
+- Read multiple materials from one JSON file
+- Possibility to set a folder containing all textures
 
 Bugs:
 ====
 - Material browser:
-   - In some cases the Hlms is saved, while it is not automatically added to the material browser
+   - If thumb is missing and the noimage.png is displayed, the thumb is not refreshed when reloaded and added again to the material browser;
+     only after a restart the thumb is refreshed.
 - Cubemap json generates a lot of warnings in the log when depth is enabled (this is with all non-depth textures); the log message is only in Debug
 
 

@@ -19,6 +19,7 @@
 ****************************************************************************/
 
 // Include
+#include "magus_core.h"
 #include "tool_resourcewidget.h"
 #include "tool_resourcewidget_assets.h"
 
@@ -139,12 +140,17 @@ namespace Magus
     //****************************************************************************/
     void QtAssetsDockWidget::addAsset(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName)
     {
+        QPixmap pixmap;
+        if (fileExist(name))
+            pixmap.load(name);
+        else
+            pixmap.load(FILE_NO_IMAGE);
+
         switch (toplevelId)
         {
             case TOOL_SOURCES_LEVEL_X000_PBS:
             {
                 // Add pixmap from file to mPbsSelection
-                QPixmap pixmap(name);
                 mPbsSelection->addTexture(pixmap, name, baseName);
             }
             break;
@@ -152,7 +158,6 @@ namespace Magus
             case TOOL_SOURCES_LEVEL_X000_UNLIT:
             {
                 // Add pixmap from file to mUnlitSelection
-                QPixmap pixmap(name);
                 mUnlitSelection->addTexture(pixmap, name, baseName);
             }
             break;

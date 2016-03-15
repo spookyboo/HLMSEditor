@@ -201,8 +201,9 @@ HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNodeStructure(Magus::OgreManager*
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_SPECULAR);
         enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_SPECULAR);
 
-        samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_METALLIC);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_METALLIC);
+        // PBSM_METALLIC is same as PBSM_SPECULAR, so do not duplicate it
+        //samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_METALLIC);
+        //enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_METALLIC);
 
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_ROUGHNESS);
         enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_ROUGHNESS);
