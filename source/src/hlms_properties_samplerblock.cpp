@@ -333,7 +333,7 @@ void HlmsPropertiesSamplerblock::setObject (HlmsNodeSamplerblock* hlmsNodeSample
     colorProperty->setColor(mHlmsNodeSamplerblock->getBorderColourRed(),
                             mHlmsNodeSamplerblock->getBorderColourGreen(),
                             mHlmsNodeSamplerblock->getBorderColourBlue(),
-                            1.0f);
+                            255.0f);
 
     // ******** UV set ********
     sliderProperty = static_cast<Magus::QtSliderProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_UV_SET));

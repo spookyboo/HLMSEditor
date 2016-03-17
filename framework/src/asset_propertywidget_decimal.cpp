@@ -27,7 +27,9 @@
 namespace Magus
 {
     //****************************************************************************/
-    QtDecimalProperty::QtDecimalProperty(const QString& title, QWidget* parent) : QtProperty(parent)
+    QtDecimalProperty::QtDecimalProperty(const QString& title, QWidget* parent) :
+        QtProperty(parent),
+        mPrecision(3)
     {
         QVBoxLayout* mainLayout = new QVBoxLayout;
         QHBoxLayout* horizontalLayout = new QHBoxLayout;
@@ -50,7 +52,7 @@ namespace Magus
     //****************************************************************************/
     void QtDecimalProperty::setValue (const double value)
     {
-        mDecimal->setText(QVariant(value).toString());
+        mDecimal->setText(QString::number(value, 'f', mPrecision));
     }
 
     //****************************************************************************/

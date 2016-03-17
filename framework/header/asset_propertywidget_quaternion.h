@@ -53,6 +53,8 @@ namespace Magus
             const qreal getX (void) const;
             const qreal getY (void) const;
             const qreal getZ (void) const;
+            int getPrecision(void) {return mPrecision;}
+            void setPrecision(int precision) {mPrecision = precision;}
 
         private slots:
             void propertyValueChanged(void);
@@ -62,6 +64,7 @@ namespace Magus
             QLineEdit* mXEdit;
             QLineEdit* mYEdit;
             QLineEdit* mZEdit;
+            int mPrecision;
     };
 }
 

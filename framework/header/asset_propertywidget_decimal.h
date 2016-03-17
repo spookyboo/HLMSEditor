@@ -43,12 +43,15 @@ namespace Magus
             virtual ~QtDecimalProperty(void) {}
             void setValue (const double value);
             const double getValue (void) const;
+            int getPrecision(void) {return mPrecision;}
+            void setPrecision(int precision) {mPrecision = precision;}
 
         private slots:
             void propertyValueChanged(void);
 
         private:
             QLineEdit* mDecimal;
+            int mPrecision;
     };
 }
 

@@ -52,6 +52,8 @@ namespace Magus
             void enableX (bool enabled);
             void enableY (bool enabled);
             void enableZ (bool enabled);
+            int getPrecision(void) {return mPrecision;}
+            void setPrecision(int precision) {mPrecision = precision;}
 
         private slots:
             void propertyValueChanged(void);
@@ -60,6 +62,7 @@ namespace Magus
             QLineEdit* mXEdit;
             QLineEdit* mYEdit;
             QLineEdit* mZEdit;
+            int mPrecision;
     };
 }
 

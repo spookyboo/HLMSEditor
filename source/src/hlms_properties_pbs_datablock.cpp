@@ -209,14 +209,14 @@ void HlmsPropertiesPbsDatablock::setObject (HlmsNodePbsDatablock* hlmsNodePbsDat
     colorProperty->setColor(mHlmsNodePbsDatablock->getDiffuseRed(),
                             mHlmsNodePbsDatablock->getDiffuseGreen(),
                             mHlmsNodePbsDatablock->getDiffuseBlue(),
-                            1.0f);
+                            255.0f);
 
     // ******** Specular ********
     colorProperty = static_cast<Magus::QtColorProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_SPECULAR));
     colorProperty->setColor(mHlmsNodePbsDatablock->getSpecularRed(),
                             mHlmsNodePbsDatablock->getSpecularGreen(),
                             mHlmsNodePbsDatablock->getSpecularBlue(),
-                            1.0f);
+                            255.0f);
 
     // ******** Roughness ********
     decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_ROUGHNESS));

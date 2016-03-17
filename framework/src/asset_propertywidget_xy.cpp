@@ -27,7 +27,9 @@
 namespace Magus
 {
     //****************************************************************************/
-    QtXYProperty::QtXYProperty(const QString& title, qreal x, qreal y, QWidget* parent) : QtProperty(parent)
+    QtXYProperty::QtXYProperty(const QString& title, qreal x, qreal y, QWidget* parent) :
+        QtProperty(parent),
+        mPrecision(3)
     {
         QVBoxLayout* mainLayout = new QVBoxLayout;
         QHBoxLayout* horizontalLayout = new QHBoxLayout;
@@ -72,13 +74,13 @@ namespace Magus
     //****************************************************************************/
     void QtXYProperty::setX (qreal x)
     {
-        mXEdit->setText(QVariant(x).toString());
+        mXEdit->setText(QString::number(x, 'f', mPrecision));
     }
 
     //****************************************************************************/
     void QtXYProperty::setY (qreal y)
     {
-        mYEdit->setText(QVariant(y).toString());
+        mYEdit->setText(QString::number(y, 'f', mPrecision));
     }
 
     //****************************************************************************/

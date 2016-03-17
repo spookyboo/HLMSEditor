@@ -31,7 +31,9 @@ namespace Magus
                                  qreal x,
                                  qreal y,
                                  qreal z,
-                                 QWidget* parent) : QtProperty(parent)
+                                 QWidget* parent) :
+        QtProperty(parent),
+        mPrecision(3)
     {
         QVBoxLayout* mainLayout = new QVBoxLayout;
         QHBoxLayout* horizontalLayout = new QHBoxLayout;
@@ -112,19 +114,19 @@ namespace Magus
     //****************************************************************************/
     void QtXYZProperty::setX (qreal x)
     {
-        mXEdit->setText(QVariant(x).toString());
+        mXEdit->setText(QString::number(x, 'f', mPrecision));
     }
 
     //****************************************************************************/
     void QtXYZProperty::setY (qreal y)
     {
-        mYEdit->setText(QVariant(y).toString());
+        mYEdit->setText(QString::number(y, 'f', mPrecision));
     }
 
     //****************************************************************************/
     void QtXYZProperty::setZ (qreal z)
     {
-        mZEdit->setText(QVariant(z).toString());
+        mZEdit->setText(QString::number(z, 'f', mPrecision));
     }
 
     //****************************************************************************/
