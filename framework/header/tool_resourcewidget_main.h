@@ -78,6 +78,9 @@ namespace Magus
         signals:
             void jSonFileSelectedToProcess(const QString& fullNameJson);
 
+        protected:
+            QMessageBox::StandardButton fileDoesNotExistsWarning(const QString& fileName);
+
         private slots:
             void handleResourceSelected(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
             void handleResourceDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);

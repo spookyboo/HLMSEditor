@@ -22,6 +22,7 @@
 #define CONSTANTS_H
 
 #include <QString>
+#include <QMessageBox>
 #include "OgreString.h"
 
 //****************************************************************************/
@@ -61,10 +62,21 @@ static const QString INFO_MACROBLOCK = QString("../common/info/macroblock.inf");
 static const QString INFO_BLENDBLOCK = QString("../common/info/blendblock.inf");
 static const QString FILE_MATERIAL_BROWSER = QString("materials.cfg");
 static const QString FILE_NO_IMAGE = QString("../common/icons/noImage.png");
-
+static const QString FILE_RESOURCES_D = QString("resources_d.cfg");
+static const QString FILE_RESOURCES = QString("resources.cfg");
 static const Ogre::String DEFAULT_DATABLOCK_NAME = "[Default]";
 static const Ogre::String DATABLOCK_DEBUG_CUBE = "DebugCube";
 static const Ogre::String THUMBS_PATH = "../common/thumbs/";
+
+// Static function to determine the 'resources' file
+static const QString& getResourcesCfg (void)
+{
+    #if OGRE_DEBUG_MODE
+        return FILE_RESOURCES_D;
+    #else
+        return FILE_RESOURCES;
+    #endif
+}
 
 enum EditorHlmsTypes
 {

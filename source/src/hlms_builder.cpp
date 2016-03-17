@@ -526,21 +526,13 @@ bool HlmsBuilder::isResourceLocationExisting(const Ogre::String& path)
 void HlmsBuilder::saveAllResourcesLocations(void)
 {
     // Also add the resource location to the resources.cfg / resources_d.cfg file (for next startup of the application)
-    QString filename;
-    #if OGRE_DEBUG_MODE
-        filename = "resources_d.cfg";
-    #else
-        filename = "resources.cfg";
-    #endif
-
-    // Iterate through groups
     Ogre::StringVector resourceGroups = Ogre::ResourceGroupManager::getSingletonPtr()->getResourceGroups();
     Ogre::StringVector::iterator itGroup;
     Ogre::StringVector::iterator itGroupStart = resourceGroups.begin();
     Ogre::StringVector::iterator itGroupEnd = resourceGroups.end();
     Ogre::String group;
     Ogre::String resourceName;
-    QFile file(filename);
+    QFile file(getResourcesCfg());
     file.open(QFile::WriteOnly | QFile::Text);
     QTextStream writeFile(&file);
 

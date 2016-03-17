@@ -585,7 +585,7 @@ void MainWindow::saveMaterialBrowserCfg(void)
 void MainWindow::doMaterialBrowserAddMenuAction(void)
 {
     if (mHlmsName.isEmpty())
-        QMessageBox::information(0, QString("Error"), QString("Unknown filename. The Hlms must be saved first"));
+        QMessageBox::information(0, QString("Error"), QString("No filename. The Hlms must be saved first"));
     else
     {
         QString baseNameJson = mHlmsName;

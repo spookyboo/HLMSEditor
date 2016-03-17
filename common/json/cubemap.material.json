@@ -1,7 +1,7 @@
 {
 	"samplers" :
 	{
-		"Sampler_2" :
+		"Sampler_3" :
 		{
 			"min" : "none",
 			"mag" : "none",
@@ -89,7 +89,7 @@
 			"reflection" :
 			{
 				"texture" : "SaintPetersBasilica.dds",
-				"sampler" : "Sampler_2"
+				"sampler" : "Sampler_3"
 			}
 		}
 	}

@@ -73,8 +73,11 @@ namespace Magus
             void addAsset(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
 
             // Delete an asset from a particular asset widget
-            void deleteAsset(int toplevelId, const QString& name);
+            void deleteAsset(int toplevelId,
+                             const QString& name,
+                             bool nameIsFullName = true); // name is either full qualified name (filename + path) or only basename
             void deleteAsset(int toplevelId, const QString& name, const QString& baseName);
+            void deleteAsset(const QString& name, bool nameIsFullName); // name is either full qualified name (filename + path) or only basename
 
             // Select the appropriate tab, based on the given arguments
             void selectTab(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);

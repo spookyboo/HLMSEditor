@@ -22,6 +22,7 @@
 #include <QString>
 #include <QFile>
 #include <QMenuBar>
+#include "magus_core.h"
 #include "tool_resourcewidget_main.h"
 #include "tool_resourcewidget_assets.h"
 
@@ -158,7 +159,20 @@ namespace Magus
     //****************************************************************************/
     void QtResourceMain::handleResourceDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName)
     {
-        emit jSonFileSelectedToProcess(name);
+        if (fileExist(name))
+        {
+            emit jSonFileSelectedToProcess(name);
+        }
+        else
+        {
+            QMessageBox::StandardButton reply = fileDoesNotExistsWarning(name);
+            if (reply == QMessageBox::Yes)
+            {
+                mSourcesDockWidget->deleteAssetQuiet(baseName);
+                mAssetsDockWidget->deleteAsset(toplevelId, baseName, false);
+                mSelectedFileName = "";
+            }
+        }
     }
 
     //****************************************************************************/
@@ -221,6 +235,28 @@ namespace Magus
     {
         // Note, that name and baseName are related to thumb images
         mSelectedFileName = mSourcesDockWidget->doubleClicked(baseName);
-        emit jSonFileSelectedToProcess(mSelectedFileName);
+        if(fileExist(mSelectedFileName))
+        {
+            emit jSonFileSelectedToProcess(mSelectedFileName);
+        }
+        else
+        {
+            QMessageBox::StandardButton reply = fileDoesNotExistsWarning(mSelectedFileName);
+            if (reply == QMessageBox::Yes)
+            {
+                mSourcesDockWidget->deleteAssetQuiet(baseName);
+                mAssetsDockWidget->deleteAsset(baseName, false);
+                mSelectedFileName = "";
+            }
+        }
+    }
+
+    //****************************************************************************/
+    QMessageBox::StandardButton QtResourceMain::fileDoesNotExistsWarning(const QString& fileName)
+    {
+        return QMessageBox::question(0,
+                                     "Warning",
+                                     fileName + QString(" does not exist. Remove it from the material browser?"),
+                                     QMessageBox::Yes|QMessageBox::No);
     }
 }

@@ -192,21 +192,31 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QtAssetsDockWidget::deleteAsset(int toplevelId, const QString& name)
+    void QtAssetsDockWidget::deleteAsset(const QString& name, bool nameIsFullName)
+    {
+        // Delete from mPbsSelection
+        mPbsSelection->deleteTexture(name, nameIsFullName);
+
+        // Delete from mUnlitSelection
+        mUnlitSelection->deleteTexture(name, nameIsFullName);
+    }
+
+    //****************************************************************************/
+    void QtAssetsDockWidget::deleteAsset(int toplevelId, const QString& name, bool nameIsFullName)
     {
         switch (toplevelId)
         {
             case TOOL_SOURCES_LEVEL_X000_PBS:
             {
                 // Delete from mPbsSelection
-                mPbsSelection->deleteTexture(name);
+                mPbsSelection->deleteTexture(name, nameIsFullName);
             }
             break;
 
             case TOOL_SOURCES_LEVEL_X000_UNLIT:
             {
                 // Delete from mUnlitSelection
-                mUnlitSelection->deleteTexture(name);
+                mUnlitSelection->deleteTexture(name, nameIsFullName);
             }
             break;
         }
@@ -281,4 +291,5 @@ namespace Magus
         // Note, that these are the thumb image names
         emit assetDoubleClicked(name, baseName);
     }
+
 }

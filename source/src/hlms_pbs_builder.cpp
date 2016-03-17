@@ -458,7 +458,9 @@ void HlmsPbsBuilder::enrichSamplerNode (Magus::OgreManager* ogreManager,
        }
        else
        {
-           QMessageBox::information(0, QString("Error"), QString("Cannot find image file. Hlms is incomplete!"));
+           QMessageBox::information(0, QString("Error"), QString("Cannot find image file. Is the resource location present in " +
+                                                                 getResourcesCfg() +
+                                                                 QString("?")));
            return;
        }
     }
