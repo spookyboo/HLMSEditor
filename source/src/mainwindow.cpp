@@ -477,19 +477,19 @@ void MainWindow::loadMaterialBrowserCfg(void)
                 info->fullQualifiedName = elements[4];
                 info->resourceType = QVariant(elements[5]).toInt();
 
-                if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_PBS &&
-                        info->resourceType == Magus::TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP)
-                    info->iconName = Magus::TOOL_RESOURCE_ICON_PBS;
-                else if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_PBS &&
-                         info->resourceType == Magus::TOOL_RESOURCETREE_KEY_TYPE_GROUP)
-                    info->iconName = Magus::TOOL_RESOURCE_ICON_SMALL_PBS;
+                if (info->topLevelId == TOOL_SOURCES_LEVEL_X000_PBS &&
+                        info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP)
+                    info->iconName = TOOL_RESOURCE_ICON_PBS;
+                else if (info->topLevelId == TOOL_SOURCES_LEVEL_X000_PBS &&
+                         info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_GROUP)
+                    info->iconName = TOOL_RESOURCE_ICON_SMALL_PBS;
 
-                if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_UNLIT &&
-                        info->resourceType == Magus::TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP)
-                    info->iconName = Magus::TOOL_RESOURCE_ICON_UNLIT;
-                else if (info->topLevelId == Magus::TOOL_SOURCES_LEVEL_X000_UNLIT &&
-                         info->resourceType == Magus::TOOL_RESOURCETREE_KEY_TYPE_GROUP)
-                    info->iconName = Magus::TOOL_RESOURCE_ICON_SMALL_UNLIT;
+                if (info->topLevelId == TOOL_SOURCES_LEVEL_X000_UNLIT &&
+                        info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP)
+                    info->iconName = TOOL_RESOURCE_ICON_UNLIT;
+                else if (info->topLevelId == TOOL_SOURCES_LEVEL_X000_UNLIT &&
+                         info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_GROUP)
+                    info->iconName = TOOL_RESOURCE_ICON_SMALL_UNLIT;
 
                 resources.append(info);
             }
@@ -498,24 +498,24 @@ void MainWindow::loadMaterialBrowserCfg(void)
         // In case the file is empty or contains garbage, add toplevel items
         if (resources.size() == 0)
         {
-             info = new Magus::QtResourceInfo();
+             info = new QtResourceInfo();
              info->topLevelId = TOOL_SOURCES_LEVEL_X000_PBS;
              info->parentId = 0;
              info->resourceId = TOOL_SOURCES_LEVEL_X000_PBS;
              info->resourceName = QString("PBS");
              info->fullQualifiedName = QString("PBS");
              info->resourceType = TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP;
-             info->iconName = Magus::TOOL_RESOURCE_ICON_PBS;
+             info->iconName = TOOL_RESOURCE_ICON_PBS;
              resources.append(info);
 
-             info = new Magus::QtResourceInfo();
+             info = new QtResourceInfo();
              info->topLevelId = TOOL_SOURCES_LEVEL_X000_UNLIT;
              info->parentId = 0;
              info->resourceId = TOOL_SOURCES_LEVEL_X000_UNLIT;
              info->resourceName = QString("Unlit");
              info->fullQualifiedName = QString("Unlit");
              info->resourceType = TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP;
-             info->iconName = Magus::TOOL_RESOURCE_ICON_UNLIT;
+             info->iconName = TOOL_RESOURCE_ICON_UNLIT;
              resources.append(info);
         }
 

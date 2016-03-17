@@ -30,7 +30,7 @@
 #include "renderwindow_dockwidget.h"
 #include "properties_dockwidget.h"
 #include "nodeeditor_dockwidget.h"
-#include "browser_dialog.h"
+#include "material_browser_dialog.h"
 #include "ogre3_renderman.h"
 #include "constants.h"
 

@@ -59,11 +59,11 @@ HEADERS       = \
     framework/header/node_scene.h \
     framework/header/tool_default_texturewidget.h \
     framework/header/tool_resourcetree_widget.h \
-    framework/header/tool_resourcewidget.h \
-    framework/header/tool_resourcewidget_assets.h \
-    framework/header/tool_resourcewidget_main.h \
-    framework/header/tool_resourcewidget_sources.h \
-    source/header/browser_dialog.h
+    source/header/material_browser.h \
+    source/header/material_tree.h \
+    source/header/material_main.h \
+    source/header/material_thumbs.h \
+    source/header/material_browser_dialog.h
 
 
 SOURCES       = \
@@ -113,11 +113,11 @@ SOURCES       = \
     framework/src/magus_treewidget.cpp \
     framework/src/tool_default_texturewidget.cpp \
     framework/src/tool_resourcetree_widget.cpp \
-    framework/src/tool_resourcewidget.cpp \
-    framework/src/tool_resourcewidget_assets.cpp \
-    framework/src/tool_resourcewidget_main.cpp \
-    framework/src/tool_resourcewidget_sources.cpp \
-    source/src/browser_dialog.cpp
+    source/src/material_browser.cpp \
+    source/src/material_main.cpp \
+    source/src/material_tree.cpp \
+    source/src/material_thumbs.cpp \
+    source/src/material_browser_dialog.cpp
 
 
 INCLUDEPATH += "../HLMSEditor/source/header/"

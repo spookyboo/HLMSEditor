@@ -25,7 +25,7 @@
 #include <QWidget>
 #include <QMessageBox>
 #include "constants.h"
-#include "tool_resourcewidget.h"
+#include "material_browser.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -55,7 +55,7 @@ class MaterialBrowserDialog : public QDialog
         void handleOkAndAccept(void);
 
     private:
-        Magus::QtResourceWidget* mResourceWidget;
+        MaterialBrowserWidget* mResourceWidget;
         QString mSelectedFileName;
 };
 

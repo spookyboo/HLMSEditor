@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 // Include
-#include "browser_dialog.h"
+#include "material_browser_dialog.h"
 
 //****************************************************************************/
 MaterialBrowserDialog::MaterialBrowserDialog(QWidget* parent, Qt::WindowFlags f) :
@@ -34,7 +34,7 @@ MaterialBrowserDialog::MaterialBrowserDialog(QWidget* parent, Qt::WindowFlags f)
     mSelectedFileName = "";
 
     // Create the Resource widget
-    mResourceWidget = new Magus::QtResourceWidget(QString("../common/icons/"), this);
+    mResourceWidget = new MaterialBrowserWidget(QString("../common/icons/"), this);
     connect(mResourceWidget, SIGNAL(jSonFileSelectedToProcess(QString)), this, SLOT(handleJsonFileSelectedToProcess(QString)));
 
     // Create a buttonbox
