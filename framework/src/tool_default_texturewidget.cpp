@@ -147,6 +147,19 @@ namespace Magus
     //****************************************************************************/
     void QtDefaultTextureListWidget::dragMoveEvent(QDragMoveEvent *event)
     {
+        QListWidgetItem* item = currentItem();
+        if (item)
+        {
+            QWidget* widget = itemWidget(item);
+            if (widget)
+            {
+                QtDefaultTextureAndText* textureAndText = static_cast<QtDefaultTextureAndText*>(widget);
+                QString name = textureAndText->mName;
+                QString baseName = textureAndText->mBaseName;
+                emit assedDragMoved(name, baseName);
+            }
+        }
+
         event->acceptProposedAction();
     }
 
@@ -175,6 +188,7 @@ namespace Magus
         mSelectionList->setFlow(QListView::LeftToRight);
         connect(mSelectionList, SIGNAL(textureFileDropped(QString,QString)), this, SLOT(handleTextureFileDropped(QString,QString)));
         connect(mSelectionList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(handleSelected(QListWidgetItem*)));
+        connect(mSelectionList, SIGNAL(assedDragMoved(QString,QString)), this, SLOT(handleSelected(QString,QString)));
         connect(mSelectionList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(handleDoubleClicked(QListWidgetItem*)));
         //connect(mSelectionList, SIGNAL(itemEntered(QListWidgetItem*)), this, SLOT(handleMouseOver(QListWidgetItem*)));
         connect(mSelectionList, SIGNAL(assetDeleted(QString,QString)), this, SLOT(handleAssetDeleted(QString,QString)));
@@ -193,11 +207,15 @@ namespace Magus
     //****************************************************************************/
     void QtDefaultTextureWidget::addTexture(const QPixmap& pixmap, const QString& name, const QString& baseName)
     {
-        QtDefaultTextureAndText* textureAndText = new QtDefaultTextureAndText(pixmap, name, baseName, mTextureSize, this);
-        QListWidgetItem* item = new QListWidgetItem();
-        item->setSizeHint(mTextureSize); // Must be present, otherwise the widget is not shown
-        mSelectionList->addItem(item);
-        mSelectionList->setItemWidget(item, textureAndText);
+        // Don't allow duplicates
+        if (!isTextureExisting(name))
+        {
+            QtDefaultTextureAndText* textureAndText = new QtDefaultTextureAndText(pixmap, name, baseName, mTextureSize, this);
+            QListWidgetItem* item = new QListWidgetItem();
+            item->setSizeHint(mTextureSize); // Must be present, otherwise the widget is not shown
+            mSelectionList->addItem(item);
+            mSelectionList->setItemWidget(item, textureAndText);
+        }
     }
 
     //****************************************************************************/
@@ -250,7 +268,7 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QtDefaultTextureWidget::setTextureSelected(const QString& baseName)
+    void QtDefaultTextureWidget::setTextureSelected(const QString& name, bool isFullQualifiedName)
     {
         QtDefaultTextureAndText* textureAndText;
         QWidget* widget;
@@ -261,11 +279,23 @@ namespace Magus
             if (widget)
             {
                 textureAndText = static_cast<QtDefaultTextureAndText*>(widget);
-                if (textureAndText->mBaseName == baseName)
+                if (isFullQualifiedName)
                 {
-                    mSelectionList->setFocus();
-                    item->setSelected(true);
-                    return;
+                    if (textureAndText->mName == name)
+                    {
+                        mSelectionList->setFocus();
+                        item->setSelected(true);
+                        return;
+                    }
+                }
+                else
+                {
+                    if (textureAndText->mBaseName == name)
+                    {
+                        mSelectionList->setFocus();
+                        item->setSelected(true);
+                        return;
+                    }
                 }
             }
         }
@@ -306,6 +336,12 @@ namespace Magus
             mBaseNameTexture = textureAndText->mBaseName;
             emit selected(textureAndText->mName, textureAndText->mBaseName);
         }
+    }
+
+    //****************************************************************************/
+    void QtDefaultTextureWidget::handleSelected(const QString& name, const QString& baseName)
+    {
+        emit selected(name, baseName);
     }
 
     //****************************************************************************/
@@ -381,11 +417,38 @@ namespace Magus
     }
 
     //****************************************************************************/
+    void QtDefaultTextureWidget::filter(const QStringList& names)
+    {
+        clearAll();
+        QtDefaultTextureAndText* textureAndText;
+        QWidget* widget;
+        QList<QListWidgetItem*> list = mSelectionList->findItems(QString("*"), Qt::MatchWildcard);
+        foreach (QListWidgetItem* item, list)
+        {
+            widget = mSelectionList->itemWidget(item);
+            foreach(QString name, names)
+            {
+                textureAndText = static_cast<QtDefaultTextureAndText*>(widget);
+                if (name == textureAndText->mName)
+                    item->setHidden(false);
+            }
+        }
+    }
+
+    //****************************************************************************/
     void QtDefaultTextureWidget::resetFilter(void)
     {
         QList<QListWidgetItem*> list = mSelectionList->findItems(QString("*"), Qt::MatchWildcard);
         foreach (QListWidgetItem* item, list)
             item->setHidden(false);
+    }
+
+    //****************************************************************************/
+    void QtDefaultTextureWidget::clearAll(void)
+    {
+        QList<QListWidgetItem*> list = mSelectionList->findItems(QString("*"), Qt::MatchWildcard);
+        foreach (QListWidgetItem* item, list)
+            item->setHidden(true);
     }
 
     //****************************************************************************/
@@ -400,5 +463,25 @@ namespace Magus
     void QtDefaultTextureWidget::setSystemCommandEditAsset(const QString& systemCommand)
     {
         mSystemCommandEditAsset = systemCommand;
+    }
+
+    //****************************************************************************/
+    bool QtDefaultTextureWidget::isTextureExisting(const QString& name)
+    {
+        QtDefaultTextureAndText* textureAndText;
+        QWidget* widget;
+        int row;
+        QList<QListWidgetItem*> list = mSelectionList->findItems(QString("*"), Qt::MatchWildcard);
+        foreach (QListWidgetItem* item, list)
+        {
+            widget = mSelectionList->itemWidget(item);
+            if (widget)
+            {
+                textureAndText = static_cast<QtDefaultTextureAndText*>(widget);
+                if (textureAndText->mName == name)
+                    return true;
+            }
+        }
+        return false;
     }
 }

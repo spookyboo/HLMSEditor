@@ -34,7 +34,7 @@ MaterialBrowserDialog::MaterialBrowserDialog(QWidget* parent, Qt::WindowFlags f)
     mSelectedFileName = "";
 
     // Create the Resource widget
-    mResourceWidget = new MaterialBrowserWidget(QString("../common/icons/"), this);
+    mResourceWidget = new MaterialBrowserWidget(QString("../common/icons/"), this); // TODO: Use const string
     connect(mResourceWidget, SIGNAL(jSonFileSelectedToProcess(QString)), this, SLOT(handleJsonFileSelectedToProcess(QString)));
 
     // Create a buttonbox

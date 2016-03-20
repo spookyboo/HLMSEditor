@@ -1,23 +1,33 @@
-Short term updates:
-==================
-- Implement material browser
+V 1.0 updates:
+=============
+- Align the dock widgets (so they are displayed with the correct height and width after start)
+- Implement option Menu: Windows -> view (and select/deselect certain windows (eg texture window)
+- Set output directory for generated shader files
+- Remove unused functions in .h/.cpp files in the 'sources' directory
 - Read multiple materials from one JSON file
-- Possibility to set a folder containing all textures
+- Texture browser:
+  - Also apply any searchPattern in case the search filter was still active and a group/asset was selected
+  - Save settings
+  - Implement doubleclick in texture browser
+  - Check on existing texturefile (if not existing, ask to delete it from the texture browser. Similar to the material browser)
 
-Bugs:
-====
+V 1.0 Bugs:
+==========
 - Material browser:
-   - If thumb is missing and the noimage.png is displayed, the thumb is not refreshed when reloaded and added again to the material browser;
-     only after a restart the thumb is refreshed.
-- Cubemap json generates a lot of warnings in the log when depth is enabled (this is with all non-depth textures); the log message is only in Debug
+  - If thumb is missing and the noimage.png is displayed, the thumb is not refreshed when reloaded and added again to the material browser;
+    only after a restart the thumb is refreshed (minor bug).
+- Cubemap json generates a lot of warnings in the log when depth is enabled (this is with all non-depth textures); the log message is only in Debug.
+- F5 (generate HLMS) does not work when the focus in on a certain dock window (eg. node editor). Must be possible independent of window focus.
 
 
-Later:
-=====
+Implement later (V2.0):
+======================
+- Export/Import function: Make it possible to load import/export plugins (for custom formats)
+- Import meshes
 - Combine multiple json files / datablocks into 1 and take care of duplicate macroblocks and blendblocks
+- Also implement drag texturefile from file exporer and drop it on the node editor (dropping from file explorer is only possible on the texture browser)
 - asset_propertywidget_color.h => does not take current colour into account
 - QtAssetWidget signal when an action icon on the property is clicked
-- Detail weight map (how to use?)
 
 
 Not to be implemented:

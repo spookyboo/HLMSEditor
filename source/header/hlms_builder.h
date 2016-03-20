@@ -52,8 +52,10 @@ class HlmsBuilder
         // Create a Blend node and add it to the node editor canvas
         virtual HlmsNodeBlendblock* createBlendNode(Magus::QtNodeEditor* nodeEditor);
 
-    protected:
+        // Determine whether a directory is part of Ogre's resource locations
         bool isResourceLocationExisting(const Ogre::String& path);
+
+    protected:
 
         // The samplerblock is enriched with values from a samplernode
         void enrichSamplerBlockGeneric (Ogre::HlmsSamplerblock* samplerblock,

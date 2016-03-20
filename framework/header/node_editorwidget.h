@@ -22,7 +22,7 @@
 #define MAGUS_NODE_EDITOR_WIDGET_H
 
 #include <QWidget>
-#include <QGraphicsView>
+#include "node_view.h"
 #include <QGraphicsScene>
 #include <QKeyEvent>
 #include <QMenu>
@@ -146,6 +146,9 @@ namespace Magus
             // Activated when a contextmenu item is selected
             void contextMenuItemSelected(QAction* action);
 
+            // Activated when something was dropped (without data)
+            void handleDropped (void);
+
         signals:
             // Emitted when a node is added to the node editor
             void nodeAdded(QtNode*);
@@ -164,6 +167,9 @@ namespace Magus
             // This signal is typically emitted when the contextmenu item is selected
             // with function "Create compound from selected items".
             void selectedNodesToBeAddedToCompound(void);
+
+            // Emitted when something is dropped
+            void dropped (void);
 
         protected:
             QGraphicsItem* itemAtExceptActiveConnection(const QPointF& pos);
@@ -209,7 +215,7 @@ namespace Magus
             QMenu* mContextMenu;
             QMenu* mZoomSubMenu;
             QMenu* mFisheyeViewSubMenu;
-            QGraphicsView* mView;
+            QtNodeGraphicsView* mView;
             QtNodeGraphicsScene* mScene;
             QVector<QtNode*> mCurrentlySelectedNodes;
             QVector<QtConnection*> mCurrentlySelectedConnections;

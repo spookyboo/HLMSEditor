@@ -53,10 +53,10 @@ MaterialThumbsDockWidget::MaterialThumbsDockWidget(const QString& iconDir, const
     connect(mUnlitSelection, SIGNAL(assetDeleted(QString,QString)), this, SLOT(handleAssetDeleted(QString,QString)));
 
     // -------------------------------------- Fill the assets widget --------------------------------------
-    QIcon pbsIcon(mIconDir + TOOL_RESOURCE_ICON_PBS);
+    QIcon pbsIcon(mIconDir + ICON_PBS_DATABLOCK_NO_PATH);
     addTab(mPbsSelection, pbsIcon, QString("PBS"));
 
-    QIcon unlitIcon(mIconDir + TOOL_RESOURCE_ICON_UNLIT);
+    QIcon unlitIcon(mIconDir + ICON_UNLIT_DATABLOCK_NO_PATH);
     addTab(mUnlitSelection, unlitIcon, QString("Unlit"));
 
     // Perform standard functions

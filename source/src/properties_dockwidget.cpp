@@ -59,7 +59,7 @@ PropertiesDockWidget::PropertiesDockWidget(QString title, MainWindow* parent, Qt
     // Make some space
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     QRect rec = QApplication::desktop()->screenGeometry();
-    setMinimumWidth(0.3 * rec.width());
+    setMinimumWidth(0.25 * rec.width());
     layout()->setSizeConstraint(QLayout::SetMinimumSize);
 }
 

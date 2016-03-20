@@ -264,7 +264,6 @@ namespace Magus
 
         // Get item to be dropped on
         QPoint pos = mResourceTree->mapFromGlobal(QCursor::pos());
-        //QPoint pos = QCursor::pos();
         QTreeWidgetItem* itemDropped = mResourceTree->itemAt(pos);
         if (!itemDropped)
             return;
@@ -1243,7 +1242,6 @@ namespace Magus
     //****************************************************************************/
     void QtResourceTreeWidget::contextMenuItemSelected(QAction* action)
     {
-        // Revoved some action handling for situations that do not occur for the HLMS Editor
         if (mSubGroupSubMenu &&
                 action->parent() == mSubGroupSubMenu &&
                 mCreateSubGroupContextMenuItemEnabled)

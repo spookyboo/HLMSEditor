@@ -20,6 +20,7 @@
 
 // Include
 #include "constants.h"
+#include "magus_core.h"
 #include <QString>
 #include <QFile>
 #include <QTextStream>
@@ -31,6 +32,7 @@
 #include "OgreHlmsPbsDatablock.h"
 #include "OgreHlmsUnlitDatablock.h"
 #include "OgreHlmsManager.h"
+#include "hlms_builder.h"
 
 //****************************************************************************/
 MainWindow::MainWindow(void) :
@@ -121,6 +123,12 @@ void MainWindow::createActions(void)
     mMaterialBrowserAddMenuAction = new QAction(QString("Add Hlms to browser"), this);
     connect(mMaterialBrowserAddMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserAddMenuAction()));
 
+    // Texture menu
+    mTextureBrowserImportMenuAction = new QAction(QString("Import from directory"), this);
+    connect(mTextureBrowserImportMenuAction, SIGNAL(triggered()), this, SLOT(doTextureBrowserImportMenuAction()));
+    mTextureBrowserAddImageMenuAction = new QAction(QString("Add texture file(s)"), this);
+    connect(mTextureBrowserAddImageMenuAction, SIGNAL(triggered()), this, SLOT(doTextureBrowserAddImageMenuAction()));
+
     // Window menu
     mResetWindowLayoutMenuAction = new QAction(QString("Reset Window Layout"), this);
     connect(mResetWindowLayoutMenuAction, SIGNAL(triggered()), this, SLOT(doResetWindowLayoutMenuAction()));
@@ -131,6 +139,7 @@ void MainWindow::createMenus(void)
 {
     mFileMenu = menuBar()->addMenu(QString("&File"));
     mMaterialBrowserMenu = menuBar()->addMenu(QString("&Materials"));
+    mTextureBrowserMenu = menuBar()->addMenu(QString("&Textures"));
     QMenu* fileMenuAction = mFileMenu->addMenu("New Hlms");
     fileMenuAction->addAction(mNewHlmsPbsAction);
     fileMenuAction->addAction(mNewHlmsUnlitAction);
@@ -140,9 +149,10 @@ void MainWindow::createMenus(void)
     mFileMenu->addAction(mQuitMenuAction);
     mMaterialBrowserMenu->addAction(mMaterialBrowserOpenMenuAction);
     mMaterialBrowserMenu->addAction(mMaterialBrowserAddMenuAction);
+    mTextureBrowserMenu->addAction(mTextureBrowserImportMenuAction);
+    mTextureBrowserMenu->addAction(mTextureBrowserAddImageMenuAction);
     mWindowMenu = menuBar()->addMenu(QString("&Window"));
     mWindowMenu->addAction(mResetWindowLayoutMenuAction);
-
 }
 
 //****************************************************************************/
@@ -164,8 +174,12 @@ void MainWindow::createDockWindows(void)
     addDockWidget(Qt::LeftDockWidgetArea, mRenderwindowDockWidget);
     mPropertiesDockWidget = new PropertiesDockWidget("Properties", this);
     addDockWidget(Qt::LeftDockWidgetArea, mPropertiesDockWidget);
+
+    mTextureDockWidget = new TextureDockWidget("Textures", this);
+    addDockWidget(Qt::RightDockWidgetArea, mTextureDockWidget);
     mNodeEditorDockWidget = new NodeEditorDockWidget("NodeEditor", this);
-    setCentralWidget(mNodeEditorDockWidget);
+    addDockWidget(Qt::RightDockWidgetArea, mNodeEditorDockWidget);
+    //connect(mNodeEditorDockWidget, SIGNAL(nodeEditorDropEvent()), this, SLOT(handleNodeEditorDropEvent()));
 }
 
 //****************************************************************************/
@@ -173,7 +187,7 @@ void MainWindow::doNewHlmsPbsAction(void)
 {
     initDatablocks();
     mPropertiesDockWidget->clear();
-    mNodeEditorDockWidget->newHlmsPbsAndSampler();
+    mNodeEditorDockWidget->newHlmsPbs();
 }
 
 //****************************************************************************/
@@ -181,7 +195,7 @@ void MainWindow::doNewHlmsUnlitAction(void)
 {
     initDatablocks();
     mPropertiesDockWidget->clear();
-    mNodeEditorDockWidget->newHlmsUnlitAndSampler();
+    mNodeEditorDockWidget->newHlmsUnlit();
 }
 
 //****************************************************************************/
@@ -479,17 +493,17 @@ void MainWindow::loadMaterialBrowserCfg(void)
 
                 if (info->topLevelId == TOOL_SOURCES_LEVEL_X000_PBS &&
                         info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP)
-                    info->iconName = TOOL_RESOURCE_ICON_PBS;
+                    info->iconName = ICON_PBS_DATABLOCK_NO_PATH;
                 else if (info->topLevelId == TOOL_SOURCES_LEVEL_X000_PBS &&
                          info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_GROUP)
-                    info->iconName = TOOL_RESOURCE_ICON_SMALL_PBS;
+                    info->iconName = ICON_PBS_DATABLOCK_SMALL_NO_PATH;
 
                 if (info->topLevelId == TOOL_SOURCES_LEVEL_X000_UNLIT &&
                         info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP)
-                    info->iconName = TOOL_RESOURCE_ICON_UNLIT;
+                    info->iconName = ICON_UNLIT_DATABLOCK_NO_PATH;
                 else if (info->topLevelId == TOOL_SOURCES_LEVEL_X000_UNLIT &&
                          info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_GROUP)
-                    info->iconName = TOOL_RESOURCE_ICON_SMALL_UNLIT;
+                    info->iconName = ICON_UNLIT_DATABLOCK_SMALL_NO_PATH;
 
                 resources.append(info);
             }
@@ -505,7 +519,7 @@ void MainWindow::loadMaterialBrowserCfg(void)
              info->resourceName = QString("PBS");
              info->fullQualifiedName = QString("PBS");
              info->resourceType = TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP;
-             info->iconName = TOOL_RESOURCE_ICON_PBS;
+             info->iconName = ICON_PBS_DATABLOCK_NO_PATH;
              resources.append(info);
 
              info = new QtResourceInfo();
@@ -515,7 +529,7 @@ void MainWindow::loadMaterialBrowserCfg(void)
              info->resourceName = QString("Unlit");
              info->fullQualifiedName = QString("Unlit");
              info->resourceType = TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP;
-             info->iconName = TOOL_RESOURCE_ICON_UNLIT;
+             info->iconName = ICON_UNLIT_DATABLOCK_NO_PATH;
              resources.append(info);
         }
 
@@ -603,14 +617,81 @@ void MainWindow::doMaterialBrowserAddMenuAction(void)
 }
 
 //****************************************************************************/
+void MainWindow::doTextureBrowserImportMenuAction(void)
+{
+    QString textureFolder;
+    QFileDialog dialog;
+    dialog.setFileMode(QFileDialog::Directory);
+    if (dialog.exec())
+    {
+        QStringList fileNames = dialog.selectedFiles();
+        textureFolder = fileNames.at(0);
+//        Ogre::String folder = textureFolder.toStdString();
+//        HlmsBuilder builder;
+//        if (!builder.isResourceLocationExisting(folder))
+//        {
+            // Add location to the resource locations
+//            Ogre::Root* root = mOgreManager->getOgreRoot();
+//            root->addResourceLocation(folder, "FileSystem", "General");
+//            builder.saveAllResourcesLocations();
+//        }
+
+        // Add all texture files to a group in mTextureDockWidget
+        QString path;
+        QString fileName;
+        Ogre::FileInfoListPtr list = Ogre::ResourceGroupManager::getSingleton().listResourceFileInfo(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME) ;
+        Ogre::FileInfoList::iterator it;
+        Ogre::FileInfoList::iterator itStart = list->begin();
+        Ogre::FileInfoList::iterator itEnd = list->end();
+        for(it = itStart; it != itEnd; ++it)
+        {
+            // Add the file to the mTextureDockWidget, only if it is a texture/image file
+            Ogre::FileInfo& fileInfo = (*it);
+            path = fileInfo.archive->getName().c_str();
+            fileName = fileInfo.filename.c_str();
+            if (textureFolder == path)
+            {
+                if (Magus::isTypeBasedOnExtension(fileName, Magus::MAGUS_SUPPORTED_IMAGE_FORMATS, Magus::MAGUS_SUPPORTED_IMAGE_FORMATS_LENGTH))
+                {
+                    fileName = textureFolder + QString("/") + fileName;
+                    mTextureDockWidget->addTextureFile(fileName, GROUP_NAME_IMPORTED_TEXTURES); // Add it to a group
+                }
+            }
+        }
+    }
+}
+
+//****************************************************************************/
+void MainWindow::doTextureBrowserAddImageMenuAction(void)
+{
+    QString fileName;
+    QStringList fileNames;
+    fileNames = QFileDialog::getOpenFileNames(this,
+                                             QString("Select texture/image file(s)"),
+                                             QString(""),
+                                             QString("JPEG (*.jpg *.jpeg);;"
+                                                     "PNG (*.png);;"
+                                                     "DDS (*.dds);;"
+                                                     "All files (*.*)"));
+    foreach (fileName, fileNames)
+    {
+        if (!fileName.isEmpty())
+            mTextureDockWidget->addTextureFile(fileName);
+    }
+}
+
+//****************************************************************************/
 void MainWindow::doResetWindowLayoutMenuAction(void)
 {
     mRenderwindowDockWidget->show();
     addDockWidget(Qt::LeftDockWidgetArea, mRenderwindowDockWidget);
     mPropertiesDockWidget->show();
     addDockWidget(Qt::LeftDockWidgetArea, mPropertiesDockWidget);
+
+    mTextureDockWidget->show();
+    addDockWidget(Qt::RightDockWidgetArea, mTextureDockWidget);
     mNodeEditorDockWidget->show();
-    setCentralWidget(mNodeEditorDockWidget);
+    addDockWidget(Qt::RightDockWidgetArea, mNodeEditorDockWidget);
 }
 
 
@@ -639,18 +720,4 @@ void MainWindow::initDatablocks(void)
 EditorHlmsTypes MainWindow::getCurrentDatablockType(void)
 {
     return mNodeEditorDockWidget->getCurrentDatablockType();
-}
-
-//****************************************************************************/
-QString MainWindow::getBaseFileName(QString& fileName)
-{
-    mTempString = fileName;
-    int index = mTempString.lastIndexOf('/');
-    if (index < 0)
-        index = mTempString.lastIndexOf('\\');
-
-    if (index != 0)
-        return mTempString.right(fileName.length() - index - 1);
-
-    return mTempString;
 }

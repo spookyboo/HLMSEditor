@@ -564,7 +564,7 @@ void HlmsPbsBuilder::repositionPbsNode(HlmsNodePbsDatablock* pbsnode)
     // Reposition the pbs node (this is only done once)
     QPointF pos = pbsnode->pos();
     pos.setX(-1.5f * pbsnode->getWidth());
-    pos.setY(-1.5f * pbsnode->getHeigth());
+    pos.setY(-1.0f * pbsnode->getHeigth());
     pbsnode->setPos(pos);
 }
 

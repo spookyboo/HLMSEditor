@@ -29,6 +29,7 @@
 #include <QToolBar>
 #include "renderwindow_dockwidget.h"
 #include "properties_dockwidget.h"
+#include "texture_dockwidget.h"
 #include "nodeeditor_dockwidget.h"
 #include "material_browser_dialog.h"
 #include "ogre3_renderman.h"
@@ -53,6 +54,7 @@ class MainWindow : public QMainWindow
 		bool mIsClosing;
         Magus::OgreManager* getOgreManager(void) const {return mOgreManager;}
         PropertiesDockWidget* mPropertiesDockWidget; // Make is public for easy access
+        TextureDockWidget* mTextureDockWidget; // Make is public for easy access
         void initDatablocks(void); // To be called by the editor window, to indicate that a new Hlms datablock is created
         void getListOfResources(void); // Function to test which resources are loaded
         void getAndSetFirstDatablock(void); // Get the first datablock from all datablocks and set it to the item in the renderwindow
@@ -68,6 +70,8 @@ class MainWindow : public QMainWindow
         void doMaterialBrowserOpenMenuAction(void);
         void doMaterialBrowserAddMenuAction(void);
         void doQuitMenuAction(void);
+        void doTextureBrowserImportMenuAction(void);
+        void doTextureBrowserAddImageMenuAction(void);
         void doResetWindowLayoutMenuAction(void);
 
 	private:
@@ -79,7 +83,6 @@ class MainWindow : public QMainWindow
 		void closeEvent(QCloseEvent* event);
         void loadDatablock(const QString jsonFileName);
         void saveDatablock(void);
-        QString getBaseFileName(QString& fileName);
         void loadMaterialBrowserCfg(void);
         void saveMaterialBrowserCfg(void);
 
@@ -88,6 +91,7 @@ class MainWindow : public QMainWindow
         MaterialBrowserDialog* mMaterialBrowser;
         QMenu* mFileMenu;
         QMenu* mMaterialBrowserMenu;
+        QMenu* mTextureBrowserMenu;
         QMenu* mWindowMenu;
         QAction* mNewHlmsPbsAction;
         QAction* mNewHlmsUnlitAction;
@@ -96,6 +100,8 @@ class MainWindow : public QMainWindow
         QAction* mSaveAsDatablockMenuAction;
         QAction* mMaterialBrowserOpenMenuAction;
         QAction* mMaterialBrowserAddMenuAction;
+        QAction* mTextureBrowserImportMenuAction;
+        QAction* mTextureBrowserAddImageMenuAction;
         QAction* mQuitMenuAction;
         QAction* mResetWindowLayoutMenuAction;
         RenderwindowDockWidget* mRenderwindowDockWidget;

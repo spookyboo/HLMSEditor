@@ -61,12 +61,18 @@ class NodeEditorDockWidget : public QDockWidget
 		void createMenus(void);
 		void createToolBars(void);
         void generateDatablock (void);
-        void newHlmsPbsAndSampler();
-        void newHlmsUnlitAndSampler();
+        void newHlmsPbsAndSampler(void);
+        HlmsNodePbsDatablock* newHlmsPbs(void);
+        void newHlmsUnlitAndSampler(void);
+        HlmsNodeUnlitDatablock* newHlmsUnlit(void);
         HlmsNodePbsDatablock* createPbsNodeStructure(const QString& pbsDatablock);
         HlmsNodeUnlitDatablock* createUnlitNodeStructure(const QString& unlitDatablock);
         const QString& getCurrentDatablockName(void);
         EditorHlmsTypes getCurrentDatablockType (void);
+
+    signals:
+        // Emitted when something was dropped on this widget
+        void nodeEditorDropEvent (void);
 
 	private slots:
         HlmsNodePbsDatablock* doNewHlmsPbsDatablockAction(void);
@@ -79,8 +85,9 @@ class NodeEditorDockWidget : public QDockWidget
         // Additional slots
         void nodeToBeDeleted(QtNode* node);
         void nodeSelected(QtNode* node);
+        void handleDropped (void);
 
-	private:
+    private:
 		MainWindow* mParent;
         QMainWindow* mInnerMain;
         QMenu* mDatablockMenu;

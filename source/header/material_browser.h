@@ -18,8 +18,8 @@
 **
 ****************************************************************************/
 
-#ifndef MAGUS_RESOURCE_WIDGET_H
-#define MAGUS_RESOURCE_WIDGET_H
+#ifndef MATERIAL_WIDGET_H
+#define MATERIAL_WIDGET_H
 
 #include <QTreeWidget>
 #include <QMimeData>
@@ -32,9 +32,6 @@
 QT_BEGIN_NAMESPACE
 
 QT_END_NAMESPACE
-
-static const int TOOL_SOURCES_LEVEL_X000_PBS = 1;
-static const int TOOL_SOURCES_LEVEL_X000_UNLIT = 2;
 
 /****************************************************************************
 The MaterialBrowserWidget is an example of a resource widget for media and other

@@ -18,11 +18,11 @@
 **
 ****************************************************************************/
 
-#ifndef MAGUS_NODE_SCENE_H
-#define MAGUS_NODE_SCENE_H
+#ifndef MAGUS_NODE_VIEW_H
+#define MAGUS_NODE_VIEW_H
 
-#include <QGraphicsScene>
-#include <QGraphicsSceneMouseEvent>
+#include <QGraphicsView>
+#include <QMimeData>
 #include <QDragEnterEvent>
 
 QT_BEGIN_NAMESPACE
@@ -32,25 +32,39 @@ QT_END_NAMESPACE
 namespace Magus
 {
     /****************************************************************************
-     * Subclass of a QGraphicsScene. This is needed to prevent that a right
-     * mousebutton press disables selected nodes. A right mousebutton press is
-     * used to show a context menu (if enabled). Some contextmenu actions apply
-     * to the selected nodes.
+     * Subclass of a QGraphicsView. This is needed for accepting dropped
+     * content
     ***************************************************************************/
-    class QtNodeGraphicsScene : public QGraphicsScene
+    class QtNodeGraphicsView : public QGraphicsView, public QObject
     {
-        public:
-            QtNodeGraphicsScene(QObject* parent = 0) : QGraphicsScene(parent){}
-            virtual ~QtNodeGraphicsScene(void){}
+        Q_OBJECT
 
-            void mousePressEvent(QGraphicsSceneMouseEvent *event)
+        public:
+            QtNodeGraphicsView(QWidget* parent = 0) : QGraphicsView(parent)
             {
-                if (event->button() == Qt::RightButton)
-                {
-                    event->accept();
-                    return;
-                }
-                QGraphicsScene::mousePressEvent(event);
+                setAcceptDrops(true);
+            }
+            virtual ~QtNodeGraphicsView(void){}
+
+        signals:
+            // Emitted when something is dropped
+            void dropped(void);
+
+        protected:
+            virtual void dropEvent(QDropEvent* event)
+            {
+                emit dropped (); // Do not check for mimetype
+                event->acceptProposedAction();
+            }
+
+            virtual void dragEnterEvent(QDragEnterEvent *event)
+            {
+                event->acceptProposedAction();
+            }
+
+            virtual void dragMoveEvent(QDragMoveEvent *event)
+            {
+                event->acceptProposedAction();
             }
     };
 

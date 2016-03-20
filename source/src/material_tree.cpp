@@ -71,26 +71,38 @@ void MaterialTreeDockWidget::initializeResourceTree (void)
     QtSourcesInfo info;
 
     // HLMS PBS
-    mResourceTreeWidget->addResource (TOOL_SOURCES_LEVEL_X000_PBS, TOOL_SOURCES_LEVEL_X000_PBS, 0, QString("PBS"), QString("PBS"), TOOL_RESOURCE_ICON_PBS);
+    mResourceTreeWidget->addResource (TOOL_SOURCES_LEVEL_X000_PBS,
+                                      TOOL_SOURCES_LEVEL_X000_PBS,
+                                      0,
+                                      QString("PBS"),
+                                      QString("PBS"),
+                                      ICON_PBS_DATABLOCK_NO_PATH);
     info.toplevelId = TOOL_SOURCES_LEVEL_X000_PBS;
     info.resourceId = TOOL_SOURCES_LEVEL_X000_PBS;
     info.resourceType = Magus::TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP;
     info.parentId = 0;
     info.fileName = QString("PBS");
     info.baseName = info.fileName;
-    info.filter = TOOL_SOURCES_FORMAT_PBS;
+    //info.filter = TOOL_SOURCES_FORMAT_PBS;
+    info.filter = QString("");
     info.baseNameThumb = ICON_PBS_DATABLOCK;
     mSourceInfo[TOOL_SOURCES_LEVEL_X000_PBS] = info;
 
     // HLMS UNLIT
-    mResourceTreeWidget->addResource (TOOL_SOURCES_LEVEL_X000_UNLIT, TOOL_SOURCES_LEVEL_X000_UNLIT, 0, QString("Unlit"), QString("Unlit"), TOOL_RESOURCE_ICON_UNLIT);
+    mResourceTreeWidget->addResource (TOOL_SOURCES_LEVEL_X000_UNLIT,
+                                      TOOL_SOURCES_LEVEL_X000_UNLIT,
+                                      0,
+                                      QString("Unlit"),
+                                      QString("Unlit"),
+                                      ICON_UNLIT_DATABLOCK_NO_PATH);
     info.toplevelId = TOOL_SOURCES_LEVEL_X000_UNLIT;
     info.resourceId = TOOL_SOURCES_LEVEL_X000_UNLIT;
     info.resourceType = Magus::TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP;
     info.parentId = 0;
     info.fileName = QString("Unlit");
     info.baseName = info.fileName;
-    info.filter = TOOL_SOURCES_FORMAT_UNLIT;
+    //info.filter = TOOL_SOURCES_FORMAT_UNLIT;
+    info.filter = QString("");
     info.baseNameThumb = ICON_UNLIT_DATABLOCK;
     mSourceInfo[TOOL_SOURCES_LEVEL_X000_UNLIT] = info;
 
@@ -361,6 +373,7 @@ void MaterialTreeDockWidget::handleResourceSearchReset(void)
     // Signal
     emit resourceSearchReset();
 }
+
 //****************************************************************************/
 bool MaterialTreeDockWidget::isResourceExisting(const QString& baseName)
 {
@@ -376,6 +389,7 @@ bool MaterialTreeDockWidget::isResourceExisting(const QString& baseName)
 
     return false;
 }
+
 //****************************************************************************/
 int MaterialTreeDockWidget::getResourceId(const QString& baseNameThumb)
 {
@@ -396,9 +410,9 @@ int MaterialTreeDockWidget::getResourceId(const QString& baseNameThumb)
 const QString& MaterialTreeDockWidget::determineSubgroupIcon(int toplevelId)
 {
     if (toplevelId == TOOL_SOURCES_LEVEL_X000_PBS)
-        return TOOL_RESOURCE_ICON_SMALL_PBS;
+        return ICON_PBS_DATABLOCK_SMALL_NO_PATH;
     else if (toplevelId == TOOL_SOURCES_LEVEL_X000_UNLIT)
-        return TOOL_RESOURCE_ICON_SMALL_UNLIT;
+        return ICON_UNLIT_DATABLOCK_SMALL_NO_PATH;
     else
         return mEmptyString;
 }

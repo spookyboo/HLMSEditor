@@ -53,6 +53,12 @@ static const QString ICON_MINMAX = QString("../common/icons/minmax.png");
 static const QString ICON_CLOSE = QString("../common/icons/close.png");
 static const QString ICON_COLOUR = QString("../common/icons/colour.png");
 static const QString ICON_INFO = QString("../common/icons/info.png");
+static const QString ICON_PBS_DATABLOCK_NO_PATH = QString("pbs.png");
+static const QString ICON_PBS_DATABLOCK_SMALL_NO_PATH = QString("pbs_small.png");
+static const QString ICON_UNLIT_DATABLOCK_NO_PATH = QString("unlit.png");
+static const QString ICON_UNLIT_DATABLOCK_SMALL_NO_PATH = QString("unlit_small.png");
+static const QString ICON_TEXTURE_NO_PATH = QString("samplerblock.png");
+static const QString ICON_TEXTURE_SMALL_NO_PATH = QString("samplerblock_small.png");
 static const QString HLMS_GROUP = "[Hlms]\n";
 static const QString HLMS_DO_NOT_USE_AS_RESOURCE = "DoNotUseAsResource = ../common/ogre3\n"; // This must be the location where the HLMS templates are
 static const QString INFO_PBS = QString("../common/info/hlms_pbs.inf");
@@ -84,6 +90,36 @@ enum EditorHlmsTypes
     HLMS_UNLIT,     /// Made for GUIs, overlays, particle FXs, self-iluminating billboards
     HLMS_NONE
 };
+
+/****************************************************************************
+Struct for source info
+***************************************************************************/
+struct QtSourcesInfo
+{
+    int resourceId;
+    int toplevelId;
+    int parentId;
+    int resourceType;
+    QString fileName;
+    QString baseName;
+    QString fileDialogTitle;
+    QString filter;
+    QString baseNameThumb;
+};
+
+//****************************************************************************/
+static QString getBaseFileName(QString& fileName)
+{
+    QString mTempString = fileName;
+    int index = mTempString.lastIndexOf('/');
+    if (index < 0)
+        index = mTempString.lastIndexOf('\\');
+
+    if (index != 0)
+        return mTempString.right(fileName.length() - index - 1);
+
+    return mTempString;
+}
 
 //****************************************************************************/
 // Ports
@@ -172,5 +208,11 @@ static const int PROPERTY_BLENDBLOCK_SOURCE_BLEND_FACTOR_ALPHA = 97;
 static const int PROPERTY_BLENDBLOCK_DEST_BLEND_FACTOR_ALPHA = 98;
 static const int PROPERTY_BLENDBLOCK_BLEND_OPERATION = 99;
 static const int PROPERTY_BLENDBLOCK_BLEND_OPERATION_ALPHA = 100;
+
+// Material and Texture browser
+static const int TOOL_SOURCES_LEVEL_X000_PBS = 1;
+static const int TOOL_SOURCES_LEVEL_X000_UNLIT = 2;
+static const int TOOL_SOURCES_LEVEL_X000_TEXTURE = 3;
+static const QString GROUP_NAME_IMPORTED_TEXTURES = QString("Imported resources");
 
 #endif

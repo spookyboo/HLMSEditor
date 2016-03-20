@@ -18,8 +18,8 @@
 **
 ****************************************************************************/
 
-#ifndef MATERIAL_MAIN_H
-#define MATERIAL_MAIN_H
+#ifndef TEXTURE_MAIN_H
+#define TEXTURE_MAIN_H
 
 #include <QCloseEvent>
 #include <QMainWindow>
@@ -28,8 +28,8 @@
 #include <QMessageBox>
 #include <QToolBar>
 #include "constants.h"
-#include "material_thumbs.h"
-#include "material_tree.h"
+#include "texture_thumbs.h"
+#include "texture_tree.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -37,32 +37,20 @@ QT_END_NAMESPACE
 
 /****************************************************************************
 MainWindow is the main container window
-
-IMPORTANT:
-=========
-This class is changed to facilitate the HLMS editor. Do not use it as a
-generic Magus class.
 ***************************************************************************/
-class MaterialMain : public QMainWindow
+class TextureMain : public QMainWindow
 {
     Q_OBJECT
 
     public:
-        MaterialMain(const QString& iconDir, QWidget * parent = 0);
-        ~MaterialMain(void);
+        TextureMain(const QString& iconDir, QWidget * parent = 0);
+        ~TextureMain(void);
 
         // Returns a list of all resources in the resource tree. This includes both groups, subgroups and assets
         QVector<Magus::QtResourceInfo*>& getResources (void);
 
-        // Creates the resourcetree and loads the assets. Setting the resources generates a signal (resourceAdded) from
-        // mMaterialTreeDockWidget; this automatically adds the assets to the mMaterialThumbsDockWidget
+        // Creates the resourcetree and loads the assets.
         void setResources (const QVector<Magus::QtResourceInfo*>& resources);
-
-        // Add a material to  the resourcetree
-        void addMaterial(const QString& baseNameJson,
-                         const QString& fullNameJson,
-                         const QString& baseNameThumb,
-                         EditorHlmsTypes type);
 
         // Initialise the resourcetree
         void initResourceTree(void);
@@ -70,25 +58,25 @@ class MaterialMain : public QMainWindow
         // Returns the qualified name of the currently selected item from the resource tree
         const QString& getSelectedFullQualifiedName(void);
 
-        void update(void);
-        bool mIsClosing;
+        void addTextureFile (const QString& fileName);
+        void addTextureFile (const QString& fileName, const QString& group);
+        const QString& getCurrentFileName (void);
 
-    signals:
-        void jSonFileSelectedToProcess(const QString& fullNameJson);
+        bool mIsClosing;
 
     protected:
         QMessageBox::StandardButton fileDoesNotExistsWarning(const QString& fileName);
 
     private slots:
-        void handleResourceSelected(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
-        void handleResourceDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
-        void handleResourceAdded(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
-        void handleResourceDeleted(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
-        void handleResourceSearched(const QString& searchPattern);
-        void handleResourceSearchReset(void);
-        void handleTabChanged(int toplevelId);
+        void handleTextureSelected(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, int resourceType);
+        void handleTextureDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
+        void handleTextureAdded(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
+        void handleTextureDeleted(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
+        void handleTextureSearched(const QString& searchPattern);
+        void handleTextureSearchReset(void);
         void handleThumbDeleted(const QString& name, const QString& baseName);
         void handleThumbSelected(const QString& name, const QString& baseName);
+        void handleTextureFileDropped(const QString& name, const QString& baseName);
         void handleThumbDoubleClicked(const QString& name, const QString& baseName);
 
     private:
@@ -99,8 +87,8 @@ class MaterialMain : public QMainWindow
         void createDockWindows(void);
         void closeEvent(QCloseEvent* event);
 
-        MaterialTreeDockWidget* mMaterialTreeDockWidget;
-        MaterialThumbsDockWidget* mMaterialThumbsDockWidget;
+        TextureTreeDockWidget* mTextureTreeDockWidget;
+        TextureThumbsDockWidget* mTextureThumbsDockWidget;
         QString mIconDir;
         QString mSelectedFileName;
 };

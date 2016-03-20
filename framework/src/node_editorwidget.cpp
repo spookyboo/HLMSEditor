@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 // Include
-#include <QVBoxLayout>
+#include <QVBoxLayout>mview
 #include <QMessageBox>
 #include <QLabel>
 #include <QGraphicsSceneMouseEvent>
@@ -37,7 +37,9 @@ namespace Magus
     QtNodeEditor::QtNodeEditor(QWidget* parent) : QWidget(parent)
     {
         QVBoxLayout* mainLayout = new QVBoxLayout;
-        mView = new QGraphicsView(this);
+        mView = new QtNodeGraphicsView(this);
+        connect(mView, SIGNAL(dropped()), this, SLOT(handleDropped())); // Check if something is dropped
+
         QRect rcontent = mView->contentsRect();
         mView->setSceneRect(0, 0, rcontent.width(), rcontent.height()); // Prevent unwanted jumping and scrollbars
         mScene = new QtNodeGraphicsScene();
@@ -718,6 +720,7 @@ namespace Magus
             mCurrentlySelectedConnections.append(connection);
             connection->setSelected(true);
         }
+
     }
 
     //****************************************************************************/
@@ -816,6 +819,7 @@ namespace Magus
         node->_setEditor(this);
         node->_setScene(mScene);
         mScene->addItem(node);
+        mScene->update();
         node->setZoom(mZoom);
         emit nodeAdded(node);
     }
@@ -973,7 +977,7 @@ namespace Magus
         // Put the connections of the node in front of the node and the other connections behind the node
         foreach(QGraphicsItem* item, items)
         {
-            if (isNode(item))
+            if (isConnection(item))
             {
                 QtConnection* connection = static_cast<QtConnection*>(item);
                 if (node->isConnectionConnectedToThisNode(connection))
@@ -982,6 +986,8 @@ namespace Magus
                     item->stackBefore(node);
             }
         }
+
+        mScene->update();
     }
 
     //****************************************************************************/
@@ -998,6 +1004,8 @@ namespace Magus
             if (node != item && isNode(item) && item->isVisible())
                 node->stackBefore(item);
         }
+
+        mScene->update();
     }
 
     //****************************************************************************/
@@ -1392,5 +1400,11 @@ namespace Magus
                 //setZoom(mZoom + 0.001 * event->delta());
 
         mScene->update();
+    }
+
+    //****************************************************************************/
+    void QtNodeEditor::handleDropped (void)
+    {
+        emit dropped();
     }
 }

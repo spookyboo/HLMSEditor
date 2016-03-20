@@ -216,7 +216,9 @@ void MaterialMain::handleTabChanged(int toplevelId)
 //****************************************************************************/
 void MaterialMain::handleThumbDeleted(const QString& name, const QString& baseName)
 {
-    // Note, that name and baseName are related to thumb images
+    // Note, that name and baseName are related to thumb images. Do not use name, because
+    // in mMaterialTreeDockWidget this applies to the filename of the json file
+    // and not the filename of the thumb
     mMaterialTreeDockWidget->deleteAssetQuiet(baseName);
     mSelectedFileName = "";
 }
@@ -224,14 +226,18 @@ void MaterialMain::handleThumbDeleted(const QString& name, const QString& baseNa
 //****************************************************************************/
 void MaterialMain::handleThumbSelected(const QString& name, const QString& baseName)
 {
-    // Note, that name and baseName are related to thumb images
+    // Note, that name and baseName are related to thumb images. Do not use name, because
+    // in mMaterialTreeDockWidget this applies to the filename of the json file
+    // and not the filename of the thumb
     mSelectedFileName = mMaterialTreeDockWidget->setSelectAssetQuiet(baseName);
 }
 
 //****************************************************************************/
 void MaterialMain::handleThumbDoubleClicked(const QString& name, const QString& baseName)
 {
-    // Note, that name and baseName are related to thumb images
+    // Note, that name and baseName are related to thumb images. Do not use name, because
+    // in mMaterialTreeDockWidget this applies to the filename of the json file
+    // and not the filename of the thumb
     mSelectedFileName = mMaterialTreeDockWidget->doubleClicked(baseName);
     if(Magus::fileExist(mSelectedFileName))
     {

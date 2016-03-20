@@ -81,6 +81,12 @@ namespace Magus
             // Emitted when an asset is deleted
             void assetDeleted(const QString& name, const QString& baseName);
 
+            // Emitted when a texture file is moved
+            void textureFileMoved(const QString& name, const QString& baseName);
+
+            // Emitted when the asset is moved
+            void assedDragMoved(const QString& name, const QString& baseName);
+
         protected:
             virtual void keyPressEvent(QKeyEvent* event);
             virtual void dropEvent(QDropEvent* event);
@@ -110,8 +116,8 @@ namespace Magus
             // else use the baseName as search criterium.
             void deleteTexture(const QString& name, bool nameIsFullName = true);
 
-            // Set a texture selected
-            void setTextureSelected(const QString& baseName);
+            // Set a texture selected (based on name (fully qualified) or the basebame
+            void setTextureSelected(const QString& name, bool isFullQualifiedName = false);
 
             // Delete an item from the QtDefaultTextureWidget. Both name (full qualified name) and baseName must match
             void deleteTexture(const QString& name, const QString& baseName);
@@ -136,8 +142,14 @@ namespace Magus
             // Apply filtering; only the items that meet the pattern are displayed
             void filter(const QString& pattern);
 
+            // Apply filtering based on a StringVector with names
+            void filter(const QStringList& names);
+
             // Reset the filtering
             void resetFilter(void);
+
+            // Hide all items
+            void clearAll(void);
 
             // Determine whether dropping texture files from the file explorer is allowed
             void setDropFilesAllowed(bool allowed);
@@ -145,7 +157,13 @@ namespace Magus
             // Executes a system command when doubleclicked
             void setSystemCommandEditAsset(const QString& systemCommand);
 
+            // Checks for a duplicate; added for HLMS Editor
+            bool isTextureExisting(const QString& name);
+
         signals:
+            // Emitted when the mouse is pressed
+            void mousePressed(const QString& name, const QString& baseName);
+
             // Emitted when a texture is selected (via the mouse)
             void selected(const QString& name, const QString& baseName);
 
@@ -160,6 +178,7 @@ namespace Magus
 
         protected slots:
             void handleSelected(QListWidgetItem* item);
+            void handleSelected(const QString& name, const QString& baseName);
             void handleDoubleClicked(QListWidgetItem* item);
             void handleTextureFileDropped (const QString& name, const QString& baseName);
             void handleMouseOver(QListWidgetItem* item);

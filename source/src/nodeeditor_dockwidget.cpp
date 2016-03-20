@@ -43,8 +43,10 @@ NodeEditorDockWidget::NodeEditorDockWidget(QString title, MainWindow* parent, Qt
     mNodeEditor = new Magus::QtNodeEditor(this);
     mNodeEditor->setMenuSelectionToCompoundEnabled(false); // Enabling this makes it a bit more complicated
     mNodeEditor->setMenuExpandCompoundsEnabled(false); // No compounds are used
+
     connect(mNodeEditor, SIGNAL(nodeToBeRemoved(QtNode*)), this, SLOT(nodeToBeDeleted(QtNode*)));
     connect(mNodeEditor, SIGNAL(nodeSelected(QtNode*)), this, SLOT(nodeSelected(QtNode*)));
+    connect(mNodeEditor, SIGNAL(dropped()), this, SLOT(handleDropped()));
     mInnerMain->setCentralWidget(mNodeEditor);
     mHlmsPbsDatablockNode = 0;
     mHlmsUnlitDatablockNode = 0;
@@ -52,6 +54,13 @@ NodeEditorDockWidget::NodeEditorDockWidget(QString title, MainWindow* parent, Qt
     mCurrentDatablockName = DEFAULT_PBS_DATABLOCK_NAME;
     mHlmsPbsBuilder = new HlmsPbsBuilder(mNodeEditor);
     mHlmsUnlitBuilder = new HlmsUnlitBuilder(mNodeEditor);
+    mNodeEditor->setZoom(0.9f);
+
+    // Make some space
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    QRect rec = QApplication::desktop()->screenGeometry();
+    setMinimumHeight(0.1 * rec.height());
+    layout()->setSizeConstraint(QLayout::SetMinimumSize);
 }
 
 //****************************************************************************/
@@ -136,6 +145,18 @@ void NodeEditorDockWidget::newHlmsPbsAndSampler()
 }
 
 //****************************************************************************/
+HlmsNodePbsDatablock* NodeEditorDockWidget::newHlmsPbs(void)
+{
+    mNodeEditor->clear();
+    mHlmsPbsDatablockNode = 0;
+    mHlmsUnlitDatablockNode = 0;
+
+    // Create a pbs
+    doNewHlmsPbsDatablockAction();
+    return mHlmsPbsDatablockNode;
+}
+
+//****************************************************************************/
 void NodeEditorDockWidget::newHlmsUnlitAndSampler()
 {
     mNodeEditor->clear();
@@ -145,6 +166,18 @@ void NodeEditorDockWidget::newHlmsUnlitAndSampler()
     // Create an unlit and a sampler for convenience
     doNewHlmsUnlitDatablockAction();
     doNewSamplerblockAction();
+}
+
+//****************************************************************************/
+HlmsNodeUnlitDatablock* NodeEditorDockWidget::newHlmsUnlit(void)
+{
+    mNodeEditor->clear();
+    mHlmsUnlitDatablockNode = 0;
+    mHlmsUnlitDatablockNode = 0;
+
+    // Create an unlit
+    doNewHlmsUnlitDatablockAction();
+    return mHlmsUnlitDatablockNode;
 }
 
 //****************************************************************************/
@@ -367,4 +400,20 @@ EditorHlmsTypes NodeEditorDockWidget::getCurrentDatablockType(void)
         return EditorHlmsTypes::HLMS_UNLIT;
 
     return EditorHlmsTypes::HLMS_NONE;
+}
+
+//****************************************************************************/
+void NodeEditorDockWidget::handleDropped (void)
+{
+    // Something was dropped on the node editor. This must be either the texture thumb or and item from the texture tree
+    // Use the currently selected item in the tree and create a texture/sampler node
+    // nB: When a file from the file explorer is dropped, this function will not take that into account
+    // It currently assumes that it came from the texture tree- or thumbs widget
+    HlmsNodeSamplerblock* samplerNode = doNewSamplerblockAction();
+    if (samplerNode)
+    {
+        QString fileName = mParent->mTextureDockWidget->getCurrentFileName();
+        samplerNode->setFileNameTexture(fileName);
+        nodeSelected(samplerNode);
+    }
 }

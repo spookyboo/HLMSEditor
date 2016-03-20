@@ -492,7 +492,7 @@ void HlmsUnlitBuilder::repositionUnlitNode(HlmsNodeUnlitDatablock* unlitnode)
     // Reposition the unlit node (this is only done once)
     QPointF pos = unlitnode->pos();
     pos.setX(-1.5f * unlitnode->getWidth());
-    pos.setY(-1.5f * unlitnode->getHeigth());
+    pos.setY(-1.0f * unlitnode->getHeigth());
     unlitnode->setPos(pos);
 }
 

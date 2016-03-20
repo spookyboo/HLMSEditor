@@ -18,8 +18,8 @@
 **
 ****************************************************************************/
 
-#ifndef MAGUS_TOOL_RESOURCES_SOURCES_H
-#define MAGUS_TOOL_RESOURCES_SOURCES_H
+#ifndef MATERIAL_TREE_H
+#define MATERIAL_TREE_H
 
 #include <QtWidgets>
 #include <QMenu>
@@ -33,31 +33,6 @@
 QT_BEGIN_NAMESPACE
 class QDockWidget;
 QT_END_NAMESPACE
-
-// Define the file types that can be imported; note, that this must be in line with the types
-// defined in tool_resourcewidget_assets.h
-static const QString TOOL_SOURCES_FORMAT_PBS = QString("PBS (*.*)");
-static const QString TOOL_SOURCES_FORMAT_UNLIT = QString("Unlit (*.*)");
-static const QString TOOL_RESOURCE_ICON_PBS = QString("pbs.png");
-static const QString TOOL_RESOURCE_ICON_SMALL_PBS = QString("pbs_small.png");
-static const QString TOOL_RESOURCE_ICON_UNLIT = QString("unlit.png");
-static const QString TOOL_RESOURCE_ICON_SMALL_UNLIT = QString("unlit_small.png");
-
-/****************************************************************************
-Struct for source info
-***************************************************************************/
-struct QtSourcesInfo
-{
-    int resourceId;
-    int toplevelId;
-    int parentId;
-    int resourceType;
-    QString fileName;
-    QString baseName;
-    QString fileDialogTitle;
-    QString filter;
-    QString baseNameThumb;
-};
 
 /****************************************************************************
 This class represents a generic dock widget for sources. The MaterialTreeDockWidget
