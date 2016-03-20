@@ -63,7 +63,12 @@ HEADERS       = \
     source/header/material_tree.h \
     source/header/material_main.h \
     source/header/material_thumbs.h \
-    source/header/material_browser_dialog.h
+    source/header/material_browser_dialog.h \
+    source/header/texture_dockwidget.h \
+    source/header/texture_main.h \
+    source/header/texture_thumbs.h \
+    source/header/texture_tree.h \
+    framework/header/node_view.h
 
 
 SOURCES       = \
@@ -117,7 +122,11 @@ SOURCES       = \
     source/src/material_main.cpp \
     source/src/material_tree.cpp \
     source/src/material_thumbs.cpp \
-    source/src/material_browser_dialog.cpp
+    source/src/material_browser_dialog.cpp \
+    source/src/texture_dockwidget.cpp \
+    source/src/texture_main.cpp \
+    source/src/texture_thumbs.cpp \
+    source/src/texture_tree.cpp
 
 
 INCLUDEPATH += "../HLMSEditor/source/header/"
