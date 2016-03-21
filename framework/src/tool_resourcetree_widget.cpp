@@ -53,7 +53,6 @@ namespace Magus
         mResourceTree->viewport()->installEventFilter(this);
         mResourceTree->header()->hide();
 
-
         // Set default values for contextmenu
         mToplevelGroupContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP] = true;
         mToplevelGroupContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP] = true;
@@ -232,48 +231,27 @@ namespace Magus
 
         if (isItemAsset(item))
         {
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP,
-                                  mAssetContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP,
-                                  mAssetContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_ASSET,
-                                  mAssetContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_ASSET]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_IMPORT_ASSET,
-                                  mAssetContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_IMPORT_ASSET]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET,
-                                  mAssetContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE,
-                                  mAssetContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE]);
+            QMap<QString, bool>::iterator it;
+            QMap<QString, bool>::iterator itStart = mAssetContextMenuItemEnabled.begin();
+            QMap<QString, bool>::iterator itEnd = mAssetContextMenuItemEnabled.end();
+            for (it = itStart; it != itEnd; ++it)
+                enableContextMenuItem(it.key(), it.value());
         }
         else if (isItemSubGroup(item))
         {
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP,
-                                  mSubGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP,
-                                  mSubGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_ASSET,
-                                  mSubGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_ASSET]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_IMPORT_ASSET,
-                                  mSubGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_IMPORT_ASSET]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET,
-                                  mSubGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE,
-                                  mSubGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE]);
+            QMap<QString, bool>::iterator it;
+            QMap<QString, bool>::iterator itStart = mSubGroupContextMenuItemEnabled.begin();
+            QMap<QString, bool>::iterator itEnd = mSubGroupContextMenuItemEnabled.end();
+            for (it = itStart; it != itEnd; ++it)
+                enableContextMenuItem(it.key(), it.value());
         }
         else if (isItemToplevelGroup(item))
         {
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP,
-                                  mToplevelGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP,
-                                  mToplevelGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_ASSET,
-                                  mToplevelGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_ASSET]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_IMPORT_ASSET,
-                                  mToplevelGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_IMPORT_ASSET]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET,
-                                  mToplevelGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET]);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE,
-                                  mToplevelGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE]);
+            QMap<QString, bool>::iterator it;
+            QMap<QString, bool>::iterator itStart = mToplevelGroupContextMenuItemEnabled.begin();
+            QMap<QString, bool>::iterator itEnd = mToplevelGroupContextMenuItemEnabled.end();
+            for (it = itStart; it != itEnd; ++it)
+                enableContextMenuItem(it.key(), it.value());
         }
     }
 
