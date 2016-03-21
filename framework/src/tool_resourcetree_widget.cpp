@@ -52,6 +52,29 @@ namespace Magus
         mResourceTree->setDragDropOverwriteMode(true);
         mResourceTree->viewport()->installEventFilter(this);
         mResourceTree->header()->hide();
+
+
+        // Set default values for contextmenu
+        mToplevelGroupContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP] = true;
+        mToplevelGroupContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP] = true;
+        mToplevelGroupContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_CREATE_ASSET] = true;
+        mToplevelGroupContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_IMPORT_ASSET] = true;
+        mToplevelGroupContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET] = true;
+        mToplevelGroupContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE] = true;
+        mSubGroupContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP] = true;
+        mSubGroupContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP] = true;
+        mSubGroupContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_CREATE_ASSET] = true;
+        mSubGroupContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_IMPORT_ASSET] = true;
+        mSubGroupContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET] = true;
+        mSubGroupContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE] = true;
+        mAssetContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP] = true;
+        mAssetContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP] = true;
+        mAssetContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_CREATE_ASSET] = true;
+        mAssetContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_IMPORT_ASSET] = true;
+        mAssetContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET] = true;
+        mAssetContextMenuItemEnabled [TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE] = true;
+
+        // Create signal/slot connection
         connect(mResourceTree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(handleItemChanged(QTreeWidgetItem*,int)));
 
         // Create edit
@@ -183,6 +206,24 @@ namespace Magus
     }
 
     //****************************************************************************/
+    void QtResourceTreeWidget::enableContextMenuItemForTopLevelGroup(const QString& menuItemText, bool enabled)
+    {
+        mToplevelGroupContextMenuItemEnabled [menuItemText] = enabled;
+    }
+
+    //****************************************************************************/
+    void QtResourceTreeWidget::enableContextMenuItemForSubGroup(const QString& menuItemText, bool enabled)
+    {
+        mSubGroupContextMenuItemEnabled [menuItemText] = enabled;
+    }
+
+    //****************************************************************************/
+    void QtResourceTreeWidget::enableContextMenuItemForAsset(const QString& menuItemText, bool enabled)
+    {
+        mAssetContextMenuItemEnabled [menuItemText] = enabled;
+    }
+
+    //****************************************************************************/
     void QtResourceTreeWidget::enableContextMenuItemsForSelectedResource(void)
     {
         QTreeWidgetItem* item = mResourceTree->currentItem();
@@ -191,30 +232,48 @@ namespace Magus
 
         if (isItemAsset(item))
         {
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, false);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, false);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_ASSET, false);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, true);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, true);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP,
+                                  mAssetContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP,
+                                  mAssetContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_ASSET,
+                                  mAssetContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_ASSET]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_IMPORT_ASSET,
+                                  mAssetContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_IMPORT_ASSET]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET,
+                                  mAssetContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE,
+                                  mAssetContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE]);
         }
         else if (isItemSubGroup(item))
         {
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, false);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, true);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_ASSET, true);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, false);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, true);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP,
+                                  mSubGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP,
+                                  mSubGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_ASSET,
+                                  mSubGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_ASSET]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_IMPORT_ASSET,
+                                  mSubGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_IMPORT_ASSET]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET,
+                                  mSubGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE,
+                                  mSubGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE]);
         }
         else if (isItemToplevelGroup(item))
         {
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, true);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, true);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_ASSET, true);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, false);
-            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, mDeleteTopLevelGroupEnabled);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP,
+                                  mToplevelGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP,
+                                  mToplevelGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_CREATE_ASSET,
+                                  mToplevelGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_CREATE_ASSET]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_IMPORT_ASSET,
+                                  mToplevelGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_IMPORT_ASSET]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET,
+                                  mToplevelGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET]);
+            enableContextMenuItem(TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE,
+                                  mToplevelGroupContextMenuItemEnabled[TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE]);
         }
     }
 
@@ -1242,7 +1301,22 @@ namespace Magus
     //****************************************************************************/
     void QtResourceTreeWidget::contextMenuItemSelected(QAction* action)
     {
-        if (mSubGroupSubMenu &&
+        if (mToplevelGroupSubMenu &&
+                action->parent() == mToplevelGroupSubMenu &&
+                mCreateTopLevelGroupContextMenuItemEnabled)
+        {
+            // ---------- Create toplevel group ----------
+            QtResourceInfo* info = getRegisteredResourceInfo (action->data().toInt());
+            if (info)
+            {
+                // Add toplevel group and disable it
+                addResource (info->resourceId, info->resourceId, 0, info->resourceName, info->fullQualifiedName, info->iconName);
+                action->setCheckable(false);
+                action->setEnabled(false);
+            }
+            return;
+        }
+        else if (mSubGroupSubMenu &&
                 action->parent() == mSubGroupSubMenu &&
                 mCreateSubGroupContextMenuItemEnabled)
         {
@@ -1297,6 +1371,72 @@ namespace Magus
                     expand(parentId);
                 }
             }
+            return;
+        }
+        else if (action->text() == TOOL_RESOURCETREE_ACTION_CREATE_ASSET)
+        {
+            // ---------- Create asset ----------
+            QTreeWidgetItem* item = mResourceTree->currentItem();
+            if (isItemAsset(item))
+                return;
+
+            if (item)
+            {
+                int parentId = getResourceIdFromItem(item);
+                int toplevelId = getToplevelParentIdFromItem(item);
+                if (parentId != 0)
+                {
+                    // A subgroup may not be added to the toplevel
+                    int resourceId = generateUniqueResourceId();
+                    addResource (toplevelId,
+                                 resourceId,
+                                 parentId,
+                                 QString("<Asset>"),
+                                 QString(""),
+                                 QString(""),
+                                 true);
+                    expand(parentId);
+                }
+            }
+
+            return;
+        }
+        else if (action->text() == TOOL_RESOURCETREE_ACTION_IMPORT_ASSET)
+        {
+            QTreeWidgetItem* item = mResourceTree->currentItem();
+            if (isItemAsset(item))
+                return;
+
+            if (item)
+            {
+                int resourceId = getResourceIdFromItem(item);
+                emit resourceImported(resourceId);
+            }
+
+            return;
+        }
+        else if (action->text() == TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET)
+        {
+            QTreeWidgetItem* item = mResourceTree->currentItem();
+            if (!isItemAsset(item))
+                return;
+
+            if (item)
+            {
+                int parentId = getParentIdFromItem(item);
+                int toplevelId = getToplevelParentIdFromItem(item);
+                QString fullName = getFullQualifiedNameFromItem(item);
+                int duplicateResourceId = generateUniqueResourceId();
+                addResource (toplevelId,
+                             duplicateResourceId,
+                             parentId,
+                             QString("Copy of ") + item->text(0),
+                             fullName,
+                             QString(""),
+                             true);
+                emit assetDuplicated(duplicateResourceId);
+            }
+
             return;
         }
         else if (action->text() == TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE)

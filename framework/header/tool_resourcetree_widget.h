@@ -28,6 +28,7 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QLabel>
+#include <QMap>
 #include "magus_treewidget.h"
 
 QT_BEGIN_NAMESPACE
@@ -356,6 +357,15 @@ namespace Magus
             const QString& getSubgroupIconName (void) const {return mSubgroupIconName;}
             void setSubgroupIconName (const QString& subgroupIconName) {mSubgroupIconName = subgroupIconName;}
 
+            // Determine whether the contextmenu item is enabled/disable when a toplevel group is selected
+            void enableContextMenuItemForTopLevelGroup(const QString& menuItemText, bool enabled);
+
+            // Determine whether the contextmenu item is enabled/disable when a subgroup is selected
+            void enableContextMenuItemForSubGroup(const QString& menuItemText, bool enabled);
+
+            // Determine whether the contextmenu item is enabled/disable when an asset is selected
+            void enableContextMenuItemForAsset(const QString& menuItemText, bool enabled);
+
         public slots:
             // Activated when a contextmenu item is selected
             void contextMenuItemSelected(QAction* action);
@@ -447,6 +457,9 @@ namespace Magus
             QVector<int> mChildIdVector;
             QVector<QtResourceInfo*> mRegisteredResources;
             QVector<QtResourceInfo*> mResourceInfoVec;
+            QMap<QString, bool> mToplevelGroupContextMenuItemEnabled;
+            QMap<QString, bool> mSubGroupContextMenuItemEnabled;
+            QMap<QString, bool> mAssetContextMenuItemEnabled;
             QString mTempString;
             QMenu* mContextMenu;
             QMenu* mToplevelGroupSubMenu;

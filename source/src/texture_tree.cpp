@@ -97,6 +97,30 @@ void TextureTreeDockWidget::initializeResourceTree (void)
     info.filter = QString("");
     info.baseNameThumb = ICON_TEXTURE_NO_PATH;
     mSourceInfo[TOOL_SOURCES_LEVEL_X000_TEXTURE] = info;
+
+    // Determine what is enabled/disabled if a toplevelgroup is selected
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, false);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, true);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, false);
+
+    // Determine what is enabled/disabled if a subgroup is selected
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, false);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, true);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, true);
+
+    // Determine what is enabled/disabled if an asset is selected
+    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, false);
+    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, false);
+    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_CREATE_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, true);
 }
 
 //****************************************************************************/
@@ -380,6 +404,7 @@ QVector<Magus::QtResourceInfo*>& TextureTreeDockWidget::getResources (int resour
 //****************************************************************************/
 void TextureTreeDockWidget::setResources(const QVector<Magus::QtResourceInfo*>& resources)
 {
+    mResourceTreeWidget->expandAll();
 }
 
 //****************************************************************************/

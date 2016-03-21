@@ -106,6 +106,30 @@ void MaterialTreeDockWidget::initializeResourceTree (void)
     info.baseNameThumb = ICON_UNLIT_DATABLOCK;
     mSourceInfo[TOOL_SOURCES_LEVEL_X000_UNLIT] = info;
 
+    // Determine what is enabled/disabled if a toplevelgroup is selected
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, false);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, true);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, false);
+
+    // Determine what is enabled/disabled if a subgroup is selected
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, false);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, true);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, true);
+
+    // Determine what is enabled/disabled if an asset is selected
+    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, false);
+    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, false);
+    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_CREATE_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, false);
+    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, true);
+
     // Set 'PBS' selected
     mResourceTreeWidget->selectResource(TOOL_SOURCES_LEVEL_X000_PBS, false);
 }
