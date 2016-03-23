@@ -450,6 +450,26 @@ QVector<Magus::QtResourceInfo*>& TextureTreeDockWidget::getResources (int resour
 //****************************************************************************/
 void TextureTreeDockWidget::setResources(const QVector<Magus::QtResourceInfo*>& resources)
 {
+    // Add resources to the resource tree
+    mResourceTreeWidget->setResources(resources, true);
+
+    // Iterate again through the list to make sure that all info is set
+    QVectorIterator<Magus::QtResourceInfo*> it(resources);
+    it.toFront();
+    Magus::QtResourceInfo* resourceInfo;
+    while (it.hasNext())
+    {
+        resourceInfo = it.next();
+        QtSourcesInfo info;
+        info.toplevelId = resourceInfo->topLevelId;
+        info.resourceId = resourceInfo->resourceId;
+        info.resourceType = resourceInfo->resourceType;
+        info.parentId = resourceInfo->parentId;
+        info.fileName = resourceInfo->fullQualifiedName;
+        info.baseName = resourceInfo->resourceName;
+        mSourceInfo[resourceInfo->resourceId] = info;
+    }
+
     mResourceTreeWidget->expandAll();
 }
 

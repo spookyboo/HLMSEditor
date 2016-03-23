@@ -60,6 +60,7 @@ class MainWindow : public QMainWindow
         void getAndSetFirstDatablock(void); // Get the first datablock from all datablocks and set it to the item in the renderwindow
         void destroyAllDatablocks(void); // Destroy all datablocks
         EditorHlmsTypes getCurrentDatablockType(void); // Returns the current hlms type
+        void loadTextureBrowserCfg(void);
 
     protected:
         // Save the content of a resource vector

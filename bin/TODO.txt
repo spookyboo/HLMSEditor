@@ -1,15 +1,11 @@
 V 1.0 updates:
 =============
-- Material browser:
-  - Write/read resourceType as 4th element in the materials.cfg (and not as last)
 - Align the dock widgets (so they are displayed with the correct height and width after start)
 - Set output directory for generated shader files
 - Remove unused functions in .h/.cpp files in the 'sources' directory
 - Create windows installer
 - Texture browser:
   - Also apply any searchPattern in case the search filter was still active and a group/asset was selected
-  - Save settings
-  - Implement doubleclick in texture browser
   - Check on existing texturefile (if not existing, ask to delete it from the texture browser. Similar to the material browser)
 
 V 1.0 Bugs:
@@ -30,7 +26,4 @@ Implement later (V2.0):
 - Also implement drag texturefile from file exporer and drop it on the node editor (dropping from file explorer is only possible on the texture browser)
 - asset_propertywidget_color.h => does not take current colour into account
 - QtAssetWidget signal when an action icon on the property is clicked
-
-Not to be implemented:
-=====================
 - Listbox after loading a json file, so it is possible to select a datablock

@@ -55,7 +55,7 @@ MainWindow::MainWindow(void) :
     createDockWindows();
     mMaterialBrowser = new MaterialBrowserDialog(this);
     loadMaterialBrowserCfg();
-
+    loadTextureBrowserCfg();
     mOgreManager->initialize();
 
     // Set the title
@@ -698,6 +698,62 @@ void MainWindow::saveTextureBrowserCfg(void)
     mSaveTextureBrowserTimerActive = false;
     const QVector<Magus::QtResourceInfo*>& resources = mTextureDockWidget->getResources();
     saveResources(FILE_TEXTURE_BROWSER, resources);
+}
+
+//****************************************************************************/
+void MainWindow::loadTextureBrowserCfg(void)
+{
+    QVector<Magus::QtResourceInfo*> resources;
+    QFile file(FILE_TEXTURE_BROWSER);
+    QString line;
+    if (file.open(QFile::ReadOnly))
+    {
+        QTextStream readFile(&file);
+        Magus::QtResourceInfo* info;
+        while (!readFile.atEnd())
+        {
+            line = readFile.readLine();
+            QStringList elements = line.split('\t', QString::SkipEmptyParts);
+
+            if (elements.size() == 6)
+            {
+                info = new Magus::QtResourceInfo();
+                info->topLevelId = QVariant(elements[0]).toInt();
+                info->parentId = QVariant(elements[1]).toInt();
+                info->resourceId = QVariant(elements[2]).toInt();
+                info->resourceType = QVariant(elements[3]).toInt();
+                info->resourceName = elements[4];
+                info->fullQualifiedName = elements[5];
+
+                if (info->topLevelId == TOOL_SOURCES_LEVEL_X000_TEXTURE &&
+                        info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP)
+                    info->iconName = ICON_TEXTURE_NO_PATH;
+                else if (info->topLevelId == TOOL_SOURCES_LEVEL_X000_TEXTURE &&
+                         info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_GROUP)
+                    info->iconName = ICON_TEXTURE_SMALL_NO_PATH;
+
+                resources.append(info);
+            }
+        }
+
+        // In case the file is empty or contains garbage, add toplevel item
+        if (resources.size() == 0)
+        {
+             info = new QtResourceInfo();
+             info->topLevelId = TOOL_SOURCES_LEVEL_X000_TEXTURE;
+             info->parentId = 0;
+             info->resourceId = TOOL_SOURCES_LEVEL_X000_TEXTURE;
+             info->resourceName = QString("Textures");
+             info->fullQualifiedName = QString("Textures");
+             info->resourceType = TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP;
+             info->iconName = ICON_TEXTURE_NO_PATH;
+             resources.append(info);
+        }
+
+        // Set the resources
+        mTextureDockWidget->setResources(resources);
+        file.close();
+    }
 }
 
 //****************************************************************************/
