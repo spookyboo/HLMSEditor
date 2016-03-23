@@ -69,6 +69,7 @@ class NodeEditorDockWidget : public QDockWidget
         HlmsNodeUnlitDatablock* createUnlitNodeStructure(const QString& unlitDatablock);
         const QString& getCurrentDatablockName(void);
         EditorHlmsTypes getCurrentDatablockType (void);
+        void newSamplerblockNode (const QString& fileName);
 
     signals:
         // Emitted when something was dropped on this widget

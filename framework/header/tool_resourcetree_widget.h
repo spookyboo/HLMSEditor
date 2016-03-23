@@ -366,6 +366,11 @@ namespace Magus
             // Determine whether the contextmenu item is enabled/disable when an asset is selected
             void enableContextMenuItemForAsset(const QString& menuItemText, bool enabled);
 
+            // Adds an extra entry to the context menu (displayed by means of 'menuItemText')
+            // If the item is selected from the context menu, the signal 'customContextMenuItemSelected'
+            // is emitted.
+            void addCustomContextMenuItem(const QString& menuItemText);
+
         public slots:
             // Activated when a contextmenu item is selected
             void contextMenuItemSelected(QAction* action);
@@ -419,6 +424,9 @@ namespace Magus
             // Emitted when a resource is changed (eg. its name is changed)
             void resourceChanged (int resourceId);
 
+            // Emitted when a custom context menuitem has been selected
+            void customContextMenuItemSelected (const QString& menuItemText);
+
         protected:
             QtResourceInfo* getRegisteredResourceInfo (int resourceId);
             int getDepth(int resourceId); // Depth in the tree
@@ -461,6 +469,7 @@ namespace Magus
             QMap<QString, bool> mSubGroupContextMenuItemEnabled;
             QMap<QString, bool> mAssetContextMenuItemEnabled;
             QString mTempString;
+            QStringList mCustomContextMenuList;
             QMenu* mContextMenu;
             QMenu* mToplevelGroupSubMenu;
             QMenu* mSubGroupSubMenu;

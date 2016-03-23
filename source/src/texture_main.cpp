@@ -96,15 +96,16 @@ void TextureMain::createDockWindows(void)
 {
     // Textures (tree)
     mTextureTreeDockWidget = new TextureTreeDockWidget(mIconDir, QString(""), this);
-    /*
-    connect(mTextureTreeDockWidget, SIGNAL(resourceAdded(int,int,int,const QString&,const QString&)), this, SLOT(handleTextureAdded(int,int,int,const QString&,const QString&)));
-    */
-
     connect(mTextureTreeDockWidget, SIGNAL(resourceSelected(int,int,int,QString,QString,int)), this, SLOT(handleTextureSelected(int,int,int,const QString&,const QString&, int)));
     connect(mTextureTreeDockWidget, SIGNAL(resourceDoubleClicked(int,int,int,QString,QString)), this, SLOT(handleTextureDoubleClicked(int,int,int,const QString&,const QString&)));
-    connect(mTextureTreeDockWidget, SIGNAL(resourceDeleted(int,int,int,const QString&,const QString&)), this, SLOT(handleTextureDeleted(int,int,int,const QString&,const QString&)));
+    connect(mTextureTreeDockWidget, SIGNAL(resourceDeleted(int,int,int,QString,QString)), this, SLOT(handleTextureDeleted(int,int,int,QString,QString)));
+    connect(mTextureTreeDockWidget, SIGNAL(resourcesDeleted()), this, SLOT(handleTexturesDeleted()));
     connect(mTextureTreeDockWidget, SIGNAL(resourceSearched(QString)), this, SLOT(handleTextureSearched(QString)));
     connect(mTextureTreeDockWidget, SIGNAL(resourceSearchReset()), this, SLOT(handleTextureSearchReset()));
+    connect(mTextureTreeDockWidget, SIGNAL(customContextMenuItemSelected(QString)), this, SLOT(handleCustomContextMenuItemSelected(QString)));
+    connect(mTextureTreeDockWidget, SIGNAL(resourceAdded(int,int,int,QString,QString,int)), this, SLOT(handleTextureAdded(int,int,int,QString,QString,int)));
+    connect(mTextureTreeDockWidget, SIGNAL(resourceMoved(int,int,int,QString,QString,int)), this, SLOT(handleTextureMoved(int,int,int,QString,QString,int)));
+    connect(mTextureTreeDockWidget, SIGNAL(resourceChanged(int,int,int,QString,QString,int)), this, SLOT(handleTextureChanged(int,int,int,QString,QString,int)));
     addDockWidget(Qt::LeftDockWidgetArea, mTextureTreeDockWidget);
 
     // Thumbs
@@ -179,30 +180,7 @@ void TextureMain::handleTextureSelected(int toplevelId,
 //****************************************************************************/
 void TextureMain::handleTextureDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName)
 {
-    /*
-    if (Magus::fileExist(name))
-    {
-        emit jSonFileSelectedToProcess(name);
-    }
-    else
-    {
-        QMessageBox::StandardButton reply = fileDoesNotExistsWarning(name);
-        if (reply == QMessageBox::Yes)
-        {
-            mTextureTreeDockWidget->deleteAssetQuiet(baseName);
-            mTextureThumbsDockWidget->deleteAsset(toplevelId, baseName, false);
-            mSelectedFileName = "";
-        }
-    }
-    */
-}
-
-//****************************************************************************/
-void TextureMain::handleTextureAdded(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName)
-{
-    // Add name to the mTextureThumbsDockWidget
-    //mTextureThumbsDockWidget->addAsset(toplevelId, parentId, resourceId, name, baseName);
-    //mSelectedFileName = name;
+    emit textureDoubleClicked(toplevelId, parentId, resourceId, name, baseName);
 }
 
 //****************************************************************************/
@@ -211,6 +189,28 @@ void TextureMain::handleTextureDeleted(int toplevelId, int parentId, int resourc
     // Delete name from mTextureThumbsDockWidget
     mTextureThumbsDockWidget->deleteTextureFile(name);
     mSelectedFileName = "";
+    emit textureMutationOccured();
+}
+
+//****************************************************************************/
+void TextureMain::handleTextureAdded(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, int resourceType)
+{
+    // Emit that a change in the tree occured (reason to save the current state)
+    emit textureMutationOccured();
+}
+
+//****************************************************************************/
+void TextureMain::handleTextureMoved(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, int resourceType)
+{
+    // Emit that a change in the tree occured (reason to save the current state)
+    emit textureMutationOccured();
+}
+
+//****************************************************************************/
+void TextureMain::handleTextureChanged(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, int resourceType)
+{
+    // The name of the texture is changed
+    emit textureMutationOccured();
 }
 
 //****************************************************************************/
@@ -259,26 +259,13 @@ void TextureMain::handleTextureFileDropped(const QString& name, const QString& b
 //****************************************************************************/
 void TextureMain::handleThumbDoubleClicked(const QString& name, const QString& baseName)
 {
-    // Note, that in contradiction to the MaterialMain::handleThumbDoubleClicked the name can be used,
-    // because it represents the filename of the thumb/texture in both
-    // mTextureTreeDockWidget and mTextureThumbDockWidget
-    /*
-    mSelectedFileName = mTextureTreeDockWidget->doubleClicked(baseName);
-    if(Magus::fileExist(mSelectedFileName))
-    {
-        emit jSonFileSelectedToProcess(mSelectedFileName);
-    }
-    else
-    {
-        QMessageBox::StandardButton reply = fileDoesNotExistsWarning(mSelectedFileName);
-        if (reply == QMessageBox::Yes)
-        {
-            mTextureTreeDockWidget->deleteAssetQuiet(baseName);
-            mTextureThumbsDockWidget->deleteAsset(baseName, false);
-            mSelectedFileName = "";
-        }
-    }
-    */
+    emit textureDoubleClicked(0, 0, 0, name, baseName);
+}
+
+//****************************************************************************/
+void TextureMain::handleCustomContextMenuItemSelected(const QString& menuItemText)
+{
+    emit customContextMenuItemSelected(menuItemText);
 }
 
 //****************************************************************************/

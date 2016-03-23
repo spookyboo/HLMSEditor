@@ -45,19 +45,22 @@ TextureTreeDockWidget::TextureTreeDockWidget(const QString& iconDir, const QStri
     // Toplevel group, sub group and assets settings
     mResourceTreeWidget->setSubLevelGroupItemEditable(true);
     mResourceTreeWidget->setAssetItemEditable(false);
-    mResourceTreeWidget->setInheritSubGroupIconFromParent(false);
 
     // Miscellanious settings
     mResourceTreeWidget->setSubgroupIconName(ICON_TEXTURE_SMALL_NO_PATH);
+    mResourceTreeWidget->addCustomContextMenuItem(ACTION_IMPORT_TEXTURES_FROM_DIR);
+    mResourceTreeWidget->addCustomContextMenuItem(ACTION_ADD_TEXTURES);
 
     // Listen to events.
     connect(mResourceTreeWidget, SIGNAL(resourceAdded(int)), this, SLOT(handleResourceAdded(int)));
     connect(mResourceTreeWidget, SIGNAL(resourceDeleted(int)), this, SLOT(handleResourceDeleted(int)));
     connect(mResourceTreeWidget, SIGNAL(resourceSelected(int)), this, SLOT(handleResourceSelected(int)));
-    //connect(mResourceTreeWidget, SIGNAL(resourceDoubleClicked(int)), this, SLOT(handleResourceDoubleClicked(int)));
+    connect(mResourceTreeWidget, SIGNAL(resourceDoubleClicked(int)), this, SLOT(handleResourceDoubleClicked(int)));
     connect(mResourceTreeWidget, SIGNAL(resourceMoved(int)), this, SLOT(handleResourceMoved(int)));
+    connect(mResourceTreeWidget, SIGNAL(resourceChanged(int)), this, SLOT(handleResourceChanged(int)));
     connect(mResourceTreeWidget, SIGNAL(resourceSearched(QString)), this, SLOT(handleResourceSearched(QString)));
     connect(mResourceTreeWidget, SIGNAL(resourceSearchReset()), this, SLOT(handleResourceSearchReset()));
+    connect(mResourceTreeWidget, SIGNAL(customContextMenuItemSelected(QString)), this, SLOT(handleCustomContextMenuItemSelected(QString)));
     mInnerMain = new QMainWindow();
     mInnerMain->setCentralWidget(mResourceTreeWidget);
     setWidget(mInnerMain);
@@ -280,6 +283,22 @@ void TextureTreeDockWidget::handleResourceSelected(int resourceId)
 }
 
 //****************************************************************************/
+void TextureTreeDockWidget::handleResourceDoubleClicked(int resourceId)
+{
+    // Determine which type is selected
+    QMap<int, QtSourcesInfo>::iterator it = mSourceInfo.find(resourceId);
+    if (it != mSourceInfo.end())
+    {
+        QtSourcesInfo info = it.value();
+        if (info.resourceType == Magus::TOOL_RESOURCETREE_KEY_TYPE_ASSET)
+        {
+            // Do not do something specific for a double click on a toplevel group or a (sub)group
+            emit resourceDoubleClicked(info.toplevelId, info.parentId, info.resourceId, info.fileName, info.baseNameThumb);
+        }
+    }
+}
+
+//****************************************************************************/
 void TextureTreeDockWidget::handleResourceSearched(const QString& searchPattern)
 {
     // Signal
@@ -291,6 +310,12 @@ void TextureTreeDockWidget::handleResourceSearchReset(void)
 {
     // Signal
     emit resourceSearchReset();
+}
+
+//****************************************************************************/
+void TextureTreeDockWidget::handleCustomContextMenuItemSelected(const QString& menuItemText)
+{
+    emit customContextMenuItemSelected(menuItemText);
 }
 
 //****************************************************************************/
@@ -308,6 +333,7 @@ void TextureTreeDockWidget::handleResourceAdded(int resourceId)
     info.fileName = fullQualifiedName;
     info.baseName = name;
     mSourceInfo[resourceId] = info;
+    emit resourceAdded(info.toplevelId, info.parentId, info.resourceId, info.fileName, info.baseName, info.resourceType);
 }
 
 //****************************************************************************/
@@ -325,11 +351,7 @@ void TextureTreeDockWidget::handleResourceDeleted(int resourceId)
         else if (info.resourceId == resourceId)
         {
             // Delete from mSourceInfo
-            emit resourceDeleted(info.toplevelId,
-                                 info.parentId,
-                                 info.resourceId,
-                                 info.fileName,
-                                 info.baseName);
+            emit resourceDeleted(info.toplevelId, info.parentId, info.resourceId, info.fileName, info.baseName);
             mSourceInfo.remove(resourceId);
         }
     }
@@ -350,6 +372,30 @@ void TextureTreeDockWidget::handleResourceMoved(int resourceId)
     info.toplevelId = mResourceTreeWidget->getToplevelParentId(resourceId);
     info.parentId = mResourceTreeWidget->getParentId(resourceId);
     mSourceInfo[resourceId] = info; // Overwrite existing one
+    emit resourceMoved(info.toplevelId, info.parentId, info.resourceId, info.fileName, info.baseName, info.resourceType);
+}
+
+//****************************************************************************/
+void TextureTreeDockWidget::handleResourceChanged(int resourceId)
+{
+    // Search the info object
+    QtSourcesInfo info;
+    QMap<int, QtSourcesInfo>::iterator it = mSourceInfo.find(resourceId);
+    if (it == mSourceInfo.end())
+        return;
+
+    info = it.value();
+    int toplevelId = mResourceTreeWidget->getToplevelParentId(resourceId);
+    QString name = mResourceTreeWidget->getResourceName(resourceId);
+    QString fullQualifiedName = mResourceTreeWidget->getFullQualifiedName(resourceId);
+    info.toplevelId = toplevelId;
+    info.resourceId = resourceId;
+    info.resourceType = mResourceTreeWidget->getTypeFromResourceId(resourceId);
+    info.parentId = mResourceTreeWidget->getParentId(resourceId);
+    info.fileName = fullQualifiedName;
+    info.baseName = name;
+    mSourceInfo[resourceId] = info; // Overwrite existing one
+    emit resourceChanged(info.toplevelId, info.parentId, info.resourceId, info.fileName, info.baseName, info.resourceType);
 }
 
 //****************************************************************************/

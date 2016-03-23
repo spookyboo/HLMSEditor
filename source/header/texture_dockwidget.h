@@ -43,11 +43,30 @@ class TextureDockWidget : public QDockWidget
 		void createActions(void);
 		void createMenus(void);
 		void createToolBars(void);
+
+        // Returns a list of all resources in the resource tree. This includes both groups, subgroups and assets
+        // This function can be used to stream the data to a file
+        QVector<Magus::QtResourceInfo*>& getResources (void);
+
+        // Creates the resourcetree. This includes both groups, subgroups and assets
+        // This function can be used to load the data from a file
+        void setResources (const QVector<Magus::QtResourceInfo*>& resources);
+
         void addTextureFile (const QString& fileName);
         void addTextureFile (const QString& fileName, const QString& group);
         const QString& getCurrentFileName (void);
 
-	private:
+    signals:
+        void textureDoubleClicked(const QString& fileName, const QString& baseName);
+        void customContextMenuItemSelected(const QString& menuItemText);
+        void textureMutationOccured(void);
+
+    private slots:
+        void handleTextureDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
+        void handleCustomContextMenuItemSelected(const QString& menuItemText);
+        void handleTextureMutationOccured(void);
+
+    private:
 		MainWindow* mParent;
         TextureMain* mTextureMain;
 };

@@ -67,6 +67,7 @@ static const QString INFO_SAMPLERBLOCK = QString("../common/info/samplerblock.in
 static const QString INFO_MACROBLOCK = QString("../common/info/macroblock.inf");
 static const QString INFO_BLENDBLOCK = QString("../common/info/blendblock.inf");
 static const QString FILE_MATERIAL_BROWSER = QString("materials.cfg");
+static const QString FILE_TEXTURE_BROWSER = QString("textures.cfg");
 static const QString FILE_NO_IMAGE = QString("../common/icons/noImage.png");
 static const QString FILE_RESOURCES_D = QString("resources_d.cfg");
 static const QString FILE_RESOURCES = QString("resources.cfg");
@@ -214,5 +215,7 @@ static const int TOOL_SOURCES_LEVEL_X000_PBS = 1;
 static const int TOOL_SOURCES_LEVEL_X000_UNLIT = 2;
 static const int TOOL_SOURCES_LEVEL_X000_TEXTURE = 3;
 static const QString GROUP_NAME_IMPORTED_TEXTURES = QString("Imported resources");
+static const QString ACTION_IMPORT_TEXTURES_FROM_DIR = QString("Import from directory");
+static const QString ACTION_ADD_TEXTURES = QString("Add texture file(s)");
 
 #endif

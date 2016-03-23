@@ -417,3 +417,14 @@ void NodeEditorDockWidget::handleDropped (void)
         nodeSelected(samplerNode);
     }
 }
+
+//****************************************************************************/
+void NodeEditorDockWidget::newSamplerblockNode (const QString& fileName)
+{
+    HlmsNodeSamplerblock* samplerNode = doNewSamplerblockAction();
+    if (samplerNode)
+    {
+        samplerNode->setFileNameTexture(fileName);
+        nodeSelected(samplerNode);
+    }
+}

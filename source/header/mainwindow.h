@@ -61,6 +61,10 @@ class MainWindow : public QMainWindow
         void destroyAllDatablocks(void); // Destroy all datablocks
         EditorHlmsTypes getCurrentDatablockType(void); // Returns the current hlms type
 
+    protected:
+        // Save the content of a resource vector
+        void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources);
+
 	private slots:
         void doNewHlmsPbsAction(void);
         void doNewHlmsUnlitAction(void);
@@ -73,6 +77,10 @@ class MainWindow : public QMainWindow
         void doTextureBrowserImportMenuAction(void);
         void doTextureBrowserAddImageMenuAction(void);
         void doResetWindowLayoutMenuAction(void);
+        void handleTextureDoubleClicked(const QString& fileName, const QString& baseName);
+        void handleCustomContextMenuItemSelected(const QString& menuItemText);
+        void handleTextureMutationOccured(void);
+        void saveTextureBrowserCfg(void);
 
 	private:
 		void createActions(void);
@@ -108,7 +116,7 @@ class MainWindow : public QMainWindow
         NodeEditorDockWidget* mNodeEditorDockWidget;
         Magus::OgreManager* mOgreManager;
         QString mHlmsName; // Used to determine whether a hlms was already saved
-
+        bool mSaveTextureBrowserTimerActive;
 };
 
 #endif

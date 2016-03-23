@@ -602,6 +602,13 @@ namespace Magus
         // Menu item for collapse/expand
         if (mCollapseExpandContextMenuItemEnabled)
             mContextMenu->addAction(new QAction(TOOL_RESOURCETREE_ACTION_COLLAPSE_EXPAND, mResourceTree));
+
+        // Custom menu items
+        QString menuItemText;
+        if (mCustomContextMenuList.size() != 0)
+            foreach (menuItemText, mCustomContextMenuList)
+                if (!menuItemText.isEmpty())
+                    mContextMenu->addAction(new QAction(menuItemText, mResourceTree));
     }
 
     //****************************************************************************/
@@ -1446,10 +1453,21 @@ namespace Magus
         }
         else if (action->text() == TOOL_RESOURCETREE_ACTION_COLLAPSE_EXPAND)
         {
+            // Collapse/expand item is selected
             if (mCollapsed)
                 expandAll();
             else
                 collapseAll();
+        }
+        else
+        {
+            // Check whether a custom item is selected
+            QString menuItem;
+            foreach (menuItem, mCustomContextMenuList)
+            {
+                if (action->text() == menuItem)
+                    emit customContextMenuItemSelected(menuItem);
+            }
         }
     }
 
@@ -1586,6 +1604,13 @@ namespace Magus
     {
         int id = getResourceIdFromItem(item);
         emit resourceChanged (id);
+    }
+
+    //****************************************************************************/
+    void QtResourceTreeWidget::addCustomContextMenuItem (const QString& menuItemText)
+    {
+        mCustomContextMenuList.append(menuItemText);
+        buildContextMenu();
     }
 
 }

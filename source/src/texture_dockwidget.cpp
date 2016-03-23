@@ -44,6 +44,9 @@ TextureDockWidget::~TextureDockWidget(void)
 //****************************************************************************/
 void TextureDockWidget::createActions(void)
 {
+    connect(mTextureMain, SIGNAL(customContextMenuItemSelected(QString)), this, SLOT(handleCustomContextMenuItemSelected(QString)));
+    connect(mTextureMain, SIGNAL(textureDoubleClicked(int,int,int,QString,QString)), this, SLOT(handleTextureDoubleClicked(int,int,int,QString,QString)));
+    connect(mTextureMain, SIGNAL(textureMutationOccured()), this, SLOT(handleTextureMutationOccured()));
 }
 
 //****************************************************************************/
@@ -54,6 +57,19 @@ void TextureDockWidget::createMenus(void)
 //****************************************************************************/
 void TextureDockWidget::createToolBars(void)
 {
+}
+
+//****************************************************************************/
+QVector<Magus::QtResourceInfo*>& TextureDockWidget::getResources (void)
+{
+    // Delegate to mTextureMain
+    return mTextureMain->getResources();
+}
+
+//****************************************************************************/
+void TextureDockWidget::setResources (const QVector<Magus::QtResourceInfo*>& resources)
+{
+    mTextureMain->setResources(resources);
 }
 
 //****************************************************************************/
@@ -73,3 +89,22 @@ const QString& TextureDockWidget::getCurrentFileName (void)
 {
     return mTextureMain->getCurrentFileName();
 }
+
+//****************************************************************************/
+void TextureDockWidget::handleTextureDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName)
+{
+    emit textureDoubleClicked(name, baseName);
+}
+
+//****************************************************************************/
+void TextureDockWidget::handleCustomContextMenuItemSelected(const QString& menuItemText)
+{
+    emit customContextMenuItemSelected(menuItemText);
+}
+
+//****************************************************************************/
+void TextureDockWidget::handleTextureMutationOccured(void)
+{
+    emit textureMutationOccured();
+}
+

@@ -75,20 +75,25 @@ class TextureTreeDockWidget : public QDockWidget
 
     signals:
         void resourceSelected(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, int resourceType);
-        //void resourceDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
-        //void resourceAdded(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
+        void resourceDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
         void resourceDeleted(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
+        void resourceMoved(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, int resourceType);
+        void resourceChanged(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, int resourceType);
+        void resourceAdded(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, int resourceType);
         void resourceSearched(const QString& searchPattern);
         void resourceSearchReset(void);
+        void customContextMenuItemSelected(const QString& menuItemText);
 
     private slots:
         void handleResourceSelected(int resourceId);
-        //void handleResourceDoubleClicked(int resourceId);
+        void handleResourceDoubleClicked(int resourceId);
         void handleResourceAdded(int resourceId);
         void handleResourceDeleted(int resourceId);
         void handleResourceMoved(int resourceId);
+        void handleResourceChanged(int resourceId);
         void handleResourceSearched(const QString& searchPattern);
         void handleResourceSearchReset(void);
+        void handleCustomContextMenuItemSelected(const QString& menuItemText);
 
     private:
         QMainWindow* mParent;

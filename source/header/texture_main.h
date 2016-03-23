@@ -67,10 +67,17 @@ class TextureMain : public QMainWindow
     protected:
         QMessageBox::StandardButton fileDoesNotExistsWarning(const QString& fileName);
 
+    signals:
+        void textureDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
+        void customContextMenuItemSelected(const QString& menuItemText);
+        void textureMutationOccured(void);
+
     private slots:
         void handleTextureSelected(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, int resourceType);
         void handleTextureDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
-        void handleTextureAdded(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
+        void handleTextureMoved(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, int resourceType);
+        void handleTextureChanged(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, int resourceType);
+        void handleTextureAdded(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, int resourceType);
         void handleTextureDeleted(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
         void handleTextureSearched(const QString& searchPattern);
         void handleTextureSearchReset(void);
@@ -78,6 +85,7 @@ class TextureMain : public QMainWindow
         void handleThumbSelected(const QString& name, const QString& baseName);
         void handleTextureFileDropped(const QString& name, const QString& baseName);
         void handleThumbDoubleClicked(const QString& name, const QString& baseName);
+        void handleCustomContextMenuItemSelected(const QString& menuItemText);
 
     private:
         void createActions(void);

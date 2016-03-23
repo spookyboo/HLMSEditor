@@ -37,7 +37,8 @@
 //****************************************************************************/
 MainWindow::MainWindow(void) :
     mIsClosing(false),
-    mFirst(true)
+    mFirst(true),
+    mSaveTextureBrowserTimerActive(false)
 {
     installEventFilter(this);
 
@@ -124,9 +125,9 @@ void MainWindow::createActions(void)
     connect(mMaterialBrowserAddMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserAddMenuAction()));
 
     // Texture menu
-    mTextureBrowserImportMenuAction = new QAction(QString("Import from directory"), this);
+    mTextureBrowserImportMenuAction = new QAction(QString(ACTION_IMPORT_TEXTURES_FROM_DIR), this);
     connect(mTextureBrowserImportMenuAction, SIGNAL(triggered()), this, SLOT(doTextureBrowserImportMenuAction()));
-    mTextureBrowserAddImageMenuAction = new QAction(QString("Add texture file(s)"), this);
+    mTextureBrowserAddImageMenuAction = new QAction(QString(ACTION_ADD_TEXTURES), this);
     connect(mTextureBrowserAddImageMenuAction, SIGNAL(triggered()), this, SLOT(doTextureBrowserAddImageMenuAction()));
 
     // Window menu
@@ -179,7 +180,9 @@ void MainWindow::createDockWindows(void)
     addDockWidget(Qt::RightDockWidgetArea, mTextureDockWidget);
     mNodeEditorDockWidget = new NodeEditorDockWidget("NodeEditor", this);
     addDockWidget(Qt::RightDockWidgetArea, mNodeEditorDockWidget);
-    //connect(mNodeEditorDockWidget, SIGNAL(nodeEditorDropEvent()), this, SLOT(handleNodeEditorDropEvent()));
+    connect(mTextureDockWidget, SIGNAL(textureDoubleClicked(QString,QString)), this, SLOT(handleTextureDoubleClicked(QString,QString)));
+    connect(mTextureDockWidget, SIGNAL(customContextMenuItemSelected(QString)), this, SLOT(handleCustomContextMenuItemSelected(QString)));
+    connect(mTextureDockWidget, SIGNAL(textureMutationOccured()), this, SLOT(handleTextureMutationOccured()));
 }
 
 //****************************************************************************/
@@ -487,9 +490,9 @@ void MainWindow::loadMaterialBrowserCfg(void)
                 info->topLevelId = QVariant(elements[0]).toInt();
                 info->parentId = QVariant(elements[1]).toInt();
                 info->resourceId = QVariant(elements[2]).toInt();
-                info->resourceName = elements[3];
-                info->fullQualifiedName = elements[4];
-                info->resourceType = QVariant(elements[5]).toInt();
+                info->resourceType = QVariant(elements[3]).toInt();
+                info->resourceName = elements[4];
+                info->fullQualifiedName = elements[5];
 
                 if (info->topLevelId == TOOL_SOURCES_LEVEL_X000_PBS &&
                         info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP)
@@ -566,33 +569,8 @@ void MainWindow::doMaterialBrowserOpenMenuAction(void)
 void MainWindow::saveMaterialBrowserCfg(void)
 {
     // Save all current settings
-    QFile file(FILE_MATERIAL_BROWSER);
-    if (file.open(QFile::WriteOnly|QFile::Truncate))
-    {
-        QTextStream stream(&file);
-        const QVector<Magus::QtResourceInfo*>& resources = mMaterialBrowser->getResources();
-        QVectorIterator<Magus::QtResourceInfo*> it(resources);
-        it.toFront();
-        Magus::QtResourceInfo* info;
-        while (it.hasNext())
-        {
-            // Write a line to the cfg file
-            info = it.next();
-            stream << info->topLevelId
-                   << "\t"
-                   << info->parentId
-                   << "\t"
-                   << info->resourceId
-                   << "\t"
-                   << info->resourceName
-                   << "\t"
-                   << info->fullQualifiedName
-                   << "\t"
-                   << info->resourceType
-                   << "\n";
-        }
-        file.close();
-    }
+    const QVector<Magus::QtResourceInfo*>& resources = mMaterialBrowser->getResources();
+    saveResources(FILE_MATERIAL_BROWSER, resources);
 }
 
 //****************************************************************************/
@@ -626,31 +604,18 @@ void MainWindow::doTextureBrowserImportMenuAction(void)
     {
         QStringList fileNames = dialog.selectedFiles();
         textureFolder = fileNames.at(0);
-//        Ogre::String folder = textureFolder.toStdString();
-//        HlmsBuilder builder;
-//        if (!builder.isResourceLocationExisting(folder))
-//        {
-            // Add location to the resource locations
-//            Ogre::Root* root = mOgreManager->getOgreRoot();
-//            root->addResourceLocation(folder, "FileSystem", "General");
-//            builder.saveAllResourcesLocations();
-//        }
 
         // Add all texture files to a group in mTextureDockWidget
-        QString path;
+        //QString path;
         QString fileName;
-        Ogre::FileInfoListPtr list = Ogre::ResourceGroupManager::getSingleton().listResourceFileInfo(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME) ;
-        Ogre::FileInfoList::iterator it;
-        Ogre::FileInfoList::iterator itStart = list->begin();
-        Ogre::FileInfoList::iterator itEnd = list->end();
-        for(it = itStart; it != itEnd; ++it)
+
+        QDirIterator dirIt(textureFolder, QDirIterator::Subdirectories);
+        while (dirIt.hasNext())
         {
-            // Add the file to the mTextureDockWidget, only if it is a texture/image file
-            Ogre::FileInfo& fileInfo = (*it);
-            path = fileInfo.archive->getName().c_str();
-            fileName = fileInfo.filename.c_str();
-            if (textureFolder == path)
+            dirIt.next();
+            if (QFileInfo(dirIt.filePath()).isFile())
             {
+                fileName = dirIt.fileName();
                 if (Magus::isTypeBasedOnExtension(fileName, Magus::MAGUS_SUPPORTED_IMAGE_FORMATS, Magus::MAGUS_SUPPORTED_IMAGE_FORMATS_LENGTH))
                 {
                     fileName = textureFolder + QString("/") + fileName;
@@ -658,6 +623,8 @@ void MainWindow::doTextureBrowserImportMenuAction(void)
                 }
             }
         }
+
+        handleTextureMutationOccured();
     }
 }
 
@@ -678,6 +645,8 @@ void MainWindow::doTextureBrowserAddImageMenuAction(void)
         if (!fileName.isEmpty())
             mTextureDockWidget->addTextureFile(fileName);
     }
+
+    handleTextureMutationOccured();
 }
 
 //****************************************************************************/
@@ -694,6 +663,74 @@ void MainWindow::doResetWindowLayoutMenuAction(void)
     addDockWidget(Qt::RightDockWidgetArea, mNodeEditorDockWidget);
 }
 
+//****************************************************************************/
+void MainWindow::handleTextureDoubleClicked(const QString& fileName, const QString& baseName)
+{
+    mNodeEditorDockWidget->newSamplerblockNode(fileName);
+}
+
+//****************************************************************************/
+void MainWindow::handleCustomContextMenuItemSelected(const QString& menuItemText)
+{
+    if (menuItemText == ACTION_IMPORT_TEXTURES_FROM_DIR)
+        doTextureBrowserImportMenuAction();
+    else if (menuItemText == ACTION_ADD_TEXTURES)
+        doTextureBrowserAddImageMenuAction();
+}
+
+//****************************************************************************/
+void MainWindow::handleTextureMutationOccured(void)
+{
+    // Do not save immediately, but only after some time; this is to prevent that saveTextureBrowserCfg
+    // is called for every mutation in the texture tree (deletion of 100 textures in one go
+    // triggers handleTextureMutationOccured also 100 times. We don't want to save 100 times).
+    // This is the reason that a QTimer is used.
+    if (mSaveTextureBrowserTimerActive)
+        return;
+
+    QTimer::singleShot(1000, this, SLOT(saveTextureBrowserCfg()));
+    mSaveTextureBrowserTimerActive = true;
+}
+
+//****************************************************************************/
+void MainWindow::saveTextureBrowserCfg(void)
+{
+    mSaveTextureBrowserTimerActive = false;
+    const QVector<Magus::QtResourceInfo*>& resources = mTextureDockWidget->getResources();
+    saveResources(FILE_TEXTURE_BROWSER, resources);
+}
+
+//****************************************************************************/
+void MainWindow::saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources)
+{
+    // Save state of a resoruces from a resourcetree widget
+    QFile file(fileName);
+    if (file.open(QFile::WriteOnly|QFile::Truncate))
+    {
+        QTextStream stream(&file);
+        QVectorIterator<Magus::QtResourceInfo*> it(resources);
+        it.toFront();
+        Magus::QtResourceInfo* info;
+        while (it.hasNext())
+        {
+            // Write a line to the cfg file
+            info = it.next();
+            stream << info->topLevelId
+                   << "\t"
+                   << info->parentId
+                   << "\t"
+                   << info->resourceId
+                   << "\t"
+                   << info->resourceType
+                   << "\t"
+                   << info->resourceName
+                   << "\t"
+                   << info->fullQualifiedName
+                   << "\n";
+        }
+        file.close();
+    }
+}
 
 //****************************************************************************/
 void MainWindow::update(void)
