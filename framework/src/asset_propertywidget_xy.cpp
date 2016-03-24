@@ -38,8 +38,8 @@ namespace Magus
         QHBoxLayout* yLayout = new QHBoxLayout;
         mainLayout->setContentsMargins(5, 0, 5, 0);
         QLabel* label = new QLabel(title);
-        QLabel* xLabel = new QLabel(QString("X"));
-        QLabel* yLabel = new QLabel(QString("Y"));
+        mXlabel = new QLabel(QString("X"));
+        mYlabel = new QLabel(QString("Y"));
         mXEdit = new QLineEdit;
         mYEdit = new QLineEdit;
         QRegExp regularExpression("[+-]?([0-9]+\\.([0-9]+)?|\\.[0-9]+)([eE][+-]?[0-9]+)?"); // floating point
@@ -51,9 +51,9 @@ namespace Magus
         connect(mYEdit, SIGNAL(textEdited(QString)), this, SLOT(propertyValueChanged(void)));
 
         // Layout
-        xLayout->addWidget(xLabel, 1);
+        xLayout->addWidget(mXlabel, 1);
         xLayout->addWidget(mXEdit, 100);
-        yLayout->addWidget(yLabel, 1);
+        yLayout->addWidget(mYlabel, 1);
         yLayout->addWidget(mYEdit, 100);
         xyLayout->addLayout(xLayout);
         xyLayout->addLayout(yLayout);
@@ -62,6 +62,18 @@ namespace Magus
         mainLayout->addLayout(horizontalLayout);
         setLayout(mainLayout);
         mType = XY;
+    }
+
+    //****************************************************************************/
+    void QtXYProperty::setLabelX (const QString& label)
+    {
+        mXlabel->setText(label);
+    }
+
+    //****************************************************************************/
+    void QtXYProperty::setLabelY (const QString& label)
+    {
+        mYlabel->setText(label);
     }
 
     //****************************************************************************/

@@ -22,6 +22,7 @@
 #define MAGUS_PROPERTY_WIDGET_XYZ_H
 
 #include <QWidget>
+#include <QLabel>
 #include <QCheckBox>
 #include <QLineEdit>
 #include "asset_propertywidget.h"
@@ -54,11 +55,17 @@ namespace Magus
             void enableZ (bool enabled);
             int getPrecision(void) {return mPrecision;}
             void setPrecision(int precision) {mPrecision = precision;}
+            void setLabelX (const QString& label);
+            void setLabelY (const QString& label);
+            void setLabelZ (const QString& label);
 
         private slots:
             void propertyValueChanged(void);
 
         private:
+            QLabel* mXlabel;
+            QLabel* mYlabel;
+            QLabel* mZlabel;
             QLineEdit* mXEdit;
             QLineEdit* mYEdit;
             QLineEdit* mZEdit;

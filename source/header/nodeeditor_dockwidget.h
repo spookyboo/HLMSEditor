@@ -71,6 +71,9 @@ class NodeEditorDockWidget : public QDockWidget
         EditorHlmsTypes getCurrentDatablockType (void);
         void newSamplerblockNode (const QString& fileName);
 
+    protected:
+        QMessageBox::StandardButton fileDoesNotExistsWarning(const QString& fileName);
+
     signals:
         // Emitted when something was dropped on this widget
         void nodeEditorDropEvent (void);

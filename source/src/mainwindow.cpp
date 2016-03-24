@@ -344,7 +344,7 @@ void MainWindow::getAndSetFirstDatablock(void)
                         QString s = newDatablockName.c_str();
                         mNodeEditorDockWidget->createPbsNodeStructure(s);
                         mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-                        mPropertiesDockWidget->setMapWeightPropertyVisible(true);
+                        mPropertiesDockWidget->setDetailMapPropertyVisible(true);
                         break;
                     }
                 }
@@ -388,7 +388,7 @@ void MainWindow::getAndSetFirstDatablock(void)
                         QString s = newDatablockName.c_str();
                         mNodeEditorDockWidget->createUnlitNodeStructure(s);
                         mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-                        mPropertiesDockWidget->setMapWeightPropertyVisible(false);
+                        mPropertiesDockWidget->setDetailMapPropertyVisible(false);
                         break;
                     }
                 }
@@ -666,7 +666,18 @@ void MainWindow::doResetWindowLayoutMenuAction(void)
 //****************************************************************************/
 void MainWindow::handleTextureDoubleClicked(const QString& fileName, const QString& baseName)
 {
-    mNodeEditorDockWidget->newSamplerblockNode(fileName);
+    if (Magus::fileExist(fileName))
+    {
+        mNodeEditorDockWidget->newSamplerblockNode(fileName);
+    }
+    else
+    {
+        QMessageBox::StandardButton reply = fileDoesNotExistsWarning(fileName);
+        if (reply == QMessageBox::Yes)
+        {
+            mTextureDockWidget->deleteTexture(fileName);
+        }
+    }
 }
 
 //****************************************************************************/
@@ -813,4 +824,13 @@ void MainWindow::initDatablocks(void)
 EditorHlmsTypes MainWindow::getCurrentDatablockType(void)
 {
     return mNodeEditorDockWidget->getCurrentDatablockType();
+}
+
+//****************************************************************************/
+QMessageBox::StandardButton MainWindow::fileDoesNotExistsWarning(const QString& fileName)
+{
+    return QMessageBox::question(0,
+                                 "Warning",
+                                 fileName + QString(" does not exist. Remove it from the texture browser?"),
+                                 QMessageBox::Yes|QMessageBox::No);
 }

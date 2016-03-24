@@ -68,6 +68,20 @@ void TextureThumbsDockWidget::createToolBars(void)
 //****************************************************************************/
 void TextureThumbsDockWidget::setResources(const QVector<Magus::QtResourceInfo*>& resources)
 {
+    // Only display the assets of the toplevel
+    clearContent();
+    QVectorIterator<Magus::QtResourceInfo*> it(resources);
+    it.toFront();
+    Magus::QtResourceInfo* info;
+    QString fileName;
+    while (it.hasNext())
+    {
+        info = it.next();
+        if (info->resourceType == Magus::TOOL_RESOURCETREE_KEY_TYPE_ASSET)
+        {
+            addTextureFile(info->fullQualifiedName);
+        }
+    }
 }
 
 //****************************************************************************/

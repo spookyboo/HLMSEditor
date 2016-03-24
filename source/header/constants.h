@@ -141,6 +141,8 @@ static const int CONTAINER_MACROBLOCK_GENERAL = 20;
 static const int CONTAINER_PBS_DATABLOCK_GENERAL = 30;
 static const int CONTAINER_UNLIT_DATABLOCK_GENERAL = 40;
 static const int CONTAINER_SAMPLERBLOCK_GENERAL = 50;
+static const int CONTAINER_SAMPLERBLOCK_DETAILS = 60;
+static const int CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS = 70;
 
 // PSB Datablock properties
 static const QString DEFAULT_PBS_DATABLOCK_NAME = QString("HlmsPbs");
@@ -185,6 +187,8 @@ static const int PROPERTY_SAMPLERBLOCK_BORDER_COLOUR = 54;
 static const int PROPERTY_SAMPLERBLOCK_UV_SET = 55;
 static const int PROPERTY_SAMPLERBLOCK_BLEND_MODE = 56;
 static const int PROPERTY_SAMPLERBLOCK_MAP_WEIGTH = 57;
+static const int PROPERTY_SAMPLERBLOCK_OFFSET = 58;
+static const int PROPERTY_SAMPLERBLOCK_SCALE = 59;
 
 // Macroblock properties
 static const int PROPERTY_MACROBLOCK_ENABLED = 70;

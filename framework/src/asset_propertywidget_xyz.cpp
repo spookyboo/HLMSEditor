@@ -43,9 +43,9 @@ namespace Magus
         QHBoxLayout* zLayout = new QHBoxLayout;
         mainLayout->setContentsMargins(5, 0, 5, 0);
         QLabel* label = new QLabel(title);
-        QLabel* xLabel = new QLabel(QString("X"));
-        QLabel* yLabel = new QLabel(QString("Y"));
-        QLabel* zLabel = new QLabel(QString("Z"));
+        mXlabel = new QLabel(QString("X"));
+        mYlabel = new QLabel(QString("Y"));
+        mZlabel = new QLabel(QString("Z"));
         mXEdit = new QLineEdit;
         mYEdit = new QLineEdit;
         mZEdit = new QLineEdit;
@@ -60,11 +60,11 @@ namespace Magus
         connect(mZEdit, SIGNAL(textEdited(QString)), this, SLOT(propertyValueChanged(void)));
 
         // Layout
-        xLayout->addWidget(xLabel, 1);
+        xLayout->addWidget(mXlabel, 1);
         xLayout->addWidget(mXEdit, 100);
-        yLayout->addWidget(yLabel, 1);
+        yLayout->addWidget(mYlabel, 1);
         yLayout->addWidget(mYEdit, 100);
-        zLayout->addWidget(zLabel, 1);
+        zLayout->addWidget(mZlabel, 1);
         zLayout->addWidget(mZEdit, 100);
         xyzLayout->addLayout(xLayout);
         xyzLayout->addLayout(yLayout);
@@ -74,6 +74,24 @@ namespace Magus
         mainLayout->addLayout(horizontalLayout);
         setLayout(mainLayout);
         mType = XYZ;
+    }
+
+    //****************************************************************************/
+    void QtXYZProperty::setLabelX (const QString& label)
+    {
+        mXlabel->setText(label);
+    }
+
+    //****************************************************************************/
+    void QtXYZProperty::setLabelY (const QString& label)
+    {
+        mYlabel->setText(label);
+    }
+
+    //****************************************************************************/
+    void QtXYZProperty::setLabelZ (const QString& label)
+    {
+        mZlabel->setText(label);
     }
 
     //****************************************************************************/

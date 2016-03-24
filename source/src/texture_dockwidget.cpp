@@ -85,6 +85,12 @@ void TextureDockWidget::addTextureFile (const QString& fileName, const QString& 
 }
 
 //****************************************************************************/
+void TextureDockWidget::deleteTexture (const QString& fileName)
+{
+    mTextureMain->deleteTexture(fileName);
+}
+
+//****************************************************************************/
 const QString& TextureDockWidget::getCurrentFileName (void)
 {
     return mTextureMain->getCurrentFileName();

@@ -134,6 +134,13 @@ void TextureMain::addTextureFile (const QString& fileName, const QString& group)
 }
 
 //****************************************************************************/
+void TextureMain::deleteTexture (const QString& fileName)
+{
+    mTextureTreeDockWidget->deleteTextureFile(fileName);
+    mTextureThumbsDockWidget->deleteTextureFile(fileName);
+}
+
+//****************************************************************************/
 void TextureMain::handleTextureSelected(int toplevelId,
                                         int parentId,
                                         int resourceId,

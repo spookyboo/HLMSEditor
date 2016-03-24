@@ -22,6 +22,7 @@
 #define MAGUS_PROPERTY_WIDGET_XY_H
 
 #include <QWidget>
+#include <QLabel>
 #include <QCheckBox>
 #include <QLineEdit>
 #include "asset_propertywidget.h"
@@ -49,6 +50,8 @@ namespace Magus
             const qreal getY (void) const;
             int getPrecision(void) {return mPrecision;}
             void setPrecision(int precision) {mPrecision = precision;}
+            void setLabelX (const QString& label);
+            void setLabelY (const QString& label);
 
         private slots:
             void propertyValueChanged(void);
@@ -56,6 +59,8 @@ namespace Magus
         private:
             QLineEdit* mXEdit;
             QLineEdit* mYEdit;
+            QLabel* mXlabel;
+            QLabel* mYlabel;
             int mPrecision;
     };
 }

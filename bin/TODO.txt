@@ -1,12 +1,14 @@
 V 1.0 updates:
 =============
+- Implement project files (<projectname>.hlmp). Each project file refers to a <projectname>_material.cfg and <projectname>_texture.cfg file
 - Align the dock widgets (so they are displayed with the correct height and width after start)
 - Set output directory for generated shader files
 - Remove unused functions in .h/.cpp files in the 'sources' directory
 - Create windows installer
 - Texture browser:
   - Also apply any searchPattern in case the search filter was still active and a group/asset was selected
-  - Check on existing texturefile (if not existing, ask to delete it from the texture browser. Similar to the material browser)
+- Material browser:
+  - When opening a new Hlms (either loading a new one or selecting from the material browser), set the Hlms node to selected and show the property widget)
 
 V 1.0 Bugs:
 ==========

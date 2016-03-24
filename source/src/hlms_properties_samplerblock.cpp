@@ -26,6 +26,7 @@
 #include "asset_propertywidget_color.h"
 #include "asset_propertywidget_slider.h"
 #include "asset_propertywidget_checkbox.h"
+#include "asset_propertywidget_xy.h"
 #include "hlms_properties_samplerblock.h"
 #include "properties_dockwidget.h"
 #include "hlms_node_samplerblock.h"
@@ -48,6 +49,8 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
     // Create container - General
     Magus::QtContainerWidget* container = 0;
     container = mAssetWidget->createContainer(CONTAINER_SAMPLERBLOCK_GENERAL, QString(""));
+    container = mAssetWidget->createContainer(CONTAINER_SAMPLERBLOCK_DETAILS, QString("Texture details"));
+    mDetailMapContainer = mAssetWidget->createContainer(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS, QString("Detail map details"));
 
     // Create properties
     // ******** Texture ********
@@ -93,7 +96,7 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
                                       QString("Linear") <<
                                       QString("Anisotropic");
     Magus::QtSelectProperty* selectProperty = static_cast<Magus::QtSelectProperty*>
-            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
                                           PROPERTY_SAMPLERBLOCK_TEXTURE_MIN_FILTER,
                                           QString("Min filter"),
                                           Magus::QtProperty::SELECT));
@@ -101,7 +104,7 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
 
     // ******** Mag filter ********
     selectProperty = static_cast<Magus::QtSelectProperty*>
-            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
                                           PROPERTY_SAMPLERBLOCK_TEXTURE_MAG_FILTER,
                                           QString("Mag filter"),
                                           Magus::QtProperty::SELECT));
@@ -109,7 +112,7 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
 
     // ******** Mip filter ********
     selectProperty = static_cast<Magus::QtSelectProperty*>
-            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
                                           PROPERTY_SAMPLERBLOCK_TEXTURE_MIP_FILTER,
                                           QString("Mip filter"),
                                           Magus::QtProperty::SELECT));
@@ -122,7 +125,7 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
                                       QString("Clamp") <<
                                       QString("Border");
     selectProperty = static_cast<Magus::QtSelectProperty*>
-            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
                                           PROPERTY_SAMPLERBLOCK_ADDRESSING_MODE_U,
                                           QString("Texture Addressing Mode U"),
                                           Magus::QtProperty::SELECT));
@@ -130,7 +133,7 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
 
     // ******** Texture Addressing Mode V ********
     selectProperty = static_cast<Magus::QtSelectProperty*>
-            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
                                           PROPERTY_SAMPLERBLOCK_ADDRESSING_MODE_V,
                                           QString("Texture Addressing Mode V"),
                                           Magus::QtProperty::SELECT));
@@ -138,20 +141,20 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
 
     // ******** Texture Addressing Mode W ********
     selectProperty = static_cast<Magus::QtSelectProperty*>
-            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
                                           PROPERTY_SAMPLERBLOCK_ADDRESSING_MODE_W,
                                           QString("Texture Addressing Mode W"),
                                           Magus::QtProperty::SELECT));
     selectProperty->addValues(stringListTextureAddressingMode);
 
     // ******** Mip LOD Bias ********
-    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
                                  PROPERTY_SAMPLERBLOCK_MIPLOD_BIAS,
                                  QString("Mip LOD bias"),
                                  Magus::QtProperty::DECIMAL);
 
     // ******** Max Anisotropy ********
-    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
                                  PROPERTY_SAMPLERBLOCK_MAX_ANISOTROPY,
                                  QString("Max anisotropy"),
                                  Magus::QtProperty::DECIMAL);
@@ -168,39 +171,39 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
                                  QString("Greater") <<
                                  QString("Disabled");
     Magus::QtSelectProperty* selectCompareFunctionProperty = static_cast<Magus::QtSelectProperty*>
-            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
                                           PROPERTY_SAMPLERBLOCK_COMPARE_FUNCTION,
                                           QString("Compare Function"),
                                           Magus::QtProperty::SELECT));
     selectCompareFunctionProperty->addValues(stringListCompareFunction);
 
     // ******** Min LOD ********
-    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
                                  PROPERTY_SAMPLERBLOCK_MIN_LOD,
                                  QString("Min LOD"),
                                  Magus::QtProperty::DECIMAL);
 
     // ******** Max LOD ********
-    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
                                  PROPERTY_SAMPLERBLOCK_MAX_LOD,
                                  QString("Max LOD"),
                                  Magus::QtProperty::DECIMAL);
 
     // ******** Border colour ********
-    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
                                  PROPERTY_SAMPLERBLOCK_BORDER_COLOUR,
                                  QString("Border colour [0..255]"),
                                  Magus::QtProperty::COLOR);
 
     // ******** UV set ********
     Magus::QtSliderProperty* silderProperty = static_cast<Magus::QtSliderProperty*>
-        (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+        (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
                                       PROPERTY_SAMPLERBLOCK_UV_SET,
                                       QString("UV set [0..7]"),
                                       Magus::QtProperty::SLIDER));
     silderProperty->setSliderRange (0, 7, 1);
 
-    // ******** Blend mode ********
+    // ******** Detail: Blend mode ********
     QStringList stringListBlendMode;
     stringListBlendMode << QString("Regular alpha blending") <<
                            QString("Premultiplied alpha blending") <<
@@ -216,21 +219,36 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
                            QString("Grain merge") <<
                            QString("Difference");
     selectProperty = static_cast<Magus::QtSelectProperty*>
-            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
                                           PROPERTY_SAMPLERBLOCK_BLEND_MODE,
                                           QString("Blend mode"),
                                           Magus::QtProperty::SELECT));
     selectProperty->addValues(stringListBlendMode);
 
-    // ******** Map weight (pbs only) ********
+    // ******** Detail: Map weight (pbs only) ********
     mMapWeightSelectProperty = static_cast<Magus::QtDecimalProperty*>
-            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
                                           PROPERTY_SAMPLERBLOCK_MAP_WEIGTH,
                                           QString("Map weight"),
                                           Magus::QtProperty::DECIMAL));
 
-    // ******** Offset scale ********
-    // TODO: Not implemented yet; vector 4 property available yet
+    // ******** Detail: Offset ********
+    Magus::QtXYProperty* xyProperty = static_cast<Magus::QtXYProperty*>
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
+                                 PROPERTY_SAMPLERBLOCK_OFFSET,
+                                 QString("Offset"),
+                                 Magus::QtProperty::XY));
+    xyProperty->setLabelX("U");
+    xyProperty->setLabelY("V");
+
+    // ******** Detail: Scale ********
+    xyProperty = static_cast<Magus::QtXYProperty*>
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
+                                 PROPERTY_SAMPLERBLOCK_SCALE,
+                                 QString("Scale"),
+                                 Magus::QtProperty::XY));
+    xyProperty->setLabelX("U");
+    xyProperty->setLabelY("V");
 
     // ******** Animation Matrix (unlit only) ********
     // TODO: Not implemented yet
@@ -253,9 +271,9 @@ void HlmsPropertiesSamplerblock::setTextureTypePropertyVisible (bool visible)
 }
 
 //****************************************************************************/
-void HlmsPropertiesSamplerblock::setMapWeightPropertyVisible (bool visible)
+void HlmsPropertiesSamplerblock::setDetailMapPropertyVisible (bool visible)
 {
-    mMapWeightSelectProperty->setVisible(visible);
+    mDetailMapContainer->setVisible(visible);
 }
 
 //****************************************************************************/
@@ -271,6 +289,7 @@ void HlmsPropertiesSamplerblock::setObject (HlmsNodeSamplerblock* hlmsNodeSample
     Magus::QtColorProperty* colorProperty;
     Magus::QtSliderProperty* sliderProperty;
     Magus::QtCheckBoxProperty* checkboxProperty;
+    Magus::QtXYProperty* xyProperty;
 
     // ******** Texture ********
     textureProperty = static_cast<Magus::QtTextureProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_TEXTURE));
@@ -339,13 +358,23 @@ void HlmsPropertiesSamplerblock::setObject (HlmsNodeSamplerblock* hlmsNodeSample
     sliderProperty = static_cast<Magus::QtSliderProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_UV_SET));
     sliderProperty->setValue((int)mHlmsNodeSamplerblock->getUvSet());
 
-    // ******** Blend mode ********
+    // ******** Detail: Blend mode ********
     selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_BLEND_MODE));
     selectProperty->setCurentIndex(mHlmsNodeSamplerblock->getBlendMode());
 
-    // ******** Map weight ********
+    // ******** Detail: Map weight ********
     decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MAP_WEIGTH));
     decimalProperty->setValue(mHlmsNodeSamplerblock->getMapWeight());
+
+    // ******** Detail: Offset ********
+    xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_OFFSET));
+    QVector2D v2 = mHlmsNodeSamplerblock->getOffset();
+    xyProperty->setXY(v2.x(), v2.y());
+
+    // ******** Detail: Scale ********
+    xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_SCALE));
+    v2 = mHlmsNodeSamplerblock->getScale();
+    xyProperty->setXY(v2.x(), v2.y());
 }
 
 //****************************************************************************/
@@ -360,6 +389,7 @@ void HlmsPropertiesSamplerblock::propertyValueChanged(QtProperty* property)
     Magus::QtColorProperty* colorProperty;
     Magus::QtSliderProperty* sliderProperty;
     Magus::QtCheckBoxProperty* checkboxProperty;
+    Magus::QtXYProperty* xyProperty;
 
     switch (property->mPropertyId)
     {
@@ -488,6 +518,26 @@ void HlmsPropertiesSamplerblock::propertyValueChanged(QtProperty* property)
         {
             decimalProperty = static_cast<Magus::QtDecimalProperty*>(property);
             mHlmsNodeSamplerblock->setMapWeight(decimalProperty->getValue());
+        }
+        break;
+
+        case PROPERTY_SAMPLERBLOCK_OFFSET:
+        {
+            xyProperty = static_cast<Magus::QtXYProperty*>(property);
+            QVector2D v2;
+            v2.setX(xyProperty->getX());
+            v2.setY(xyProperty->getY());
+            mHlmsNodeSamplerblock->setOffset(v2);
+        }
+        break;
+
+        case PROPERTY_SAMPLERBLOCK_SCALE:
+        {
+            xyProperty = static_cast<Magus::QtXYProperty*>(property);
+            QVector2D v2;
+            v2.setX(xyProperty->getX());
+            v2.setY(xyProperty->getY());
+            mHlmsNodeSamplerblock->setScale(v2);
         }
         break;
     }

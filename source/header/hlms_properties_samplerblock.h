@@ -44,7 +44,7 @@ class HlmsPropertiesSamplerblock : public QWidget
 
         // Set properties visible/invisible
         void setTextureTypePropertyVisible (bool visible);
-        void setMapWeightPropertyVisible (bool visible);
+        void setDetailMapPropertyVisible (bool visible);
 
     private slots:
         void propertyValueChanged(QtProperty* property);
@@ -55,6 +55,7 @@ class HlmsPropertiesSamplerblock : public QWidget
         Magus::QtAssetWidget* mAssetWidget;
         Magus::QtSelectProperty* mTextureTypeSelectProperty;
         Magus::QtDecimalProperty* mMapWeightSelectProperty;
+        Magus::QtContainerWidget* mDetailMapContainer;
 };
 
 #endif

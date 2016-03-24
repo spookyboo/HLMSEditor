@@ -35,7 +35,7 @@ namespace Magus
      * Subclass of a QGraphicsView. This is needed for accepting dropped
      * content
     ***************************************************************************/
-    class QtNodeGraphicsView : public QGraphicsView, public QObject
+    class QtNodeGraphicsView : public QGraphicsView
     {
         Q_OBJECT
 

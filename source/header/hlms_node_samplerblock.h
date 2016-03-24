@@ -22,7 +22,7 @@
 #define HLMS_NODE_SAMPLERBLOCK_H
 
 #include <QWidget>
-#include <QVector4D>
+#include <QVector2D>
 #include "node_node.h"
 #include "node_port.h"
 
@@ -65,7 +65,8 @@ class HlmsNodeSamplerblock : public Magus::QtNode
         unsigned int getUvSet (void) const {return mUvSet;}
         unsigned int getBlendMode (void) const {return mBlendMode;}
         float getMapWeight (void) const {return mMapWeight;}
-        QVector4D getOffsetScale (void) const {return mOffsetScale;}
+        QVector2D getOffset (void) const {return mOffset;}
+        QVector2D getScale (void) const {return mScale;}
 
         // Setters
         void setFileNameTexture(const QString fileNameTexture);
@@ -91,7 +92,8 @@ class HlmsNodeSamplerblock : public Magus::QtNode
         void setUvSet (unsigned int uvSet) {mUvSet = uvSet;}
         void setBlendMode (unsigned int blendMode) {mBlendMode = blendMode;}
         void setMapWeight (float mapWeight) {mMapWeight = mapWeight;}
-        void setOffsetScale (QVector4D offsetScale) {mOffsetScale = offsetScale;}
+        void setOffset (QVector2D offset) {mOffset = offset;}
+        void setScale (QVector2D scale) {mScale = scale;}
 
         // Executed when this node is connected
         void nodeConnected(QtPort* port, QtConnection* connection);
@@ -119,7 +121,8 @@ class HlmsNodeSamplerblock : public Magus::QtNode
         unsigned int mUvSet;
         unsigned int mBlendMode; // Only in case of detail maps
         float mMapWeight; // For normal map and detail maps
-        QVector4D mOffsetScale;
+        QVector2D mOffset;
+        QVector2D mScale;
         bool mSamplerblockEnabled; // Enable / disable the samplerblock, to check the difference when rendering with/without the texture
         Magus::QtPort* mPort;
 };

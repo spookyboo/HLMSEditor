@@ -20,6 +20,7 @@
 
 // Include
 #include "constants.h"
+#include "magus_core.h"
 #include "mainwindow.h"
 #include "NodeEditor_dockwidget.h"
 #include "OgreHlmsPbsDatablock.h"
@@ -214,7 +215,7 @@ HlmsNodePbsDatablock* NodeEditorDockWidget::doNewHlmsPbsDatablockAction(void)
     if (mHlmsUnlitDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(false);
         return mHlmsPbsDatablockNode;
     }
 
@@ -223,7 +224,7 @@ HlmsNodePbsDatablock* NodeEditorDockWidget::doNewHlmsPbsDatablockAction(void)
     {
         mHlmsPbsDatablockNode = mHlmsPbsBuilder->createPbsNode();
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(true);
         mParent->initDatablocks();
     }
 
@@ -237,7 +238,7 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::doNewHlmsUnlitDatablockAction(void
     if (mHlmsPbsDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(true);
         return mHlmsUnlitDatablockNode;
     }
 
@@ -246,7 +247,7 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::doNewHlmsUnlitDatablockAction(void
     {
         mHlmsUnlitDatablockNode = mHlmsUnlitBuilder->createUnlitNode();
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(false);
         mParent->initDatablocks();
     }
 
@@ -263,13 +264,13 @@ HlmsNodeSamplerblock* NodeEditorDockWidget::doNewSamplerblockAction(void)
     if (mHlmsPbsDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(true);
         mHlmsPbsBuilder->connectNodes(mHlmsPbsDatablockNode, sampler);
     }
     else if (mHlmsUnlitDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(false);
         mHlmsUnlitBuilder->connectNodes(mHlmsUnlitDatablockNode, sampler);
     }
 
@@ -313,7 +314,7 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
     if (mHlmsPbsDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(true);
         mCurrentDatablockName = mHlmsPbsDatablockNode->getName();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
         mParent->initDatablocks();
@@ -324,7 +325,7 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
     else if (mHlmsUnlitDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-        mParent->mPropertiesDockWidget->setMapWeightPropertyVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(false);
         mCurrentDatablockName = mHlmsUnlitDatablockNode->getName();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
         mParent->initDatablocks();
@@ -409,12 +410,23 @@ void NodeEditorDockWidget::handleDropped (void)
     // Use the currently selected item in the tree and create a texture/sampler node
     // nB: When a file from the file explorer is dropped, this function will not take that into account
     // It currently assumes that it came from the texture tree- or thumbs widget
-    HlmsNodeSamplerblock* samplerNode = doNewSamplerblockAction();
-    if (samplerNode)
+    QString fileName = mParent->mTextureDockWidget->getCurrentFileName();
+    if (Magus::fileExist(fileName))
     {
-        QString fileName = mParent->mTextureDockWidget->getCurrentFileName();
-        samplerNode->setFileNameTexture(fileName);
-        nodeSelected(samplerNode);
+        HlmsNodeSamplerblock* samplerNode = doNewSamplerblockAction();
+        if (samplerNode)
+        {
+            samplerNode->setFileNameTexture(fileName);
+            nodeSelected(samplerNode);
+        }
+    }
+    else
+    {
+        QMessageBox::StandardButton reply = fileDoesNotExistsWarning(fileName);
+        if (reply == QMessageBox::Yes)
+        {
+            mParent->mTextureDockWidget->deleteTexture(fileName);
+        }
     }
 }
 
@@ -427,4 +439,13 @@ void NodeEditorDockWidget::newSamplerblockNode (const QString& fileName)
         samplerNode->setFileNameTexture(fileName);
         nodeSelected(samplerNode);
     }
+}
+
+//****************************************************************************/
+QMessageBox::StandardButton NodeEditorDockWidget::fileDoesNotExistsWarning(const QString& fileName)
+{
+    return QMessageBox::question(0,
+                                 "Warning",
+                                 fileName + QString(" does not exist. Remove it from the texture browser?"),
+                                 QMessageBox::Yes|QMessageBox::No);
 }

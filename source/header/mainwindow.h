@@ -65,6 +65,7 @@ class MainWindow : public QMainWindow
     protected:
         // Save the content of a resource vector
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources);
+        QMessageBox::StandardButton fileDoesNotExistsWarning(const QString& fileName);
 
 	private slots:
         void doNewHlmsPbsAction(void);

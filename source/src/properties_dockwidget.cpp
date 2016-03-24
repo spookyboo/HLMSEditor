@@ -144,9 +144,9 @@ void PropertiesDockWidget::setTextureTypePropertyVisible(bool visible)
 }
 
 //****************************************************************************/
-void PropertiesDockWidget::setMapWeightPropertyVisible(bool visible)
+void PropertiesDockWidget::setDetailMapPropertyVisible(bool visible)
 {
-    mHlmsPropertiesSamplerblock->setMapWeightPropertyVisible(visible);
+    mHlmsPropertiesSamplerblock->setDetailMapPropertyVisible(visible);
 }
 
 //****************************************************************************/
