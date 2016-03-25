@@ -66,12 +66,17 @@ class MainWindow : public QMainWindow
         // Save the content of a resource vector
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources);
         QMessageBox::StandardButton fileDoesNotExistsWarning(const QString& fileName);
+        void newProjectName(void);
 
 	private slots:
+        void doNewProjectAction(void);
         void doNewHlmsPbsAction(void);
         void doNewHlmsUnlitAction(void);
+        void doOpenProjectMenuAction(void);
         void doOpenDatablockMenuAction(void);
+        void doSaveProjectMenuAction(void);
         void doSaveDatablockMenuAction(void);
+        void doSaveAsProjectMenuAction(void);
         void doSaveAsDatablockMenuAction(void);
         void doMaterialBrowserOpenMenuAction(void);
         void doMaterialBrowserAddMenuAction(void);
@@ -103,10 +108,14 @@ class MainWindow : public QMainWindow
         QMenu* mMaterialBrowserMenu;
         QMenu* mTextureBrowserMenu;
         QMenu* mWindowMenu;
+        QAction* mNewProjectAction;
         QAction* mNewHlmsPbsAction;
         QAction* mNewHlmsUnlitAction;
+        QAction* mOpenProjectMenuAction;
         QAction* mOpenDatablockMenuAction;
+        QAction* mSaveProjectMenuAction;
         QAction* mSaveDatablockMenuAction;
+        QAction* mSaveAsProjectMenuAction;
         QAction* mSaveAsDatablockMenuAction;
         QAction* mMaterialBrowserOpenMenuAction;
         QAction* mMaterialBrowserAddMenuAction;
@@ -117,6 +126,10 @@ class MainWindow : public QMainWindow
         RenderwindowDockWidget* mRenderwindowDockWidget;
         NodeEditorDockWidget* mNodeEditorDockWidget;
         Magus::OgreManager* mOgreManager;
+        QString mProjectName;
+        QString mProjectPath;
+        QString mMaterialFileName;
+        QString mTextureFileName;
         QString mHlmsName; // Used to determine whether a hlms was already saved
         bool mSaveTextureBrowserTimerActive;
 };

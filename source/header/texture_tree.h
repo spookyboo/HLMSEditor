@@ -73,6 +73,9 @@ class TextureTreeDockWidget : public QDockWidget
         const QString& setSelectAssetQuiet(const QString& fileName); // This differs from the one in material_tree.h
         int getResourceId(const QString& fileName);
 
+        // Clear all content in the resourcetree
+        void clearContent(void);
+
     signals:
         void resourceSelected(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, int resourceType);
         void resourceDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);

@@ -83,3 +83,9 @@ void MaterialBrowserWidget::handleJsonFileSelectedToProcess(const QString& fullN
 {
     emit jSonFileSelectedToProcess(fullNameJson);
 }
+
+//****************************************************************************/
+void MaterialBrowserWidget::clearResources (void)
+{
+    mResourceMain->clearResources();
+}

@@ -114,3 +114,8 @@ void TextureDockWidget::handleTextureMutationOccured(void)
     emit textureMutationOccured();
 }
 
+//****************************************************************************/
+void TextureDockWidget::clearResources (void)
+{
+    mTextureMain->clearResources();
+}

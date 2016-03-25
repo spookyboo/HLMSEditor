@@ -173,7 +173,7 @@ void NodeEditorDockWidget::newHlmsUnlitAndSampler()
 HlmsNodeUnlitDatablock* NodeEditorDockWidget::newHlmsUnlit(void)
 {
     mNodeEditor->clear();
-    mHlmsUnlitDatablockNode = 0;
+    mHlmsPbsDatablockNode = 0;
     mHlmsUnlitDatablockNode = 0;
 
     // Create an unlit

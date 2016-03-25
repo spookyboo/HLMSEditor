@@ -44,6 +44,7 @@ MainWindow::MainWindow(void) :
 
     // Create the Ogre Manager
     mOgreManager = new Magus::OgreManager();
+    newProjectName();
     mHlmsName = QString("");
     mTempString = QString("");
     
@@ -59,7 +60,7 @@ MainWindow::MainWindow(void) :
     mOgreManager->initialize();
 
     // Set the title
-    setWindowTitle(QString("HLMS editor"));
+    setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
 
     // Set the stylesheet of the application
     QFile File(QString("dark.qss"));
@@ -104,33 +105,50 @@ void MainWindow::closeEvent(QCloseEvent* event)
 //****************************************************************************/
 void MainWindow::createActions(void)
 {
-    // File menu
-    mNewHlmsPbsAction = new QAction(QString("Pbs"), this);
+    // ******** File menu ********
+    // New
+    mNewProjectAction = new QAction(QString("New project"), this);
+    connect(mNewProjectAction, SIGNAL(triggered()), this, SLOT(doNewProjectAction()));
+    mNewHlmsPbsAction = new QAction(QString("New Hlms Pbs"), this);
     connect(mNewHlmsPbsAction, SIGNAL(triggered()), this, SLOT(doNewHlmsPbsAction()));
-    mNewHlmsUnlitAction = new QAction(QString("Unlit"), this);
+    mNewHlmsUnlitAction = new QAction(QString("New Hlms Unlit"), this);
     connect(mNewHlmsUnlitAction, SIGNAL(triggered()), this, SLOT(doNewHlmsUnlitAction()));
+
+    // Open
+    mOpenProjectMenuAction = new QAction(QString("Open project"), this);
+    connect(mOpenProjectMenuAction, SIGNAL(triggered()), this, SLOT(doOpenProjectMenuAction()));
     mOpenDatablockMenuAction = new QAction(QString("Open Hlms"), this);
     connect(mOpenDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doOpenDatablockMenuAction()));
+
+    // Save
+    mSaveProjectMenuAction = new QAction(QString("Save project"), this);
+    connect(mSaveProjectMenuAction, SIGNAL(triggered()), this, SLOT(doSaveProjectMenuAction()));
     mSaveDatablockMenuAction = new QAction(QString("Save Hlms"), this);
     connect(mSaveDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doSaveDatablockMenuAction()));
+
+    // Save as
+    mSaveAsProjectMenuAction = new QAction(QString("Save Project as"), this);
+    connect(mSaveAsProjectMenuAction, SIGNAL(triggered()), this, SLOT(doSaveAsProjectMenuAction()));
     mSaveAsDatablockMenuAction = new QAction(QString("Save Hlms as"), this);
     connect(mSaveAsDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doSaveAsDatablockMenuAction()));
+
+    // Quit
     mQuitMenuAction = new QAction(QString("Quit"), this);
     connect(mQuitMenuAction, SIGNAL(triggered()), this, SLOT(doQuitMenuAction()));
 
-    // Materials menu
+    // ******** Materials menu ********
     mMaterialBrowserOpenMenuAction = new QAction(QString("Open browser"), this);
     connect(mMaterialBrowserOpenMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserOpenMenuAction()));
     mMaterialBrowserAddMenuAction = new QAction(QString("Add Hlms to browser"), this);
     connect(mMaterialBrowserAddMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserAddMenuAction()));
 
-    // Texture menu
+    // ******** Texture menu ********
     mTextureBrowserImportMenuAction = new QAction(QString(ACTION_IMPORT_TEXTURES_FROM_DIR), this);
     connect(mTextureBrowserImportMenuAction, SIGNAL(triggered()), this, SLOT(doTextureBrowserImportMenuAction()));
     mTextureBrowserAddImageMenuAction = new QAction(QString(ACTION_ADD_TEXTURES), this);
     connect(mTextureBrowserAddImageMenuAction, SIGNAL(triggered()), this, SLOT(doTextureBrowserAddImageMenuAction()));
 
-    // Window menu
+    // ******** Window menu ********
     mResetWindowLayoutMenuAction = new QAction(QString("Reset Window Layout"), this);
     connect(mResetWindowLayoutMenuAction, SIGNAL(triggered()), this, SLOT(doResetWindowLayoutMenuAction()));
 }
@@ -138,20 +156,34 @@ void MainWindow::createActions(void)
 //****************************************************************************/
 void MainWindow::createMenus(void)
 {
+    // ******** File ********
     mFileMenu = menuBar()->addMenu(QString("&File"));
     mMaterialBrowserMenu = menuBar()->addMenu(QString("&Materials"));
     mTextureBrowserMenu = menuBar()->addMenu(QString("&Textures"));
-    QMenu* fileMenuAction = mFileMenu->addMenu("New Hlms");
+    QMenu* fileMenuAction = mFileMenu->addMenu("New...");
+    fileMenuAction->addAction(mNewProjectAction);
     fileMenuAction->addAction(mNewHlmsPbsAction);
     fileMenuAction->addAction(mNewHlmsUnlitAction);
-    mFileMenu->addAction(mOpenDatablockMenuAction);
-    mFileMenu->addAction(mSaveDatablockMenuAction);
-    mFileMenu->addAction(mSaveAsDatablockMenuAction);
+    fileMenuAction = mFileMenu->addMenu("Open...");
+    fileMenuAction->addAction(mOpenProjectMenuAction);
+    fileMenuAction->addAction(mOpenDatablockMenuAction);
+    fileMenuAction = mFileMenu->addMenu("Save...");
+    fileMenuAction->addAction(mSaveProjectMenuAction);
+    fileMenuAction->addAction(mSaveDatablockMenuAction);
+    fileMenuAction = mFileMenu->addMenu("Save As...");
+    fileMenuAction->addAction(mSaveAsProjectMenuAction);
+    fileMenuAction->addAction(mSaveAsDatablockMenuAction);
     mFileMenu->addAction(mQuitMenuAction);
+
+    // ******** Material browser ********
     mMaterialBrowserMenu->addAction(mMaterialBrowserOpenMenuAction);
     mMaterialBrowserMenu->addAction(mMaterialBrowserAddMenuAction);
+
+    // ******** Texture browser ********
     mTextureBrowserMenu->addAction(mTextureBrowserImportMenuAction);
     mTextureBrowserMenu->addAction(mTextureBrowserAddImageMenuAction);
+
+    // ******** Window ********
     mWindowMenu = menuBar()->addMenu(QString("&Window"));
     mWindowMenu->addAction(mResetWindowLayoutMenuAction);
 }
@@ -186,6 +218,24 @@ void MainWindow::createDockWindows(void)
 }
 
 //****************************************************************************/
+void MainWindow::doNewProjectAction(void)
+{
+    mMaterialBrowser->clearResources();
+    mTextureDockWidget->clearResources();
+    newProjectName();
+}
+
+//****************************************************************************/
+void MainWindow::newProjectName(void)
+{
+    mProjectName = DEFAULT_PROJECT_NAME;
+    mProjectPath = PROJECT_PATH;
+    setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
+    mMaterialFileName = mProjectPath + mProjectName + QString ("_") + FILE_MATERIAL_BROWSER;
+    mTextureFileName = mProjectPath + mProjectName + QString ("_") + FILE_TEXTURE_BROWSER;
+}
+
+//****************************************************************************/
 void MainWindow::doNewHlmsPbsAction(void)
 {
     initDatablocks();
@@ -199,6 +249,62 @@ void MainWindow::doNewHlmsUnlitAction(void)
     initDatablocks();
     mPropertiesDockWidget->clear();
     mNodeEditorDockWidget->newHlmsUnlit();
+}
+
+//****************************************************************************/
+void MainWindow::doOpenProjectMenuAction(void)
+{
+    QString fileName;
+    fileName = QFileDialog::getOpenFileName(this, QString("Load the project"),
+                                            QString(""),
+                                            QString("Hlms project file (*.hlmp)"));
+
+    if (!fileName.isEmpty())
+    {
+        QFileInfo info(fileName);
+        mProjectName = info.baseName();
+        mProjectPath = info.absolutePath() + QString("/");
+
+        QFile file(mProjectPath + mProjectName + QString(".hlmp"));
+        QString header;
+        if (file.open(QFile::ReadOnly))
+        {
+            QTextStream readFile(&file);
+
+            // Line 1
+            header = readFile.readLine();
+            if (header != HEADER_PROJECT)
+            {
+                QMessageBox::information(0, QString("Error"), QString("This is not a valid project file"));
+            }
+            else
+            {
+                // Line 2
+                fileName = readFile.readLine();
+                info.setFile(fileName);
+                if (info.exists() && info.isFile())
+                {
+                    mMaterialFileName = fileName;
+                    QString test = mMaterialFileName;
+                }
+
+                // Line 3
+                fileName = readFile.readLine();
+                info.setFile(fileName);
+                if (info.exists() && info.isFile())
+                {
+                    mTextureFileName = fileName;
+                    QString test = mTextureFileName;
+                }
+
+                // Load the material and texture config
+                loadMaterialBrowserCfg();
+                loadTextureBrowserCfg();
+                file.close();
+                setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
+            }
+        }
+    }
 }
 
 //****************************************************************************/
@@ -418,6 +524,54 @@ void MainWindow::getListOfResources(void)
 }
 
 //****************************************************************************/
+void MainWindow::doSaveProjectMenuAction(void)
+{
+    // Save material config
+    mMaterialFileName = mProjectPath + mProjectName + QString ("_") + FILE_MATERIAL_BROWSER;
+    saveMaterialBrowserCfg();
+
+    // Save texture config
+    mTextureFileName = mProjectPath + mProjectName + QString ("_") + FILE_TEXTURE_BROWSER;
+    saveTextureBrowserCfg();
+
+    // Save a project file
+    QFile file(mProjectPath + mProjectName + QString(".hlmp"));
+    QString header = QString(HEADER_PROJECT);
+    if (file.open(QFile::WriteOnly|QFile::Truncate))
+    {
+        QTextStream stream(&file);
+        stream << header
+               << "\n"
+               << mMaterialFileName
+               << "\n"
+               << mTextureFileName
+               << "\n";
+        file.close();
+
+        // Set title
+        setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
+    }
+}
+
+//****************************************************************************/
+void MainWindow::doSaveAsProjectMenuAction(void)
+{
+    // Save the project file
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    QString("Save the project"),
+                                                    mProjectName + QString(".hlmp"),
+                                                    QString("Hlms project file (*.hlmp)"));
+
+    if (!fileName.isEmpty())
+    {
+        QFileInfo info(fileName);
+        mProjectName = info.baseName();
+        mProjectPath = info.absolutePath() + QString("/");
+        doSaveProjectMenuAction();
+    }
+}
+
+//****************************************************************************/
 void MainWindow::doSaveDatablockMenuAction(void)
 {
     if (mHlmsName.isEmpty())
@@ -473,7 +627,7 @@ void MainWindow::saveDatablock(void)
 void MainWindow::loadMaterialBrowserCfg(void)
 {
     QVector<Magus::QtResourceInfo*> resources;
-    QFile file(FILE_MATERIAL_BROWSER);
+    QFile file(mMaterialFileName);
     QString line;
     if (file.open(QFile::ReadOnly))
     {
@@ -570,7 +724,7 @@ void MainWindow::saveMaterialBrowserCfg(void)
 {
     // Save all current settings
     const QVector<Magus::QtResourceInfo*>& resources = mMaterialBrowser->getResources();
-    saveResources(FILE_MATERIAL_BROWSER, resources);
+    saveResources(mMaterialFileName, resources);
 }
 
 //****************************************************************************/
@@ -708,14 +862,14 @@ void MainWindow::saveTextureBrowserCfg(void)
 {
     mSaveTextureBrowserTimerActive = false;
     const QVector<Magus::QtResourceInfo*>& resources = mTextureDockWidget->getResources();
-    saveResources(FILE_TEXTURE_BROWSER, resources);
+    saveResources(mTextureFileName, resources);
 }
 
 //****************************************************************************/
 void MainWindow::loadTextureBrowserCfg(void)
 {
     QVector<Magus::QtResourceInfo*> resources;
-    QFile file(FILE_TEXTURE_BROWSER);
+    QFile file(mTextureFileName);
     QString line;
     if (file.open(QFile::ReadOnly))
     {

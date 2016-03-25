@@ -63,6 +63,9 @@ class TextureMain : public QMainWindow
         void deleteTexture (const QString& fileName);
         const QString& getCurrentFileName (void);
 
+        // Empty the texture browser
+        void clearResources(void);
+
         bool mIsClosing;
 
     protected:

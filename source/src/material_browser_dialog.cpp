@@ -98,3 +98,9 @@ void MaterialBrowserDialog::handleOkAndAccept(void)
     mSelectedFileName = mResourceWidget->getSelectedFullQualifiedName();
     accept();
 }
+
+//****************************************************************************/
+void MaterialBrowserDialog::clearResources (void)
+{
+    mResourceWidget->clearResources();
+}

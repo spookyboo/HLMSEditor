@@ -496,3 +496,9 @@ const QString& TextureTreeDockWidget::getCurrentFileName (void)
     return mTempString;
 }
 
+//****************************************************************************/
+void TextureTreeDockWidget::clearContent(void)
+{
+    mResourceTreeWidget->clear();
+    initializeResourceTree();
+}

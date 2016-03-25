@@ -263,3 +263,10 @@ QMessageBox::StandardButton MaterialMain::fileDoesNotExistsWarning(const QString
                                  fileName + QString(" does not exist. Remove it from the material browser?"),
                                  QMessageBox::Yes|QMessageBox::No);
 }
+
+//****************************************************************************/
+void MaterialMain::clearResources (void)
+{
+    mMaterialTreeDockWidget->clearContent();
+    mMaterialThumbsDockWidget->clearContent();
+}

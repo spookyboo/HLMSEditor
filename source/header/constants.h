@@ -26,6 +26,7 @@
 #include "OgreString.h"
 
 //****************************************************************************/
+static const QString WINDOW_TITLE = QString("HLMS editor");
 static const int OGRE_WIDGET_RENDERWINDOW = 1;
 static const int TB_ICON_AND_SPACING = 32;
 static const QString NODE_TITLE_PBS_DATABLOCK = QString("Hlms PBS");
@@ -66,11 +67,14 @@ static const QString INFO_UNLIT = QString("../common/info/hlms_unlit.inf");
 static const QString INFO_SAMPLERBLOCK = QString("../common/info/samplerblock.inf");
 static const QString INFO_MACROBLOCK = QString("../common/info/macroblock.inf");
 static const QString INFO_BLENDBLOCK = QString("../common/info/blendblock.inf");
+static const QString DEFAULT_PROJECT_NAME = QString("project1");
+static const QString HEADER_PROJECT = QString("hlmsEditor v1.0");
 static const QString FILE_MATERIAL_BROWSER = QString("materials.cfg");
 static const QString FILE_TEXTURE_BROWSER = QString("textures.cfg");
 static const QString FILE_NO_IMAGE = QString("../common/icons/noImage.png");
 static const QString FILE_RESOURCES_D = QString("resources_d.cfg");
 static const QString FILE_RESOURCES = QString("resources.cfg");
+static const QString PROJECT_PATH = "../common/project/";
 static const Ogre::String DEFAULT_DATABLOCK_NAME = "[Default]";
 static const Ogre::String DATABLOCK_DEBUG_CUBE = "DebugCube";
 static const Ogre::String THUMBS_PATH = "../common/thumbs/";

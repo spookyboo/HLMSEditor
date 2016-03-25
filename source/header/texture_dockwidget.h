@@ -57,6 +57,9 @@ class TextureDockWidget : public QDockWidget
         void deleteTexture (const QString& fileName);
         const QString& getCurrentFileName (void);
 
+        // Empty the texture browser
+        void clearResources(void);
+
     signals:
         void textureDoubleClicked(const QString& fileName, const QString& baseName);
         void customContextMenuItemSelected(const QString& menuItemText);

@@ -289,3 +289,12 @@ const QString& TextureMain::getCurrentFileName (void)
 {
     return mTextureTreeDockWidget->getCurrentFileName();
 }
+
+//****************************************************************************/
+void TextureMain::clearResources (void)
+{
+    mTextureTreeDockWidget->clearContent();
+    mTextureThumbsDockWidget->clearContent();
+}
+
+

@@ -74,6 +74,9 @@ class MaterialBrowserWidget : public QWidget
         // Returns the qualified name of the currently selected item from the resource tree
         const QString& getSelectedFullQualifiedName(void);
 
+        // Empty the material browser
+        void clearResources(void);
+
     signals:
         // Emitted when a json file is selected to process
         void jSonFileSelectedToProcess(const QString& fullNameJson);

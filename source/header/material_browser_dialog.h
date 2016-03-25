@@ -49,6 +49,7 @@ class MaterialBrowserDialog : public QDialog
         void setResources (const QVector<Magus::QtResourceInfo*>& resources);
         void initResourceTree(void);
         const QString& getSelectedJsonFileName(void) const {return mSelectedFileName;}
+        void clearResources(void);
 
     private slots:
         void handleJsonFileSelectedToProcess(const QString& fullNameJson);

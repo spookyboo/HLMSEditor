@@ -70,6 +70,9 @@ class MaterialMain : public QMainWindow
         // Returns the qualified name of the currently selected item from the resource tree
         const QString& getSelectedFullQualifiedName(void);
 
+        // Empty the material browser
+        void clearResources(void);
+
         void update(void);
         bool mIsClosing;
 
