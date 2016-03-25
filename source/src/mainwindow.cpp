@@ -160,18 +160,22 @@ void MainWindow::createMenus(void)
     mFileMenu = menuBar()->addMenu(QString("&File"));
     mMaterialBrowserMenu = menuBar()->addMenu(QString("&Materials"));
     mTextureBrowserMenu = menuBar()->addMenu(QString("&Textures"));
-    QMenu* fileMenuAction = mFileMenu->addMenu("New...");
+    QMenu* fileMenuAction = mFileMenu->addMenu("New");
     fileMenuAction->addAction(mNewProjectAction);
+    fileMenuAction->addSeparator();
     fileMenuAction->addAction(mNewHlmsPbsAction);
     fileMenuAction->addAction(mNewHlmsUnlitAction);
-    fileMenuAction = mFileMenu->addMenu("Open...");
+    fileMenuAction = mFileMenu->addMenu("Open");
     fileMenuAction->addAction(mOpenProjectMenuAction);
+    fileMenuAction->addSeparator();
     fileMenuAction->addAction(mOpenDatablockMenuAction);
-    fileMenuAction = mFileMenu->addMenu("Save...");
+    fileMenuAction = mFileMenu->addMenu("Save");
     fileMenuAction->addAction(mSaveProjectMenuAction);
+    fileMenuAction->addSeparator();
     fileMenuAction->addAction(mSaveDatablockMenuAction);
-    fileMenuAction = mFileMenu->addMenu("Save As...");
+    fileMenuAction = mFileMenu->addMenu("Save As");
     fileMenuAction->addAction(mSaveAsProjectMenuAction);
+    fileMenuAction->addSeparator();
     fileMenuAction->addAction(mSaveAsDatablockMenuAction);
     mFileMenu->addAction(mQuitMenuAction);
 
@@ -448,9 +452,14 @@ void MainWindow::getAndSetFirstDatablock(void)
 
                         // Create the node structure
                         QString s = newDatablockName.c_str();
-                        mNodeEditorDockWidget->createPbsNodeStructure(s);
+                        HlmsNodePbsDatablock* node = mNodeEditorDockWidget->createPbsNodeStructure(s);
+                        if (node)
+                        {
+                            node->setSelected(true);
+                            mNodeEditorDockWidget->nodeSelected(node);
+                        }
                         mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-                        mPropertiesDockWidget->setDetailMapPropertyVisible(true);
+                        mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
                         break;
                     }
                 }
@@ -492,9 +501,14 @@ void MainWindow::getAndSetFirstDatablock(void)
 
                         // Create the node structure
                         QString s = newDatablockName.c_str();
-                        mNodeEditorDockWidget->createUnlitNodeStructure(s);
+                        HlmsNodeUnlitDatablock* node = mNodeEditorDockWidget->createUnlitNodeStructure(s);
+                        if (node)
+                        {
+                            node->setSelected(true);
+                            mNodeEditorDockWidget->nodeSelected(node);
+                        }
                         mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-                        mPropertiesDockWidget->setDetailMapPropertyVisible(false);
+                        mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
                         break;
                     }
                 }

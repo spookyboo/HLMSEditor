@@ -276,7 +276,15 @@ const QString& MaterialTreeDockWidget::doubleClicked(const QString& baseNameThum
 //****************************************************************************/
 void MaterialTreeDockWidget::deleteAssetQuiet(int toplevelId, const QString& name, const QString& baseName)
 {
-    mResourceTreeWidget->deleteResource(toplevelId, name, true);
+    // First, delete it from mResourceTreeWidget
+    int resourceId = mResourceTreeWidget->getResourceIdFromToplevelIdAndName(toplevelId, name);
+    if (resourceId < 0)
+        return;
+
+    mResourceTreeWidget->deleteResource(resourceId, true);
+
+    // find the underlying asset (filenames) + delete it from the mSourceInfo
+    mSourceInfo.remove(resourceId);
 }
 
 //****************************************************************************/
@@ -286,6 +294,7 @@ void MaterialTreeDockWidget::deleteAssetQuiet(const QString& baseNameThumb)
     if (id != -1)
     {
         QtSourcesInfo info = mSourceInfo[id];
+        mSourceInfo.remove(id);
         mResourceTreeWidget->deleteResource(info.toplevelId, info.fileName, true);
     }
 }

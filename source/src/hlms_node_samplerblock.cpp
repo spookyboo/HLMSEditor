@@ -51,8 +51,8 @@ HlmsNodeSamplerblock::HlmsNodeSamplerblock(QString title, QGraphicsItem* parent)
     mFileNameTexture = QString("");
     mBaseNameTexture = QString("");
     mPathTexture = QString("");
-    mOffset = QVector2D();
-    mScale = QVector2D();
+    mOffset = QVector2D(0.0f, 0.0f);
+    mScale = QVector2D(1.0f, 1.0f);
 
     // Define the connection policy
     HlmsPbsDatablockSamplerblockPortType hlmsPbsDatablockSamplerblockPortType;

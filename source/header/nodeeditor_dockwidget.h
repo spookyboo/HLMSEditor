@@ -71,6 +71,9 @@ class NodeEditorDockWidget : public QDockWidget
         EditorHlmsTypes getCurrentDatablockType (void);
         void newSamplerblockNode (const QString& fileName);
 
+    public slots:
+        void nodeSelected(QtNode* node);
+
     protected:
         QMessageBox::StandardButton fileDoesNotExistsWarning(const QString& fileName);
 
@@ -88,7 +91,6 @@ class NodeEditorDockWidget : public QDockWidget
 
         // Additional slots
         void nodeToBeDeleted(QtNode* node);
-        void nodeSelected(QtNode* node);
         void handleDropped (void);
 
     private:

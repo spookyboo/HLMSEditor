@@ -44,7 +44,7 @@ class HlmsPropertiesSamplerblock : public QWidget
 
         // Set properties visible/invisible
         void setTextureTypePropertyVisible (bool visible);
-        void setDetailMapPropertyVisible (bool visible);
+        void setDetailMapPropertiesVisible (bool visible);
 
     private slots:
         void propertyValueChanged(QtProperty* property);

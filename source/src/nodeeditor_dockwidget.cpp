@@ -215,7 +215,7 @@ HlmsNodePbsDatablock* NodeEditorDockWidget::doNewHlmsPbsDatablockAction(void)
     if (mHlmsUnlitDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
         return mHlmsPbsDatablockNode;
     }
 
@@ -224,8 +224,11 @@ HlmsNodePbsDatablock* NodeEditorDockWidget::doNewHlmsPbsDatablockAction(void)
     {
         mHlmsPbsDatablockNode = mHlmsPbsBuilder->createPbsNode();
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
         mParent->initDatablocks();
+        if (mHlmsPbsDatablockNode)
+            mHlmsPbsDatablockNode->setSelected(true);
+        nodeSelected(mHlmsPbsDatablockNode);
     }
 
     return mHlmsPbsDatablockNode;
@@ -238,7 +241,7 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::doNewHlmsUnlitDatablockAction(void
     if (mHlmsPbsDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
         return mHlmsUnlitDatablockNode;
     }
 
@@ -247,8 +250,11 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::doNewHlmsUnlitDatablockAction(void
     {
         mHlmsUnlitDatablockNode = mHlmsUnlitBuilder->createUnlitNode();
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
         mParent->initDatablocks();
+        if (mHlmsUnlitDatablockNode)
+            mHlmsUnlitDatablockNode->setSelected(true);
+        nodeSelected(mHlmsUnlitDatablockNode);
     }
 
     return mHlmsUnlitDatablockNode;
@@ -264,13 +270,13 @@ HlmsNodeSamplerblock* NodeEditorDockWidget::doNewSamplerblockAction(void)
     if (mHlmsPbsDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
         mHlmsPbsBuilder->connectNodes(mHlmsPbsDatablockNode, sampler);
     }
     else if (mHlmsUnlitDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
         mHlmsUnlitBuilder->connectNodes(mHlmsUnlitDatablockNode, sampler);
     }
 
@@ -314,7 +320,7 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
     if (mHlmsPbsDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
         mCurrentDatablockName = mHlmsPbsDatablockNode->getName();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
         mParent->initDatablocks();
@@ -325,7 +331,7 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
     else if (mHlmsUnlitDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-        mParent->mPropertiesDockWidget->setDetailMapPropertyVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
         mCurrentDatablockName = mHlmsUnlitDatablockNode->getName();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
         mParent->initDatablocks();

@@ -271,9 +271,17 @@ void HlmsPropertiesSamplerblock::setTextureTypePropertyVisible (bool visible)
 }
 
 //****************************************************************************/
-void HlmsPropertiesSamplerblock::setDetailMapPropertyVisible (bool visible)
+void HlmsPropertiesSamplerblock::setDetailMapPropertiesVisible (bool visible)
 {
-    mDetailMapContainer->setVisible(visible);
+    // Enable specific detail map properties, except for blend properties
+    Magus::QtDecimalProperty* decimalProperty;
+    decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MAP_WEIGTH));
+    decimalProperty->setVisible(visible);
+    Magus::QtXYProperty* xyProperty;
+    xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_OFFSET));
+    xyProperty->setVisible(visible);
+    xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_SCALE));
+    xyProperty->setVisible(visible);
 }
 
 //****************************************************************************/
