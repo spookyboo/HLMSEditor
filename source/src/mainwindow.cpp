@@ -26,13 +26,17 @@
 #include <QTextStream>
 #include <QMenuBar>
 #include "mainwindow.h"
+#include "OgreRoot.h"
+#include "OgrePlugin.h"
 #include "OgreItem.h"
 #include "OgreHlmsPbs.h"
 #include "OgreHlmsUnlit.h"
 #include "OgreHlmsPbsDatablock.h"
 #include "OgreHlmsUnlitDatablock.h"
 #include "OgreHlmsManager.h"
+#include "OgreArchiveManager.h"
 #include "hlms_builder.h"
+#include "hlms_editor_plugin_action.h"
 
 //****************************************************************************/
 MainWindow::MainWindow(void) :
@@ -161,22 +165,79 @@ void MainWindow::createMenus(void)
     mMaterialBrowserMenu = menuBar()->addMenu(QString("&Materials"));
     mTextureBrowserMenu = menuBar()->addMenu(QString("&Textures"));
     QMenu* fileMenuAction = mFileMenu->addMenu("New");
+
+    // New
     fileMenuAction->addAction(mNewProjectAction);
     fileMenuAction->addSeparator();
     fileMenuAction->addAction(mNewHlmsPbsAction);
     fileMenuAction->addAction(mNewHlmsUnlitAction);
+
+    // Open
     fileMenuAction = mFileMenu->addMenu("Open");
     fileMenuAction->addAction(mOpenProjectMenuAction);
     fileMenuAction->addSeparator();
     fileMenuAction->addAction(mOpenDatablockMenuAction);
+
+    // Save
     fileMenuAction = mFileMenu->addMenu("Save");
     fileMenuAction->addAction(mSaveProjectMenuAction);
     fileMenuAction->addSeparator();
     fileMenuAction->addAction(mSaveDatablockMenuAction);
-    fileMenuAction = mFileMenu->addMenu("Save As");
+
+    // Save as
+    fileMenuAction = mFileMenu->addMenu("Save as");
     fileMenuAction->addAction(mSaveAsProjectMenuAction);
     fileMenuAction->addSeparator();
     fileMenuAction->addAction(mSaveAsDatablockMenuAction);
+
+    // Import/Export
+    Ogre::Root::PluginInstanceList plugins = mOgreManager->getOgreRoot()->getInstalledPlugins();
+    Ogre::Root::PluginInstanceList::iterator it;
+    Ogre::Root::PluginInstanceList::iterator itStart = plugins.begin();
+    Ogre::Root::PluginInstanceList::iterator itEnd = plugins.end();
+    Ogre::Plugin* plugin;
+    PluginAction* action;
+    bool menuImportExists = false;
+    bool menuExportExists = false;
+    for (it = itStart; it != itEnd; ++it)
+    {
+        plugin = *it;
+        if (plugin->getName() == GENERAL_HLMS_PLUGIN_NAME)
+        {
+            // It is a Hlms editor plugin
+            Ogre::HlmsEditorPlugin* hlmsEditorPlugin = dynamic_cast<Ogre::HlmsEditorPlugin*>(plugin);
+            if (hlmsEditorPlugin->isImport())
+            {
+                // First create an import menu item if needed
+                if (!menuImportExists)
+                {
+                    fileMenuAction = mFileMenu->addMenu("Import");
+                    menuImportExists = true;
+                }
+
+                // Add the import action of the plugin to the submenu
+                action = new PluginAction(hlmsEditorPlugin, hlmsEditorPlugin->getImportMenuText().c_str(), this);
+                connect(action, SIGNAL(pluginActionTriggered(Ogre::HlmsEditorPlugin*)), this, SLOT(doImport(Ogre::HlmsEditorPlugin*)));
+                fileMenuAction->addAction(action);
+            }
+            else if (hlmsEditorPlugin->isExport())
+            {
+                // First create an export menu item if needed
+                if (!menuExportExists)
+                {
+                    fileMenuAction = mFileMenu->addMenu("Export");
+                    menuExportExists = true;
+                }
+
+                // Add the export action of the plugin to the submenu
+                action = new PluginAction(hlmsEditorPlugin, hlmsEditorPlugin->getExportMenuText().c_str(), this);
+                connect(action, SIGNAL(pluginActionTriggered(Ogre::HlmsEditorPlugin*)), this, SLOT(doExport(Ogre::HlmsEditorPlugin*)));
+                fileMenuAction->addAction(action);
+            }
+        }
+    }
+
+    // Quit
     mFileMenu->addAction(mQuitMenuAction);
 
     // ******** Material browser ********
@@ -1001,4 +1062,18 @@ QMessageBox::StandardButton MainWindow::fileDoesNotExistsWarning(const QString& 
                                  "Warning",
                                  fileName + QString(" does not exist. Remove it from the texture browser?"),
                                  QMessageBox::Yes|QMessageBox::No);
+}
+
+//****************************************************************************/
+void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
+{
+    // TODO
+    QMessageBox::information(0, QString("info"), plugin->getImportMenuText().c_str());
+}
+
+//****************************************************************************/
+void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
+{
+    // TODO
+    QMessageBox::information(0, QString("info"), plugin->getExportMenuText().c_str());
 }

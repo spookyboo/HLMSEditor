@@ -68,7 +68,9 @@ HEADERS       = \
     source/header/texture_main.h \
     source/header/texture_thumbs.h \
     source/header/texture_tree.h \
-    framework/header/node_view.h
+    framework/header/node_view.h \
+    source/header/hlms_editor_plugin.h \
+    source/header/hlms_editor_plugin_action.h
 
 
 SOURCES       = \
@@ -126,7 +128,8 @@ SOURCES       = \
     source/src/texture_dockwidget.cpp \
     source/src/texture_main.cpp \
     source/src/texture_thumbs.cpp \
-    source/src/texture_tree.cpp
+    source/src/texture_tree.cpp \
+    source/src/hlms_editor_plugin_action.cpp
 
 
 INCLUDEPATH += "../HLMSEditor/source/header/"

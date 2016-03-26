@@ -33,6 +33,7 @@
 #include "nodeeditor_dockwidget.h"
 #include "material_browser_dialog.h"
 #include "ogre3_renderman.h"
+#include "hlms_editor_plugin.h"
 #include "constants.h"
 
 QT_BEGIN_NAMESPACE
@@ -88,6 +89,8 @@ class MainWindow : public QMainWindow
         void handleCustomContextMenuItemSelected(const QString& menuItemText);
         void handleTextureMutationOccured(void);
         void saveTextureBrowserCfg(void);
+        void doImport(Ogre::HlmsEditorPlugin* plugin);
+        void doExport(Ogre::HlmsEditorPlugin* plugin);
 
 	private:
 		void createActions(void);
