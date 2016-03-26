@@ -36,6 +36,7 @@
 #include "OgreHlmsManager.h"
 #include "OgreArchiveManager.h"
 #include "hlms_builder.h"
+#include "hlms_editor_plugin.h"
 #include "hlms_editor_plugin_action.h"
 
 //****************************************************************************/
@@ -484,7 +485,7 @@ void MainWindow::getAndSetFirstDatablock(void)
     if (hlmsPbs)
     {
         int size = hlmsPbs->getDatablockMap().size();
-        //QMessageBox::information(0, QString("info"), QVariant(size).toString());
+        //QMessageBox::information(0, QString("Info"), QVariant(size).toString());
         if (size> 1)
         {
             // It is a PBS; Note, that there is also a default (so always 1)
@@ -533,7 +534,7 @@ void MainWindow::getAndSetFirstDatablock(void)
     if (hlmsUnlit)
     {
         int size = hlmsUnlit->getDatablockMap().size();
-        //QMessageBox::information(0, QString("info"), QVariant(size).toString());
+        //QMessageBox::information(0, QString("Info"), QVariant(size).toString());
         if (size > 1)
         {
             // It is an Unlit; Note, that there is also a default (so always 1)
@@ -1067,13 +1068,71 @@ QMessageBox::StandardButton MainWindow::fileDoesNotExistsWarning(const QString& 
 //****************************************************************************/
 void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
 {
-    // TODO
-    QMessageBox::information(0, QString("info"), plugin->getImportMenuText().c_str());
+    Ogre::HlmsEditorPluginData data;
+    QString text;
+    constructHlmsEditorPluginData(&data);
+    if (plugin->executeImport(&data))
+    {
+        text = data.mOutSuccessText.c_str();
+        if (text.isEmpty())
+            text = QString ("Import completed");
+        QMessageBox::information(0, QString("Info"), text);
+    }
+    else
+    {
+        text = data.mOutErrorText.c_str();
+        if (text.isEmpty())
+            text = QString ("Error while importing");
+        QMessageBox::information(0, QString("Error"), text);
+    }
 }
 
 //****************************************************************************/
 void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
 {
-    // TODO
-    QMessageBox::information(0, QString("info"), plugin->getExportMenuText().c_str());
+    Ogre::HlmsEditorPluginData data;
+    QString text;
+    constructHlmsEditorPluginData(&data);
+    if (plugin->executeExport(&data))
+    {
+        text = data.mOutSuccessText.c_str();
+        if (text.isEmpty())
+            text = QString ("Export completed");
+        QMessageBox::information(0, QString("Info"), text);
+    }
+    else
+    {
+        text = data.mOutErrorText.c_str();
+        if (text.isEmpty())
+            text = QString ("Error while exporting");
+        QMessageBox::information(0, QString("Error"), text);
+    }
+}
+
+//****************************************************************************/
+void MainWindow::constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data)
+{
+    QOgreWidget* widget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
+    Ogre::Item* item = widget->getItem();
+    data->mInItem = item;
+
+    data->mInMaterialFileName = mMaterialFileName.toStdString();
+    const QVector<Magus::QtResourceInfo*>& resources = mMaterialBrowser->getResources();
+    QVectorIterator<Magus::QtResourceInfo*> it(resources);
+    it.toFront();
+    Magus::QtResourceInfo* info;
+    while (it.hasNext())
+    {
+        // Only add real filenames (assets)
+        info = it.next();
+        if (info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_ASSET)
+            data->mInMaterialFileNameVector.push_back(info->fullQualifiedName.toStdString());
+    }
+
+    data->mInOutCurrenDatablock = item->getSubItem(0)->getDatablock();
+    data->mInProjectName = mProjectName.toStdString();;
+    data->mInProjectPath = mProjectPath.toStdString();;
+    data->mInRenderWindow = widget->getRenderWindow();
+    data->mInSceneManager = widget->getSceneManager();
+    data->mInTextureFileName = mTextureFileName.toStdString();;
 }

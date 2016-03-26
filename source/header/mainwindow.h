@@ -91,6 +91,7 @@ class MainWindow : public QMainWindow
         void saveTextureBrowserCfg(void);
         void doImport(Ogre::HlmsEditorPlugin* plugin);
         void doExport(Ogre::HlmsEditorPlugin* plugin);
+        void constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data);
 
 	private:
 		void createActions(void);
