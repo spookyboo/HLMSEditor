@@ -51,7 +51,7 @@ namespace Ogre
             Ogre::SceneManager* mInSceneManager; // The scenemanager used in the renderwidget
 
             // Input/output
-            Ogre::HlmsDatablock* mInOutCurrenDatablock; // Pointer to the currently editted datablock
+            Ogre::HlmsDatablock* mInOutCurrentDatablock; // Pointer to the currently editted datablock
 
             // Output
             String mOutExportReference; // To be filled in by the plugin; this can be a (file) reference of the export
@@ -68,8 +68,11 @@ namespace Ogre
                 mInItem = 0;
                 mInRenderWindow = 0;
                 mInSceneManager = 0;
-                mInOutCurrenDatablock = 0;
+                mInOutCurrentDatablock = 0;
                 mOutErrorText = "Error while performing this function";
+                mOutExportReference = "";
+                mOutSuccessText = "";
+                mInMaterialFileNameVector.clear();
             }
 
             // Destructor

@@ -1121,6 +1121,7 @@ void MainWindow::constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data)
     QVectorIterator<Magus::QtResourceInfo*> it(resources);
     it.toFront();
     Magus::QtResourceInfo* info;
+    data->mInMaterialFileNameVector.clear();
     while (it.hasNext())
     {
         // Only add real filenames (assets)
@@ -1129,10 +1130,13 @@ void MainWindow::constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data)
             data->mInMaterialFileNameVector.push_back(info->fullQualifiedName.toStdString());
     }
 
-    data->mInOutCurrenDatablock = item->getSubItem(0)->getDatablock();
+    data->mInOutCurrentDatablock = item->getSubItem(0)->getDatablock();
     data->mInProjectName = mProjectName.toStdString();;
     data->mInProjectPath = mProjectPath.toStdString();;
     data->mInRenderWindow = widget->getRenderWindow();
     data->mInSceneManager = widget->getSceneManager();
-    data->mInTextureFileName = mTextureFileName.toStdString();;
+    data->mInTextureFileName = mTextureFileName.toStdString();
+    data->mOutErrorText = "Error while performing this function";
+    data->mOutExportReference = "";
+    data->mOutSuccessText = "";
 }
