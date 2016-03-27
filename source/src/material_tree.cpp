@@ -227,8 +227,12 @@ bool MaterialTreeDockWidget::addAssetQuiet(int toplevelId,
                                            const QString& baseName,
                                            const QString& baseNameThumb)
 {
+    // Always add it even if the resource exists (sometimes the resourcetree and mSourceInfo are out-of-sync)
     if (isResourceExisting(baseName))
-        return false;
+    {
+        // delete it first
+        deleteAssetQuiet(toplevelId, name, baseName);
+    }
 
     // Suppress the signal that a resource was added, otherwise the signal causes the asset to
     // be added to the asset widget
