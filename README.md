@@ -17,8 +17,9 @@ Step 3. Copy the following DLL's to the HLMSEditor/bin directory
 * OgreMain_d.dll
 * RenderSystem_Direct3D11.dll
 * RenderSystem_Direct3D11_d.dll
-* RenderSystem_GL3Plus.dll  
-* RenderSystem_GL3Plus_d.dll  
+* RenderSystem_GL3Plus.dll
+* RenderSystem_GL3Plus_d.dll
+* platform/qwindows.dll (if you use windows, of course)  
 
 Step 4. Run 'Qt Creator'  
 Step 5. Open the 'HLMSEditor.pro' in Qt Creator  
