@@ -112,7 +112,7 @@ void MainWindow::createActions(void)
 {
     // ******** File menu ********
     // New
-    mNewProjectAction = new QAction(QString("New project"), this);
+    mNewProjectAction = new QAction(QString("New Project"), this);
     connect(mNewProjectAction, SIGNAL(triggered()), this, SLOT(doNewProjectAction()));
     mNewHlmsPbsAction = new QAction(QString("New Hlms Pbs"), this);
     connect(mNewHlmsPbsAction, SIGNAL(triggered()), this, SLOT(doNewHlmsPbsAction()));
@@ -120,13 +120,13 @@ void MainWindow::createActions(void)
     connect(mNewHlmsUnlitAction, SIGNAL(triggered()), this, SLOT(doNewHlmsUnlitAction()));
 
     // Open
-    mOpenProjectMenuAction = new QAction(QString("Open project"), this);
+    mOpenProjectMenuAction = new QAction(QString("Open Project"), this);
     connect(mOpenProjectMenuAction, SIGNAL(triggered()), this, SLOT(doOpenProjectMenuAction()));
     mOpenDatablockMenuAction = new QAction(QString("Open Hlms"), this);
     connect(mOpenDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doOpenDatablockMenuAction()));
 
     // Save
-    mSaveProjectMenuAction = new QAction(QString("Save project"), this);
+    mSaveProjectMenuAction = new QAction(QString("Save Project"), this);
     connect(mSaveProjectMenuAction, SIGNAL(triggered()), this, SLOT(doSaveProjectMenuAction()));
     mSaveDatablockMenuAction = new QAction(QString("Save Hlms"), this);
     connect(mSaveDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doSaveDatablockMenuAction()));
@@ -321,9 +321,9 @@ void MainWindow::doNewHlmsUnlitAction(void)
 void MainWindow::doOpenProjectMenuAction(void)
 {
     QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, QString("Load the project"),
+    fileName = QFileDialog::getOpenFileName(this, QString("Load the Project"),
                                             QString(""),
-                                            QString("Hlms project file (*.hlmp)"));
+                                            QString("Hlms Project file (*.hlmp)"));
 
     if (!fileName.isEmpty())
     {
@@ -341,7 +341,7 @@ void MainWindow::doOpenProjectMenuAction(void)
             header = readFile.readLine();
             if (header != HEADER_PROJECT)
             {
-                QMessageBox::information(0, QString("Error"), QString("This is not a valid project file"));
+                QMessageBox::information(0, QString("Error"), QString("This is not a valid Project file"));
             }
             else
             {
@@ -634,9 +634,9 @@ void MainWindow::doSaveAsProjectMenuAction(void)
 {
     // Save the project file
     QString fileName = QFileDialog::getSaveFileName(this,
-                                                    QString("Save the project"),
+                                                    QString("Save the Project"),
                                                     mProjectName + QString(".hlmp"),
-                                                    QString("Hlms project file (*.hlmp)"));
+                                                    QString("Hlms Project file (*.hlmp)"));
 
     if (!fileName.isEmpty())
     {

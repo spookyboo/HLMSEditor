@@ -54,6 +54,7 @@ namespace Ogre
             Ogre::HlmsDatablock* mInOutCurrenDatablock; // Pointer to the currently editted datablock
 
             // Output
+            String mOutExportReference; // To be filled in by the plugin; this can be a (file) reference of the export
             String mOutSuccessText; // In case the function was executed correctly, this text can be displayed
             String mOutErrorText; // In case the function was not executed correctly, this errortext can be displayed
 
@@ -82,7 +83,7 @@ namespace Ogre
             HlmsEditorPlugin (void) {}
             virtual ~HlmsEditorPlugin (void) {}
 		
-			// Does the plugin perform an import?
+            // Does the plugin perform an import?
 			virtual bool isImport (void) const = 0;
 			
 			// Does the plugin perform an export?
