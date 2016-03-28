@@ -205,6 +205,7 @@ namespace Magus
 
         private:
             qreal mZoom;
+            bool mPanEnabled;
             bool mContextMenuEnabled;
             bool mMenuZoomEnabled;
             bool mMenuSelectionToCompoundEnabled;
