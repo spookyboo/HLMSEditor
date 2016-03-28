@@ -30,7 +30,7 @@ HlmsNodeUnlitDatablock::HlmsNodeUnlitDatablock(QString title, QGraphicsItem* par
     mAlphaTest(1),
     mAlphaTestThreshold(0.5f)
 {
-    mName = DEFAULT_UNLIT_DATABLOCK_NAME;
+    mName = DEFAULT_UNLIT_DATABLOCK_NAME + QVariant(getSequence()).toString();
 
     // Define the connection policy
     HlmsUnlitDatablockSamplerblockPortType hlmsUnlitDatablockSamplerblockPortType;

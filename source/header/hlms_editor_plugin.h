@@ -40,20 +40,28 @@ namespace Ogre
         public:
             // Public Hlms Editor data, exposed to the plugin
 
-            // Input
+            // Input (input for the plugin, output from the HLMS Editor)
             String mInProjectName; // The name of the project; without path and without extenstion
             String mInProjectPath; // The path where the projectfile, material configfile and texture configfile are stored
             String mInMaterialFileName; // The name of the material configfile
             String mInTextureFileName; // The name of the texture configfile
+            String mInFileDialogName; // The name of the file selected by means of a filedialog (used for import)
+            String mInFileDialogPath; // The path of the file selected by means of a filedialog (used for import)
             std::vector<String> mInMaterialFileNameVector; // Vector with material names (fileName) in the material browser
             Ogre::Item* mInItem; // The currently selected Item in the renderwidget
             Ogre::RenderWindow* mInRenderWindow; // The renderwindow of the renderwidget
             Ogre::SceneManager* mInSceneManager; // The scenemanager used in the renderwidget
 
-            // Input/output
-            Ogre::HlmsDatablock* mInOutCurrentDatablock; // Pointer to the currently editted datablock
+            // Input/output (data is passed two-way)
 
-            // Output
+            /* Pointer to the currently editted datablock, set by the HLMS Editor; It can also be used to return a pointer
+             * from the plugin to the HLMS editor (in case isImport() return true). This pointer will be used to generate
+             * a node structure.
+             */
+            Ogre::HlmsDatablock* mInOutCurrentDatablock;
+
+
+            // Output (output from the plugin, input for the HLMS Editor)
             String mOutExportReference; // To be filled in by the plugin; this can be a (file) reference of the export
             String mOutSuccessText; // In case the function was executed correctly, this text can be displayed
             String mOutErrorText; // In case the function was not executed correctly, this errortext can be displayed
@@ -65,6 +73,8 @@ namespace Ogre
                 mInProjectPath = "";
                 mInMaterialFileName = "";
                 mInTextureFileName = "";
+                mInFileDialogName = "";
+                mInFileDialogPath = "";
                 mInItem = 0;
                 mInRenderWindow = 0;
                 mInSceneManager = 0;
@@ -86,6 +96,10 @@ namespace Ogre
             HlmsEditorPlugin (void) {}
             virtual ~HlmsEditorPlugin (void) {}
 		
+            // The plugin indicates that the HLMS Editor must open a filedialog before the
+            // executeImport() function is added. The filename must be passed
+            virtual bool isOpenFileDialogForImport (void) const = 0;
+
             // Does the plugin perform an import?
 			virtual bool isImport (void) const = 0;
 			

@@ -116,6 +116,7 @@ class HlmsPbsBuilder : public HlmsBuilder
         Ogre::PbsBlendModes getBlendModeFromIndex (unsigned int index);
         unsigned int getDetailMapIndexFromTextureType (Ogre::PbsTextureTypes textureType);
         unsigned int getDetailNormalMapIndexFromTextureType (Ogre::PbsTextureTypes textureType);
+        unsigned int getDetailNormalMapIndexForOffSetScale (Ogre::PbsTextureTypes textureType);
 };
 
 #endif

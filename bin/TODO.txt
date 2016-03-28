@@ -1,7 +1,7 @@
 V 1.0 updates:
 =============
+- Pan node editor
 - Align the dock widgets (so they are displayed with the correct height and width after start)
-- Set output directory for generated shader files
 - Remove unused functions in .h/.cpp files in the 'sources' directory
 - Create windows installer
 - Texture browser:

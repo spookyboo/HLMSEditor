@@ -64,6 +64,13 @@ MainWindow::MainWindow(void) :
     loadTextureBrowserCfg();
     mOgreManager->initialize();
 
+    // Disable shaderfile generation
+    Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
+    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
+    hlmsPbs->setDebugOutputPath(false);
+    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+    hlmsUnlit->setDebugOutputPath(false);
+
     // Set the title
     setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
 
@@ -113,48 +120,63 @@ void MainWindow::createActions(void)
     // ******** File menu ********
     // New
     mNewProjectAction = new QAction(QString("New Project"), this);
+    mNewProjectAction->setShortcut(QKeySequence(QString("Ctrl+Shift+N")));
     connect(mNewProjectAction, SIGNAL(triggered()), this, SLOT(doNewProjectAction()));
     mNewHlmsPbsAction = new QAction(QString("New Hlms Pbs"), this);
+    mNewHlmsPbsAction->setShortcut(QKeySequence(QString("Ctrl+Alt+N")));
     connect(mNewHlmsPbsAction, SIGNAL(triggered()), this, SLOT(doNewHlmsPbsAction()));
     mNewHlmsUnlitAction = new QAction(QString("New Hlms Unlit"), this);
+    mNewHlmsUnlitAction->setShortcut(QKeySequence(QString("Ctrl+N")));
     connect(mNewHlmsUnlitAction, SIGNAL(triggered()), this, SLOT(doNewHlmsUnlitAction()));
 
     // Open
     mOpenProjectMenuAction = new QAction(QString("Open Project"), this);
+    mOpenProjectMenuAction->setShortcut(QKeySequence(QString("Ctrl+Shift+O")));
     connect(mOpenProjectMenuAction, SIGNAL(triggered()), this, SLOT(doOpenProjectMenuAction()));
     mOpenDatablockMenuAction = new QAction(QString("Open Hlms"), this);
+    mOpenDatablockMenuAction->setShortcut(QKeySequence(QString("Ctrl+Alt+O")));
     connect(mOpenDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doOpenDatablockMenuAction()));
 
     // Save
     mSaveProjectMenuAction = new QAction(QString("Save Project"), this);
+    mSaveProjectMenuAction->setShortcut(QKeySequence(QString("Ctrl+Shift+S")));
     connect(mSaveProjectMenuAction, SIGNAL(triggered()), this, SLOT(doSaveProjectMenuAction()));
     mSaveDatablockMenuAction = new QAction(QString("Save Hlms"), this);
+    mSaveDatablockMenuAction->setShortcut(QKeySequence(QString("Ctrl+Alt+S")));
     connect(mSaveDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doSaveDatablockMenuAction()));
 
     // Save as
     mSaveAsProjectMenuAction = new QAction(QString("Save Project as"), this);
+    mSaveAsProjectMenuAction->setShortcut(QKeySequence(QString("Ctrl+Shift+A")));
     connect(mSaveAsProjectMenuAction, SIGNAL(triggered()), this, SLOT(doSaveAsProjectMenuAction()));
     mSaveAsDatablockMenuAction = new QAction(QString("Save Hlms as"), this);
+    mSaveAsDatablockMenuAction->setShortcut(QKeySequence(QString("Ctrl+Alt+A")));
     connect(mSaveAsDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doSaveAsDatablockMenuAction()));
 
     // Quit
     mQuitMenuAction = new QAction(QString("Quit"), this);
+    mQuitMenuAction->setShortcut(QKeySequence(QString("Ctrl+Q")));
     connect(mQuitMenuAction, SIGNAL(triggered()), this, SLOT(doQuitMenuAction()));
 
     // ******** Materials menu ********
     mMaterialBrowserOpenMenuAction = new QAction(QString("Open browser"), this);
+    mMaterialBrowserOpenMenuAction->setShortcut(QKeySequence(QString("Ctrl+B")));
     connect(mMaterialBrowserOpenMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserOpenMenuAction()));
     mMaterialBrowserAddMenuAction = new QAction(QString("Add Hlms to browser"), this);
+    mMaterialBrowserAddMenuAction->setShortcut(QKeySequence(QString("Ctrl+H")));
     connect(mMaterialBrowserAddMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserAddMenuAction()));
 
     // ******** Texture menu ********
     mTextureBrowserImportMenuAction = new QAction(QString(ACTION_IMPORT_TEXTURES_FROM_DIR), this);
+    mTextureBrowserImportMenuAction->setShortcut(QKeySequence(QString("Ctrl+I")));
     connect(mTextureBrowserImportMenuAction, SIGNAL(triggered()), this, SLOT(doTextureBrowserImportMenuAction()));
     mTextureBrowserAddImageMenuAction = new QAction(QString(ACTION_ADD_TEXTURES), this);
+    mTextureBrowserAddImageMenuAction->setShortcut(QKeySequence(QString("Ctrl+T")));
     connect(mTextureBrowserAddImageMenuAction, SIGNAL(triggered()), this, SLOT(doTextureBrowserAddImageMenuAction()));
 
     // ******** Window menu ********
     mResetWindowLayoutMenuAction = new QAction(QString("Reset Window Layout"), this);
+    mResetWindowLayoutMenuAction->setShortcut(QKeySequence(QString("Ctrl+R")));
     connect(mResetWindowLayoutMenuAction, SIGNAL(triggered()), this, SLOT(doResetWindowLayoutMenuAction()));
 }
 
@@ -221,7 +243,7 @@ void MainWindow::createMenus(void)
                 connect(action, SIGNAL(pluginActionTriggered(Ogre::HlmsEditorPlugin*)), this, SLOT(doImport(Ogre::HlmsEditorPlugin*)));
                 fileMenuAction->addAction(action);
             }
-            else if (hlmsEditorPlugin->isExport())
+            if (hlmsEditorPlugin->isExport())
             {
                 // First create an export menu item if needed
                 if (!menuExportExists)
@@ -1071,8 +1093,40 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
     Ogre::HlmsEditorPluginData data;
     QString text;
     constructHlmsEditorPluginData(&data);
+
+    // Is a filedialog needed before import (to select the file to be imported)?
+    if (plugin->isOpenFileDialogForImport())
+    {
+        QString fileName;
+        fileName = QFileDialog::getOpenFileName(this, QString("Import"),
+                                                QString(""),
+                                                QString("(*.*)"));
+
+        if (!fileName.isEmpty())
+        {
+            QFileInfo info(fileName);
+            data.mInFileDialogName = info.fileName().toStdString();
+            data.mInFileDialogPath = (info.absolutePath() + QString("/")).toStdString();
+        }
+        else
+        {
+            QMessageBox::information(0, QString("Error"), QString("No file selected"));
+            return;
+        }
+    }
+
+    // Execute the import
+    Ogre::HlmsDatablock* oldDatablock = data.mInOutCurrentDatablock;
+    Ogre::HlmsDatablock* newDatablock;
     if (plugin->executeImport(&data))
     {
+        // Check whether a new datablock was created
+        newDatablock = data.mInOutCurrentDatablock;
+        if (newDatablock && oldDatablock != newDatablock)
+        {
+            // The pointer was changed (and not 0), so the assumption is that it points to a new datablock
+            getAndSetFirstDatablock();
+        }
         text = data.mOutSuccessText.c_str();
         if (text.isEmpty())
             text = QString ("Import completed");
@@ -1131,8 +1185,10 @@ void MainWindow::constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data)
     }
 
     data->mInOutCurrentDatablock = item->getSubItem(0)->getDatablock();
-    data->mInProjectName = mProjectName.toStdString();;
-    data->mInProjectPath = mProjectPath.toStdString();;
+    data->mInProjectName = mProjectName.toStdString();
+    data->mInProjectPath = mProjectPath.toStdString();
+    data->mInFileDialogName = "";
+    data->mInFileDialogPath = "";
     data->mInRenderWindow = widget->getRenderWindow();
     data->mInSceneManager = widget->getSceneManager();
     data->mInTextureFileName = mTextureFileName.toStdString();

@@ -510,12 +510,33 @@ void HlmsPbsBuilder::enrichSamplerNode (Magus::OgreManager* ogreManager,
         samplernode->setBlendMode(listIndex);
     }
 
-    // ******** Map weight, offset and scale ********
+    // ******** Map weight ********
     index = getDetailMapIndexFromTextureType(textureType);
     if (index < 999)
     {
-        // It is a detail (diffuse) map
+        // It is a detail (diffuse) map (index diffuse detail map [0..3])
         samplernode->setMapWeight(datablock->getDetailMapWeight(index));
+    }
+    else
+    {
+        index = getDetailNormalMapIndexFromTextureType(textureType);
+        if (index < 999)
+        {
+            // It is a detail normal map (index normal detail map [0..3])
+            samplernode->setMapWeight(datablock->getDetailNormalWeight(index));
+        }
+        else if (textureType == Ogre::PBSM_NORMAL)
+        {
+            // It is a normal map
+            samplernode->setMapWeight(datablock->getNormalMapWeight());
+        }
+    }
+
+    // ******** Offset and scale ********
+    index = getDetailMapIndexFromTextureType(textureType);
+    if (index < 999)
+    {
+        // It is a detail (diffuse) map index diffuse detail map [0..3])
         Ogre::Vector4 v4 = datablock->getDetailMapOffsetScale(index);
         QVector2D v2;
         v2.setX(v4.x);
@@ -527,11 +548,10 @@ void HlmsPbsBuilder::enrichSamplerNode (Magus::OgreManager* ogreManager,
     }
     else
     {
-        index = getDetailNormalMapIndexFromTextureType(textureType);
+        index = getDetailNormalMapIndexForOffSetScale(textureType);
         if (index < 999)
         {
-            // It is a detail normal map
-            samplernode->setMapWeight(datablock->getDetailNormalWeight(index));
+            // It is a detail normal map (index normal detail map [4..7])
             Ogre::Vector4 v4 = datablock->getDetailMapOffsetScale(index);
             QVector2D v2;
             v2.setX(v4.x);
@@ -540,11 +560,6 @@ void HlmsPbsBuilder::enrichSamplerNode (Magus::OgreManager* ogreManager,
             v2.setX(v4.z);
             v2.setY(v4.w);
             samplernode->setScale(v2);
-        }
-        else if (textureType == Ogre::PBSM_NORMAL)
-        {
-            // It is a normal map
-            samplernode->setMapWeight(datablock->getNormalMapWeight());
         }
     }
 }
@@ -752,22 +767,45 @@ void HlmsPbsBuilder::enrichSamplerblock (Ogre::HlmsPbsDatablock* datablock,
     if (textureType < Ogre::NUM_PBSM_SOURCES)
         datablock->setTextureUvSource(textureType, samplernode->getUvSet());
 
+
     // ******** Blend mode ********
     Ogre::PbsBlendModes blendMode = getBlendModeFromIndex (samplernode->getBlendMode());
     unsigned int index = getDetailMapIndexFromTextureType(textureType);
     if (index < 999)
     {
-        // It is a detail map
+        // It is a detail map (index diffuse detail map [0..3])
         datablock->setDetailMapBlendMode(index, blendMode);
     }
 
-    // ******** Map weight, offset, scale ********
+    // ******** Map weight ********
     // First check the detailed map
     index = getDetailMapIndexFromTextureType(textureType);
     if (index < 999)
     {
-        // It is a detail map
+        // It is a detail map (index diffuse detail map [0..3])
         datablock->setDetailMapWeight(index, samplernode->getMapWeight());
+    }
+    else
+    {
+        index = getDetailNormalMapIndexFromTextureType(textureType);
+        if (index < 999)
+        {
+            // It is a detail normal map (index normal detail map [0..3])
+            datablock->setDetailNormalWeight(index, samplernode->getMapWeight());
+        }
+        else if (textureType == Ogre::PBSM_NORMAL)
+        {
+            // Also a normal map can have a weight
+            datablock->setNormalMapWeight(samplernode->getMapWeight());
+        }
+    }
+
+    // ******** Offset, scale ********
+    // First check the detailed map
+    index = getDetailMapIndexFromTextureType(textureType);
+    if (index < 999)
+    {
+        // It is a detail map (index diffuse detail map [0..3])
         Ogre::Vector4 v4;
         v4.x = samplernode->getOffset().x();
         v4.y = samplernode->getOffset().y();
@@ -777,22 +815,16 @@ void HlmsPbsBuilder::enrichSamplerblock (Ogre::HlmsPbsDatablock* datablock,
     }
     else
     {
-        index = getDetailNormalMapIndexFromTextureType(textureType);
+        index = getDetailNormalMapIndexForOffSetScale(textureType);
         if (index < 999)
         {
-            // It is a detail normal map
-            datablock->setDetailNormalWeight(index, samplernode->getMapWeight());
+            // It is a detail normal map  (index normal detail map [4..7])
             Ogre::Vector4 v4;
             v4.x = samplernode->getOffset().x();
             v4.y = samplernode->getOffset().y();
             v4.z = samplernode->getScale().x();
             v4.w = samplernode->getScale().y();
             datablock->setDetailMapOffsetScale(index, v4);
-        }
-        else if (textureType == Ogre::PBSM_NORMAL)
-        {
-            // Also a normal map can have a weight
-            datablock->setNormalMapWeight(samplernode->getMapWeight());
         }
     }
 }
@@ -834,6 +866,27 @@ unsigned int HlmsPbsBuilder::getDetailNormalMapIndexFromTextureType (Ogre::PbsTe
         break;
         case Ogre::PBSM_DETAIL3_NM:
             return 3;
+        break;
+    }
+    return 999;
+}
+
+//****************************************************************************/
+unsigned int HlmsPbsBuilder::getDetailNormalMapIndexForOffSetScale (Ogre::PbsTextureTypes textureType)
+{
+    switch (textureType)
+    {
+        case Ogre::PBSM_DETAIL0_NM:
+            return 4;
+        break;
+        case Ogre::PBSM_DETAIL1_NM:
+            return 5;
+        break;
+        case Ogre::PBSM_DETAIL2_NM:
+            return 6;
+        break;
+        case Ogre::PBSM_DETAIL3_NM:
+            return 7;
         break;
     }
     return 999;

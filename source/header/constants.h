@@ -112,6 +112,13 @@ struct QtSourcesInfo
     QString baseNameThumb;
 };
 
+static unsigned int gSequence = 0;
+//****************************************************************************/
+static unsigned int getSequence(void)
+{
+    return ++gSequence;
+}
+
 //****************************************************************************/
 static QString getBaseFileName(QString& fileName)
 {

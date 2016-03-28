@@ -172,9 +172,16 @@ namespace Magus
         Ogre::Light *light = mSceneManager->createLight();
         Ogre::SceneNode *lightNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
         lightNode->attachObject( light );
-        light->setPowerScale( Ogre::Math::PI ); //Since we don't do HDR, counter the PBS' division by PI
+        light->setPowerScale( Ogre::Math::PI ); // Since we don't do HDR, counter the PBS' division by PI
         light->setType( Ogre::Light::LT_DIRECTIONAL );
+        light->setDiffuseColour( Ogre::ColourValue::White );
+        light->setSpecularColour( Ogre::ColourValue::White );
         light->setDirection( Ogre::Vector3( -1, -1, -1 ).normalisedCopy() );
+
+        // Put some light at the bottom, so the materials are not completely dark
+        mSceneManager->setAmbientLight( Ogre::ColourValue::White,
+                                        Ogre::ColourValue::White,
+                                        Ogre::Vector3( 0, 1, 0 ).normalisedCopy());
 
         mSystemInitialized = true;
     }

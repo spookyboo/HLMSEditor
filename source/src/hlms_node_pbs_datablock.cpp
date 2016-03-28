@@ -46,7 +46,7 @@ HlmsNodePbsDatablock::HlmsNodePbsDatablock(QString title, QGraphicsItem* parent)
     mAlphaTest(1),
     mAlphaTestThreshold(0.5f)
 {
-    mName = DEFAULT_PBS_DATABLOCK_NAME;
+    mName = DEFAULT_PBS_DATABLOCK_NAME + QVariant(getSequence()).toString();
 
     // Define the connection policy
     HlmsPbsDatablockSamplerblockPortType hlmsPbsDatablockSamplerblockPortType;
