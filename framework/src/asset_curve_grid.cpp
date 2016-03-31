@@ -114,7 +114,7 @@ namespace Magus
     //****************************************************************************/
     void QtCurveEllipseItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
     {
-        QMessageBox::information(0, QString("test"), "Enter"); // TEST
+        //QMessageBox::information(0, QString("test"), "Enter"); // TEST
     }
 
     //****************************************************************************/

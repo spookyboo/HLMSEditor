@@ -70,7 +70,8 @@ HEADERS       = \
     source/header/texture_tree.h \
     framework/header/node_view.h \
     source/header/hlms_editor_plugin.h \
-    source/header/hlms_editor_plugin_action.h
+    source/header/hlms_editor_plugin_action.h \
+    source/header/recent_file_action.h
 
 
 SOURCES       = \
@@ -129,7 +130,8 @@ SOURCES       = \
     source/src/texture_main.cpp \
     source/src/texture_thumbs.cpp \
     source/src/texture_tree.cpp \
-    source/src/hlms_editor_plugin_action.cpp
+    source/src/hlms_editor_plugin_action.cpp \
+    source/src/recent_file_action.cpp
 
 
 INCLUDEPATH += "../HLMSEditor/source/header/"

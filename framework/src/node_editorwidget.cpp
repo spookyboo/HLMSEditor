@@ -354,6 +354,12 @@ namespace Magus
             {
                 mouseReleaseHandler(mouseEvent);
             }
+            case QEvent::Enter:
+            {
+                // Set the focus to mView, so you can use the shift key (for panning)
+                // without clicking on the renderwidget first
+                mView->setFocus();
+            }
             break;
         }
         return QObject::eventFilter(object, event);

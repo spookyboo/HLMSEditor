@@ -27,6 +27,7 @@
 #include <QAction>
 #include <QMessageBox>
 #include <QToolBar>
+#include <QList>
 #include "renderwindow_dockwidget.h"
 #include "properties_dockwidget.h"
 #include "texture_dockwidget.h"
@@ -34,6 +35,7 @@
 #include "material_browser_dialog.h"
 #include "ogre3_renderman.h"
 #include "hlms_editor_plugin.h"
+#include "recent_file_action.h"
 #include "constants.h"
 
 QT_BEGIN_NAMESPACE
@@ -68,6 +70,8 @@ class MainWindow : public QMainWindow
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources);
         QMessageBox::StandardButton fileDoesNotExistsWarning(const QString& fileName);
         void newProjectName(void);
+        void appendRecentHlms(const QString fileName); // Used for recent Hlms files in menu
+        void appendRecentProject(const QString fileName); // Used for recent Project files in menu
 
 	private slots:
         void doNewProjectAction(void);
@@ -92,6 +96,8 @@ class MainWindow : public QMainWindow
         void doImport(Ogre::HlmsEditorPlugin* plugin);
         void doExport(Ogre::HlmsEditorPlugin* plugin);
         void constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data);
+        void doRecentHlmsFileAction(const QString& fileName);
+        void doRecentProjectFileAction(const QString& fileName);
 
 	private:
 		void createActions(void);
@@ -101,9 +107,15 @@ class MainWindow : public QMainWindow
 		void createDockWindows(void);
 		void closeEvent(QCloseEvent* event);
         void loadDatablock(const QString jsonFileName);
+        void loadProject(const QString& fileName);
         void saveDatablock(void);
         void loadMaterialBrowserCfg(void);
         void saveMaterialBrowserCfg(void);
+        void loadRecentHlmsFilesCfg(void);
+        void saveRecentHlmsFilesCfg(void);
+        void loadRecentProjectFilesCfg(void);
+        void saveRecentProjectFilesCfg(void);
+        void clearDatablocks(void);
 
         bool mFirst;
         QString mTempString;
@@ -112,6 +124,8 @@ class MainWindow : public QMainWindow
         QMenu* mMaterialBrowserMenu;
         QMenu* mTextureBrowserMenu;
         QMenu* mWindowMenu;
+        QMenu* mRecentHlmsFilesMenu;
+        QMenu* mRecentProjectFilesMenu;
         QAction* mNewProjectAction;
         QAction* mNewHlmsPbsAction;
         QAction* mNewHlmsUnlitAction;
@@ -125,6 +139,8 @@ class MainWindow : public QMainWindow
         QAction* mMaterialBrowserAddMenuAction;
         QAction* mTextureBrowserImportMenuAction;
         QAction* mTextureBrowserAddImageMenuAction;
+        QAction* mRecentHlmsFilesMenuAction;
+        QAction* mRecentProjectFilesMenuAction;
         QAction* mQuitMenuAction;
         QAction* mResetWindowLayoutMenuAction;
         RenderwindowDockWidget* mRenderwindowDockWidget;
@@ -136,6 +152,13 @@ class MainWindow : public QMainWindow
         QString mTextureFileName;
         QString mHlmsName; // Used to determine whether a hlms was already saved
         bool mSaveTextureBrowserTimerActive;
+        struct RecentFileStruct
+        {
+            RecentFileAction* action;
+            QString fileName;
+        };
+        QList<RecentFileStruct> mRecentHlmsFiles; // Used for recent Hlms files in menu
+        QList<RecentFileStruct> mRecentProjectFiles; // Used for recent Project files in menu
 };
 
 #endif

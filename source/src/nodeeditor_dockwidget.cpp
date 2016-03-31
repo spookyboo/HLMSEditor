@@ -136,9 +136,8 @@ void NodeEditorDockWidget::createToolBars(void)
 //****************************************************************************/
 void NodeEditorDockWidget::newHlmsPbsAndSampler()
 {
-    mNodeEditor->clear();
-    mHlmsPbsDatablockNode = 0;
-    mHlmsUnlitDatablockNode = 0;
+    // Clear the node editor
+    clear();
 
     // Create a pbs and a sampler for convenience
     doNewHlmsPbsDatablockAction();
@@ -148,9 +147,8 @@ void NodeEditorDockWidget::newHlmsPbsAndSampler()
 //****************************************************************************/
 HlmsNodePbsDatablock* NodeEditorDockWidget::newHlmsPbs(void)
 {
-    mNodeEditor->clear();
-    mHlmsPbsDatablockNode = 0;
-    mHlmsUnlitDatablockNode = 0;
+    // Clear the node editor
+    clear();
 
     // Create a pbs
     doNewHlmsPbsDatablockAction();
@@ -160,9 +158,8 @@ HlmsNodePbsDatablock* NodeEditorDockWidget::newHlmsPbs(void)
 //****************************************************************************/
 void NodeEditorDockWidget::newHlmsUnlitAndSampler()
 {
-    mNodeEditor->clear();
-    mHlmsPbsDatablockNode = 0;
-    mHlmsUnlitDatablockNode = 0;
+    // Clear the node editor
+    clear();
 
     // Create an unlit and a sampler for convenience
     doNewHlmsUnlitDatablockAction();
@@ -172,9 +169,8 @@ void NodeEditorDockWidget::newHlmsUnlitAndSampler()
 //****************************************************************************/
 HlmsNodeUnlitDatablock* NodeEditorDockWidget::newHlmsUnlit(void)
 {
-    mNodeEditor->clear();
-    mHlmsPbsDatablockNode = 0;
-    mHlmsUnlitDatablockNode = 0;
+    // Clear the node editor
+    clear();
 
     // Create an unlit
     doNewHlmsUnlitDatablockAction();
@@ -454,4 +450,12 @@ QMessageBox::StandardButton NodeEditorDockWidget::fileDoesNotExistsWarning(const
                                  "Warning",
                                  fileName + QString(" does not exist. Remove it from the texture browser?"),
                                  QMessageBox::Yes|QMessageBox::No);
+}
+
+//****************************************************************************/
+void NodeEditorDockWidget::clear (void)
+{
+    mNodeEditor->clear();
+    mHlmsPbsDatablockNode = 0;
+    mHlmsUnlitDatablockNode = 0;
 }

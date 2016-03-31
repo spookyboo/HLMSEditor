@@ -70,6 +70,7 @@ class NodeEditorDockWidget : public QDockWidget
         const QString& getCurrentDatablockName(void);
         EditorHlmsTypes getCurrentDatablockType (void);
         void newSamplerblockNode (const QString& fileName);
+        void clear (void);
 
     public slots:
         void nodeSelected(QtNode* node);

@@ -62,6 +62,8 @@ MainWindow::MainWindow(void) :
     mMaterialBrowser = new MaterialBrowserDialog(this);
     loadMaterialBrowserCfg();
     loadTextureBrowserCfg();
+    loadRecentHlmsFilesCfg();
+    loadRecentProjectFilesCfg();
     mOgreManager->initialize();
 
     // Disable shaderfile generation
@@ -260,6 +262,12 @@ void MainWindow::createMenus(void)
         }
     }
 
+    // Recent Hlms files
+    mRecentHlmsFilesMenu = mFileMenu->addMenu("Recent Hlms files");
+
+    // Recent Hlms files
+    mRecentProjectFilesMenu = mFileMenu->addMenu("Recent Project files");
+
     // Quit
     mFileMenu->addAction(mQuitMenuAction);
 
@@ -311,6 +319,7 @@ void MainWindow::doNewProjectAction(void)
     mMaterialBrowser->clearResources();
     mTextureDockWidget->clearResources();
     newProjectName();
+    clearDatablocks();
 }
 
 //****************************************************************************/
@@ -340,6 +349,14 @@ void MainWindow::doNewHlmsUnlitAction(void)
 }
 
 //****************************************************************************/
+void MainWindow::clearDatablocks(void)
+{
+    initDatablocks();
+    mPropertiesDockWidget->clear();
+    mNodeEditorDockWidget->clear();
+}
+
+//****************************************************************************/
 void MainWindow::doOpenProjectMenuAction(void)
 {
     QString fileName;
@@ -347,6 +364,12 @@ void MainWindow::doOpenProjectMenuAction(void)
                                             QString(""),
                                             QString("Hlms Project file (*.hlmp)"));
 
+    loadProject(fileName);
+}
+
+//****************************************************************************/
+void MainWindow::loadProject(const QString& fileName)
+{
     if (!fileName.isEmpty())
     {
         QFileInfo info(fileName);
@@ -368,28 +391,24 @@ void MainWindow::doOpenProjectMenuAction(void)
             else
             {
                 // Line 2
-                fileName = readFile.readLine();
-                info.setFile(fileName);
+                QString materialFileName = readFile.readLine();
+                info.setFile(materialFileName);
                 if (info.exists() && info.isFile())
-                {
-                    mMaterialFileName = fileName;
-                    QString test = mMaterialFileName;
-                }
+                    mMaterialFileName = materialFileName;
 
                 // Line 3
-                fileName = readFile.readLine();
-                info.setFile(fileName);
+                QString textureFileName = readFile.readLine();
+                info.setFile(textureFileName);
                 if (info.exists() && info.isFile())
-                {
-                    mTextureFileName = fileName;
-                    QString test = mTextureFileName;
-                }
+                    mTextureFileName = textureFileName;
 
                 // Load the material and texture config
                 loadMaterialBrowserCfg();
                 loadTextureBrowserCfg();
                 file.close();
                 setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
+                appendRecentProject(fileName);
+                clearDatablocks();
             }
         }
     }
@@ -440,6 +459,7 @@ void MainWindow::loadDatablock(const QString jsonFileName)
         }
         file.close();
         mHlmsName = jsonFileName;
+        appendRecentHlms(jsonFileName);
 
         // Get the (list of) datablocks and assign the first one to the current 'item' to be rendered
         getAndSetFirstDatablock();
@@ -633,7 +653,8 @@ void MainWindow::doSaveProjectMenuAction(void)
     saveTextureBrowserCfg();
 
     // Save a project file
-    QFile file(mProjectPath + mProjectName + QString(".hlmp"));
+    QString fileName = mProjectPath + mProjectName + QString(".hlmp");
+    QFile file(fileName);
     QString header = QString(HEADER_PROJECT);
     if (file.open(QFile::WriteOnly|QFile::Truncate))
     {
@@ -648,6 +669,7 @@ void MainWindow::doSaveProjectMenuAction(void)
 
         // Set title
         setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
+        appendRecentProject(fileName);
     }
 }
 
@@ -713,11 +735,13 @@ void MainWindow::saveDatablock(void)
     {
         hlmsManager->saveMaterials (Ogre::HLMS_PBS, fname);
         mMaterialBrowser->addMaterial(baseNameJson, mHlmsName, thumb, HLMS_PBS);
+        appendRecentHlms(mHlmsName);
     }
     else if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_UNLIT)
     {
         hlmsManager->saveMaterials (Ogre::HLMS_UNLIT, fname);
         mMaterialBrowser->addMaterial(baseNameJson, mHlmsName, thumb, HLMS_UNLIT);
+        appendRecentHlms(mHlmsName);
     }
 }
 
@@ -1195,4 +1219,166 @@ void MainWindow::constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data)
     data->mOutErrorText = "Error while performing this function";
     data->mOutExportReference = "";
     data->mOutSuccessText = "";
+}
+
+//****************************************************************************/
+void MainWindow::appendRecentHlms(const QString fileName)
+{
+    // Check on duplicate
+    QList<RecentFileStruct>::const_iterator it = mRecentHlmsFiles.begin();
+    QList<RecentFileStruct>::const_iterator itEnd = mRecentHlmsFiles.end();
+    RecentFileStruct rc;
+    while(it != itEnd)
+    {
+        rc = *it;
+        if (rc.fileName == fileName)
+            return;
+        ++it;
+    }
+
+    // Add to the menu
+    RecentFileStruct recentFiles;
+    recentFiles.action = new RecentFileAction(fileName, this);
+    recentFiles.fileName = fileName;
+    if (mRecentHlmsFiles.size() > MAX_RECENT_HLMS_FILES)
+    {
+        // Remove oldest (= first) from menu
+        RecentFileStruct firstEntry = mRecentHlmsFiles.at(0);
+        QAction* action = firstEntry.action;
+        mRecentHlmsFilesMenu->removeAction(action);
+        delete action;
+        mRecentHlmsFiles.removeAt(0);
+    }
+
+    mRecentHlmsFiles.append(recentFiles);
+    mRecentHlmsFilesMenu->addAction(recentFiles.action);
+    connect(recentFiles.action, SIGNAL(recentFileActionTriggered(QString)), this, SLOT(doRecentHlmsFileAction(QString)));
+
+    // Save the recent list to a file (and load it at startup)
+    saveRecentHlmsFilesCfg();
+}
+
+//****************************************************************************/
+void MainWindow::appendRecentProject(const QString fileName)
+{
+    // Check on duplicate
+    QList<RecentFileStruct>::const_iterator it = mRecentProjectFiles.begin();
+    QList<RecentFileStruct>::const_iterator itEnd = mRecentProjectFiles.end();
+    RecentFileStruct rc;
+    while(it != itEnd)
+    {
+        rc = *it;
+        if (rc.fileName == fileName)
+            return;
+        ++it;
+    }
+
+    // Add to the menu
+    RecentFileStruct recentFiles;
+    recentFiles.action = new RecentFileAction(fileName, this);
+    recentFiles.fileName = fileName;
+    if (mRecentProjectFiles.size() > MAX_RECENT_PROJECT_FILES)
+    {
+        // Remove oldest (= first) from menu
+        RecentFileStruct firstEntry = mRecentProjectFiles.at(0);
+        QAction* action = firstEntry.action;
+        mRecentProjectFilesMenu->removeAction(action);
+        delete action;
+        mRecentProjectFiles.removeAt(0);
+    }
+
+    mRecentProjectFiles.append(recentFiles);
+    mRecentProjectFilesMenu->addAction(recentFiles.action);
+    connect(recentFiles.action, SIGNAL(recentFileActionTriggered(QString)), this, SLOT(doRecentProjectFileAction(QString)));
+
+    // Save the recent list to a file (and load it at startup)
+    saveRecentProjectFilesCfg();
+}
+
+//****************************************************************************/
+void MainWindow::doRecentHlmsFileAction(const QString& fileName)
+{
+    loadDatablock(fileName);
+}
+
+//****************************************************************************/
+void MainWindow::doRecentProjectFileAction(const QString& fileName)
+{
+    loadProject(fileName);
+}
+
+//****************************************************************************/
+void MainWindow::loadRecentHlmsFilesCfg(void)
+{
+    QFile file(FILE_RECENT_HLMS_FILES);
+    QString line;
+    if (file.open(QFile::ReadOnly))
+    {
+        QTextStream readFile(&file);
+        while (!readFile.atEnd())
+        {
+            line = readFile.readLine();
+            appendRecentHlms(line);
+        }
+       file.close();
+    }
+}
+
+//****************************************************************************/
+void MainWindow::saveRecentHlmsFilesCfg(void)
+{
+    QList<RecentFileStruct>::const_iterator it = mRecentHlmsFiles.begin();
+    QList<RecentFileStruct>::const_iterator itEnd = mRecentHlmsFiles.end();
+    RecentFileStruct rc;
+    QFile file(FILE_RECENT_HLMS_FILES);
+    if (file.open(QFile::WriteOnly|QFile::Truncate))
+    {
+        QTextStream stream(&file);
+        while(it != itEnd)
+        {
+            rc = *it;
+            stream << rc.fileName
+                   << "\n";
+            ++it;
+        }
+        file.close();
+    }
+}
+
+//****************************************************************************/
+void MainWindow::loadRecentProjectFilesCfg(void)
+{
+    QFile file(FILE_RECENT_PROJECT_FILES);
+    QString line;
+    if (file.open(QFile::ReadOnly))
+    {
+        QTextStream readFile(&file);
+        while (!readFile.atEnd())
+        {
+            line = readFile.readLine();
+            appendRecentProject(line);
+        }
+       file.close();
+    }
+}
+
+//****************************************************************************/
+void MainWindow::saveRecentProjectFilesCfg(void)
+{
+    QList<RecentFileStruct>::const_iterator it = mRecentProjectFiles.begin();
+    QList<RecentFileStruct>::const_iterator itEnd = mRecentProjectFiles.end();
+    RecentFileStruct rc;
+    QFile file(FILE_RECENT_PROJECT_FILES);
+    if (file.open(QFile::WriteOnly|QFile::Truncate))
+    {
+        QTextStream stream(&file);
+        while(it != itEnd)
+        {
+            rc = *it;
+            stream << rc.fileName
+                   << "\n";
+            ++it;
+        }
+        file.close();
+    }
 }

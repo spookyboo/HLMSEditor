@@ -1,6 +1,6 @@
 V 1.0 updates:
 =============
-- Pan node editor
+- Remove the current Hlms when a new project is created
 - Align the dock widgets (so they are displayed with the correct height and width after start)
 - Remove unused functions in .h/.cpp files in the 'sources' directory
 - Create windows installer
