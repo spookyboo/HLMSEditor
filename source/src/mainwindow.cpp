@@ -370,6 +370,7 @@ void MainWindow::doOpenProjectMenuAction(void)
 //****************************************************************************/
 void MainWindow::loadProject(const QString& fileName)
 {
+    setCursor(Qt::WaitCursor);
     if (!fileName.isEmpty())
     {
         QFileInfo info(fileName);
@@ -412,6 +413,7 @@ void MainWindow::loadProject(const QString& fileName)
             }
         }
     }
+    setCursor(Qt::ArrowCursor);
 }
 
 //****************************************************************************/

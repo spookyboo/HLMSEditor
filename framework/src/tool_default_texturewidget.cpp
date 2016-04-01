@@ -205,9 +205,13 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QtDefaultTextureWidget::addTexture(const QPixmap& pixmap, const QString& name, const QString& baseName)
+    void QtDefaultTextureWidget::addTexture(const QPixmap& pixmap, const QString& name, const QString& baseName, bool replace)
     {
-        // Don't allow duplicates
+        if (replace)
+        {
+            deleteTexture(name);
+        }
+
         if (!isTextureExisting(name))
         {
             QtDefaultTextureAndText* textureAndText = new QtDefaultTextureAndText(pixmap, name, baseName, mTextureSize, this);

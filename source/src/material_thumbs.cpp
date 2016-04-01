@@ -149,14 +149,14 @@ void MaterialThumbsDockWidget::addAsset(int toplevelId, int parentId, int resour
         case TOOL_SOURCES_LEVEL_X000_PBS:
         {
             // Add pixmap from file to mPbsSelection
-            mPbsSelection->addTexture(pixmap, name, baseName);
+            mPbsSelection->addTexture(pixmap, name, baseName, true);
         }
         break;
 
         case TOOL_SOURCES_LEVEL_X000_UNLIT:
         {
             // Add pixmap from file to mUnlitSelection
-            mUnlitSelection->addTexture(pixmap, name, baseName);
+            mUnlitSelection->addTexture(pixmap, name, baseName, true);
         }
         break;
     }

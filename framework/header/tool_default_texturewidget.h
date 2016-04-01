@@ -110,7 +110,7 @@ namespace Magus
             // Add a pixmap to this widget. The name is a (fully qualified) filename for example.
             // E.g. name = "c:/temp/Tools/common/icons/info.png"
             // E.g. baseName = "info.png"
-            void addTexture(const QPixmap& pixmap, const QString& name, const QString& baseName);
+            void addTexture(const QPixmap& pixmap, const QString& name, const QString& baseName, bool replace = false);
 
             // Delete an item from the QtDefaultTextureWidget. Use the full qualified name as search criterium if nameIsFullName = true;
             // else use the baseName as search criterium.
