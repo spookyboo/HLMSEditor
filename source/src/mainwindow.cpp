@@ -370,7 +370,7 @@ void MainWindow::doOpenProjectMenuAction(void)
 //****************************************************************************/
 void MainWindow::loadProject(const QString& fileName)
 {
-    setCursor(Qt::WaitCursor);
+    QApplication::setOverrideCursor(Qt::WaitCursor);
     if (!fileName.isEmpty())
     {
         QFileInfo info(fileName);
@@ -413,7 +413,7 @@ void MainWindow::loadProject(const QString& fileName)
             }
         }
     }
-    setCursor(Qt::ArrowCursor);
+    QApplication::setOverrideCursor(Qt::ArrowCursor);
 }
 
 //****************************************************************************/
@@ -646,6 +646,8 @@ void MainWindow::getListOfResources(void)
 //****************************************************************************/
 void MainWindow::doSaveProjectMenuAction(void)
 {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
     // Save material config
     mMaterialFileName = mProjectPath + mProjectName + QString ("_") + FILE_MATERIAL_BROWSER;
     saveMaterialBrowserCfg();
@@ -673,6 +675,7 @@ void MainWindow::doSaveProjectMenuAction(void)
         setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
         appendRecentProject(fileName);
     }
+    QApplication::setOverrideCursor(Qt::ArrowCursor);
 }
 
 //****************************************************************************/
