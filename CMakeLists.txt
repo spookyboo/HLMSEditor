@@ -131,6 +131,14 @@ set (HEADER_FILES
     source/header/material_main.h
     source/header/material_thumbs.h
     source/header/material_browser_dialog.h
+    source/header/texture_dockwidget.h
+    source/header/texture_main.h
+    source/header/texture_thumbs.h
+    source/header/texture_tree.h
+    framework/header/node_view.h
+    source/header/hlms_editor_plugin.h
+    source/header/hlms_editor_plugin_action.h
+    source/header/recent_file_action.h
 )
 
 set (SOURCE_FILES
@@ -185,6 +193,12 @@ set (SOURCE_FILES
     source/src/material_tree.cpp
     source/src/material_thumbs.cpp
     source/src/material_browser_dialog.cpp
+    source/src/texture_dockwidget.cpp
+    source/src/texture_main.cpp
+    source/src/texture_thumbs.cpp
+    source/src/texture_tree.cpp
+    source/src/hlms_editor_plugin_action.cpp
+    source/src/recent_file_action.cpp
 )
 
 if(Boost_FOUND)
