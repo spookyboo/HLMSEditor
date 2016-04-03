@@ -1176,6 +1176,32 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
     Ogre::HlmsEditorPluginData data;
     QString text;
     constructHlmsEditorPluginData(&data);
+
+
+    // Is a filedialog needed before export (to select the dir to be exported)?
+    if (plugin->isOpenFileDialogForExport())
+    {
+        QString textureFolder;
+        QFileDialog dialog;
+        dialog.setFileMode(QFileDialog::Directory);
+        if (dialog.exec())
+        {
+            QStringList fileNames = dialog.selectedFiles();
+            textureFolder = fileNames.at(0);
+        }
+
+        if (!textureFolder.isEmpty())
+        {
+            data.mInFileDialogPath = (textureFolder + QString("/")).toStdString();
+        }
+        else
+        {
+            QMessageBox::information(0, QString("Error"), QString("No directory"));
+            return;
+        }
+    }
+
+    // Execute the export
     if (plugin->executeExport(&data))
     {
         text = data.mOutSuccessText.c_str();
@@ -1199,18 +1225,33 @@ void MainWindow::constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data)
     Ogre::Item* item = widget->getItem();
     data->mInItem = item;
 
+    // mInMaterialFileNameVector
     data->mInMaterialFileName = mMaterialFileName.toStdString();
-    const QVector<Magus::QtResourceInfo*>& resources = mMaterialBrowser->getResources();
-    QVectorIterator<Magus::QtResourceInfo*> it(resources);
-    it.toFront();
+    const QVector<Magus::QtResourceInfo*>& materialResources = mMaterialBrowser->getResources();
+    QVectorIterator<Magus::QtResourceInfo*> itMaterials(materialResources);
+    itMaterials.toFront();
     Magus::QtResourceInfo* info;
     data->mInMaterialFileNameVector.clear();
-    while (it.hasNext())
+    while (itMaterials.hasNext())
     {
         // Only add real filenames (assets)
-        info = it.next();
+        info = itMaterials.next();
         if (info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_ASSET)
             data->mInMaterialFileNameVector.push_back(info->fullQualifiedName.toStdString());
+    }
+
+    // mInTextureFileNameVector
+    data->mInTextureFileName = mTextureFileName.toStdString();
+    const QVector<Magus::QtResourceInfo*>& textureResources = mTextureDockWidget->getResources();
+    QVectorIterator<Magus::QtResourceInfo*> itTextures(textureResources);
+    itTextures.toFront();
+    data->mInTextureFileNameVector.clear();
+    while (itTextures.hasNext())
+    {
+        // Only add real filenames (assets)
+        info = itTextures.next();
+        if (info->resourceType == TOOL_RESOURCETREE_KEY_TYPE_ASSET)
+            data->mInTextureFileNameVector.push_back(info->fullQualifiedName.toStdString());
     }
 
     data->mInOutCurrentDatablock = item->getSubItem(0)->getDatablock();

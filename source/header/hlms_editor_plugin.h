@@ -45,9 +45,10 @@ namespace Ogre
             String mInProjectPath; // The path where the projectfile, material configfile and texture configfile are stored
             String mInMaterialFileName; // The name of the material configfile
             String mInTextureFileName; // The name of the texture configfile
-            String mInFileDialogName; // The name of the file selected by means of a filedialog (used for import)
-            String mInFileDialogPath; // The path of the file selected by means of a filedialog (used for import)
+            String mInFileDialogName; // The name of the file selected by means of a filedialog (used for import/export)
+            String mInFileDialogPath; // The path of the file selected by means of a filedialog (used for import/export)
             std::vector<String> mInMaterialFileNameVector; // Vector with material names (fileName) in the material browser
+            std::vector<String> mInTextureFileNameVector; // Vector with texture names (fileName) in the texture browser
             Ogre::Item* mInItem; // The currently selected Item in the renderwidget
             Ogre::RenderWindow* mInRenderWindow; // The renderwindow of the renderwidget
             Ogre::SceneManager* mInSceneManager; // The scenemanager used in the renderwidget
@@ -83,6 +84,7 @@ namespace Ogre
                 mOutExportReference = "";
                 mOutSuccessText = "";
                 mInMaterialFileNameVector.clear();
+                mInTextureFileNameVector.clear();
             }
 
             // Destructor
@@ -97,13 +99,17 @@ namespace Ogre
             virtual ~HlmsEditorPlugin (void) {}
 		
             // The plugin indicates that the HLMS Editor must open a filedialog before the
-            // executeImport() function is added. The filename must be passed
+            // executeImport() function is added. The filename (mInFileDialogName + mInFileDialogPath) must be passed
             virtual bool isOpenFileDialogForImport (void) const = 0;
 
             // Does the plugin perform an import?
 			virtual bool isImport (void) const = 0;
 			
-			// Does the plugin perform an export?
+            // The plugin indicates that the HLMS Editor must open a filedialog before the
+            // executeExport () function is added. The output directory (mInFileDialogPath) must be passed
+            virtual bool isOpenFileDialogForExport (void) const = 0;
+
+            // Does the plugin perform an export?
 			virtual bool isExport (void) const = 0;
 
 			// Return the text to be presented in the import menu
