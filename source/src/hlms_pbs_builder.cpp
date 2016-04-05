@@ -25,6 +25,8 @@
 #include "hlms_pbs_builder.h"
 #include "OgreItem.h"
 #include "OgreResourceGroupManager.h"
+//#include "OgreHlmsPbs.h"
+//#include "OgreHlmsPbsDatablock.h"
 #include "OgreHlmsManager.h"
 
 //****************************************************************************/
@@ -32,6 +34,7 @@ HlmsPbsBuilder::HlmsPbsBuilder(Magus::QtNodeEditor* nodeEditor) :
     HlmsBuilder(),
     mNodeEditor(nodeEditor)
 {
+    mTempOgreString = "";
 }
 
 //****************************************************************************/
@@ -1216,4 +1219,61 @@ Ogre::HlmsTextureManager::TextureMapType HlmsPbsBuilder::getTextureMapTypeFromSa
         break;
     }
     return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
+}
+
+//****************************************************************************/
+const Ogre::String& HlmsPbsBuilder::getTextureName(Magus::OgreManager* ogreManager,
+                                                   Ogre::HlmsPbsDatablock* pbsDatablock,
+                                                   Ogre::PbsTextureTypes textureType)
+{
+    mTempOgreString = "";
+    Ogre::Root* root = ogreManager->getOgreRoot();
+    Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
+    Ogre::HlmsTextureManager::TextureLocation texLocation;
+    texLocation.texture = pbsDatablock->getTexture(textureType);
+    const Ogre::String* pBasename;
+    if (!texLocation.texture.isNull())
+    {
+       texLocation.xIdx = pbsDatablock->_getTextureIdx(textureType);
+       texLocation.yIdx = 0;
+       texLocation.divisor = 1;
+       pBasename = hlmsManager->getTextureManager()->findAliasName(texLocation); // findAliasName could return 0 pointer
+       if (pBasename)
+       {
+           mTempOgreString = *pBasename;
+       }
+    }
+
+    return mTempOgreString;
+}
+
+//****************************************************************************/
+void HlmsPbsBuilder::getTexturesFromAvailableDatablocks(Magus::OgreManager* ogreManager, std::vector<Ogre::String>* v)
+{
+    // Get all textures from the currently available pbs datablocks
+    Ogre::Root* root = ogreManager->getOgreRoot();
+    Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
+    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
+
+    // Iterate through all Pbs
+    Ogre::Hlms::HlmsDatablockMap::const_iterator itorPbs = hlmsPbs->getDatablockMap().begin();
+    Ogre::Hlms::HlmsDatablockMap::const_iterator endPbs = hlmsPbs->getDatablockMap().end();
+    Ogre::HlmsTextureManager::TextureLocation texLocation;
+    Ogre::HlmsPbsDatablock* pbsDatablock;
+    Ogre::String basename;
+    while (itorPbs != endPbs)
+    {
+        pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itorPbs->second.datablock);
+        size_t texType = Ogre::PBSM_DIFFUSE;
+        while (texType < Ogre::NUM_PBSM_TEXTURE_TYPES)
+        {
+            basename = getTextureName(ogreManager, pbsDatablock, (Ogre::PbsTextureTypes)texType);
+            if (!basename.empty())
+                v->push_back(basename);
+
+            ++texType;
+        }
+
+        ++itorPbs;
+    }
 }

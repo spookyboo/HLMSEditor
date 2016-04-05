@@ -106,8 +106,9 @@ class MainWindow : public QMainWindow
 		void createStatusBar(void);
 		void createDockWindows(void);
 		void closeEvent(QCloseEvent* event);
-        void loadDatablock(const QString jsonFileName);
+        void loadDatablockAndSet(const QString jsonFileName);
         void loadProject(const QString& fileName);
+        bool loadDatablock(const QString& jsonFileName);
         void saveDatablock(void);
         void loadMaterialBrowserCfg(void);
         void saveMaterialBrowserCfg(void);
@@ -119,6 +120,7 @@ class MainWindow : public QMainWindow
 
         bool mFirst;
         QString mTempString;
+        Ogre::String mTempOgreString;
         MaterialBrowserDialog* mMaterialBrowser;
         QMenu* mFileMenu;
         QMenu* mMaterialBrowserMenu;

@@ -49,6 +49,7 @@ namespace Ogre
             String mInFileDialogPath; // The path of the file selected by means of a filedialog (used for import/export)
             std::vector<String> mInMaterialFileNameVector; // Vector with material names (fileName) in the material browser
             std::vector<String> mInTextureFileNameVector; // Vector with texture names (fileName) in the texture browser
+            std::vector<String> mInTexturesUsedByDatablocks; // Vector with unique texture basenames from all the Pbs and Unlit datablocks in the material browser
             Ogre::Item* mInItem; // The currently selected Item in the renderwidget
             Ogre::RenderWindow* mInRenderWindow; // The renderwindow of the renderwidget
             Ogre::SceneManager* mInSceneManager; // The scenemanager used in the renderwidget
@@ -58,6 +59,7 @@ namespace Ogre
             /* Pointer to the currently editted datablock, set by the HLMS Editor; It can also be used to return a pointer
              * from the plugin to the HLMS editor (in case isImport() return true). This pointer will be used to generate
              * a node structure.
+             * Note, that there is a possibility that it becomes a problem to access data from the OgreHlmsPbs / OgreHlmsUnlit components
              */
             Ogre::HlmsDatablock* mInOutCurrentDatablock;
 
@@ -85,6 +87,7 @@ namespace Ogre
                 mOutSuccessText = "";
                 mInMaterialFileNameVector.clear();
                 mInTextureFileNameVector.clear();
+                mInTexturesUsedByDatablocks.clear();
             }
 
             // Destructor
@@ -97,7 +100,7 @@ namespace Ogre
 		public:
             HlmsEditorPlugin (void) {}
             virtual ~HlmsEditorPlugin (void) {}
-		
+
             // The plugin indicates that the HLMS Editor must open a filedialog before the
             // executeImport() function is added. The filename (mInFileDialogName + mInFileDialogPath) must be passed
             virtual bool isOpenFileDialogForImport (void) const = 0;
@@ -108,6 +111,10 @@ namespace Ogre
             // The plugin indicates that the HLMS Editor must open a filedialog before the
             // executeExport () function is added. The output directory (mInFileDialogPath) must be passed
             virtual bool isOpenFileDialogForExport (void) const = 0;
+
+            // If true, the HLMS editor fills the mInTexturesUsedByDatablocks vector
+            // This is a performance improvement (otherwise the editor always provides the data even if not needed)
+            virtual bool isTexturesUsedByDatablocksForExport (void) const = 0;
 
             // Does the plugin perform an export?
 			virtual bool isExport (void) const = 0;

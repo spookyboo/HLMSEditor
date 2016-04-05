@@ -76,8 +76,18 @@ class HlmsUnlitBuilder : public HlmsBuilder
         void connectNodes(HlmsNodeUnlitDatablock* unlitnode,
                           HlmsNodeBlendblock* blendnode);
 
+        // Some convenience functions (eg used for plugins; that is the reason std and Ogre types are used)
+        // Get the alias name from an unlit datablock
+        const Ogre::String& getTextureName(Magus::OgreManager* ogreManager,
+                                           Ogre::HlmsUnlitDatablock* unlitDatablock,
+                                           Ogre::uint8 textureType);
+
+        // Get all alias names from all currently available unlit datablocks
+        void getTexturesFromAvailableDatablocks(Magus::OgreManager* ogreManager, std::vector<Ogre::String>* v);
+
     private:
         Magus::QtNodeEditor* mNodeEditor;
+        Ogre::String mTempOgreString;
 
         // Some private functions
         // The datablock is enriched with values from a given pbsnode

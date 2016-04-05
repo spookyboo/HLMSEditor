@@ -31,6 +31,7 @@ HlmsUnlitBuilder::HlmsUnlitBuilder(Magus::QtNodeEditor* nodeEditor) :
     HlmsBuilder(),
     mNodeEditor(nodeEditor)
 {
+    mTempOgreString = "";
 }
 
 //****************************************************************************/
@@ -665,4 +666,60 @@ Ogre::UnlitBlendModes HlmsUnlitBuilder::getBlendModeFromIndex (unsigned int inde
         break;
     }
     return Ogre::UNLIT_BLEND_NORMAL_NON_PREMUL;
+}
+
+//****************************************************************************/
+const Ogre::String& HlmsUnlitBuilder::getTextureName(Magus::OgreManager* ogreManager,
+                                                     Ogre::HlmsUnlitDatablock* unlitDatablock,
+                                                     Ogre::uint8 textureType)
+{
+    mTempOgreString = "";
+    Ogre::Root* root = ogreManager->getOgreRoot();
+    Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
+    Ogre::HlmsTextureManager::TextureLocation texLocation;
+    texLocation.texture = unlitDatablock->getTexture(textureType);
+    const Ogre::String* pBasename;
+    if (!texLocation.texture.isNull())
+    {
+       texLocation.xIdx = 0;
+       texLocation.yIdx = 0;
+       texLocation.divisor = 1;
+       pBasename = hlmsManager->getTextureManager()->findAliasName(texLocation); // findAliasName could return 0 pointer
+       if (pBasename)
+       {
+           mTempOgreString = *pBasename;
+       }
+    }
+
+    return mTempOgreString;
+}
+
+//****************************************************************************/
+void HlmsUnlitBuilder::getTexturesFromAvailableDatablocks(Magus::OgreManager* ogreManager, std::vector<Ogre::String>* v)
+{
+    // Get all textures from the currently available unlit datablocks
+    Ogre::Root* root = ogreManager->getOgreRoot();
+    Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
+    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>(hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+
+    // Iterate through all Unlit
+    Ogre::Hlms::HlmsDatablockMap::const_iterator itorUnlit = hlmsUnlit->getDatablockMap().begin();
+    Ogre::Hlms::HlmsDatablockMap::const_iterator endUnlit = hlmsUnlit->getDatablockMap().end();
+    Ogre::HlmsUnlitDatablock* unlitDatablock;
+    Ogre::String basename;
+    while (itorUnlit != endUnlit)
+    {
+        unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itorUnlit->second.datablock);
+        Ogre::uint8 texType = 0;
+        while (texType < Ogre::NUM_UNLIT_TEXTURE_TYPES)
+        {
+            basename = getTextureName(ogreManager, unlitDatablock, texType);
+            if (!basename.empty())
+                v->push_back(basename);
+
+            ++texType;
+        }
+
+        ++itorUnlit;
+    }
 }

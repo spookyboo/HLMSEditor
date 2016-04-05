@@ -28,6 +28,7 @@
 #include "hlms_node_macroblock.h"
 #include "hlms_node_blenddblock.h"
 #include "node_editorwidget.h"
+#include "ogre3_renderman.h"
 
 /****************************************************************************
  This class is the base class for other builder classes, responsible for

@@ -36,6 +36,8 @@
 #include "OgreHlmsManager.h"
 #include "OgreArchiveManager.h"
 #include "hlms_builder.h"
+#include "hlms_pbs_builder.h"
+#include "hlms_unlit_builder.h"
 #include "hlms_editor_plugin.h"
 #include "hlms_editor_plugin_action.h"
 
@@ -52,6 +54,7 @@ MainWindow::MainWindow(void) :
     newProjectName();
     mHlmsName = QString("");
     mTempString = QString("");
+    mTempOgreString = "";
     
 	// Perform standard functions
     createActions();
@@ -413,7 +416,7 @@ void MainWindow::loadProject(const QString& fileName)
             }
         }
     }
-    QApplication::setOverrideCursor(Qt::ArrowCursor);
+    QApplication::restoreOverrideCursor();
 }
 
 //****************************************************************************/
@@ -424,47 +427,26 @@ void MainWindow::doOpenDatablockMenuAction(void)
     fileName = QFileDialog::getOpenFileName(this, QString("Open Hlms file"),
                                             QString(""),
                                             QString("Json material (*.json)"));
-    loadDatablock(fileName);
+    loadDatablockAndSet(fileName);
 }
 
 //****************************************************************************/
-void MainWindow::loadDatablock(const QString jsonFileName)
+void MainWindow::loadDatablockAndSet(const QString jsonFileName)
 {
-    // Load the materials
-    if (!jsonFileName.isEmpty())
+    HlmsBuilder builder;
+    initDatablocks();
+    mPropertiesDockWidget->clear();
+    if (loadDatablock(jsonFileName))
     {
-        // Read the json file as text file and feed it to the HlmsManager::loadMaterials() function
-        // Note, that the resources (textures, etc.) must be present
-
-        // First, delete all datablocks before loading the new ones
-        initDatablocks();
-        mPropertiesDockWidget->clear();
-
-        // Read the json file
-        Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
-        QFile file(jsonFileName);
-        file.open(QFile::ReadOnly | QFile::Text);
-        QTextStream readFile(&file);
-        QString jsonString = readFile.readAll();
-        QByteArray ba = jsonString.toLatin1();
-        char* jsonChar = ba.data();
-        Ogre::String fname = jsonFileName.toStdString();
-        Ogre::HlmsJson hlmsJson(hlmsManager);
-        try
-        {
-            // Load the datablocks (which also creates them)
-            hlmsJson.loadMaterials(fname, jsonChar);
-        }
-        catch (Ogre::Exception e)
-        {
-            Ogre::LogManager::getSingleton().logMessage("MainWindow::doOpenDatablockMenuAction(); Could not load the materials\n");
-        }
-        file.close();
         mHlmsName = jsonFileName;
         appendRecentHlms(jsonFileName);
 
         // Get the (list of) datablocks and assign the first one to the current 'item' to be rendered
         getAndSetFirstDatablock();
+    }
+    else
+    {
+        Ogre::LogManager::getSingleton().logMessage("MainWindow::doOpenDatablockMenuAction(); Could not load the materials\n");
     }
 }
 
@@ -675,7 +657,7 @@ void MainWindow::doSaveProjectMenuAction(void)
         setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
         appendRecentProject(fileName);
     }
-    QApplication::setOverrideCursor(Qt::ArrowCursor);
+    QApplication::restoreOverrideCursor();
 }
 
 //****************************************************************************/
@@ -724,6 +706,41 @@ void MainWindow::doSaveAsDatablockMenuAction(void)
         mHlmsName = fileName;
         saveDatablock();
     }
+}
+
+//****************************************************************************/
+bool MainWindow::loadDatablock(const QString& jsonFileName)
+{
+    bool success = false;
+
+    if (!jsonFileName.isEmpty())
+    {
+        // Read the json file as text file and feed it to the HlmsManager::loadMaterials() function
+        // Note, that the resources (textures, etc.) must be present
+        success = true;
+        Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
+        QFile file(jsonFileName);
+        file.open(QFile::ReadOnly | QFile::Text);
+        QTextStream readFile(&file);
+        QString jsonString = readFile.readAll();
+        QByteArray ba = jsonString.toLatin1();
+        char* jsonChar = ba.data();
+        Ogre::String fname = jsonFileName.toStdString();
+        Ogre::HlmsJson hlmsJson(hlmsManager);
+        try
+        {
+            // Load the datablocks (which also creates them)
+            hlmsJson.loadMaterials(fname, jsonChar);
+        }
+
+        catch (Ogre::Exception e)
+        {
+            success = false;
+        }
+        file.close();
+    }
+
+    return success;
 }
 
 //****************************************************************************/
@@ -837,7 +854,7 @@ void MainWindow::doMaterialBrowserOpenMenuAction(void)
         // A change is made in the material browser and accepted with ok or double click on an item
         QString fileName = mMaterialBrowser->getSelectedJsonFileName();
         if (!fileName.isEmpty())
-            loadDatablock(fileName);
+            loadDatablockAndSet(fileName);
 
         // Save all current settings
         saveMaterialBrowserCfg();
@@ -1201,6 +1218,58 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
         }
     }
 
+    // Are the textures of all datablocks in the material browser needed?
+    if (plugin->isTexturesUsedByDatablocksForExport())
+    {
+        // TODO: Exclude textures from currently loaded material (datablock)
+
+        // Load all datablocks from the material browser
+        std::vector<Ogre::String> materials;
+        materials = data.mInMaterialFileNameVector;
+        std::vector<Ogre::String>::iterator it = materials.begin();
+        std::vector<Ogre::String>::iterator itEnd = materials.end();
+        Ogre::String fileName;
+        while (it != itEnd)
+        {
+            // Load the materials
+            fileName = *it;
+            if (!fileName.empty())
+            {
+                loadDatablock(fileName.c_str());
+            }
+            ++it;
+        }
+
+        // Get the texture basenames from the datablocks
+        std::vector<Ogre::String> vPbs;
+        std::vector<Ogre::String> vUnlit;
+        HlmsPbsBuilder pbsBuilder(0); // Do not pass the node editor (not needed in this case)
+        HlmsUnlitBuilder unlitBuilder(0); // Do not pass the node editor (not needed in this case)
+        pbsBuilder.getTexturesFromAvailableDatablocks (mOgreManager, &vPbs);
+        unlitBuilder.getTexturesFromAvailableDatablocks (mOgreManager, &vUnlit);
+
+        // Add all textures from Pbs
+        std::vector<Ogre::String>::iterator itPbs = vPbs.begin();
+        std::vector<Ogre::String>::iterator itPbsEnd = vPbs.end();
+        Ogre::String baseName;
+        while (itPbs != itPbsEnd)
+        {
+            baseName = *itPbs;
+            data.mInTexturesUsedByDatablocks.push_back(baseName);
+            ++itPbs;
+        }
+
+        // Add all textures from Unlit
+        std::vector<Ogre::String>::iterator itUnlit = vUnlit.begin();
+        std::vector<Ogre::String>::iterator itUnlitEnd = vUnlit.end();
+        while (itUnlit != itUnlitEnd)
+        {
+            baseName = *itUnlit;
+            data.mInTexturesUsedByDatablocks.push_back(baseName);
+            ++itUnlit;
+        }
+    }
+
     // Execute the export
     if (plugin->executeExport(&data))
     {
@@ -1344,7 +1413,7 @@ void MainWindow::appendRecentProject(const QString fileName)
 //****************************************************************************/
 void MainWindow::doRecentHlmsFileAction(const QString& fileName)
 {
-    loadDatablock(fileName);
+    loadDatablockAndSet(fileName);
 }
 
 //****************************************************************************/

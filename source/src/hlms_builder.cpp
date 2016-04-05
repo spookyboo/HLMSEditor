@@ -25,6 +25,7 @@
 #include <QTextStream>
 #include "OgreResourceGroupManager.h"
 #include "OgreHlmsManager.h"
+#include "OgreHlmsJson.h"
 
 //****************************************************************************/
 HlmsBuilder::HlmsBuilder(void)

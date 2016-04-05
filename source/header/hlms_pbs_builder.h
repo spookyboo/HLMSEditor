@@ -77,8 +77,19 @@ class HlmsPbsBuilder : public HlmsBuilder
         // Connect PBS node and Blend node in the editor canvas
         void connectNodes(HlmsNodePbsDatablock* pbsnode,
                           HlmsNodeBlendblock* blendnode);
+
+        // Some convenience functions (eg used for plugins; that is the reason std and Ogre types are used)
+        // Get the alias name from a pbs datablock
+        const Ogre::String& getTextureName(Magus::OgreManager* ogreManager,
+                                           Ogre::HlmsPbsDatablock* pbsDatablock,
+                                           Ogre::PbsTextureTypes textureType);
+
+        // Get all alias names from all currently available pbs datablocks
+        void getTexturesFromAvailableDatablocks(Magus::OgreManager* ogreManager, std::vector<Ogre::String>* v);
+
 	private:
         Magus::QtNodeEditor* mNodeEditor;
+        Ogre::String mTempOgreString;
 
         // Some private functions
         unsigned int getIndexFromTextureType(Ogre::PbsTextureTypes textureType);
