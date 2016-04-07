@@ -190,6 +190,7 @@ namespace Magus
         connect(mSelectionList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(handleSelected(QListWidgetItem*)));
         connect(mSelectionList, SIGNAL(assedDragMoved(QString,QString)), this, SLOT(handleSelected(QString,QString)));
         connect(mSelectionList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(handleDoubleClicked(QListWidgetItem*)));
+        connect(mSelectionList, SIGNAL(itemPressed(QListWidgetItem*)), this, SLOT(handleSelected(QListWidgetItem*)));
         //connect(mSelectionList, SIGNAL(itemEntered(QListWidgetItem*)), this, SLOT(handleMouseOver(QListWidgetItem*)));
         connect(mSelectionList, SIGNAL(assetDeleted(QString,QString)), this, SLOT(handleAssetDeleted(QString,QString)));
 

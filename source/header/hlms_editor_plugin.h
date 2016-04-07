@@ -49,7 +49,7 @@ namespace Ogre
             String mInFileDialogPath; // The path of the file selected by means of a filedialog (used for import/export)
             std::vector<String> mInMaterialFileNameVector; // Vector with material names (fileName) in the material browser
             std::vector<String> mInTextureFileNameVector; // Vector with texture names (fileName) in the texture browser
-            std::vector<String> mInTexturesUsedByDatablocks; // Vector with unique texture basenames from all the Pbs and Unlit datablocks in the material browser
+            std::vector<String> mInTexturesUsedByDatablocks; // Vector with texture basenames from all the Pbs and Unlit datablocks in the material browser
             Ogre::Item* mInItem; // The currently selected Item in the renderwidget
             Ogre::RenderWindow* mInRenderWindow; // The renderwindow of the renderwidget
             Ogre::SceneManager* mInSceneManager; // The scenemanager used in the renderwidget

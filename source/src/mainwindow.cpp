@@ -1162,9 +1162,12 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
     }
 
     // Execute the import
+    QApplication::setOverrideCursor(Qt::WaitCursor);
     Ogre::HlmsDatablock* oldDatablock = data.mInOutCurrentDatablock;
     Ogre::HlmsDatablock* newDatablock;
-    if (plugin->executeImport(&data))
+    bool result = plugin->executeImport(&data);
+    QApplication::restoreOverrideCursor();
+    if (result)
     {
         // Check whether a new datablock was created
         newDatablock = data.mInOutCurrentDatablock;
@@ -1194,7 +1197,6 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
     QString text;
     constructHlmsEditorPluginData(&data);
 
-
     // Is a filedialog needed before export (to select the dir to be exported)?
     if (plugin->isOpenFileDialogForExport())
     {
@@ -1218,11 +1220,11 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
         }
     }
 
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+
     // Are the textures of all datablocks in the material browser needed?
     if (plugin->isTexturesUsedByDatablocksForExport())
     {
-        // TODO: Exclude textures from currently loaded material (datablock)
-
         // Load all datablocks from the material browser
         std::vector<Ogre::String> materials;
         materials = data.mInMaterialFileNameVector;
@@ -1271,7 +1273,9 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
     }
 
     // Execute the export
-    if (plugin->executeExport(&data))
+    bool result = plugin->executeExport(&data);
+    QApplication::restoreOverrideCursor();
+    if (result)
     {
         text = data.mOutSuccessText.c_str();
         if (text.isEmpty())
@@ -1334,6 +1338,7 @@ void MainWindow::constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data)
     data->mOutErrorText = "Error while performing this function";
     data->mOutExportReference = "";
     data->mOutSuccessText = "";
+    data->mInTexturesUsedByDatablocks.clear();
 }
 
 //****************************************************************************/
