@@ -27,7 +27,8 @@ TextureDockWidget::TextureDockWidget(QString title, MainWindow* parent, Qt::Wind
 	QDockWidget (title, parent, flags), 
     mParent(parent)
 {
-    mTextureMain = new TextureMain("../common/icons/"); // TODO: Use const string
+    //mTextureMain = new TextureMain("../common/icons/"); // TODO: Use const string
+    mTextureMain = new TextureMain(ICON_PATH);
     setWidget(mTextureMain);
 
     // Perform standard functions

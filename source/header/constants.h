@@ -44,6 +44,7 @@ static const unsigned int MAX_MACROBLOCKS = 1;
 static const unsigned int MAX_BLENDBLOCKS = 1;
 static const unsigned int MAX_RECENT_HLMS_FILES = 9;
 static const unsigned int MAX_RECENT_PROJECT_FILES = 9;
+static const QString ICON_PATH = QString("../common/icons/");
 static const QString ASSET_ICON_COLLAPSE = QString("../common/icons/collapse.png");
 static const QString ASSET_ICON_EXPAND = QString("../common/icons/expand.png");
 static const QString ICON_PBS_DATABLOCK = QString("../common/icons/pbs.png");

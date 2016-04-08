@@ -51,9 +51,19 @@ class MaterialBrowserDialog : public QDialog
         const QString& getSelectedJsonFileName(void) const {return mSelectedFileName;}
         void clearResources(void);
 
+    signals:
+        // Emitted when Ok is clicked
+        void okClicked(void);
+        void cancelClicked(void);
+        void closeClicked(void);
+
+    protected:
+        virtual void closeEvent(QCloseEvent *event);
+
     private slots:
         void handleJsonFileSelectedToProcess(const QString& fullNameJson);
         void handleOkAndAccept(void);
+        void handleCancel(void);
 
     private:
         MaterialBrowserWidget* mResourceWidget;

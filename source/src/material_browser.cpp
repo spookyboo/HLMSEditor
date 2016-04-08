@@ -31,12 +31,6 @@ MaterialBrowserWidget::MaterialBrowserWidget(const QString& iconDir, QWidget* pa
     connect(mResourceMain, SIGNAL(jSonFileSelectedToProcess(QString)), this, SLOT(handleJsonFileSelectedToProcess(QString)));
     mainLayout->addWidget(mResourceMain);
     setLayout(mainLayout);
-
-    QRect rec = QApplication::desktop()->screenGeometry();
-    setMinimumWidth(0.7 * rec.width());
-    setMaximumWidth(0.7 * rec.width());
-    setMinimumHeight(0.8 * rec.height());
-    setMaximumHeight(0.8 * rec.height());
 }
 
 //****************************************************************************/

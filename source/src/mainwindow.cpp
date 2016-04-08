@@ -63,6 +63,9 @@ MainWindow::MainWindow(void) :
     createStatusBar();
     createDockWindows();
     mMaterialBrowser = new MaterialBrowserDialog(this);
+    connect(mMaterialBrowser, SIGNAL(okClicked()), this, SLOT(doMaterialBrowserAccepted()));
+    connect(mMaterialBrowser, SIGNAL(cancelClicked()), this, SLOT(doMaterialBrowserRejected()));
+    connect(mMaterialBrowser, SIGNAL(closeClicked()), this, SLOT(doMaterialBrowserClosed()));
     loadMaterialBrowserCfg();
     loadTextureBrowserCfg();
     loadRecentHlmsFilesCfg();
@@ -849,18 +852,10 @@ void MainWindow::doQuitMenuAction(void)
 //****************************************************************************/
 void MainWindow::doMaterialBrowserOpenMenuAction(void)
 {
-    if (mMaterialBrowser->exec())
-    {
-        // A change is made in the material browser and accepted with ok or double click on an item
-        QString fileName = mMaterialBrowser->getSelectedJsonFileName();
-        if (!fileName.isEmpty())
-            loadDatablockAndSet(fileName);
-
-        // Save all current settings
-        saveMaterialBrowserCfg();
-    }
-    else
-        loadMaterialBrowserCfg(); // Reverses all changes
+    mMaterialBrowser->move(mMaterialBrowserPosition);
+    mMaterialBrowser->resize(mMaterialBrowserSize);
+    mMaterialBrowser->showNormal();
+    mMaterialBrowser->raise();
 }
 
 //****************************************************************************/
@@ -1501,4 +1496,29 @@ void MainWindow::saveRecentProjectFilesCfg(void)
         }
         file.close();
     }
+}
+
+//****************************************************************************/
+void MainWindow::doMaterialBrowserAccepted(void)
+{
+    // A change is made in the material browser and accepted with ok or double click on an item
+    QString fileName = mMaterialBrowser->getSelectedJsonFileName();
+    if (!fileName.isEmpty())
+        loadDatablockAndSet(fileName);
+
+    // Save all current settings
+    saveMaterialBrowserCfg();
+}
+
+//****************************************************************************/
+void MainWindow::doMaterialBrowserRejected(void)
+{
+    loadMaterialBrowserCfg(); // Reverses all changes
+}
+
+//****************************************************************************/
+void MainWindow::doMaterialBrowserClosed(void)
+{
+    mMaterialBrowserPosition = mMaterialBrowser->pos();
+    mMaterialBrowserSize = mMaterialBrowser->size();
 }

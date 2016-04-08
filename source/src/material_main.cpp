@@ -129,9 +129,6 @@ void MaterialMain::createDockWindows(void)
 
     // Determine width of mMaterialThumbsDockWidget
     mMaterialThumbsDockWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-    QRect rec = QApplication::desktop()->screenGeometry();
-    mMaterialThumbsDockWidget->setMinimumWidth(0.45 * rec.width()); // Note that the parent is 0.7 * screenwidth
-    mMaterialThumbsDockWidget->layout()->setSizeConstraint(QLayout::SetMinimumSize);
 }
 
 //****************************************************************************/

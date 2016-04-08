@@ -98,6 +98,9 @@ class MainWindow : public QMainWindow
         void constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data);
         void doRecentHlmsFileAction(const QString& fileName);
         void doRecentProjectFileAction(const QString& fileName);
+        void doMaterialBrowserAccepted(void);
+        void doMaterialBrowserRejected(void);
+        void doMaterialBrowserClosed(void);
 
 	private:
 		void createActions(void);
@@ -161,6 +164,8 @@ class MainWindow : public QMainWindow
         };
         QList<RecentFileStruct> mRecentHlmsFiles; // Used for recent Hlms files in menu
         QList<RecentFileStruct> mRecentProjectFiles; // Used for recent Project files in menu
+        QPoint mMaterialBrowserPosition;
+        QSize mMaterialBrowserSize;
 };
 
 #endif

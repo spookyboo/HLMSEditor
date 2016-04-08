@@ -27,20 +27,23 @@ MaterialBrowserDialog::MaterialBrowserDialog(QWidget* parent, Qt::WindowFlags f)
 {
     setWindowTitle(QString("Material Browser"));
     QRect rec = QApplication::desktop()->screenGeometry();
-    setMinimumWidth(0.7 * rec.width());
-    setMaximumWidth(0.7 * rec.width());
-    setMinimumHeight(0.8 * rec.height());
-    setMaximumHeight(0.8 * rec.height());
+    setMinimumWidth(0.2 * rec.width());
+    setMinimumHeight(0.6 * rec.height());
     mSelectedFileName = "";
 
     // Create the Resource widget
-    mResourceWidget = new MaterialBrowserWidget(QString("../common/icons/"), this); // TODO: Use const string
+    //mResourceWidget = new MaterialBrowserWidget(QString("../common/icons/"), this); // TODO: Use const string
+    mResourceWidget = new MaterialBrowserWidget(ICON_PATH, this);
     connect(mResourceWidget, SIGNAL(jSonFileSelectedToProcess(QString)), this, SLOT(handleJsonFileSelectedToProcess(QString)));
 
     // Create a buttonbox
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+    QPushButton* button = buttonBox->button(QDialogButtonBox::Cancel);
+    button->setText("Undo delete");
+    button = buttonBox->button(QDialogButtonBox::Ok);
+    button->setText("Edit");
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(handleOkAndAccept()));
-    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(handleCancel()));
 
     // Set the layout
     QHBoxLayout* buttonsLayout = new QHBoxLayout;
@@ -89,18 +92,32 @@ void MaterialBrowserDialog::initResourceTree(void)
 void MaterialBrowserDialog::handleJsonFileSelectedToProcess(const QString& fullNameJson)
 {
     mSelectedFileName = fullNameJson;
-    accept();
+    emit okClicked();
+    //accept();
 }
 
 //****************************************************************************/
 void MaterialBrowserDialog::handleOkAndAccept(void)
 {
     mSelectedFileName = mResourceWidget->getSelectedFullQualifiedName();
-    accept();
+    emit okClicked();
+    //accept();
+}
+
+//****************************************************************************/
+void MaterialBrowserDialog::handleCancel(void)
+{
+    emit cancelClicked();
 }
 
 //****************************************************************************/
 void MaterialBrowserDialog::clearResources (void)
 {
     mResourceWidget->clearResources();
+}
+
+//****************************************************************************/
+void MaterialBrowserDialog::closeEvent(QCloseEvent *event)
+{
+    emit closeClicked();
 }
