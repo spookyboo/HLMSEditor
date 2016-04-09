@@ -63,7 +63,7 @@ MainWindow::MainWindow(void) :
     createStatusBar();
     createDockWindows();
     mMaterialBrowser = new MaterialBrowserDialog(this);
-    connect(mMaterialBrowser, SIGNAL(okClicked()), this, SLOT(doMaterialBrowserAccepted()));
+    connect(mMaterialBrowser, SIGNAL(okClicked(QString)), this, SLOT(doMaterialBrowserAccepted(QString)));
     connect(mMaterialBrowser, SIGNAL(cancelClicked()), this, SLOT(doMaterialBrowserRejected()));
     connect(mMaterialBrowser, SIGNAL(closeClicked()), this, SLOT(doMaterialBrowserClosed()));
     loadMaterialBrowserCfg();
@@ -1499,10 +1499,9 @@ void MainWindow::saveRecentProjectFilesCfg(void)
 }
 
 //****************************************************************************/
-void MainWindow::doMaterialBrowserAccepted(void)
+void MainWindow::doMaterialBrowserAccepted(const QString& fileName)
 {
     // A change is made in the material browser and accepted with ok or double click on an item
-    QString fileName = mMaterialBrowser->getSelectedJsonFileName();
     if (!fileName.isEmpty())
         loadDatablockAndSet(fileName);
 

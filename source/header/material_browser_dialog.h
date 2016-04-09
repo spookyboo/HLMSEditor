@@ -48,12 +48,10 @@ class MaterialBrowserDialog : public QDialog
         QVector<Magus::QtResourceInfo*>& getResources (void);
         void setResources (const QVector<Magus::QtResourceInfo*>& resources);
         void initResourceTree(void);
-        const QString& getSelectedJsonFileName(void) const {return mSelectedFileName;}
         void clearResources(void);
 
     signals:
-        // Emitted when Ok is clicked
-        void okClicked(void);
+        void okClicked(const QString& fullNameJson);
         void cancelClicked(void);
         void closeClicked(void);
 
@@ -67,7 +65,6 @@ class MaterialBrowserDialog : public QDialog
 
     private:
         MaterialBrowserWidget* mResourceWidget;
-        QString mSelectedFileName;
 };
 
 #endif

@@ -98,7 +98,8 @@ class MainWindow : public QMainWindow
         void constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data);
         void doRecentHlmsFileAction(const QString& fileName);
         void doRecentProjectFileAction(const QString& fileName);
-        void doMaterialBrowserAccepted(void);
+        //void doMaterialBrowserAccepted(void);
+        void doMaterialBrowserAccepted(const QString& fileName); // TEST
         void doMaterialBrowserRejected(void);
         void doMaterialBrowserClosed(void);
 
