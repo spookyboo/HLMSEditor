@@ -29,10 +29,8 @@ MaterialBrowserDialog::MaterialBrowserDialog(QWidget* parent, Qt::WindowFlags f)
     QRect rec = QApplication::desktop()->screenGeometry();
     setMinimumWidth(0.2 * rec.width());
     setMinimumHeight(0.6 * rec.height());
-    mSelectedFileName = "";
 
     // Create the Resource widget
-    //mResourceWidget = new MaterialBrowserWidget(QString("../common/icons/"), this); // TODO: Use const string
     mResourceWidget = new MaterialBrowserWidget(ICON_PATH, this);
     connect(mResourceWidget, SIGNAL(jSonFileSelectedToProcess(QString)), this, SLOT(handleJsonFileSelectedToProcess(QString)));
 
@@ -91,17 +89,14 @@ void MaterialBrowserDialog::initResourceTree(void)
 //****************************************************************************/
 void MaterialBrowserDialog::handleJsonFileSelectedToProcess(const QString& fullNameJson)
 {
-    mSelectedFileName = fullNameJson;
-    emit okClicked();
-    //accept();
+    emit okClicked(fullNameJson);
 }
 
 //****************************************************************************/
 void MaterialBrowserDialog::handleOkAndAccept(void)
 {
-    mSelectedFileName = mResourceWidget->getSelectedFullQualifiedName();
-    emit okClicked();
-    //accept();
+    QString selectedFileName = mResourceWidget->getSelectedFullQualifiedName();
+    emit okClicked(selectedFileName);
 }
 
 //****************************************************************************/
