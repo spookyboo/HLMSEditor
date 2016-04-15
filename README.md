@@ -21,6 +21,7 @@ Step 3. Copy the following DLL's to the HLMSEditor/bin directory
 * RenderSystem_GL3Plus_d.dll
 * platform/qwindows.dll (if you use windows, of course)  
 
+
 Step 4. Run 'Qt Creator'  
 Step 5. Open the 'HLMSEditor.pro' in Qt Creator  
 Step 6. Edit 'HLMSEditor.pro' file; change OGREHOME = "C:/Users/Henry/Documents/Visual Studio 2015/Projects/ogre" to the path that refers to your ogre root/home  
