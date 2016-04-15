@@ -1,8 +1,5 @@
 V 1.0 updates:
 =============
-- Bug: Context menu node editor: Delete selected nodes when the canvas doesn't contain nodes => crash application
-- Bug: Move texture group with textures in it, sometimes crashes
-- Remove the current Hlms when a new project is created
 - Align the dock widgets (so they are displayed with the correct height and width after start)
 - Remove unused functions in .h/.cpp files in the 'sources' directory
 - Create windows installer
@@ -11,14 +8,18 @@ V 1.0 updates:
 
 V 1.0 Bugs:
 ==========
+- hlms_unlit_builder.cpp => Change as result in Ogre commit 21b9540: texLocation.xIdx = datablock->_getTextureIdx( textureType );
 - Material browser:
   - If thumb is missing and the noimage.png is displayed, the thumb is not refreshed when reloaded and added again to the material browser;
     only after a restart the thumb is refreshed (minor bug).
 - Cubemap json generates a lot of warnings in the log when depth is enabled (this is with all non-depth textures); the log message is only in Debug.
 - F5 (generate HLMS) does not work when the focus in on a certain dock window (eg. node editor). Must be possible independent of window focus.
 
+
 Implement later (V2.0):
 ======================
+- Bug?: Context menu node editor: Delete selected nodes when the canvas doesn't contain nodes => crash application
+- Bug?: Move texture group with textures in it, sometimes crashes
 - Plugin support
   - Implement isFileDialog needed => Hlms editor ask the plugin for this and sets it to the HlmsEditorPluginData (filename or directory)
   - Check whether HlmsEditorPluginData::mInOutCurrenDatablock differs between before and after calling the executeImport; when different, create
