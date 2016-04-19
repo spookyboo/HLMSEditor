@@ -1,4 +1,7 @@
 HLMS Unlit:
 ==========
+A Datablock is a “material” from the user’s perspective. The Unlit datablock
+represents a simple unlit material.
+
 
 TODO: Add help text

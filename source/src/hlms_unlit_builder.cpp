@@ -422,6 +422,7 @@ void HlmsUnlitBuilder::enrichSamplerNode (Magus::OgreManager* ogreManager,
     if (!texLocation.texture.isNull())
     {
        texLocation.xIdx = 0;
+       //texLocation.xIdx = datablock->_getTextureIdx( textureType ); // TODO: Change as result in Ogre commit 21b9540
        texLocation.yIdx = 0;
        texLocation.divisor = 1;
        pBasename = hlmsManager->getTextureManager()->findAliasName(texLocation); // findAliasName could return 0 pointer
@@ -682,6 +683,7 @@ const Ogre::String& HlmsUnlitBuilder::getTextureName(Magus::OgreManager* ogreMan
     if (!texLocation.texture.isNull())
     {
        texLocation.xIdx = 0;
+       //texLocation.xIdx = datablock->_getTextureIdx( textureType ); // TODO: Change as result in Ogre commit 21b9540
        texLocation.yIdx = 0;
        texLocation.divisor = 1;
        pBasename = hlmsManager->getTextureManager()->findAliasName(texLocation); // findAliasName could return 0 pointer

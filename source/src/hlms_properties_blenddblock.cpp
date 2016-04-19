@@ -194,9 +194,10 @@ void HlmsPropertiesBlendblock::setObject (HlmsNodeBlendblock* hlmsNodeBlendblock
     selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_BLENDBLOCK_BLEND_CHANNEL_MASK));
     selectProperty->setCurentIndex(hlmsNodeBlendblock->getBlendChannelMask());
 
-    // ******** Transparent ********
+    // ******** Transparent (use source- and destination blendfactor) ********
     checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_BLENDBLOCK_TRANSPARENT));
-    checkboxProperty->setValue(hlmsNodeBlendblock->getTransparent());
+    //checkboxProperty->setValue(hlmsNodeBlendblock->getTransparent());
+    checkboxProperty->setValue(hlmsNodeBlendblock->getSourceBlendFactor() == 7 && hlmsNodeBlendblock->getDestBlendFactor() == 9);
 
     // ******** Separate Blend ********
     checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_BLENDBLOCK_SEPARATE_BLEND));
@@ -260,6 +261,22 @@ void HlmsPropertiesBlendblock::propertyValueChanged(QtProperty* property)
         {
             checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(property);
             mHlmsNodeBlendblock->setTransparent(checkboxProperty->getValue());
+
+            // Set source- and destination blendfactor
+            if (checkboxProperty->getValue())
+            {
+                selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_BLENDBLOCK_SOURCE_BLEND_FACTOR));
+                selectProperty->setCurentIndex(7); // Source alpha
+                selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_BLENDBLOCK_DEST_BLEND_FACTOR));
+                selectProperty->setCurentIndex(9); // One minus source alpha
+            }
+            else
+            {
+                selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_BLENDBLOCK_SOURCE_BLEND_FACTOR));
+                selectProperty->setCurentIndex(0); // One
+                selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_BLENDBLOCK_DEST_BLEND_FACTOR));
+                selectProperty->setCurentIndex(1); // Zero
+            }
         }
         break;
         case PROPERTY_BLENDBLOCK_SEPARATE_BLEND:
@@ -272,12 +289,23 @@ void HlmsPropertiesBlendblock::propertyValueChanged(QtProperty* property)
         {
             selectProperty = static_cast<Magus::QtSelectProperty*>(property);
             mHlmsNodeBlendblock->setSourceBlendFactor(selectProperty->getCurrentIndex());
+
+            // Adjust transparent checkbox, based on source blend factor and destination blend factor
+            Magus::QtSelectProperty* selectPropertyDestBF = static_cast<Magus::QtSelectProperty*>(
+                        mAssetWidget->getPropertyWidget(PROPERTY_BLENDBLOCK_DEST_BLEND_FACTOR));
+            adjustTransparent(selectProperty->getCurrentIndex(), selectPropertyDestBF->getCurrentIndex());
+
         }
         break;
         case PROPERTY_BLENDBLOCK_DEST_BLEND_FACTOR:
         {
             selectProperty = static_cast<Magus::QtSelectProperty*>(property);
             mHlmsNodeBlendblock->setDestBlendFactor(selectProperty->getCurrentIndex());
+
+            // Adjust transparent checkbox, based on source blend factor and destination blend factor
+            Magus::QtSelectProperty* selectPropertySourceBF = static_cast<Magus::QtSelectProperty*>(
+                        mAssetWidget->getPropertyWidget(PROPERTY_BLENDBLOCK_SOURCE_BLEND_FACTOR));
+            adjustTransparent(selectPropertySourceBF->getCurrentIndex(), selectProperty->getCurrentIndex());
         }
         break;
         case PROPERTY_BLENDBLOCK_SOURCE_BLEND_FACTOR_ALPHA:
@@ -312,4 +340,12 @@ void HlmsPropertiesBlendblock::infoClicked(void)
 {
     PropertiesDockWidget* parent = static_cast<PropertiesDockWidget*>(parentWidget());
     parent->displayInfo(INFO_BLENDBLOCK, QString("Info"));
+}
+
+//****************************************************************************/
+void HlmsPropertiesBlendblock::adjustTransparent(unsigned int indexSourceBF, unsigned int indexDestBF)
+{
+    // Adjust transparent checkbox, based on source blend factor and destination blend factor
+    Magus::QtCheckBoxProperty* checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_BLENDBLOCK_TRANSPARENT));
+    checkboxProperty->setValue(indexSourceBF == 7 && indexDestBF == 9); // Source alpha and One minus source alpha
 }

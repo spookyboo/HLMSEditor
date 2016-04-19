@@ -86,7 +86,6 @@ void RenderwindowDockWidget::createActions(void)
 void RenderwindowDockWidget::createMenus(void)
 {
     QAction* item;
-    QHBoxLayout* layout = new QHBoxLayout();
     QMenuBar* menuBar = mInnerMain->menuBar();
     QMenu* menu = menuBar->addMenu(QString("Change mesh"));
 

@@ -49,6 +49,7 @@ class HlmsPropertiesBlendblock : public QWidget
     private:
         HlmsNodeBlendblock* mHlmsNodeBlendblock;
         Magus::QtAssetWidget* mAssetWidget;
+        void adjustTransparent(unsigned int indexSourceBF, unsigned int indexDestBF);
 };
 
 #endif

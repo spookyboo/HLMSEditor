@@ -1,4 +1,7 @@
 Macroblock:
 ==========
+Marcoblocks contain information like depth check & depth write, culling mode, 
+polygon mode (point, wireframe, solid). They’re quite analogous to 
+D3D11_RASTERIZER_DESC
 
 TODO: Add help text

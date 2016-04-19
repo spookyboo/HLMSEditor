@@ -1,4 +1,7 @@
 **************************************** Texture / sampler ****************************************
+Samplerblocks hold information about texture units, like filtering options, addressing modes
+(wrap, clamp, etc), Lod bias, anisotropy, border colour, etc. They're analogous to 
+D3D11_SAMPLER_DESC.
 
 Texture
 =======

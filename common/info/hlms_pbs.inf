@@ -1,4 +1,6 @@
 **************************************** Hlms PBS ****************************************
+A Datablock is a “material” from the user’s perspective. The PBS datablock
+represents a Physically Based Shading material.
 
 Name
 ====

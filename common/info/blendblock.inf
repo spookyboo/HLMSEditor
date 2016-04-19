@@ -1,4 +1,14 @@
 Blendblock:
 ==========
+Blendblocks are like Macroblocks, but they hold alpha blending operation information
+(blend factors: one, one_minus_src_alpha; blending modes: add, substract, min, 
+max. etc). They’re analogous to D3D11_BLEND_DESC.
 
-TODO: Add help text
+Transparent
+===========
+Setting the tranparency of a Hlms. This is the same as setting:
+- Source blend factor = Source alpha
+- Destination blend factor = One minus source alpha
+
+The 'Tranparent' property only works for unlit materials.
+Use 'Tranparent Mode' in case of a PBS Hlms material.
