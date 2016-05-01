@@ -152,6 +152,9 @@ namespace Magus
     //****************************************************************************/
     void QtNode::adjustWidthForTitle(void)
     {
+        // Inititalize width
+        mNormalizedWidth = 0;
+
         // Adjust the width of the node, depending on total width of the title and the icons
         // Calculate using zoom factor 1.0
         qreal offset = 0.5f * (NODE_HEADER_HEIGHT - NODE_HEADER_ICON_SIZE);
@@ -1051,8 +1054,13 @@ namespace Magus
         // 2. Get for each port the connected port
         QVector<QtPort*> ports = getPorts(portName);
         QVector<QtPort*> connectedPorts;
+        QtPort* checkedPort;
         foreach(QtPort* port, ports)
-            connectedPorts.append(getCheckedPortConnectedToPort(port));
+        {
+            checkedPort = getCheckedPortConnectedToPort(port);
+            if (checkedPort)
+                connectedPorts.append(checkedPort);
+        }
 
         return connectedPorts;
     }

@@ -247,18 +247,21 @@ namespace Magus
             nodeDef = iter->second;
             if (nodeDef)
             {
-                targetDef = nodeDef->getTargetPass( 0 );
-                Ogre::CompositorPassDefVec passDefs = targetDef->getCompositorPasses();
-                Ogre::CompositorPassDefVec::const_iterator iterPass;
-                Ogre::CompositorPassDefVec::const_iterator iterPassStart = passDefs.begin();
-                Ogre::CompositorPassDefVec::const_iterator iterPassEnd = passDefs.end();
-                for (iterPass = iterPassStart; iterPass != iterPassEnd; ++iterPass)
+                if (nodeDef->getNumTargetPasses() > 0)
                 {
-                    passDef = *iterPass;
-                    if (Ogre::PASS_CLEAR == passDef->getType())
+                    targetDef = nodeDef->getTargetPass( 0 );
+                    Ogre::CompositorPassDefVec passDefs = targetDef->getCompositorPasses();
+                    Ogre::CompositorPassDefVec::const_iterator iterPass;
+                    Ogre::CompositorPassDefVec::const_iterator iterPassStart = passDefs.begin();
+                    Ogre::CompositorPassDefVec::const_iterator iterPassEnd = passDefs.end();
+                    for (iterPass = iterPassStart; iterPass != iterPassEnd; ++iterPass)
                     {
-                        clearDef = static_cast<Ogre::CompositorPassClearDef*>( passDef );
-                        clearDef->mColourValue = colour;
+                        passDef = *iterPass;
+                        if (Ogre::PASS_CLEAR == passDef->getType())
+                        {
+                            clearDef = static_cast<Ogre::CompositorPassClearDef*>( passDef );
+                            clearDef->mColourValue = colour;
+                        }
                     }
                 }
             }
