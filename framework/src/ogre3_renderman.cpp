@@ -33,6 +33,7 @@ namespace Magus
     OgreManager::OgreManager(void)
     {
         mGlContext = 0;
+        mCompositorPassProvider = 0;
 
         #ifdef _DEBUG
             mResourcesCfg = "resources_d.cfg";
@@ -98,6 +99,11 @@ namespace Magus
     //****************************************************************************/
     OgreManager::~OgreManager(void)
     {
+        // Delete the dummy CompositorPassProvider
+        Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
+        compositorManager->setCompositorPassProvider(0);
+        OGRE_DELETE mCompositorPassProvider;
+
         // Delete Ogre root
         delete mRoot;
     }
@@ -105,6 +111,12 @@ namespace Magus
     //-------------------------------------------------------------------------------------
     void OgreManager::initialize(void)
     {
+        // Create dummy CompositorPassProvider (see http://www.ogre3d.org/forums/viewtopic.php?f=11&t=84816&p=525752&hilit=CompositorPassProvider#p525752)
+        // If one of the resource locations contains a compositor with a custom pass, the editor doesn't work anymore. This is to prevent it
+        Ogre::MyCompositorPassProvider* mCompositorPassProvider = OGRE_NEW Ogre::MyCompositorPassProvider;
+        Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
+        compositorManager->setCompositorPassProvider(mCompositorPassProvider);
+
         // After resources have been setup and renderwindows created (in ogre widget), the Hlms managers are registered
         registerHlms();
 
