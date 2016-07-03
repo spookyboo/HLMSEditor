@@ -19,6 +19,8 @@
 ****************************************************************************/
 
 // Include
+#include <iostream>
+#include <fstream>
 #include <QString>
 #include <QFile>
 #include <QMenuBar>
@@ -117,6 +119,7 @@ void MaterialMain::createDockWindows(void)
     connect(mMaterialTreeDockWidget, SIGNAL(resourceDeleted(int,int,int,const QString&,const QString&)), this, SLOT(handleResourceDeleted(int,int,int,const QString&,const QString&)));
     connect(mMaterialTreeDockWidget, SIGNAL(resourceSearched(QString)), this, SLOT(handleResourceSearched(QString)));
     connect(mMaterialTreeDockWidget, SIGNAL(resourceSearchReset()), this, SLOT(handleResourceSearchReset()));
+    connect(mMaterialTreeDockWidget, SIGNAL(resourceCloned(int,int,int,QString,QString,QString)), this, SLOT(handleResourceCloned(int,int,int,const QString&,const QString&, const QString&)));
     addDockWidget(Qt::LeftDockWidgetArea, mMaterialTreeDockWidget);
 
     // Assets
@@ -200,6 +203,59 @@ void MaterialMain::handleResourceSearchReset(void)
     // Reset the filtering in mMaterialThumbsDockWidget
     mMaterialThumbsDockWidget->resetFilter();
     mSelectedFileName = "";
+}
+
+//****************************************************************************/
+void MaterialMain::handleResourceCloned(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, const QString& baseNameThumb)
+{
+    if (Magus::fileExist(name))
+    {
+        // Clone the filename
+        EditorHlmsTypes type;
+        if (toplevelId == TOOL_SOURCES_LEVEL_X000_PBS)
+            type = EditorHlmsTypes::HLMS_PBS;
+        else if (toplevelId == TOOL_SOURCES_LEVEL_X000_UNLIT)
+            type = EditorHlmsTypes::HLMS_UNLIT;
+
+        // TODO: Open the copied file in the editor and rename the Hlms name in the editor and generate the material
+
+        // Determine cloned name, baseName and baseNameThumb
+        QFileInfo info(name);
+        QString originalPath = info.absolutePath() + QString("/");
+        QString clonedBaseName = QString ("CloneOf") + baseName;
+        QString clonedName = originalPath + clonedBaseName;
+        QString clonedBaseNameThumb = QString ("CloneOf") + baseNameThumb;
+
+        // Copy the json file
+        std::ifstream  srcJson(name.toStdString(), std::ios::binary);
+        std::ofstream  dstJson(clonedName.toStdString(), std::ios::binary);
+        dstJson << srcJson.rdbuf();
+        srcJson.close();
+        dstJson.close();
+
+        // Replace the name of the hlms in the cloned file
+        // TODO
+
+        // Copy the thumb file
+        std::ifstream  srcThumb((THUMBS_PATH.c_str() + baseNameThumb).toStdString(), std::ios::binary);
+        std::ofstream  dstThumb((THUMBS_PATH.c_str() + clonedBaseNameThumb).toStdString(), std::ios::binary);
+        dstThumb << srcThumb.rdbuf();
+        srcThumb.close();
+        dstThumb.close();
+
+        // Add material to the list
+        addMaterial(clonedBaseName, clonedName, clonedBaseNameThumb, type);
+    }
+    else
+    {
+        QMessageBox::StandardButton reply = fileDoesNotExistsWarning(name);
+        if (reply == QMessageBox::Yes)
+        {
+            mMaterialTreeDockWidget->deleteAssetQuiet(baseName);
+            mMaterialThumbsDockWidget->deleteAsset(toplevelId, baseName, false);
+            mSelectedFileName = "";
+        }
+    }
 }
 
 //****************************************************************************/

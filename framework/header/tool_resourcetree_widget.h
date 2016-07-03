@@ -92,6 +92,15 @@ namespace Magus
         Q_OBJECT
 
         public:
+            // Public members for changing text
+            QString mActionCreateToplevelGroupText;
+            QString mActionCreateSubGroupText;
+            QString mActionCreateAssetText;
+            QString mActionImportAssetText;
+            QString mActionDuplicateAssetText;
+            QString mActionDeleteResourceText;
+            QString mActionCollapseExpandText;
+
             QtResourceTreeWidget(const QString& iconDir, QWidget* parent = 0);
             virtual ~QtResourceTreeWidget(void);
             bool eventFilter(QObject* object, QEvent* event);
@@ -371,6 +380,14 @@ namespace Magus
             // is emitted.
             void addCustomContextMenuItem(const QString& menuItemText);
 
+            // Get/Set mAddAssetAfterDuplicateAssetSelected
+            // This is used to determine whether an item must be duplicated or if only the signal is emitted
+            // (the duplication must be done by yourself)
+            bool getAddAssetAfterDuplicateAssetSelected (void) const
+                {return mAddAssetAfterDuplicateAssetSelected;}
+            void setAddAssetAfterDuplicateAssetSelected (bool addAssetAfterDuplicateAssetSelected)
+                {mAddAssetAfterDuplicateAssetSelected = addAssetAfterDuplicateAssetSelected;}
+
         public slots:
             // Activated when a contextmenu item is selected
             void contextMenuItemSelected(QAction* action);
@@ -388,8 +405,10 @@ namespace Magus
             // Emitted when a resource is added to the resource tree
             void resourceAdded (int resourceId);
 
-            // Emitted when a resource is duplicated (eg. from the context menu
-            void assetDuplicated (int duplicateResourceId);
+            // Emitted when a resource is duplicated (eg. from the context menu)
+            // resourceId = the new id of the duplicated item (in case mAddAssetAfterDuplicateAssetSelected = true)
+            // resourceId = the id of the item to be duplicated (in case mAddAssetAfterDuplicateAssetSelected = false)
+            void assetDuplicated (int resourceId);
 
             // Emitted when a resource is deleted from the resource tree
             void resourceDeleted (int resourceId);
@@ -458,6 +477,7 @@ namespace Magus
             bool mDuplicateAssetContextMenuItemEnabled;
             bool mDeleteResourceContextMenuItemEnabled;
             bool mCollapseExpandContextMenuItemEnabled;
+            bool mAddAssetAfterDuplicateAssetSelected;
             bool mAssetItemEditable;
             int mMaxDepth;
             QString mIconDir;

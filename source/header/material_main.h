@@ -89,6 +89,7 @@ class MaterialMain : public QMainWindow
         void handleResourceDeleted(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
         void handleResourceSearched(const QString& searchPattern);
         void handleResourceSearchReset(void);
+        void handleResourceCloned(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, const QString& baseNameThumb);
         void handleTabChanged(int toplevelId);
         void handleThumbDeleted(const QString& name, const QString& baseName);
         void handleThumbSelected(const QString& name, const QString& baseName);

@@ -123,6 +123,7 @@ class MaterialTreeDockWidget : public QDockWidget
         void resourceDeleted(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName);
         void resourceSearched(const QString& searchPattern);
         void resourceSearchReset(void);
+        void resourceCloned(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName, const QString& baseNameThumb);
 
     private slots:
         void handleResourceSelected(int resourceId);
@@ -132,6 +133,7 @@ class MaterialTreeDockWidget : public QDockWidget
         void handleResourceMoved(int resourceId);
         void handleResourceSearched(const QString& searchPattern);
         void handleResourceSearchReset(void);
+        void handleResourceDuplicated(int resourceId);
 
     private:
         QMainWindow* mParent;

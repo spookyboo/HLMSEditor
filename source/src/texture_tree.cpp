@@ -33,6 +33,7 @@ TextureTreeDockWidget::TextureTreeDockWidget(const QString& iconDir, const QStri
 
     // Context menu settings
     mResourceTreeWidget = new Magus::QtResourceTreeWidget(iconDir);
+    mResourceTreeWidget->mActionDeleteResourceText = QString("Remove texture from list");
     mResourceTreeWidget->setCreateTopLevelGroupContextMenuItemEnabled(false);
     mResourceTreeWidget->setDeleteTopLevelGroupEnabled(false);
     mResourceTreeWidget->setTopLevelGroupItemEditable(false);

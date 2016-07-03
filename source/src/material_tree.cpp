@@ -30,6 +30,9 @@ MaterialTreeDockWidget::MaterialTreeDockWidget(const QString& iconDir, const QSt
     mIconDir = iconDir;
     mEmptyString = "";
     mResourceTreeWidget = new Magus::QtResourceTreeWidget(iconDir);
+    mResourceTreeWidget->mActionDuplicateAssetText = QString("Clone material");
+    mResourceTreeWidget->mActionDeleteResourceText = QString("Remove material from list");
+    mResourceTreeWidget->setAddAssetAfterDuplicateAssetSelected(false); // Do not duplicate automatically
     mResourceTreeWidget->setCreateTopLevelGroupContextMenuItemEnabled(false);
     mResourceTreeWidget->setDeleteTopLevelGroupEnabled(false);
     mResourceTreeWidget->setTopLevelGroupItemEditable(false);
@@ -38,7 +41,7 @@ MaterialTreeDockWidget::MaterialTreeDockWidget(const QString& iconDir, const QSt
     mResourceTreeWidget->setAssetItemEditable(false);
     mResourceTreeWidget->setDeleteResourceContextMenuItemEnabled(true);
     mResourceTreeWidget->setImportAssetContextMenuItemEnabled(false);
-    mResourceTreeWidget->setDuplicateAssetContextMenuItemEnabled(false);
+    mResourceTreeWidget->setDuplicateAssetContextMenuItemEnabled(true);
     mResourceTreeWidget->setInheritSubGroupIconFromParent(false);
 
     // Listen to events.
@@ -53,6 +56,7 @@ MaterialTreeDockWidget::MaterialTreeDockWidget(const QString& iconDir, const QSt
     connect(mResourceTreeWidget, SIGNAL(resourceMoved(int)), this, SLOT(handleResourceMoved(int)));
     connect(mResourceTreeWidget, SIGNAL(resourceSearched(QString)), this, SLOT(handleResourceSearched(QString)));
     connect(mResourceTreeWidget, SIGNAL(resourceSearchReset()), this, SLOT(handleResourceSearchReset()));
+    connect(mResourceTreeWidget, SIGNAL(assetDuplicated(int)), this, SLOT(handleResourceDuplicated(int)));
     mInnerMain = new QMainWindow();
     mInnerMain->setCentralWidget(mResourceTreeWidget);
     setWidget(mInnerMain);
@@ -107,28 +111,46 @@ void MaterialTreeDockWidget::initializeResourceTree (void)
     mSourceInfo[TOOL_SOURCES_LEVEL_X000_UNLIT] = info;
 
     // Determine what is enabled/disabled if a toplevelgroup is selected
-    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, false);
-    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, true);
-    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_ASSET, false);
-    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
-    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, false);
-    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, false);
+    //mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, false);
+    //mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, true);
+    //mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_ASSET, false);
+    //mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
+    //mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, false);
+    //mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(Magus::TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, false);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(mResourceTreeWidget->mActionCreateToplevelGroupText, false);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(mResourceTreeWidget->mActionCreateSubGroupText, true);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(mResourceTreeWidget->mActionCreateAssetText, false);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(mResourceTreeWidget->mActionImportAssetText, false);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(mResourceTreeWidget->mActionDuplicateAssetText, false);
+    mResourceTreeWidget->enableContextMenuItemForTopLevelGroup(mResourceTreeWidget->mActionDeleteResourceText, false);
 
     // Determine what is enabled/disabled if a subgroup is selected
-    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, false);
-    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, true);
-    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_ASSET, false);
-    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
-    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, false);
-    mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, true);
+    //mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, false);
+    //mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, true);
+    //mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_CREATE_ASSET, false);
+    //mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
+    //mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, false);
+    //mResourceTreeWidget->enableContextMenuItemForSubGroup(Magus::TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, true);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(mResourceTreeWidget->mActionCreateToplevelGroupText, false);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(mResourceTreeWidget->mActionCreateSubGroupText, true);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(mResourceTreeWidget->mActionCreateAssetText, false);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(mResourceTreeWidget->mActionImportAssetText, false);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(mResourceTreeWidget->mActionDuplicateAssetText, false);
+    mResourceTreeWidget->enableContextMenuItemForSubGroup(mResourceTreeWidget->mActionDeleteResourceText, true);
 
     // Determine what is enabled/disabled if an asset is selected
-    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, false);
-    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, false);
-    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_CREATE_ASSET, false);
-    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
-    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, false);
-    mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, true);
+    //mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP, false);
+    //mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP, false);
+    //mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_CREATE_ASSET, false);
+    //mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_IMPORT_ASSET, false);
+    //mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_DUPLICATE_ASSET, false);
+    //mResourceTreeWidget->enableContextMenuItemForAsset(Magus::TOOL_RESOURCETREE_ACTION_DELETE_RESOURCE, true);
+    mResourceTreeWidget->enableContextMenuItemForAsset(mResourceTreeWidget->mActionCreateToplevelGroupText, false);
+    mResourceTreeWidget->enableContextMenuItemForAsset(mResourceTreeWidget->mActionCreateSubGroupText, false);
+    mResourceTreeWidget->enableContextMenuItemForAsset(mResourceTreeWidget->mActionCreateAssetText, false);
+    mResourceTreeWidget->enableContextMenuItemForAsset(mResourceTreeWidget->mActionImportAssetText, false);
+    mResourceTreeWidget->enableContextMenuItemForAsset(mResourceTreeWidget->mActionDuplicateAssetText, true);
+    mResourceTreeWidget->enableContextMenuItemForAsset(mResourceTreeWidget->mActionDeleteResourceText, true);
 
     // Set 'PBS' selected
     mResourceTreeWidget->selectResource(TOOL_SOURCES_LEVEL_X000_PBS, false);
@@ -409,6 +431,23 @@ void MaterialTreeDockWidget::handleResourceSearchReset(void)
 {
     // Signal
     emit resourceSearchReset();
+}
+
+//****************************************************************************/
+void MaterialTreeDockWidget::handleResourceDuplicated(int resourceId)
+{
+    // Determine which type is selected
+    QMap<int, QtSourcesInfo>::iterator it = mSourceInfo.find(resourceId);
+    if (it != mSourceInfo.end())
+    {
+        QtSourcesInfo info = it.value();
+        if (info.resourceType == Magus::TOOL_RESOURCETREE_KEY_TYPE_ASSET)
+        {
+            // Do not do something specific for a clone on a toplevel group or a (sub)group
+            mResourceTreeWidget->setSubgroupIconName(determineSubgroupIcon(info.toplevelId));
+            emit resourceCloned(info.toplevelId, info.parentId, info.resourceId, info.fileName, info.baseName, info.baseNameThumb);
+        }
+    }
 }
 
 //****************************************************************************/
