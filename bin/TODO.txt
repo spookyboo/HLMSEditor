@@ -1,10 +1,18 @@
 V 1.0 updates:
 =============
+- Import models, which are also added to the project (models.cfg + <project>_models.cfg)
+  <project>.hlmp contains reference to <project>_models.cfg
 - Align the dock widgets (so they are displayed with the correct height and width after start)
 - Remove unused functions in .h/.cpp files in the 'sources' directory
-- Create windows installer
 - Texture browser:
   - Also apply any searchPattern in case the search filter was still active and a group/asset was selected
+- Main menu
+  - Clone material
+- Forum topic: Would be possible to use the same texture sampler for different textures? I know when exporting, if all textures use the same settings in texture sampler, 
+  only one will be written, but inside the edit, still need to set a diferente one for each texture.
+- Forum topic: Another request, would be possible to rotate the directional light inside the render viewport?
+- Use mesh with multiple UV sets
+
 
 V 1.0 Bugs:
 ==========

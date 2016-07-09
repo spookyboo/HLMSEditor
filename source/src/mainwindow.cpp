@@ -28,7 +28,12 @@
 #include "mainwindow.h"
 #include "OgreRoot.h"
 #include "OgrePlugin.h"
+#include "OgreMesh.h"
 #include "OgreItem.h"
+#include "OgreMeshManager.h"
+#include "OgreMeshManager2.h"
+#include "OgreMeshSerializer.h"
+#include "OgreMesh2Serializer.h"
 #include "OgreHlmsPbs.h"
 #include "OgreHlmsUnlit.h"
 #include "OgreHlmsPbsDatablock.h"
@@ -144,6 +149,9 @@ void MainWindow::createActions(void)
     mOpenDatablockMenuAction = new QAction(QString("Open Hlms"), this);
     mOpenDatablockMenuAction->setShortcut(QKeySequence(QString("Ctrl+Alt+O")));
     connect(mOpenDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doOpenDatablockMenuAction()));
+    mOpenModelMenuAction = new QAction(QString("Open Mesh"), this);
+    mOpenModelMenuAction->setShortcut(QKeySequence(QString("Ctrl+O")));
+    connect(mOpenModelMenuAction, SIGNAL(triggered()), this, SLOT(doOpenModelMenuAction()));
 
     // Save
     mSaveProjectMenuAction = new QAction(QString("Save Project"), this);
@@ -208,6 +216,8 @@ void MainWindow::createMenus(void)
     fileMenuAction->addAction(mOpenProjectMenuAction);
     fileMenuAction->addSeparator();
     fileMenuAction->addAction(mOpenDatablockMenuAction);
+    fileMenuAction->addSeparator();
+    fileMenuAction->addAction(mOpenModelMenuAction);
 
     // Save
     fileMenuAction = mFileMenu->addMenu("Save");
@@ -451,6 +461,203 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
     {
         Ogre::LogManager::getSingleton().logMessage("MainWindow::doOpenDatablockMenuAction(); Could not load the materials\n");
     }
+}
+
+//****************************************************************************/
+void MainWindow::doOpenModelMenuAction(void)
+{
+    // Load a model
+    QString fileName;
+    fileName = QFileDialog::getOpenFileName(this, QString("Open Model"),
+                                            QString(""),
+                                            QString("MESH (*.mesh);;"
+                                                    "All files (*.*)"));
+    if (!fileName.isEmpty())
+        loadModel(fileName);
+}
+
+//****************************************************************************/
+void MainWindow::loadModel(const QString modelFileName)
+{
+    if (!Magus::fileExist(modelFileName))
+    {
+        QMessageBox::information(0, QString("Warning"), modelFileName + QString(" does not exist."));
+        return;
+    }
+
+    // 1. Model is an Ogre mesh?
+    QFileInfo info(modelFileName);
+    QString suffix = info.suffix();
+    QString baseName = info.fileName();
+    if (suffix != "mesh")
+    {
+        // Only Ogre3d meshes allowed for now
+        QMessageBox::information(0, QString("Warning"), modelFileName + QString(" is not an Ogre3d mesh file."));
+        return;
+    }
+
+    // 2. Check mesh version
+    Ogre::String dataFolder = info.path().toStdString();
+    if (isMeshV1 (modelFileName))
+    {
+        try
+        {
+            // Add the resource location first
+            mOgreManager->getOgreRoot()->addResourceLocation(dataFolder, "FileSystem", "General");
+
+            // Convert v1 mesh to v2 mesh
+            Ogre::MeshPtr v2MeshPtr = convertMeshV1ToV2(baseName);
+
+            // Create an item and add it to the renderwindow
+            Ogre::SceneManager* sceneManager = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getSceneManager();
+            Ogre::Item* item = sceneManager->createItem(v2MeshPtr, Ogre::SCENE_DYNAMIC);
+            mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setItem(item, Ogre::Vector3::UNIT_SCALE);
+
+            // Save the V2 mesh (ask whether it must be saved)
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this, "Info", modelFileName +
+                                          QString(" is converted to a V2 mesh. Do you want to save it?"),
+                                          QMessageBox::Yes|QMessageBox::No);
+            if (reply == QMessageBox::Yes)
+            {
+                // Save the mesh
+                QString fileName = QFileDialog::getSaveFileName(this,
+                                                                QString("Save the mesh"),
+                                                                info.path() + QString("/.mesh"),
+                                                                QString("V2 mesh file (*.mesh)"));
+
+                if (!fileName.isEmpty())
+                    saveV2Mesh(v2MeshPtr, fileName);
+            }
+
+            // Add to mesh map
+            mRenderwindowDockWidget->addToMeshMap(baseName, baseName, QVector3D(1.0f, 1.0f, 1.0f));
+
+            return;
+        }
+        catch (Ogre::Exception e)
+        {
+            QMessageBox::information(0, QString("Warning"), QString("Error while converting V1 mesh ") + modelFileName);
+        }
+    }
+    if (isMeshV2 (modelFileName))
+    {
+        // 3. Load the V2 mesh
+        try
+        {
+            // Add the resource location first
+            mOgreManager->getOgreRoot()->addResourceLocation(dataFolder, "FileSystem", "General");
+
+            // Create the mesh and add it to the render window
+            mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->createItem(baseName.toStdString(), Ogre::Vector3::UNIT_SCALE);
+
+            // Add to mesh map
+            mRenderwindowDockWidget->addToMeshMap(baseName, baseName, QVector3D(1.0f, 1.0f, 1.0f));
+        }
+        catch (Ogre::Exception e)
+        {
+            QMessageBox::information(0, QString("Warning"), QString("Cannot load ") + modelFileName);
+        }
+    }
+}
+
+//****************************************************************************/
+void MainWindow::saveV2Mesh(Ogre::MeshPtr v2MeshPtr, QString modelFileName)
+{
+    Ogre::MeshSerializer meshSerializer( 0 );
+    meshSerializer.exportMesh(v2MeshPtr.get(), modelFileName.toStdString());
+}
+
+//****************************************************************************/
+bool MainWindow::isMeshV1(const QString modelFileName)
+{
+    Ogre::SceneManager* sceneManager = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getSceneManager();
+    if (!sceneManager)
+        return false;
+
+    Ogre::v1::MeshPtr v1MeshPtr;
+    try
+    {
+        Ogre::v1::MeshSerializer meshSerializer;
+        Ogre::DataStreamPtr stream(openFile(modelFileName.toStdString()));
+        Ogre::String name = Ogre::StringConverter::toString(mOgreManager->getOgreRoot()->getTimer()->getMicroseconds());
+        v1MeshPtr = Ogre::v1::MeshManager::getSingleton().createManual(name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
+        meshSerializer.importMesh(stream, v1MeshPtr.get());
+        v1MeshPtr->unload();
+    }
+    catch (Ogre::Exception e)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+//****************************************************************************/
+bool MainWindow::isMeshV2(const QString modelFileName)
+{
+    Ogre::SceneManager* sceneManager = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getSceneManager();
+    if (!sceneManager)
+        return false;
+
+    Ogre::MeshPtr v2MeshPtr;
+    try
+    {
+        Ogre::RenderSystem* renderSystem = mOgreManager->getOgreRoot()->getRenderSystem();
+        Ogre::VaoManager* vaoManager = renderSystem->getVaoManager();
+        Ogre::MeshSerializer meshSerializer(vaoManager);
+        Ogre::DataStreamPtr stream(openFile(modelFileName.toStdString()));
+        Ogre::String name = Ogre::StringConverter::toString(mOgreManager->getOgreRoot()->getTimer()->getMicroseconds());
+        v2MeshPtr = Ogre::MeshManager::getSingleton().createManual(name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
+        meshSerializer.importMesh(stream, v2MeshPtr.get());
+        v2MeshPtr->unload();
+    }
+    catch (Ogre::Exception e)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+//****************************************************************************/
+Ogre::MeshPtr MainWindow::convertMeshV1ToV2(const QString baseNameMeshV1)
+{
+    Ogre::v1::MeshPtr v1MeshPtr;
+    Ogre::MeshPtr v2MeshPtr;
+
+    // Create V1 mesh
+    v1MeshPtr = Ogre::v1::MeshManager::getSingleton().load(
+                baseNameMeshV1.toStdString(), Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME,
+                Ogre::v1::HardwareBuffer::HBU_STATIC, Ogre::v1::HardwareBuffer::HBU_STATIC);
+
+    // Create V2 mesh
+    //Ogre::String name = Ogre::StringConverter::toString(mOgreManager->getOgreRoot()->getTimer()->getMicroseconds());
+    //v2MeshPtr = Ogre::MeshManager::getSingleton().createManual(name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
+    v2MeshPtr = Ogre::MeshManager::getSingleton().createManual(baseNameMeshV1.toStdString(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
+    v2MeshPtr->importV1 (v1MeshPtr.get(), true, true, true);
+    v1MeshPtr->unload();
+    return v2MeshPtr;
+}
+
+
+//****************************************************************************/
+Ogre::DataStreamPtr MainWindow::openFile(Ogre::String source)
+{
+    struct stat tagStat;
+
+    FILE* pFile = fopen( source.c_str(), "rb" );
+    if (!pFile)
+        OGRE_EXCEPT(Ogre::Exception::ERR_INVALID_STATE, "", "");
+
+    stat( source.c_str(), &tagStat );
+    Ogre::MemoryDataStream* memstream = new Ogre::MemoryDataStream(source, tagStat.st_size, true);
+    size_t result = fread( (void*)memstream->getPtr(), 1, tagStat.st_size, pFile );
+    if (result != tagStat.st_size)
+        OGRE_EXCEPT(Ogre::Exception::ERR_INVALID_STATE, "", "");
+
+    fclose( pFile );
+    return Ogre::DataStreamPtr( memstream );
 }
 
 //****************************************************************************/

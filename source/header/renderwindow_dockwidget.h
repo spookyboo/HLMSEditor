@@ -56,11 +56,17 @@ class RenderwindowDockWidget : public QDockWidget
 		void createMenus(void);
 		void createToolBars(void);
         void updateTransformationWidgetFromOgreWidget(void);
+        void addToMeshMap(const QString name,
+                          const QString meshName,
+                          QVector3D scale);
 
 	private slots:
         void doChangeItemAction(QAction* action);
         void doTransformationWidgetValueChanged(void);
         void doChangeBackgroundAction(void);
+
+    protected:
+        void preLoadMeshMap(void);
 
 	private:
 		MainWindow* mParent;
@@ -70,6 +76,7 @@ class RenderwindowDockWidget : public QDockWidget
         QToolBar* mHToolBar;
         QMap<QString, MeshStruct> mMeshMap;
         Magus::TransformationWidget* mTransformationWidget;
+        QMenu* mMeshMenu;
 };
 
 #endif

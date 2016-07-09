@@ -189,6 +189,38 @@ namespace Magus
     //****************************************************************************/
     void QOgreWidget::createItem(const Ogre::String& itemName, const Ogre::Vector3& scale)
     {
+        try
+        {
+            Ogre::String datablockName = "";
+
+            // Delete the old item if available
+            if (mItem)
+            {
+                datablockName = *(mItem->getSubItem(0)->getDatablock()->getFullName());
+                setDefaultDatablockItem();
+                mSceneNode->detachAllObjects();
+                mSceneManager->destroyItem(mItem);
+            }
+
+            // Create a new item
+            mItem = mSceneManager->createItem(itemName,
+                                              Ogre::ResourceGroupManager::
+                                              AUTODETECT_RESOURCE_GROUP_NAME,
+                                              Ogre::SCENE_DYNAMIC );
+
+            mSceneNode->attachObject(mItem);
+            mSceneNode->setScale(scale);
+            if (!datablockName.empty())
+                mItem->setDatablock(datablockName);
+        }
+        catch (Ogre::Exception e)
+        {
+        }
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::setItem(Ogre::Item* item, const Ogre::Vector3& scale)
+    {
         Ogre::String datablockName = "";
 
         // Delete the old item if available
@@ -200,18 +232,14 @@ namespace Magus
             mSceneManager->destroyItem(mItem);
         }
 
-        // Create a new item
-        mItem = mSceneManager->createItem(itemName,
-                                          Ogre::ResourceGroupManager::
-                                          AUTODETECT_RESOURCE_GROUP_NAME,
-                                          Ogre::SCENE_DYNAMIC );
+        // Set the new item
+        mItem = item;
 
         mSceneNode->attachObject(mItem);
         mSceneNode->setScale(scale);
         if (!datablockName.empty())
             mItem->setDatablock(datablockName);
     }
-
 
     //****************************************************************************/
     void QOgreWidget::setDefaultDatablockItem(void)

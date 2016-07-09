@@ -1,7 +1,7 @@
 QT += widgets opengl multimedia
 
 OGREHOME = "C:/Users/Henry/Documents/Visual Studio 2015/Projects/ogre"
-
+#win32:RC_ICONS += "common/icons/HLMSEditor.ico"
 
 HEADERS       = \
     source/header/mainwindow.h \

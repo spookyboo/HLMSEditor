@@ -21,6 +21,7 @@
 // Include
 #include "constants.h"
 #include "mainwindow.h"
+#include "OgreMeshManager2.h"
 #include "Renderwindow_dockwidget.h"
 
 //****************************************************************************/
@@ -67,12 +68,42 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     mOgreWidget = new Magus::QOgreWidget();
     mInnerMain->setCentralWidget(mOgreWidget);
     parent->getOgreManager()->registerOgreWidget(OGRE_WIDGET_RENDERWINDOW, mOgreWidget);
-    mOgreWidget->createRenderWindow(parent->getOgreManager()); 
+    mOgreWidget->createRenderWindow(parent->getOgreManager());
+
+    preLoadMeshMap(); // TEST
 }
 
 //****************************************************************************/
 RenderwindowDockWidget::~RenderwindowDockWidget(void)
 {
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::addToMeshMap(const QString name,
+                                          const QString meshName,
+                                          QVector3D scale)
+{
+    MeshStruct meshStruct;
+    meshStruct.meshName = meshName;
+    meshStruct.scale = scale;
+    mMeshMap.insert(name, meshStruct);
+    QAction* item = new QAction(name, this);
+    mMeshMenu->addAction(item);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::preLoadMeshMap(void)
+{
+    Ogre::String meshName;
+    QMap<QString, MeshStruct>::iterator it;
+    QMap<QString, MeshStruct>::iterator itStart = mMeshMap.begin();
+    QMap<QString, MeshStruct>::iterator itEnd = mMeshMap.end();
+    for (it = itStart; it != itEnd; ++it)
+    {
+        meshName = it.value().meshName.toStdString();
+        Ogre::MeshPtr v2MeshPtr = Ogre::MeshManager::getSingleton().load(
+                    meshName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+    }
 }
 
 //****************************************************************************/
@@ -87,7 +118,7 @@ void RenderwindowDockWidget::createMenus(void)
 {
     QAction* item;
     QMenuBar* menuBar = mInnerMain->menuBar();
-    QMenu* menu = menuBar->addMenu(QString("Change mesh"));
+    mMeshMenu = menuBar->addMenu(QString("Change mesh"));
 
     QMap<QString, MeshStruct>::iterator it;
     QMap<QString, MeshStruct>::iterator itStart = mMeshMap.begin();
@@ -95,9 +126,9 @@ void RenderwindowDockWidget::createMenus(void)
     for (it = itStart; it != itEnd; ++it)
     {
         item = new QAction(it.key(), this);
-        menu->addAction(item);
+        mMeshMenu->addAction(item);
     }
-    connect(menu, SIGNAL(triggered(QAction*)), this, SLOT(doChangeItemAction(QAction*)));
+    connect(mMeshMenu, SIGNAL(triggered(QAction*)), this, SLOT(doChangeItemAction(QAction*)));
 }
 
 //****************************************************************************/
