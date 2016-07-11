@@ -444,7 +444,9 @@ namespace Magus
             void resourceChanged (int resourceId);
 
             // Emitted when a custom context menuitem has been selected
-            void customContextMenuItemSelected (const QString& menuItemText);
+            // menuItemText is the text of the menu item
+            // resourceId is the currently selected item in the resource tree
+            void customContextMenuItemSelected (const QString& menuItemText, int resourceId);
 
         protected:
             QtResourceInfo* getRegisteredResourceInfo (int resourceId);

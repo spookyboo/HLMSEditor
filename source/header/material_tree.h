@@ -134,6 +134,7 @@ class MaterialTreeDockWidget : public QDockWidget
         void handleResourceSearched(const QString& searchPattern);
         void handleResourceSearchReset(void);
         void handleResourceDuplicated(int resourceId);
+        void handleCustomContextMenuItemSelected(const QString& menuItemText, int resourceId);
 
     private:
         QMainWindow* mParent;

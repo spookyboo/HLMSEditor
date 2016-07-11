@@ -27,8 +27,8 @@ MaterialBrowserDialog::MaterialBrowserDialog(QWidget* parent, Qt::WindowFlags f)
 {
     setWindowTitle(QString("Material Browser"));
     QRect rec = QApplication::desktop()->screenGeometry();
-    setMinimumWidth(0.2 * rec.width());
-    setMinimumHeight(0.6 * rec.height());
+    setMinimumWidth(0.3 * rec.width());
+    setMinimumHeight(0.4 * rec.height());
 
     // Create the Resource widget
     mResourceWidget = new MaterialBrowserWidget(ICON_PATH, this);
@@ -37,9 +37,9 @@ MaterialBrowserDialog::MaterialBrowserDialog(QWidget* parent, Qt::WindowFlags f)
     // Create a buttonbox
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
     QPushButton* button = buttonBox->button(QDialogButtonBox::Cancel);
-    button->setText("Undo delete");
+    button->setText("Undo remove from list");
     button = buttonBox->button(QDialogButtonBox::Ok);
-    button->setText("Edit");
+    button->setText("Edit material");
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(handleOkAndAccept()));
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(handleCancel()));
 

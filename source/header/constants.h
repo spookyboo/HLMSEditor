@@ -237,5 +237,6 @@ static const int TOOL_SOURCES_LEVEL_X000_TEXTURE = 3;
 static const QString GROUP_NAME_IMPORTED_TEXTURES = QString("Imported resources");
 static const QString ACTION_IMPORT_TEXTURES_FROM_DIR = QString("Import from directory");
 static const QString ACTION_ADD_TEXTURES = QString("Add texture file(s)");
+static const QString ACTION_EDIT = QString("Edit material");
 
 #endif

@@ -96,7 +96,7 @@ class TextureTreeDockWidget : public QDockWidget
         void handleResourceChanged(int resourceId);
         void handleResourceSearched(const QString& searchPattern);
         void handleResourceSearchReset(void);
-        void handleCustomContextMenuItemSelected(const QString& menuItemText);
+        void handleCustomContextMenuItemSelected(const QString& menuItemText, int resourceId);
 
     private:
         QMainWindow* mParent;

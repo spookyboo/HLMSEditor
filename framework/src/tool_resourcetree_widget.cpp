@@ -1477,10 +1477,12 @@ namespace Magus
         {
             // Check whether a custom item is selected
             QString menuItem;
+            QTreeWidgetItem* item = mResourceTree->currentItem();
+            int resourceId = getResourceIdFromItem(item);
             foreach (menuItem, mCustomContextMenuList)
             {
                 if (action->text() == menuItem)
-                    emit customContextMenuItemSelected(menuItem);
+                    emit customContextMenuItemSelected(menuItem, resourceId);
             }
         }
     }

@@ -66,6 +66,11 @@ class RenderwindowDockWidget : public QDockWidget
         void doChangeBackgroundAction(void);
 
     protected:
+        // This function is used to preload the meshes in the dropdown listbox. Strictly speaking this is not needed,
+        // but for some reason, after a V2 mesh is loaded from file (by means of File -> Open -> Mesh), the MeshSerializer
+        // thinks it should support a lower version of the mesh in the dropdown listbox.
+        // Something has been screwed up (Ogre bug?) but I didn't bother to look into it. Preloading of all meshes in
+        // the models.cfg solves the issue.
         void preLoadMeshMap(void);
 
 	private:

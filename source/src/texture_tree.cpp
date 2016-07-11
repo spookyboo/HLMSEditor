@@ -33,7 +33,7 @@ TextureTreeDockWidget::TextureTreeDockWidget(const QString& iconDir, const QStri
 
     // Context menu settings
     mResourceTreeWidget = new Magus::QtResourceTreeWidget(iconDir);
-    mResourceTreeWidget->mActionDeleteResourceText = QString("Remove texture from list");
+    mResourceTreeWidget->mActionDeleteResourceText = QString("Remove from list");
     mResourceTreeWidget->setCreateTopLevelGroupContextMenuItemEnabled(false);
     mResourceTreeWidget->setDeleteTopLevelGroupEnabled(false);
     mResourceTreeWidget->setTopLevelGroupItemEditable(false);
@@ -61,7 +61,7 @@ TextureTreeDockWidget::TextureTreeDockWidget(const QString& iconDir, const QStri
     connect(mResourceTreeWidget, SIGNAL(resourceChanged(int)), this, SLOT(handleResourceChanged(int)));
     connect(mResourceTreeWidget, SIGNAL(resourceSearched(QString)), this, SLOT(handleResourceSearched(QString)));
     connect(mResourceTreeWidget, SIGNAL(resourceSearchReset()), this, SLOT(handleResourceSearchReset()));
-    connect(mResourceTreeWidget, SIGNAL(customContextMenuItemSelected(QString)), this, SLOT(handleCustomContextMenuItemSelected(QString)));
+    connect(mResourceTreeWidget, SIGNAL(customContextMenuItemSelected(QString, int)), this, SLOT(handleCustomContextMenuItemSelected(QString, int)));
     mInnerMain = new QMainWindow();
     mInnerMain->setCentralWidget(mResourceTreeWidget);
     setWidget(mInnerMain);
@@ -314,7 +314,8 @@ void TextureTreeDockWidget::handleResourceSearchReset(void)
 }
 
 //****************************************************************************/
-void TextureTreeDockWidget::handleCustomContextMenuItemSelected(const QString& menuItemText)
+void TextureTreeDockWidget::handleCustomContextMenuItemSelected(const QString& menuItemText,
+                                                                int resourceId)
 {
     emit customContextMenuItemSelected(menuItemText);
 }
