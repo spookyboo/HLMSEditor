@@ -632,8 +632,6 @@ Ogre::MeshPtr MainWindow::convertMeshV1ToV2(const QString baseNameMeshV1)
                 Ogre::v1::HardwareBuffer::HBU_STATIC, Ogre::v1::HardwareBuffer::HBU_STATIC);
 
     // Create V2 mesh
-    //Ogre::String name = Ogre::StringConverter::toString(mOgreManager->getOgreRoot()->getTimer()->getMicroseconds());
-    //v2MeshPtr = Ogre::MeshManager::getSingleton().createManual(name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
     v2MeshPtr = Ogre::MeshManager::getSingleton().createManual(baseNameMeshV1.toStdString(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
     v2MeshPtr->importV1 (v1MeshPtr.get(), true, true, true);
     v1MeshPtr->unload();
@@ -677,7 +675,8 @@ void MainWindow::destroyAllDatablocks(void)
     {
         pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itorPbs->second.datablock);
         if (pbsDatablock != hlmsPbs->getDefaultDatablock() &&
-                pbsDatablock != hlmsUnlit->getDefaultDatablock())
+                pbsDatablock != hlmsUnlit->getDefaultDatablock() &&
+                pbsDatablock->getName() != Magus::AXIS_MATERIAL_NAME)
         {
             hlmsPbs->destroyDatablock(pbsDatablock->getName());
             itorPbs = hlmsPbs->getDatablockMap().begin(); // Start from the beginning again
@@ -694,7 +693,8 @@ void MainWindow::destroyAllDatablocks(void)
     {
         unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itorUnlit->second.datablock);
         if (unlitDatablock != hlmsPbs->getDefaultDatablock() &&
-                unlitDatablock != hlmsUnlit->getDefaultDatablock())
+                unlitDatablock != hlmsUnlit->getDefaultDatablock() &&
+                unlitDatablock->getName() != Magus::AXIS_MATERIAL_NAME)
         {
             hlmsUnlit->destroyDatablock(unlitDatablock->getName());
             itorUnlit = hlmsUnlit->getDatablockMap().begin(); // Start from the beginning again
@@ -703,6 +703,7 @@ void MainWindow::destroyAllDatablocks(void)
             ++itorUnlit;
     }
 }
+
 
 //****************************************************************************/
 void MainWindow::getAndSetFirstDatablock(void)
@@ -718,13 +719,13 @@ void MainWindow::getAndSetFirstDatablock(void)
     Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
     Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
     Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+
     if (hlmsPbs)
     {
         int size = hlmsPbs->getDatablockMap().size();
-        //QMessageBox::information(0, QString("Info"), QVariant(size).toString());
-        if (size> 1)
+        if (size> 2)
         {
-            // It is a PBS; Note, that there is also a default (so always 1)
+            // It is a PBS; Note, that there is also a default and the pbs material of the light axis (so always 2)
             Ogre::Hlms::HlmsDatablockMap::const_iterator itor = hlmsPbs->getDatablockMap().begin();
             Ogre::Hlms::HlmsDatablockMap::const_iterator end  = hlmsPbs->getDatablockMap().end();
             Ogre::HlmsPbsDatablock* newDatablock;
@@ -732,7 +733,9 @@ void MainWindow::getAndSetFirstDatablock(void)
             while( itor != end )
             {
                 newDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itor->second.datablock);
-                if (newDatablock != hlmsPbs->getDefaultDatablock() && newDatablock != hlmsUnlit->getDefaultDatablock())
+                if (newDatablock != hlmsPbs->getDefaultDatablock() &&
+                        newDatablock != hlmsUnlit->getDefaultDatablock() &&
+                        newDatablock->getName() != Magus::AXIS_MATERIAL_NAME)
                 {
                     // Get the first datablock
                     newDatablockName = *newDatablock->getFullName();
@@ -740,7 +743,9 @@ void MainWindow::getAndSetFirstDatablock(void)
                     {
                         // Assign the datablock to the item (and destroy the items' old datablock, if still available)
                         item->setDatablock(newDatablock);
-                        if (oldDatablock != hlmsPbs->getDefaultDatablock() && oldDatablock != hlmsUnlit->getDefaultDatablock())
+                        if (oldDatablock != hlmsPbs->getDefaultDatablock() &&
+                                oldDatablock != hlmsUnlit->getDefaultDatablock() &&
+                                oldDatablock->getName() != Magus::AXIS_MATERIAL_NAME)
                         {
                             if (oldDatablock->getCreator()->getType() == Ogre::HLMS_PBS)
                                 hlmsPbs->destroyDatablock(oldDatablockId);
@@ -770,7 +775,6 @@ void MainWindow::getAndSetFirstDatablock(void)
     if (hlmsUnlit)
     {
         int size = hlmsUnlit->getDatablockMap().size();
-        //QMessageBox::information(0, QString("Info"), QVariant(size).toString());
         if (size > 1)
         {
             // It is an Unlit; Note, that there is also a default (so always 1)

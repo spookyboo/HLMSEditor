@@ -31,6 +31,7 @@
 #include "OgreHlmsPbs.h"
 #include "OgreHlmsUnlit.h"
 #include "OgreHlmsManager.h"
+#include "OgreHlmsPbsDatablock.h"
 #include "constants.h"
 
 namespace Magus
@@ -44,8 +45,16 @@ namespace Magus
         mCameraManager(0),
         mTimeSinceLastFrame (0.0f),
         mItem(0),
+        mLightAxisItem(0),
+        mLight(0),
+        mSceneNode(0),
+        mLightNode(0),
+        mLightAxisNode(0),
         mSceneCreated(false),
-        mSystemInitialized(false)
+        mSystemInitialized(false),
+        mRotateCameraMode(true),
+        mShiftDown(false),
+        mMouseDown(false)
     {
         setAttribute(Qt::WA_OpaquePaintEvent);
         setAttribute(Qt::WA_PaintOnScreen);
@@ -136,6 +145,8 @@ namespace Magus
         const size_t numThreads = std::max<int>(1, Ogre::PlatformInformation::getNumLogicalCores());
         Ogre::InstancingThreadedCullingMethod threadedCullingMethod = (numThreads > 1) ? Ogre::INSTANCING_CULLING_THREADED : Ogre::INSTANCING_CULLING_SINGLETHREAD;
         mSceneManager = mRoot->createSceneManager(Ogre::ST_GENERIC, numThreads, threadedCullingMethod);
+        mSceneManager->getRenderQueue()->setRenderQueueMode(1, Ogre::RenderQueue::FAST);
+        mSceneManager->getRenderQueue()->setRenderQueueMode(2, Ogre::RenderQueue::FAST);
         mSceneManager->setShadowDirectionalLightExtrusionDistance( 500.0f );
         mSceneManager->setShadowFarDistance( 500.0f );
 
@@ -169,14 +180,27 @@ namespace Magus
             hlmsPbs->destroyDatablock(DATABLOCK_DEBUG_CUBE);
 
         // Create light
-        Ogre::Light *light = mSceneManager->createLight();
-        Ogre::SceneNode *lightNode = mSceneManager->getRootSceneNode()->createChildSceneNode();
-        lightNode->attachObject( light );
-        light->setPowerScale( Ogre::Math::PI ); // Since we don't do HDR, counter the PBS' division by PI
-        light->setType( Ogre::Light::LT_DIRECTIONAL );
-        light->setDiffuseColour( Ogre::ColourValue::White );
-        light->setSpecularColour( Ogre::ColourValue::White );
-        light->setDirection( Ogre::Vector3( -1, -1, -1 ).normalisedCopy() );
+        mLight = mSceneManager->createLight();
+        mLightNode = mCameraManager->mCameraNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
+        mLightNode->attachObject( mLight );
+        mLight->setPowerScale( Ogre::Math::PI ); // Since we don't do HDR, counter the PBS' division by PI
+        mLight->setType( Ogre::Light::LT_DIRECTIONAL );
+        mLight->setDiffuseColour( Ogre::ColourValue::White );
+        mLight->setSpecularColour( Ogre::ColourValue::White );
+        mLight->setDirection(Ogre::Vector3(0, 1, 0));
+
+        // Light axis node
+        mLightAxisNode = mCameraManager->mCameraNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
+        mLightAxisNode->setPosition(mCamera->getPosition() + Ogre::Vector3(0, -27, -100));
+        mLightAxisItem = mSceneManager->createItem("axis.mesh",
+                                                   Ogre::ResourceGroupManager::
+                                                   AUTODETECT_RESOURCE_GROUP_NAME,
+                                                   Ogre::SCENE_DYNAMIC );
+        mLightAxisItem->setRenderQueueGroup(2);
+        mLightAxisNode->attachObject(mLightAxisItem);
+        mLightAxisNode->setScale(Ogre::Vector3(0.12f, 0.12f, 0.12f));
+        mLightAxisItem->setVisible(false);
+        createLightAxisMaterial();
 
         // Put some light at the bottom, so the materials are not completely dark
         mSceneManager->setAmbientLight( Ogre::ColourValue::White,
@@ -184,6 +208,51 @@ namespace Magus
                                         Ogre::Vector3( 0, 1, 0 ).normalisedCopy());
 
         mSystemInitialized = true;
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::createLightAxisMaterial(void)
+    {
+        try
+        {
+            // Create a Pbs datablock
+            Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+            Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
+
+            // Create a new datablock and use the (new) name defined in the node
+            Ogre::HlmsMacroblock macroblock;
+            macroblock.mDepthCheck = false;
+            macroblock.mDepthWrite = false;
+            Ogre::HlmsPbsDatablock* datablock = static_cast<Ogre::HlmsPbsDatablock*>(
+                        hlmsPbs->createDatablock( AXIS_MATERIAL_NAME,
+                                                  AXIS_MATERIAL_NAME,
+                                                  macroblock,
+                                                  Ogre::HlmsBlendblock(),
+                                                  Ogre::HlmsParamVec()));
+            datablock->setDiffuse(Ogre::Vector3(1, 0, 0));
+            mLightAxisItem->setDatablock(AXIS_MATERIAL_NAME);
+        }
+        catch (Ogre::Exception e){}
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::removeLightAxisMaterial(void)
+    {
+        try
+        {
+             mLightAxisItem->setDatablock(DEFAULT_DATABLOCK_NAME);
+        }
+        catch (Ogre::Exception e){}
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::setLightAxisMaterial(void)
+    {
+        try
+        {
+             mLightAxisItem->setDatablock("1234567890HlmsLightAxisItem");
+        }
+        catch (Ogre::Exception e){}
     }
 
     //****************************************************************************/
@@ -208,6 +277,7 @@ namespace Magus
                                               AUTODETECT_RESOURCE_GROUP_NAME,
                                               Ogre::SCENE_DYNAMIC );
 
+            mItem->setRenderQueueGroup(1);
             mSceneNode->attachObject(mItem);
             mSceneNode->setScale(scale);
             if (!datablockName.empty())
@@ -234,7 +304,7 @@ namespace Magus
 
         // Set the new item
         mItem = item;
-
+        mItem->setRenderQueueGroup(1);
         mSceneNode->attachObject(mItem);
         mSceneNode->setScale(scale);
         if (!datablockName.empty())
@@ -355,6 +425,9 @@ namespace Magus
     {
         if(mSystemInitialized)
             mCameraManager->injectKeyDown(ev);
+
+        if(ev->key() == Qt::Key_Shift)
+            mShiftDown = true;
     }
 
     //****************************************************************************/
@@ -362,6 +435,19 @@ namespace Magus
     {
         if(mSystemInitialized)
             mCameraManager->injectKeyUp(ev);
+
+        if(ev->key() == Qt::Key_Shift)
+            mShiftDown = false;
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::enableLightItem(bool enabled)
+    {
+        if (mLightAxisItem)
+        {
+            mRotateCameraMode = !enabled; // We want to rotate the light if enabled = true
+            mLightAxisItem->setVisible(enabled);
+        }
     }
 
     //****************************************************************************/
@@ -372,7 +458,21 @@ namespace Magus
             Ogre::Vector2 oldPos = mAbsolute;
             mAbsolute = Ogre::Vector2(e->pos().x(), e->pos().y());
             mRelative = mAbsolute - oldPos;
-            mCameraManager->injectMouseMove(mRelative);
+            if (mRotateCameraMode)
+                mCameraManager->injectMouseMove(mRelative);
+            else
+                rotateLight(mRelative);
+        }
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::rotateLight(Ogre::Vector2 relativeMouseMove)
+    {
+        if (mMouseDown)
+        {
+            mLightAxisNode->roll(Ogre::Degree(relativeMouseMove.x * 0.25f));
+            mLightAxisNode->pitch(Ogre::Degree(relativeMouseMove.y * 0.25f));
+            mLight->setDirection(mLightAxisNode->getOrientation().yAxis()); // Light direction follows light axis
         }
     }
 
@@ -381,6 +481,8 @@ namespace Magus
     {
         if(mSystemInitialized)
             mCameraManager->injectMouseWheel(e);
+
+        mLightAxisNode->setPosition(mCamera->getPosition() + Ogre::Vector3(0, -27, -100));
     }
 
     //****************************************************************************/
@@ -388,6 +490,9 @@ namespace Magus
     {
         if(mSystemInitialized)
             mCameraManager->injectMouseDown(e);
+
+        if (e->button() == Qt::MiddleButton || e->button() == Qt::LeftButton)
+            mMouseDown = true;
     }
 
     //****************************************************************************/
@@ -395,6 +500,9 @@ namespace Magus
     {
         if(mSystemInitialized)
             mCameraManager->injectMouseUp(e);
+
+        if (e->button() == Qt::MiddleButton || e->button() == Qt::LeftButton)
+            mMouseDown = false;
     }
 
     //****************************************************************************/

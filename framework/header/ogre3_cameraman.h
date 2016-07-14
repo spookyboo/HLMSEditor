@@ -98,9 +98,6 @@ namespace Magus
             mCamera->setNearClipDistance( 0.1f );
             mCamera->setFarClipDistance( 10000.0f );
             mCamera->setAutoAspectRatio( true );
-            //mCameraNode->pitch( Ogre::Degree( -45.0f ) );
-            //mCamera->setPosition( Ogre::Vector3::UNIT_Z * 50.0f );
-            //mCamera->lookAt( Ogre::Vector3( 0.0f, 0.0f, 0.0f ) );
 		}
 
 		virtual Ogre::Camera* getCamera()
@@ -157,14 +154,14 @@ namespace Magus
 		/*-----------------------------------------------------------------------------
 		| Sets the spatial offset from the target. Only applies for orbit style.
 		-----------------------------------------------------------------------------*/
-		virtual void setYawPitchDist(Ogre::Radian yaw, Ogre::Radian pitch, Ogre::Real dist)
-		{
+        virtual void setYawPitchDist(Ogre::Radian yaw, Ogre::Radian pitch, Ogre::Real dist)
+        {
             mCamera->setPosition(mTarget->_getDerivedPositionUpdated());
             mCamera->setOrientation(mTarget->_getDerivedOrientationUpdated());
-			mCamera->yaw(yaw);
-			mCamera->pitch(-pitch);
-			mCamera->moveRelative(Ogre::Vector3(0, 0, dist));
-		}
+            mCamera->yaw(yaw);
+            mCamera->pitch(-pitch);
+            mCamera->moveRelative(Ogre::Vector3(0, 0, dist));
+        }
 
 		/*-----------------------------------------------------------------------------
 		| Sets the movement style of our camera man.
@@ -174,7 +171,7 @@ namespace Magus
 			if (mMode != CM_BLENDER && mode == CM_BLENDER)
 			{
 			    setTarget(mTarget ? mTarget : mCamera->getSceneManager()->getRootSceneNode());
-			    setYawPitchDist(Ogre::Degree(0), Ogre::Degree(15), 150);
+                setYawPitchDist(Ogre::Degree(0), Ogre::Degree(15), 150);
 			}
 			else if (mMode != CM_FLY && mode == CM_FLY)
 			{
@@ -383,7 +380,6 @@ namespace Magus
 		-----------------------------------------------------------------------------*/
 		virtual void injectMouseMove(Ogre::Vector2 mousePos)
 		{
-
 		    if (mMode == CM_FLY)
 		    {
 			    mCamera->yaw(Ogre::Degree(-mousePos.x * 0.15f));
@@ -409,7 +405,7 @@ namespace Magus
 		    mMouseWheelDelta = evt->delta();
 
             mDistFromTarget = (mCamera->getPosition() - mTarget->_getDerivedPositionUpdated()).length();
-		    mCamera->moveRelative(Ogre::Vector3(0, 0, -mMouseWheelDelta * 0.0008f * mDistFromTarget));
+            mCamera->moveRelative(Ogre::Vector3(0, 0, -mMouseWheelDelta * 0.0008f * mDistFromTarget));
 		}
 
 		virtual void injectMouseDown(const QMouseEvent* evt)
@@ -440,8 +436,8 @@ namespace Magus
 
 		virtual void rotate(int x, int y)
 		{
-		    mCameraNode->yaw( Ogre::Degree( -x * 0.4f ), Ogre::Node::TS_PARENT );
-		    mCameraNode->pitch( Ogre::Degree( -y * 0.4f ) );
+            mCameraNode->yaw( Ogre::Degree( -x * 0.4f ), Ogre::Node::TS_PARENT );
+            mCameraNode->pitch( Ogre::Degree( -y * 0.4f ) );
 		}
 
 		virtual void pan(int x, int y)

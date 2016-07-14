@@ -34,6 +34,8 @@
 
 namespace Magus
 {
+    static const Ogre::String AXIS_MATERIAL_NAME = "08945875681365184756348";
+
     class OgreManager;
 
     /****************************************************************************
@@ -66,10 +68,18 @@ namespace Magus
             // Set the background colour
             void setBackgroundColour(const Ogre::ColourValue colour);
 
+            void setRotateCameraMode (bool rotateCameraMode) {mRotateCameraMode = rotateCameraMode;}
+            bool getRotateCameraMode (void) const {return mRotateCameraMode;}
+            void enableLightItem(bool enabled); // Used to switch to ' light rotation mode'
+            void createLightAxisMaterial(void); // Reset the material of the light axis item
+            void setLightAxisMaterial(void); // Reset the material of the light axis item
+            void removeLightAxisMaterial(void);
+
         protected:
             Ogre::Root* mRoot;
             Ogre::RenderWindow* mOgreRenderWindow;
             Ogre::SceneManager* mSceneManager;
+            Ogre::SceneManager* mSceneManagerTest;
             Ogre::Camera* mCamera;
             Ogre::ColourValue mBackground;
             Ogre::Real mTimeSinceLastFrame;
@@ -79,8 +89,15 @@ namespace Magus
             Ogre::Vector2 mRelative;
             bool mSystemInitialized;
             Ogre::Item* mItem;
+            Ogre::Item* mLightAxisItem;
             Ogre::SceneNode* mSceneNode;
+            Ogre::SceneNode* mLightNode;
+            Ogre::SceneNode* mLightAxisNode;
             Ogre::CompositorWorkspace* mWorkspace;
+            bool mRotateCameraMode;
+            bool mShiftDown;
+            bool mMouseDown;
+            Ogre::Light* mLight;
 
             virtual void createCompositor();
             virtual void paintEvent(QPaintEvent *e);
@@ -93,6 +110,7 @@ namespace Magus
             virtual void mousePressEvent(QMouseEvent* e);
             virtual void mouseReleaseEvent(QMouseEvent* e);
             HGLRC getCurrentGlContext(void);
+            void rotateLight(Ogre::Vector2 relativeMouseMove);
     };
 }
 
