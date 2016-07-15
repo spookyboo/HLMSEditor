@@ -62,6 +62,7 @@ class RenderwindowDockWidget : public QDockWidget
 
 	private slots:
         void doChangeItemAction(QAction* action);
+        void handleToggleModelAndLight(void);
         void doTransformationWidgetValueChanged(void);
         void doChangeBackgroundAction(void);
 
@@ -79,9 +80,13 @@ class RenderwindowDockWidget : public QDockWidget
         Magus::QOgreWidget* mOgreWidget;
         QAction* mChangeBackgroundAction;
         QToolBar* mHToolBar;
+        QPushButton* mButtonToggleModelAndLight;
         QMap<QString, MeshStruct> mMeshMap;
         Magus::TransformationWidget* mTransformationWidget;
         QMenu* mMeshMenu;
+        bool mButtonModelActive;
+        QIcon mLightIcon;
+        QIcon mModelIcon;
 };
 
 #endif

@@ -1409,6 +1409,9 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
 //****************************************************************************/
 void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
 {
+    // First destroy the material of the axis, otherwise it will also be saved
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->destroyLightAxisMaterial();
+
     Ogre::HlmsEditorPluginData data;
     QString text;
     constructHlmsEditorPluginData(&data);
@@ -1505,6 +1508,9 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
             text = QString ("Error while exporting");
         QMessageBox::information(0, QString("Error"), text);
     }
+
+    // Recreate the axis the material again
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->createLightAxisMaterial();
 }
 
 //****************************************************************************/

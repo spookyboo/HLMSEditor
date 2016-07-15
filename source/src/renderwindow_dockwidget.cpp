@@ -27,7 +27,9 @@
 //****************************************************************************/
 RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags) : 
 	QDockWidget (title, parent, flags), 
-    mParent(parent)
+    mParent(parent),
+    mButtonToggleModelAndLight(0),
+    mButtonModelActive(true)
 {
     // Create the meshMap
     QFile file(QString("models.cfg"));
@@ -70,7 +72,7 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     parent->getOgreManager()->registerOgreWidget(OGRE_WIDGET_RENDERWINDOW, mOgreWidget);
     mOgreWidget->createRenderWindow(parent->getOgreManager());
 
-    preLoadMeshMap(); // TEST
+    preLoadMeshMap();
 }
 
 //****************************************************************************/
@@ -134,7 +136,17 @@ void RenderwindowDockWidget::createMenus(void)
 //****************************************************************************/
 void RenderwindowDockWidget::createToolBars(void)
 {
+    // Toolbar
     mHToolBar = new QToolBar();
+
+    // Button to switch between model and light movement/rotation
+    mButtonToggleModelAndLight = new QPushButton();
+    mModelIcon = QIcon(ICON_MODEL);
+    mLightIcon = QIcon(ICON_LIGHT);
+    mButtonToggleModelAndLight->setIcon(mModelIcon);
+    connect(mButtonToggleModelAndLight, SIGNAL(clicked(bool)), this, SLOT(handleToggleModelAndLight()));
+
+    // Transformation widget
     mTransformationWidget = new Magus::TransformationWidget(mHToolBar);
     mTransformationWidget->setMaximumWidth(344);
     mTransformationWidget->setCurrentIndex(2); // Only scale is visible
@@ -144,7 +156,10 @@ void RenderwindowDockWidget::createToolBars(void)
     mHToolBar->setMinimumWidth(8 * 32);
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    // Add widgets
     mHToolBar->addWidget(mTransformationWidget);
+    mHToolBar->addWidget(mButtonToggleModelAndLight);
     mHToolBar->addWidget(spacer);
     mHToolBar->addAction(mChangeBackgroundAction);
     connect(mTransformationWidget, SIGNAL(valueChanged()), this, SLOT(doTransformationWidgetValueChanged()));
@@ -171,6 +186,25 @@ void RenderwindowDockWidget::doChangeItemAction(QAction* action)
         }
     }
 }
+
+//****************************************************************************/
+void RenderwindowDockWidget::handleToggleModelAndLight(void)
+{
+    if (mButtonModelActive)
+    {
+        // Disable Light axis
+        mButtonToggleModelAndLight->setIcon(mModelIcon);
+        mOgreWidget->enableLightItem(false);
+    }
+    else
+    {
+        // Enable Light axis
+        mButtonToggleModelAndLight->setIcon(mLightIcon);
+        mOgreWidget->enableLightItem(true);
+    }
+    mButtonModelActive = !mButtonModelActive;
+}
+
 
 //****************************************************************************/
 void RenderwindowDockWidget::updateTransformationWidgetFromOgreWidget(void)
