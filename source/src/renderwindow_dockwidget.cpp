@@ -192,15 +192,15 @@ void RenderwindowDockWidget::handleToggleModelAndLight(void)
 {
     if (mButtonModelActive)
     {
-        // Disable Light axis
-        mButtonToggleModelAndLight->setIcon(mModelIcon);
-        mOgreWidget->enableLightItem(false);
-    }
-    else
-    {
         // Enable Light axis
         mButtonToggleModelAndLight->setIcon(mLightIcon);
         mOgreWidget->enableLightItem(true);
+    }
+    else
+    {
+        // Disable Light axis
+        mButtonToggleModelAndLight->setIcon(mModelIcon);
+        mOgreWidget->enableLightItem(false);
     }
     mButtonModelActive = !mButtonModelActive;
 }
