@@ -200,7 +200,7 @@ namespace Magus
         mLightAxisNode->attachObject(mLightAxisItem);
         mLightAxisNode->setScale(Ogre::Vector3(0.12f, 0.12f, 0.12f));
         createLightAxisMaterial();
-        mLightAxisItem->setVisible(true);
+        mLightAxisItem->setVisible(false); // TEST
 
         // Put some light at the bottom, so the materials are not completely dark
         mSceneManager->setAmbientLight( Ogre::ColourValue::White,
