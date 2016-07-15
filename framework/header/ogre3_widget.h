@@ -73,7 +73,7 @@ namespace Magus
             void enableLightItem(bool enabled); // Used to switch to ' light rotation mode'
             void createLightAxisMaterial(void); // Reset the material of the light axis item
             void setLightAxisMaterial(void); // Reset the material of the light axis item
-            void removeLightAxisMaterial(void);
+            void destroyLightAxisMaterial(void);
 
         protected:
             Ogre::Root* mRoot;

@@ -785,7 +785,9 @@ void MainWindow::getAndSetFirstDatablock(void)
             while( itor != end )
             {
                 newDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itor->second.datablock);
-                if (newDatablock != hlmsPbs->getDefaultDatablock() && newDatablock != hlmsUnlit->getDefaultDatablock())
+                if (newDatablock != hlmsPbs->getDefaultDatablock() &&
+                        newDatablock != hlmsUnlit->getDefaultDatablock() &&
+                        newDatablock->getName() != Magus::AXIS_MATERIAL_NAME)
                 {
                     // Get the first datablock
                     newDatablockName = *newDatablock->getFullName();
@@ -793,7 +795,9 @@ void MainWindow::getAndSetFirstDatablock(void)
                     {
                         // Assign the datablock to the item (and destroy the items' old datablock, if still available)
                         item->setDatablock(newDatablock);
-                        if (oldDatablock != hlmsPbs->getDefaultDatablock() && oldDatablock != hlmsUnlit->getDefaultDatablock())
+                        if (oldDatablock != hlmsPbs->getDefaultDatablock() &&
+                                oldDatablock != hlmsUnlit->getDefaultDatablock() &&
+                                oldDatablock->getName() != Magus::AXIS_MATERIAL_NAME)
                         {
                             if (oldDatablock->getCreator()->getType() == Ogre::HLMS_UNLIT)
                                 hlmsUnlit->destroyDatablock(oldDatablockId);
@@ -960,6 +964,9 @@ bool MainWindow::loadDatablock(const QString& jsonFileName)
 //****************************************************************************/
 void MainWindow::saveDatablock(void)
 {
+    // First destroy the material of the axis, otherwise it will also be saved
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->destroyLightAxisMaterial();
+
     Ogre::String fname = mHlmsName.toStdString();
     QString baseNameJson = mHlmsName;
     baseNameJson = getBaseFileName(baseNameJson);
@@ -979,6 +986,9 @@ void MainWindow::saveDatablock(void)
         mMaterialBrowser->addMaterial(baseNameJson, mHlmsName, thumb, HLMS_UNLIT);
         appendRecentHlms(mHlmsName);
     }
+
+    // Recreate the axis the material again
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->createLightAxisMaterial();
 }
 
 //****************************************************************************/

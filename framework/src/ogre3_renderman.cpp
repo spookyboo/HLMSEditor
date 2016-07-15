@@ -121,7 +121,12 @@ namespace Magus
         registerHlms();
 
         // Initialise, parse scripts etc
-        Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+        try
+        {
+            Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+        }
+        catch (Ogre::Exception e){}
+
     }
 
     //-------------------------------------------------------------------------------------

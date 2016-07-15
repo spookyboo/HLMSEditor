@@ -199,8 +199,8 @@ namespace Magus
         mLightAxisItem->setRenderQueueGroup(2);
         mLightAxisNode->attachObject(mLightAxisItem);
         mLightAxisNode->setScale(Ogre::Vector3(0.12f, 0.12f, 0.12f));
-        mLightAxisItem->setVisible(false);
         createLightAxisMaterial();
+        mLightAxisItem->setVisible(true);
 
         // Put some light at the bottom, so the materials are not completely dark
         mSceneManager->setAmbientLight( Ogre::ColourValue::White,
@@ -218,8 +218,6 @@ namespace Magus
             // Create a Pbs datablock
             Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
             Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
-
-            // Create a new datablock and use the (new) name defined in the node
             Ogre::HlmsMacroblock macroblock;
             macroblock.mDepthCheck = false;
             macroblock.mDepthWrite = false;
@@ -236,11 +234,15 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QOgreWidget::removeLightAxisMaterial(void)
+    void QOgreWidget::destroyLightAxisMaterial(void)
     {
         try
         {
              mLightAxisItem->setDatablock(DEFAULT_DATABLOCK_NAME);
+             Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+             Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
+             if (hlmsPbs->getDatablock(AXIS_MATERIAL_NAME))
+                 hlmsPbs->destroyDatablock(AXIS_MATERIAL_NAME);
         }
         catch (Ogre::Exception e){}
     }
@@ -277,11 +279,11 @@ namespace Magus
                                               AUTODETECT_RESOURCE_GROUP_NAME,
                                               Ogre::SCENE_DYNAMIC );
 
-            mItem->setRenderQueueGroup(1);
             mSceneNode->attachObject(mItem);
             mSceneNode->setScale(scale);
             if (!datablockName.empty())
                 mItem->setDatablock(datablockName);
+            mItem->setRenderQueueGroup(1);
         }
         catch (Ogre::Exception e)
         {
@@ -304,11 +306,11 @@ namespace Magus
 
         // Set the new item
         mItem = item;
-        mItem->setRenderQueueGroup(1);
         mSceneNode->attachObject(mItem);
         mSceneNode->setScale(scale);
         if (!datablockName.empty())
             mItem->setDatablock(datablockName);
+        mItem->setRenderQueueGroup(1);
     }
 
     //****************************************************************************/
