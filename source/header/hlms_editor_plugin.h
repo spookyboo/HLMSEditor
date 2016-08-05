@@ -34,6 +34,13 @@ static const Ogre::String GENERAL_HLMS_PLUGIN_NAME = "HlmsEditorPlugin";
 
 namespace Ogre
 {
+    enum PLUGIN_ACTION_FLAG
+    {
+        PAF_PRE_IMPORT_MK_DIR = 1 << 0,
+        PAF_POST_IMPORT_OPEN_PROJECT = 1 << 1,
+        PAF_POST_IMPORT_SAVE_RESOURCE_LOCATIONS = 1 << 2
+    };
+
     /** Class to pass data from Hlms editor to plugins */
     class HlmsEditorPluginData
     {
@@ -45,9 +52,12 @@ namespace Ogre
             String mInProjectPath; // The path where the projectfile, material configfile and texture configfile are stored
             String mInMaterialFileName; // The name of the material configfile
             String mInTextureFileName; // The name of the texture configfile
-            String mInFileDialogName; // The name of the file selected by means of a filedialog (used for import/export)
+            String mInFileDialogName; // The full qualified name of the file selected by means of a filedialog (used for import/export)
+            String mInFileDialogBaseName; // The name of the file selected by means of a filedialog (used for import/export), without path AND without extension
             String mInFileDialogPath; // The path of the file selected by means of a filedialog (used for import/export)
-            String mInImportExportPath; // The default path used to import or export (= mInFileDialogPath when a filedialog is used)
+            //String mInImportExportPath; // The default path used to import or export (= mInFileDialogPath when a filedialog is used)
+            String mInImportPath; // The default path used to import
+            String mInExportPath; // The default path used to export
             std::vector<String> mInMaterialFileNameVector; // Vector with material names (fileName) in the material browser
             std::vector<String> mInTextureFileNameVector; // Vector with texture names (fileName) in the texture browser
             std::vector<String> mInTexturesUsedByDatablocks; // Vector with texture basenames from all the Pbs and Unlit datablocks in the material browser
@@ -78,8 +88,11 @@ namespace Ogre
                 mInMaterialFileName = "";
                 mInTextureFileName = "";
                 mInFileDialogName = "";
+                mInFileDialogBaseName = "";
                 mInFileDialogPath = "";
-                mInImportExportPath = "";
+                //mInImportExportPath = "";
+                mInImportPath = "";
+                mInExportPath = "";
                 mInItem = 0;
                 mInRenderWindow = 0;
                 mInSceneManager = 0;
@@ -140,6 +153,9 @@ namespace Ogre
             // The editor must perform (additional) pre- and/or post actions
             virtual void performPreExportActions (void) = 0;
             virtual void performPostExportActions (void) = 0;
+
+            // The plugin can also inform the editor to perform a pre- or post action
+            virtual unsigned int getActionFlag (void) = 0;
     };
 }
 

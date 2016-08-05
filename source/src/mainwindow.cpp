@@ -244,8 +244,8 @@ void MainWindow::createMenus(void)
     Ogre::Root::PluginInstanceList::iterator itEnd = plugins.end();
     Ogre::Plugin* plugin;
     PluginAction* action;
-    bool menuImportExists = false;
-    bool menuExportExists = false;
+    QMenu* fileMenuImportAction = 0;
+    QMenu* fileMenuExportAction = 0;
     for (it = itStart; it != itEnd; ++it)
     {
         plugin = *it;
@@ -256,30 +256,30 @@ void MainWindow::createMenus(void)
             if (hlmsEditorPlugin->isImport())
             {
                 // First create an import menu item if needed
-                if (!menuImportExists)
-                {
-                    fileMenuAction = mFileMenu->addMenu("Import");
-                    menuImportExists = true;
-                }
+                if (!fileMenuImportAction)
+                    fileMenuImportAction = mFileMenu->addMenu("Import");
 
                 // Add the import action of the plugin to the submenu
-                action = new PluginAction(hlmsEditorPlugin, hlmsEditorPlugin->getImportMenuText().c_str(), this);
-                connect(action, SIGNAL(pluginActionTriggered(Ogre::HlmsEditorPlugin*)), this, SLOT(doImport(Ogre::HlmsEditorPlugin*)));
-                fileMenuAction->addAction(action);
+                if (fileMenuImportAction)
+                {
+                    action = new PluginAction(hlmsEditorPlugin, hlmsEditorPlugin->getImportMenuText().c_str(), this);
+                    connect(action, SIGNAL(pluginActionTriggered(Ogre::HlmsEditorPlugin*)), this, SLOT(doImport(Ogre::HlmsEditorPlugin*)));
+                    fileMenuImportAction->addAction(action);
+                }
             }
             if (hlmsEditorPlugin->isExport())
             {
                 // First create an export menu item if needed
-                if (!menuExportExists)
-                {
-                    fileMenuAction = mFileMenu->addMenu("Export");
-                    menuExportExists = true;
-                }
+                if (!fileMenuExportAction)
+                    fileMenuExportAction = mFileMenu->addMenu("Export");
 
                 // Add the export action of the plugin to the submenu
-                action = new PluginAction(hlmsEditorPlugin, hlmsEditorPlugin->getExportMenuText().c_str(), this);
-                connect(action, SIGNAL(pluginActionTriggered(Ogre::HlmsEditorPlugin*)), this, SLOT(doExport(Ogre::HlmsEditorPlugin*)));
-                fileMenuAction->addAction(action);
+                if (fileMenuExportAction)
+                {
+                    action = new PluginAction(hlmsEditorPlugin, hlmsEditorPlugin->getExportMenuText().c_str(), this);
+                    connect(action, SIGNAL(pluginActionTriggered(Ogre::HlmsEditorPlugin*)), this, SLOT(doExport(Ogre::HlmsEditorPlugin*)));
+                    fileMenuExportAction->addAction(action);
+                }
             }
         }
     }
@@ -1390,7 +1390,9 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
         {
             QFileInfo info(fileName);
             data.mInFileDialogName = info.fileName().toStdString();
+            data.mInFileDialogBaseName = info.baseName().toStdString();
             data.mInFileDialogPath = (info.absolutePath() + QString("/")).toStdString();
+            data.mInExportPath = data.mInFileDialogPath;
         }
         else
         {
@@ -1399,7 +1401,19 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
         }
     }
 
-    // Perform pre-import actions
+    // Perform pre-import actions (by the editor)
+    if (plugin->getActionFlag() & Ogre::PAF_PRE_IMPORT_MK_DIR)
+    {
+        // Create the project directory
+        QString path = QString::fromStdString(data.mInImportPath + data.mInFileDialogBaseName);
+        QDir dir(path);
+        if (!dir.exists())
+        {
+          dir.mkdir(".");
+        }
+    }
+
+    // Perform pre-import actions (by the plugin)
     plugin->performPreImportActions();
 
     // Execute the import
@@ -1430,8 +1444,22 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
         QMessageBox::information(0, QString("Error"), text);
     }
 
-    // Perform post-import actions
+    // Perform post-import actions (by the plugin)
     plugin->performPostImportActions();
+
+    // Perform post-import actions (by the editor)
+    if (plugin->getActionFlag() & Ogre::PAF_POST_IMPORT_SAVE_RESOURCE_LOCATIONS)
+    {
+        // Save all resource locations
+        HlmsBuilder builder;
+        builder.saveAllResourcesLocations();
+    }
+    if (plugin->getActionFlag() & Ogre::PAF_POST_IMPORT_OPEN_PROJECT)
+    {
+        // Open a project (referered to by means of data.mOutExportReference)
+        QString fileName = QString::fromStdString(data.mOutExportReference);
+        loadProject(fileName);
+    }
 }
 
 //****************************************************************************/
@@ -1459,7 +1487,7 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
         if (!textureFolder.isEmpty())
         {
             data.mInFileDialogPath = (textureFolder + QString("/")).toStdString();
-            data.mInImportExportPath = data.mInFileDialogPath;
+            data.mInExportPath = data.mInFileDialogPath;
         }
         else
         {
@@ -1588,8 +1616,10 @@ void MainWindow::constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data)
     data->mInProjectName = mProjectName.toStdString();
     data->mInProjectPath = mProjectPath.toStdString();
     data->mInFileDialogName = "";
+    data->mInFileDialogBaseName = "";
     data->mInFileDialogPath = "";
-    data->mInImportExportPath = IMPORT_EXPORT_PATH;
+    data->mInImportPath = IMPORT_PATH;
+    data->mInExportPath = "";
     data->mInRenderWindow = widget->getRenderWindow();
     data->mInSceneManager = widget->getSceneManager();
     data->mInTextureFileName = mTextureFileName.toStdString();

@@ -86,7 +86,7 @@ static const QString PROJECT_PATH = "../project/";
 static const Ogre::String DEFAULT_DATABLOCK_NAME = "[Default]";
 static const Ogre::String DATABLOCK_DEBUG_CUBE = "DebugCube";
 static const Ogre::String THUMBS_PATH = "../common/thumbs/";
-static const Ogre::String IMPORT_EXPORT_PATH = "../import_export/";
+static const Ogre::String IMPORT_PATH = "../import/";
 
 // Static function to determine the 'resources' file
 static const QString& getResourcesCfg (void)
