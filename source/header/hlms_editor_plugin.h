@@ -47,6 +47,7 @@ namespace Ogre
             String mInTextureFileName; // The name of the texture configfile
             String mInFileDialogName; // The name of the file selected by means of a filedialog (used for import/export)
             String mInFileDialogPath; // The path of the file selected by means of a filedialog (used for import/export)
+            String mInImportExportPath; // The default path used to import or export (= mInFileDialogPath when a filedialog is used)
             std::vector<String> mInMaterialFileNameVector; // Vector with material names (fileName) in the material browser
             std::vector<String> mInTextureFileNameVector; // Vector with texture names (fileName) in the texture browser
             std::vector<String> mInTexturesUsedByDatablocks; // Vector with texture basenames from all the Pbs and Unlit datablocks in the material browser
@@ -78,6 +79,7 @@ namespace Ogre
                 mInTextureFileName = "";
                 mInFileDialogName = "";
                 mInFileDialogPath = "";
+                mInImportExportPath = "";
                 mInItem = 0;
                 mInRenderWindow = 0;
                 mInSceneManager = 0;
@@ -130,7 +132,15 @@ namespace Ogre
 
 			// Perform the export
             virtual bool executeExport (HlmsEditorPluginData* data) = 0;
-	};
+
+            // The editor must perform (additional) pre- and/or post actions
+            virtual void performPreImportActions (void) = 0;
+            virtual void performPostImportActions (void) = 0;
+
+            // The editor must perform (additional) pre- and/or post actions
+            virtual void performPreExportActions (void) = 0;
+            virtual void performPostExportActions (void) = 0;
+    };
 }
 
 #endif

@@ -41,7 +41,6 @@
 #include "constants.h"
 
 QT_BEGIN_NAMESPACE
-
 QT_END_NAMESPACE
 
 /****************************************************************************
@@ -95,6 +94,7 @@ class MainWindow : public QMainWindow
         void doQuitMenuAction(void);
         void doTextureBrowserImportMenuAction(void);
         void doTextureBrowserAddImageMenuAction(void);
+        void doConfigureMenuAction(void);
         void doResetWindowLayoutMenuAction(void);
         void handleTextureDoubleClicked(const QString& fileName, const QString& baseName);
         void handleCustomContextMenuItemSelected(const QString& menuItemText);
@@ -154,6 +154,7 @@ class MainWindow : public QMainWindow
         QAction* mMaterialBrowserOpenMenuAction;
         QAction* mMaterialBrowserAddMenuAction;
         QAction* mTextureBrowserImportMenuAction;
+        QAction* mConfigureMenuAction;
         QAction* mTextureBrowserAddImageMenuAction;
         QAction* mRecentHlmsFilesMenuAction;
         QAction* mRecentProjectFilesMenuAction;

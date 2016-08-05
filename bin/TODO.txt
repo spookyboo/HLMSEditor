@@ -1,7 +1,13 @@
 V 1.0 updates:
 =============
-- Import models, which are also added to the project (models.cfg + <project>_models.cfg)
-  <project>.hlmp contains reference to <project>_models.cfg
+- Apply material per submesh. Approach:
+  1. Apply a material with a unique colour to each submesh
+  2. Render the renderwindow to a texture
+  3. Map the mouse coordinates in the renderwindow to the rendertexture and read the colour of the underlying rendertexture
+  4. Determine the pixel colour under the mousecursor and determine to which submesh this belongs
+  5. Re-apply the original materials to the submeshes again
+  6. Apply the material to this submesh or highlight the submesh first
+- Use resource.cfg per project
 - Align the dock widgets (so they are displayed with the correct height and width after start)
 - Remove unused functions in .h/.cpp files in the 'sources' directory
 - Texture browser:

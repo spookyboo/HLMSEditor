@@ -59,6 +59,7 @@ static const QString ICON_COLOUR = QString("../common/icons/colour.png");
 static const QString ICON_INFO = QString("../common/icons/info.png");
 static const QString ICON_MODEL = QString("../common/icons/model.png");
 static const QString ICON_LIGHT = QString("../common/icons/lightbulb.png");
+static const QString ICON_HLMS = QString("../common/icons/HLMSEditor.png");
 static const QString ICON_PBS_DATABLOCK_NO_PATH = QString("pbs.png");
 static const QString ICON_PBS_DATABLOCK_SMALL_NO_PATH = QString("pbs_small.png");
 static const QString ICON_UNLIT_DATABLOCK_NO_PATH = QString("unlit.png");
@@ -85,6 +86,7 @@ static const QString PROJECT_PATH = "../project/";
 static const Ogre::String DEFAULT_DATABLOCK_NAME = "[Default]";
 static const Ogre::String DATABLOCK_DEBUG_CUBE = "DebugCube";
 static const Ogre::String THUMBS_PATH = "../common/thumbs/";
+static const Ogre::String IMPORT_EXPORT_PATH = "../import_export/";
 
 // Static function to determine the 'resources' file
 static const QString& getResourcesCfg (void)
@@ -238,6 +240,7 @@ static const int TOOL_SOURCES_LEVEL_X000_UNLIT = 2;
 static const int TOOL_SOURCES_LEVEL_X000_TEXTURE = 3;
 static const QString GROUP_NAME_IMPORTED_TEXTURES = QString("Imported resources");
 static const QString ACTION_IMPORT_TEXTURES_FROM_DIR = QString("Import from directory");
+static const QString ACTION_CONFIGURE = QString("Configure");
 static const QString ACTION_ADD_TEXTURES = QString("Add texture file(s)");
 static const QString ACTION_EDIT = QString("Edit material");
 

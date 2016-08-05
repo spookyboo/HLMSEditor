@@ -45,6 +45,7 @@
 #include "hlms_unlit_builder.h"
 #include "hlms_editor_plugin.h"
 #include "hlms_editor_plugin_action.h"
+#include "config_dialog.h"
 
 //****************************************************************************/
 MainWindow::MainWindow(void) :
@@ -190,6 +191,11 @@ void MainWindow::createActions(void)
     mTextureBrowserAddImageMenuAction->setShortcut(QKeySequence(QString("Ctrl+T")));
     connect(mTextureBrowserAddImageMenuAction, SIGNAL(triggered()), this, SLOT(doTextureBrowserAddImageMenuAction()));
 
+    // ******** Tools ********
+    mConfigureMenuAction = new QAction(QString(ACTION_CONFIGURE), this);
+    mConfigureMenuAction->setShortcut(QKeySequence(QString("Ctrl+C")));
+    connect(mConfigureMenuAction, SIGNAL(triggered()), this, SLOT(doConfigureMenuAction()));
+
     // ******** Window menu ********
     mResetWindowLayoutMenuAction = new QAction(QString("Reset Window Layout"), this);
     mResetWindowLayoutMenuAction->setShortcut(QKeySequence(QString("Ctrl+R")));
@@ -294,6 +300,10 @@ void MainWindow::createMenus(void)
     // ******** Texture browser ********
     mTextureBrowserMenu->addAction(mTextureBrowserImportMenuAction);
     mTextureBrowserMenu->addAction(mTextureBrowserAddImageMenuAction);
+
+    // ******** Tools ********
+    mWindowMenu = menuBar()->addMenu(QString("&Tools"));
+    mWindowMenu->addAction(mConfigureMenuAction);
 
     // ******** Window ********
     mWindowMenu = menuBar()->addMenu(QString("&Window"));
@@ -1164,6 +1174,18 @@ void MainWindow::doTextureBrowserAddImageMenuAction(void)
 }
 
 //****************************************************************************/
+void MainWindow::doConfigureMenuAction(void)
+{
+    ConfigDialog configDialog (this);
+    configDialog.setMinimumWidth(400);
+    configDialog.setMinimumHeight(400);
+    if (configDialog.exec())
+    {
+        // TODO
+    }
+}
+
+//****************************************************************************/
 void MainWindow::doResetWindowLayoutMenuAction(void)
 {
     mRenderwindowDockWidget->show();
@@ -1284,7 +1306,7 @@ void MainWindow::loadTextureBrowserCfg(void)
 //****************************************************************************/
 void MainWindow::saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources)
 {
-    // Save state of a resoruces from a resourcetree widget
+    // Save state of a resources from a resourcetree widget
     QFile file(fileName);
     if (file.open(QFile::WriteOnly|QFile::Truncate))
     {
@@ -1377,6 +1399,9 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
         }
     }
 
+    // Perform pre-import actions
+    plugin->performPreImportActions();
+
     // Execute the import
     QApplication::setOverrideCursor(Qt::WaitCursor);
     Ogre::HlmsDatablock* oldDatablock = data.mInOutCurrentDatablock;
@@ -1404,6 +1429,9 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
             text = QString ("Error while importing");
         QMessageBox::information(0, QString("Error"), text);
     }
+
+    // Perform post-import actions
+    plugin->performPostImportActions();
 }
 
 //****************************************************************************/
@@ -1431,6 +1459,7 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
         if (!textureFolder.isEmpty())
         {
             data.mInFileDialogPath = (textureFolder + QString("/")).toStdString();
+            data.mInImportExportPath = data.mInFileDialogPath;
         }
         else
         {
@@ -1491,6 +1520,9 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
         }
     }
 
+    // Perform pre-export actions
+    plugin->performPreExportActions();
+
     // Execute the export
     bool result = plugin->executeExport(&data);
     QApplication::restoreOverrideCursor();
@@ -1508,6 +1540,9 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
             text = QString ("Error while exporting");
         QMessageBox::information(0, QString("Error"), text);
     }
+
+    // Perform post-export actions
+    plugin->performPostExportActions();
 
     // Recreate the axis the material again
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->createLightAxisMaterial();
@@ -1554,6 +1589,7 @@ void MainWindow::constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data)
     data->mInProjectPath = mProjectPath.toStdString();
     data->mInFileDialogName = "";
     data->mInFileDialogPath = "";
+    data->mInImportExportPath = IMPORT_EXPORT_PATH;
     data->mInRenderWindow = widget->getRenderWindow();
     data->mInSceneManager = widget->getSceneManager();
     data->mInTextureFileName = mTextureFileName.toStdString();
