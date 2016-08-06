@@ -25,6 +25,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMenuBar>
+#include <QSettings>
 #include "mainwindow.h"
 #include "OgreRoot.h"
 #include "OgrePlugin.h"
@@ -53,6 +54,7 @@ MainWindow::MainWindow(void) :
     mFirst(true),
     mSaveTextureBrowserTimerActive(false)
 {
+    loadSettings();
     installEventFilter(this);
 
     // Create the Ogre Manager
@@ -193,7 +195,7 @@ void MainWindow::createActions(void)
 
     // ******** Tools ********
     mConfigureMenuAction = new QAction(QString(ACTION_CONFIGURE), this);
-    mConfigureMenuAction->setShortcut(QKeySequence(QString("Ctrl+C")));
+    mConfigureMenuAction->setShortcut(QKeySequence(QString("Ctrl+X")));
     connect(mConfigureMenuAction, SIGNAL(triggered()), this, SLOT(doConfigureMenuAction()));
 
     // ******** Window menu ********
@@ -421,13 +423,17 @@ void MainWindow::loadProject(const QString& fileName)
                 QString materialFileName = readFile.readLine();
                 info.setFile(materialFileName);
                 if (info.exists() && info.isFile())
+                {
                     mMaterialFileName = materialFileName;
+                }
 
                 // Line 3
                 QString textureFileName = readFile.readLine();
                 info.setFile(textureFileName);
                 if (info.exists() && info.isFile())
+                {
                     mTextureFileName = textureFileName;
+                }
 
                 // Load the material and texture config
                 loadMaterialBrowserCfg();
@@ -1618,7 +1624,7 @@ void MainWindow::constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data)
     data->mInFileDialogName = "";
     data->mInFileDialogBaseName = "";
     data->mInFileDialogPath = "";
-    data->mInImportPath = IMPORT_PATH;
+    data->mInImportPath = mImportPath.toStdString();
     data->mInExportPath = "";
     data->mInRenderWindow = widget->getRenderWindow();
     data->mInSceneManager = widget->getSceneManager();
@@ -1813,4 +1819,14 @@ void MainWindow::doMaterialBrowserClosed(void)
 {
     mMaterialBrowserPosition = mMaterialBrowser->pos();
     mMaterialBrowserSize = mMaterialBrowser->size();
+}
+
+//****************************************************************************/
+void MainWindow::loadSettings(void)
+{
+    mImportPath = "";
+    QSettings settings(FILE_SETTINGS, QSettings::IniFormat);
+    mImportPath = settings.value(SETTINGS_IMPORT_PATH).toString();
+    if (mImportPath.isEmpty())
+        mImportPath = DEFAULT_IMPORT_PATH;
 }

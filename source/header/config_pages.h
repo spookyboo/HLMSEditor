@@ -33,23 +33,19 @@ class GeneralPage : public QWidget
 
 public:
     GeneralPage(QWidget *parent = 0);
-    //const QString& getIconDir(void) const;
-    //const QString& getTemplateDir(void) const;
-    //const QString& getLayoutDir(void) const;
 
-//private slots:
-    //void textEdited(void);
-    //void restorePushed(void);
+private slots:
+    void doSetImportDir (void);
+    void doResetAllSettings (void);
 
-//private:
-    //void restoreValues(const QString& configFileName);
-    //QString mIconDir;
-    //QString mTemplateDir;
-    //QString mLayoutDir;
-    //QLineEdit* mIconDirEdit;
-    //QLineEdit* mTemplateDirEdit;
-    //QLineEdit* mLayoutDirEdit;
-    //QPushButton* mRestoreButton;
+protected:
+    void loadSettings(void);
+    void saveSettings(void);
+    void displaySettingsChangedMessage(void);
+
+private:
+    QString mImportPath;
+    QLineEdit* mImportEdit;
 };
 
 //****************************************************************************/

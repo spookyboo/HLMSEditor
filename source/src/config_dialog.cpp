@@ -34,35 +34,36 @@ ConfigDialog::ConfigDialog(MainWindow* parent) : QDialog(parent)
     contentsWidget->setMaximumWidth(128);
     contentsWidget->setSpacing(12);
 
+    // Pages
     pagesWidget = new QStackedWidget;
     mGeneralPage = new GeneralPage;
     mHlmsPage = new HlmsPage;
     pagesWidget->addWidget(mGeneralPage);
     pagesWidget->addWidget(mHlmsPage);
 
-    QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(okAndAccept()));
-    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
-
     createIcons();
     contentsWidget->setCurrentRow(0);
 
+    // Close button
+    QPushButton* closeButton = new QPushButton(tr("Close"));
+    connect(closeButton, &QAbstractButton::clicked, this, &QWidget::close);
+
     QHBoxLayout *horizontalLayout = new QHBoxLayout;
     horizontalLayout->addWidget(contentsWidget);
-    horizontalLayout->addWidget(pagesWidget, 1);
+    horizontalLayout->addWidget(pagesWidget);
 
     QHBoxLayout *buttonsLayout = new QHBoxLayout;
     buttonsLayout->addStretch(1);
-    buttonsLayout->addWidget(buttonBox);
+    buttonsLayout->addWidget(closeButton);
 
+    setMinimumWidth(600);
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addLayout(horizontalLayout);
-    //mainLayout->addStretch(1);
     mainLayout->addSpacing(12);
     mainLayout->addLayout(buttonsLayout);
     setLayout(mainLayout);
-
     setWindowTitle(tr("Config Dialog"));
+    showMaximized();
 }
 
 //****************************************************************************/

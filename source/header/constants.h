@@ -82,11 +82,16 @@ static const QString FILE_RECENT_PROJECT_FILES = QString("rprojects.cfg");
 static const QString FILE_NO_IMAGE = QString("../common/icons/noImage.png");
 static const QString FILE_RESOURCES_D = QString("resources_d.cfg");
 static const QString FILE_RESOURCES = QString("resources.cfg");
+static const QString FILE_RESOURCES_DEFAULT = QString("resources_default.cfg");
+static const QString FILE_SETTINGS = QString("settings.cfg");
+static const QString FILE_SETTINGS_DEFAULT = QString("settings_default.cfg");
 static const QString PROJECT_PATH = "../project/";
 static const Ogre::String DEFAULT_DATABLOCK_NAME = "[Default]";
 static const Ogre::String DATABLOCK_DEBUG_CUBE = "DebugCube";
 static const Ogre::String THUMBS_PATH = "../common/thumbs/";
-static const Ogre::String IMPORT_PATH = "../import/";
+static const QString DEFAULT_IMPORT_PATH = "../import/";
+static const QString SETTINGS_GROUP_GENERAL = "General";
+static const QString SETTINGS_IMPORT_PATH = "importPath";
 
 // Static function to determine the 'resources' file
 static const QString& getResourcesCfg (void)
