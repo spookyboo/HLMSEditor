@@ -20,6 +20,7 @@
 
 // Include
 #include <QMessageBox>
+#include <QSettings>
 #include "constants.h"
 #include "hlms_node_samplerblock.h"
 #include "hlms_node_porttypes.h"
@@ -30,9 +31,9 @@ HlmsNodeSamplerblock::HlmsNodeSamplerblock(QString title, QGraphicsItem* parent)
     mTextureType(0),
     mTextureIndex(0),
     mSamplerblockEnabled(true),
-    mTextureMinFilter(0),
-    mTextureMagFilter(0),
-    mTextureMipFilter(0),
+    //mTextureMinFilter(0),
+    //mTextureMagFilter(0),
+    //mTextureMipFilter(0),
     mTextureAddressingModeU(0),
     mTextureAddressingModeV(0),
     mTextureAddressingModeW(0),
@@ -58,6 +59,12 @@ HlmsNodeSamplerblock::HlmsNodeSamplerblock(QString title, QGraphicsItem* parent)
     HlmsPbsDatablockSamplerblockPortType hlmsPbsDatablockSamplerblockPortType;
     HlmsSamplerblockDatablockPortType hlmsSamplerblockDatablockPortType;
     hlmsPbsDatablockSamplerblockPortType.addPortTypeToConnectionPolicy(hlmsSamplerblockDatablockPortType);
+
+    // Apply values from settings.cfg
+    QSettings settings(FILE_SETTINGS, QSettings::IniFormat);
+    mTextureMinFilter = settings.value(SETTINGS_SAMPLERBLOCK_FILTER_INDEX).toInt();
+    mTextureMagFilter = settings.value(SETTINGS_SAMPLERBLOCK_FILTER_INDEX).toInt();
+    mTextureMipFilter = settings.value(SETTINGS_SAMPLERBLOCK_FILTER_INDEX).toInt();
 
     // Custome node settings
     setTitleColor(Qt::white);

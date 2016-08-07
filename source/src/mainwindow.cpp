@@ -54,7 +54,6 @@ MainWindow::MainWindow(void) :
     mFirst(true),
     mSaveTextureBrowserTimerActive(false)
 {
-    loadSettings();
     installEventFilter(this);
 
     // Create the Ogre Manager
@@ -1624,7 +1623,14 @@ void MainWindow::constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data)
     data->mInFileDialogName = "";
     data->mInFileDialogBaseName = "";
     data->mInFileDialogPath = "";
-    data->mInImportPath = mImportPath.toStdString();
+
+    // Use value from settings.cfg for import path
+    QSettings settings(FILE_SETTINGS, QSettings::IniFormat);
+    QString importPath = settings.value(SETTINGS_IMPORT_PATH).toString();
+    if (importPath.isEmpty())
+        importPath = DEFAULT_IMPORT_PATH;
+    data->mInImportPath = importPath.toStdString();
+
     data->mInExportPath = "";
     data->mInRenderWindow = widget->getRenderWindow();
     data->mInSceneManager = widget->getSceneManager();
@@ -1819,14 +1825,4 @@ void MainWindow::doMaterialBrowserClosed(void)
 {
     mMaterialBrowserPosition = mMaterialBrowser->pos();
     mMaterialBrowserSize = mMaterialBrowser->size();
-}
-
-//****************************************************************************/
-void MainWindow::loadSettings(void)
-{
-    mImportPath = "";
-    QSettings settings(FILE_SETTINGS, QSettings::IniFormat);
-    mImportPath = settings.value(SETTINGS_IMPORT_PATH).toString();
-    if (mImportPath.isEmpty())
-        mImportPath = DEFAULT_IMPORT_PATH;
 }

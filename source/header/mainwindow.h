@@ -77,7 +77,6 @@ class MainWindow : public QMainWindow
         bool isMeshV2(const QString modelFileName);
         Ogre::MeshPtr convertMeshV1ToV2(const QString fileNameMeshV1);
         void saveV2Mesh(Ogre::MeshPtr v2MeshPtr, QString modelFileName);
-        void loadSettings(void);
 
 	private slots:
         void doNewProjectAction(void);
@@ -179,7 +178,6 @@ class MainWindow : public QMainWindow
         QList<RecentFileStruct> mRecentProjectFiles; // Used for recent Project files in menu
         QPoint mMaterialBrowserPosition;
         QSize mMaterialBrowserSize;
-        QString mImportPath;
 };
 
 #endif

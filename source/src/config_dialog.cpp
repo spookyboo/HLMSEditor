@@ -27,6 +27,7 @@
 //****************************************************************************/
 ConfigDialog::ConfigDialog(MainWindow* parent) : QDialog(parent)
 {
+    loadSettings();
     contentsWidget = new QListWidget;
     contentsWidget->setViewMode(QListView::IconMode);
     contentsWidget->setIconSize(QSize(96, 84));
@@ -36,8 +37,8 @@ ConfigDialog::ConfigDialog(MainWindow* parent) : QDialog(parent)
 
     // Pages
     pagesWidget = new QStackedWidget;
-    mGeneralPage = new GeneralPage;
-    mHlmsPage = new HlmsPage;
+    mGeneralPage = new GeneralPage(this);
+    mHlmsPage = new HlmsPage(this);
     pagesWidget->addWidget(mGeneralPage);
     pagesWidget->addWidget(mHlmsPage);
 
@@ -99,4 +100,39 @@ void ConfigDialog::changePage(QListWidgetItem *current, QListWidgetItem *previou
 void ConfigDialog::okAndAccept(void)
 {
     accept();
+}
+
+//****************************************************************************/
+void ConfigDialog::loadSettings(void)
+{
+    mImportPath = "";
+    QSettings settings(FILE_SETTINGS, QSettings::IniFormat);
+    mImportPath = settings.value(SETTINGS_IMPORT_PATH).toString();
+    if (mImportPath.isEmpty())
+        mImportPath = DEFAULT_IMPORT_PATH;
+
+    mSamplerblockFilterIndex = settings.value(SETTINGS_SAMPLERBLOCK_FILTER_INDEX).toInt();
+}
+
+//****************************************************************************/
+void ConfigDialog::saveSettings(void)
+{
+    QFile file(FILE_SETTINGS);
+    if (file.open(QFile::WriteOnly|QFile::Truncate))
+    {
+        QTextStream stream(&file);
+        stream << SETTINGS_IMPORT_PATH
+               << " = "
+               << "\""
+               << mImportPath
+               << "\""
+               << "\n";
+        stream << SETTINGS_SAMPLERBLOCK_FILTER_INDEX
+               << " = "
+               << "\""
+               << mSamplerblockFilterIndex
+               << "\""
+               << "\n";
+        file.close();
+    }
 }

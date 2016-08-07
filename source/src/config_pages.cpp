@@ -24,17 +24,15 @@
 #include "config_pages.h"
 
 //****************************************************************************/
-GeneralPage::GeneralPage(QWidget *parent)
-    : QWidget(parent)
+GeneralPage::GeneralPage(ConfigDialog *parent)
+    : QWidget(parent),
+      mParent(parent)
 {
-    // First load the settings
-    loadSettings();
-
     // Paths
     QGroupBox* pathGroup = new QGroupBox(tr("Paths"));
     QLabel* importLabel = new QLabel(tr("Import dir:"));
     mImportEdit = new QLineEdit;
-    mImportEdit->setText(mImportPath);
+    mImportEdit->setText(mParent->mImportPath);
     mImportEdit->setEnabled(false);
     QPushButton* importButton = new QPushButton(tr(".."));
     connect(importButton, SIGNAL(clicked(bool)), this, SLOT(doSetImportDir(void)));
@@ -71,10 +69,10 @@ void GeneralPage::doSetImportDir (void)
     if (dialog.exec())
     {
         QStringList fileNames = dialog.selectedFiles();
-        mImportPath = fileNames.at(0) + "/";
-        mImportEdit->setText(mImportPath);
-        saveSettings();
-        displaySettingsChangedMessage();
+        mParent->mImportPath = fileNames.at(0) + "/";
+        mImportEdit->setText(mParent->mImportPath);
+        mParent->saveSettings();
+        //QMessageBox::information(0, QString("Info"), QString("The import path is immediately active"));
     }
 }
 
@@ -109,43 +107,62 @@ void GeneralPage::doResetAllSettings (void)
 }
 
 //****************************************************************************/
-void GeneralPage::loadSettings(void)
+//****************************************************************************/
+//****************************************************************************/
+HlmsPage::HlmsPage(ConfigDialog *parent)
+    : QWidget(parent),
+      mParent(parent)
 {
-    mImportPath = "";
-    QSettings settings(FILE_SETTINGS, QSettings::IniFormat);
-    mImportPath = settings.value(SETTINGS_IMPORT_PATH).toString();
-    if (mImportPath.isEmpty())
-        mImportPath = DEFAULT_IMPORT_PATH;
+    // PBS
+    QGroupBox* pbsGroup = new QGroupBox(tr("PBS"));
+    QHBoxLayout* pbsLayout = new QHBoxLayout;
+    // TODO: Add widgets to the pbsLayout
+    pbsGroup->setLayout(pbsLayout);
+
+    // Unlit
+    QGroupBox* unlitGroup = new QGroupBox(tr("Unlit"));
+    QHBoxLayout* unlitLayout = new QHBoxLayout;
+    // TODO: Add widgets to the unlitLayout
+    unlitGroup->setLayout(unlitLayout);
+
+    // Texture/Samplerblock
+    QGroupBox* samplerBlockGroup = new QGroupBox(tr("Texture/Samplerblock"));
+    QVBoxLayout* samplerBlockLayout = new QVBoxLayout;
+
+    // Filter
+    QHBoxLayout* filterLayout = new QHBoxLayout();
+    QLabel* filterLabel = new QLabel(tr("Default Min, Mag, Mip Filter"));
+    mFilterList = new QComboBox();
+    QStringList stringListTextureFilterOptions;
+    stringListTextureFilterOptions << QString("No filtering")
+                                   << QString("Point")
+                                   << QString("Linear")
+                                   << QString("Anisotropic");
+    QStringListModel* model = new QStringListModel(stringListTextureFilterOptions);
+    mFilterList->setModel(model);
+    mFilterList->setMaxVisibleItems(4);
+    mFilterList->setCurrentIndex(mParent->mSamplerblockFilterIndex);
+    filterLayout->addWidget(filterLabel, 1);
+    filterLayout->addWidget(mFilterList, 2);
+    connect(mFilterList, SIGNAL(currentIndexChanged(QString)), this, SLOT(doFilterChanged(void)));
+
+    // Layout
+    samplerBlockLayout->addLayout(filterLayout);
+    samplerBlockLayout->addStretch(1);
+    samplerBlockGroup->setLayout(samplerBlockLayout);
+
+    // Set layout
+    QVBoxLayout *mainLayout = new QVBoxLayout;
+    mainLayout->addWidget(pbsGroup);
+    mainLayout->addWidget(unlitGroup);
+    mainLayout->addWidget(samplerBlockGroup);
+    setLayout(mainLayout);
 }
 
 //****************************************************************************/
-void GeneralPage::saveSettings(void)
+void HlmsPage::doFilterChanged(void)
 {
-    QFile file(FILE_SETTINGS);
-    if (file.open(QFile::WriteOnly|QFile::Truncate))
-    {
-        QTextStream stream(&file);
-        stream << SETTINGS_IMPORT_PATH
-               << " = "
-               << "\""
-               << mImportPath
-               << "\""
-               << "\n";
-        file.close();
-    }
-}
-
-
-//****************************************************************************/
-void GeneralPage::displaySettingsChangedMessage(void)
-{
-    QMessageBox::information(0, QString("Info"), QString("The changed settings are active after the application has been restarted"));
-}
-
-//****************************************************************************/
-//****************************************************************************/
-//****************************************************************************/
-HlmsPage::HlmsPage(QWidget *parent)
-    : QWidget(parent)
-{
+    mParent->mSamplerblockFilterIndex = mFilterList->currentIndex();
+    mParent->saveSettings();
+    //QMessageBox::information(0, QString("Info"), QString("The filter settings are immediately active"));
 }

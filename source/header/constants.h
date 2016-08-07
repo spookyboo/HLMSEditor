@@ -92,6 +92,7 @@ static const Ogre::String THUMBS_PATH = "../common/thumbs/";
 static const QString DEFAULT_IMPORT_PATH = "../import/";
 static const QString SETTINGS_GROUP_GENERAL = "General";
 static const QString SETTINGS_IMPORT_PATH = "importPath";
+static const QString SETTINGS_SAMPLERBLOCK_FILTER_INDEX = "samplerblockFilterIndex";
 
 // Static function to determine the 'resources' file
 static const QString& getResourcesCfg (void)

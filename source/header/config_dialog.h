@@ -41,6 +41,10 @@ public:
     ConfigDialog(MainWindow* parent);
     GeneralPage* mGeneralPage;
     HlmsPage* mHlmsPage;
+    void loadSettings(void);
+    void saveSettings(void);
+    QString mImportPath;
+    unsigned int mSamplerblockFilterIndex;
 
 public slots:
     void changePage(QListWidgetItem *current, QListWidgetItem *previous);

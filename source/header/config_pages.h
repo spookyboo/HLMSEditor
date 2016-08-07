@@ -25,6 +25,8 @@
 #include <QLineEdit>
 #include <QRadioButton>
 #include <QPushButton>
+#include <QComboBox>
+#include "config_dialog.h"
 
 //****************************************************************************/
 class GeneralPage : public QWidget
@@ -32,7 +34,7 @@ class GeneralPage : public QWidget
     Q_OBJECT
 
 public:
-    GeneralPage(QWidget *parent = 0);
+    GeneralPage(ConfigDialog *parent = 0);
 
 private slots:
     void doSetImportDir (void);
@@ -41,9 +43,9 @@ private slots:
 protected:
     void loadSettings(void);
     void saveSettings(void);
-    void displaySettingsChangedMessage(void);
 
 private:
+    ConfigDialog* mParent;
     QString mImportPath;
     QLineEdit* mImportEdit;
 };
@@ -54,18 +56,14 @@ class HlmsPage : public QWidget
     Q_OBJECT
 
 public:
-    HlmsPage(QWidget *parent = 0);
-    //const QString& getOutputDir(void) const;
+    HlmsPage(ConfigDialog *parent = 0);
 
-//private slots:
-    //void textEdited(void);
-    //void restorePushed(void);
+private slots:
+    void doFilterChanged(void);
 
-//private:
-    //void restoreValues(const QString& configFileName);
-    //QString mOutputDir;
-    //QLineEdit* mOutputDirEdit;
-    //QPushButton* mRestoreButton;
+private:
+    ConfigDialog* mParent;
+    QComboBox* mFilterList;
 };
 
 #endif
