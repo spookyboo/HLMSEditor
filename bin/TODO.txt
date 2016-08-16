@@ -2,11 +2,13 @@ V 1.0 updates:
 =============
 - Apply material per submesh. Approach:
   1. Apply a material with a unique colour to each submesh
-  2. Render the renderwindow to a texture
+  2. Render the renderwindow to a texture (see http://www.ogre3d.org/forums/viewtopic.php?f=25&t=82023&p=511311&hilit=render+texture+2.1+example#p511311 for an RTT example)
   3. Map the mouse coordinates in the renderwindow to the rendertexture and read the colour of the underlying rendertexture
   4. Determine the pixel colour under the mousecursor and determine to which submesh this belongs
   5. Re-apply the original materials to the submeshes again
-  6. Apply the material to this submesh or highlight the submesh first
+  6. Depending on the mouse setting:
+     - Mouseover => apply a highlight material to the submesh
+     - Mouseover + double leftclick => apply current material (from editor) to the submesh
 - Use resource.cfg per project
 - Align the dock widgets (so they are displayed with the correct height and width after start)
 - Remove unused functions in .h/.cpp files in the 'sources' directory

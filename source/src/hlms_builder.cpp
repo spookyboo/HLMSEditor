@@ -557,3 +557,4 @@ void HlmsBuilder::saveAllResourcesLocations(void)
     writeFile << HLMS_DO_NOT_USE_AS_RESOURCE;
     file.close();
 }
+

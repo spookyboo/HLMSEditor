@@ -38,7 +38,9 @@ namespace Ogre
     {
         PAF_PRE_IMPORT_MK_DIR = 1 << 0,
         PAF_POST_IMPORT_OPEN_PROJECT = 1 << 1,
-        PAF_POST_IMPORT_SAVE_RESOURCE_LOCATIONS = 1 << 2
+        PAF_POST_IMPORT_SAVE_RESOURCE_LOCATIONS = 1 << 2,
+        PAF_PRE_EXPORT_DELETE_ALL_DATABLOCKS = 1 << 3,
+        PAF_POST_EXPORT_DELETE_ALL_DATABLOCKS = 1 << 4
     };
 
     /** Class to pass data from Hlms editor to plugins */

@@ -56,8 +56,12 @@ void HlmsPbsBuilder::deletePbsDatablock (Magus::OgreManager* ogreManager, const 
     if (hlmsPbs->getDatablock(name))
     {
         // Destroy any existing datablock with that name
-        ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
-        hlmsPbs->destroyDatablock(name);
+        try
+        {
+            ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
+            hlmsPbs->destroyDatablock(name);
+        }
+        catch (Ogre::Exception e){}
     }
 }
 

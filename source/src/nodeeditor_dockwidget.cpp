@@ -221,7 +221,7 @@ HlmsNodePbsDatablock* NodeEditorDockWidget::doNewHlmsPbsDatablockAction(void)
         mHlmsPbsDatablockNode = mHlmsPbsBuilder->createPbsNode();
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
         mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
-        mParent->initDatablocks();
+        mParent->initDatablock(); // Don't destroy all other datablocks
         if (mHlmsPbsDatablockNode)
             mHlmsPbsDatablockNode->setSelected(true);
         nodeSelected(mHlmsPbsDatablockNode);
@@ -247,7 +247,7 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::doNewHlmsUnlitDatablockAction(void
         mHlmsUnlitDatablockNode = mHlmsUnlitBuilder->createUnlitNode();
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
         mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
-        mParent->initDatablocks();
+        mParent->initDatablock(); // Don't destroy all other datablocks
         if (mHlmsUnlitDatablockNode)
             mHlmsUnlitDatablockNode->setSelected(true);
         nodeSelected(mHlmsUnlitDatablockNode);
@@ -319,7 +319,7 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
         mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
         mCurrentDatablockName = mHlmsPbsDatablockNode->getName();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
-        mParent->initDatablocks();
+        mParent->destroyDatablock(mCurrentDatablockName);
         Ogre::HlmsPbsDatablock* datablock = mHlmsPbsBuilder->createPbsDatablock(ogreManager, mHlmsPbsDatablockNode);
         if (datablock)
             mLatestDatablockName = mHlmsPbsDatablockNode->getName();
@@ -330,7 +330,7 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
         mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
         mCurrentDatablockName = mHlmsUnlitDatablockNode->getName();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
-        mParent->initDatablocks();
+        mParent->destroyDatablock(mCurrentDatablockName);
         Ogre::HlmsUnlitDatablock* datablock = mHlmsUnlitBuilder->createUnlitDatablock(ogreManager, mHlmsUnlitDatablockNode);
         if (datablock)
             mLatestDatablockName = mHlmsUnlitDatablockNode->getName();
@@ -345,14 +345,14 @@ void NodeEditorDockWidget::nodeToBeDeleted(QtNode* node)
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
         mHlmsPbsBuilder->deletePbsDatablock(ogreManager, mHlmsPbsDatablockNode->getName());
         mHlmsPbsDatablockNode = 0;
-        mParent->initDatablocks();
+        mParent->initDatablock();
     }
     else if (mHlmsUnlitDatablockNode == node)
     {
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
         mHlmsUnlitBuilder->deleteUnlitDatablock(ogreManager, mHlmsUnlitDatablockNode->getName());
         mHlmsUnlitDatablockNode = 0;
-        mParent->initDatablocks();
+        mParent->initDatablock();
     }
 }
 

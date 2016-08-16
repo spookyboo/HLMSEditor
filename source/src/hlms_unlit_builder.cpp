@@ -53,8 +53,12 @@ void HlmsUnlitBuilder::deleteUnlitDatablock (Magus::OgreManager* ogreManager, co
     if (hlmsUnlit->getDatablock(name))
     {
         // Destroy any existing datablock with that name
-        ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
-        hlmsUnlit->destroyDatablock(name);
+        try
+        {
+            ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
+            hlmsUnlit->destroyDatablock(name);
+        }
+        catch (Ogre::Exception e){}
     }
 }
 
