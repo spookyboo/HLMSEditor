@@ -426,6 +426,9 @@ void MainWindow::loadProject(const QString& fileName)
         QString header;
         if (file.open(QFile::ReadOnly))
         {
+            // Add resource location first; this is in case the textures etc. are not loaded
+            mOgreManager->getOgreRoot()->addResourceLocation(mProjectPath.toStdString(), "FileSystem", "General");
+
             QTextStream readFile(&file);
 
             // Line 1
@@ -492,23 +495,22 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
 
     mHlmsName = jsonFileName;
     appendRecentHlms(jsonFileName);
-    mCurrentDatablockFullName = datablockStruct.datablockFullName;
-    mCurrentDatablockName = datablockStruct.datablockId;
+    setCurrentDatablockNames (datablockStruct.datablockId, datablockStruct.datablockFullName);
 
     // Set the datablock in the entity
-    Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
-    Ogre::HlmsDatablock* oldDatablock = item->getSubItem(0)->getDatablock();
-    Ogre::String oldDatablockFullName = *oldDatablock->getFullName();
+    //Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
+    //Ogre::HlmsDatablock* oldDatablock = item->getSubItem(0)->getDatablock();
+    //Ogre::String oldDatablockFullName = *oldDatablock->getFullName();
 
-    if (oldDatablockFullName == datablockStruct.datablockFullName)
-    {
-        mNodeEditorDockWidget->nodeSelected(0);
-        Ogre::LogManager::getSingleton().logMessage("MainWindow::loadDatablockAndSet -> Loaded datablock is equal to the one in the Item\n");
-        return;
-    }
+    //if (oldDatablockFullName == datablockStruct.datablockFullName)
+    //{
+        //mNodeEditorDockWidget->nodeSelected(0);
+        //Ogre::LogManager::getSingleton().logMessage("MainWindow::loadDatablockAndSet -> Loaded datablock is equal to the one in the Item\n");
+        //return;
+    //}
 
     // Set the datablock
-    item->setDatablock(datablockStruct.datablock);
+    //item->setDatablock(datablockStruct.datablock);
 
     // Create the pbs node structure
     QString s = datablockStruct.datablockFullName.c_str();
@@ -1772,4 +1774,12 @@ void MainWindow::createSpecialDatablocks (void)
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->createLightAxisMaterial();
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->createHighlightMaterial();
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->createUnlitDatablocksRtt();
+}
+
+//****************************************************************************/
+void MainWindow::setCurrentDatablockNames(const Ogre::IdString& name, const Ogre::String& fullName)
+{
+    mCurrentDatablockFullName = fullName;
+    mCurrentDatablockName = name;
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setCurrentDatablockName(mCurrentDatablockName);
 }

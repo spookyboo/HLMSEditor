@@ -259,6 +259,7 @@ void RenderwindowDockWidget::handleToggleHoover(void)
         mButtonToggleHoover->setIcon(*mHooverOnIcon);
     mToggleHooverOn = !mToggleHooverOn;
     mOgreWidget->setHoover(mToggleHooverOn);
+    mOgreWidget->setFocus();
 }
 
 //****************************************************************************/

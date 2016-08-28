@@ -82,6 +82,7 @@ namespace Magus
             void resetHighlight(void); // Undo highlight of mItem (preserving its datablocks)
             void resetCamera(void); // Set position/orientation to default
             void setHoover(bool hoover); // Determines whether the subItems are highlighted when the mousecursor hoovers over them
+            void setCurrentDatablockName(const Ogre::IdString& datablockName);
             void cleanup(void);
 
         protected:
@@ -117,6 +118,7 @@ namespace Magus
             int mLatestSubItemIndexHighlighted;
             Ogre::HlmsDatablock* mLatestSubItemDatablock;
             QSize mSize;
+            Ogre::IdString mCurrentDatablockName;
 
             virtual void createCompositor();
             virtual void createCompositorRenderToTexture();
@@ -129,6 +131,7 @@ namespace Magus
             virtual void wheelEvent(QWheelEvent* e);
             virtual void mousePressEvent(QMouseEvent* e);
             virtual void mouseReleaseEvent(QMouseEvent* e);
+            virtual void mouseDoubleClickEvent(QMouseEvent *event);
             HGLRC getCurrentGlContext(void);
             void rotateLight(Ogre::Vector2 relativeMouseMove);
             const Ogre::ColourValue& calculateIndexToColour(int index);

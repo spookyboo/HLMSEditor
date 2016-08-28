@@ -67,6 +67,7 @@ namespace Magus
         mLatestSubItemDatablock(0),
         mHoover(false)
     {
+        mCurrentDatablockName = "";
         setAttribute(Qt::WA_OpaquePaintEvent);
         setAttribute(Qt::WA_PaintOnScreen);
         mSize = QSize(100, 100);
@@ -498,18 +499,34 @@ namespace Magus
         resetHighlight();
 
         // Set the default datablock
-        Ogre::HlmsDatablock* itemDatablock = mItem->getSubItem(0)->getDatablock();
         Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
         Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
         Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
 
-        if (itemDatablock != hlmsUnlit->getDefaultDatablock())
-            mItem->setDatablock(hlmsUnlit->getDefaultDatablock());
-        else
-            if (itemDatablock != hlmsPbs->getDefaultDatablock())
-                mItem->setDatablock(hlmsPbs->getDefaultDatablock());
-            else
+        bool success = false;
+        try
+        {
+            mItem->setDatablock(hlmsPbs->getDefaultDatablock());
+            success = true;
+        }
+        catch (Ogre::Exception e) {}
+        if (!success)
+        {
+            try
+            {
                 mItem->setDatablock(DEFAULT_DATABLOCK_NAME);
+                success = true;
+            }
+            catch (Ogre::Exception e) {}
+        }
+        if (!success)
+        {
+            try
+            {
+                mItem->setDatablock(hlmsUnlit->getDefaultDatablock());
+            }
+            catch (Ogre::Exception e) {}
+        }
     }
 
     //****************************************************************************/
@@ -616,6 +633,7 @@ namespace Magus
     //****************************************************************************/
     void QOgreWidget::setBackgroundColour(const Ogre::ColourValue colour)
     {
+        mBackground = colour;
         Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
         Ogre::CompositorManager2::CompositorNodeDefMap mNodeDefinitions = compositorManager->getNodeDefinitions();
         Ogre::CompositorManager2::CompositorNodeDefMap::const_iterator iter;
@@ -681,6 +699,15 @@ namespace Magus
 
         if (mWorkspaceRtt)
         {
+            // Set the background colour to black, otherwise the colours in the rtt are not uniquely assigned to a subItem anymore
+            Ogre::ColourValue c;
+            bool toggleBackgroundColour = mBackground != Ogre::ColourValue::Black;
+            if (toggleBackgroundColour)
+            {
+                c = mBackground;
+                setBackgroundColour(Ogre::ColourValue::Black);
+            }
+
             mSceneNode->setVisible(false);
             bool lightVisibility;
             if (mLightAxisItem)
@@ -702,6 +729,9 @@ namespace Magus
             mSceneNodeRtt->setVisible(false);
             if (mLightAxisItem)
                 mLightAxisItem->setVisible(lightVisibility);
+
+            if (toggleBackgroundColour)
+                setBackgroundColour(c);
         }
 }
 
@@ -840,6 +870,21 @@ namespace Magus
     }
 
     //****************************************************************************/
+    void QOgreWidget::mouseDoubleClickEvent(QMouseEvent *event)
+    {
+        // TODO: Make more robust!!!
+        if(mSystemInitialized)
+        {
+            int index = mLatestSubItemIndexHighlighted;
+            if (index > -1)
+            {
+                resetHighlight();
+                mItem->getSubItem(index)->setDatablock(mCurrentDatablockName);
+            }
+        }
+    }
+
+    //****************************************************************************/
     const Ogre::Vector3& QOgreWidget::getItemScale(void)
     {
         if (mItem && mItem->getParentSceneNode())
@@ -974,6 +1019,14 @@ namespace Magus
         mCamera->getParentSceneNode()->setOrientation(Ogre::Quaternion::IDENTITY);
         mLightAxisNode->setPosition(mCamera->getPosition() + Ogre::Vector3(0, -27, -100));
         mLightAxisNode->setOrientation(Ogre::Quaternion::IDENTITY);
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::setCurrentDatablockName(const Ogre::IdString& datablockName)
+    {
+        mCurrentDatablockName = datablockName;
+        if (!mHoover)
+            mItem->setDatablock(datablockName);
     }
 
 }

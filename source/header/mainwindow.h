@@ -67,11 +67,9 @@ class MainWindow : public QMainWindow
         //void destroyDatablocksExceptGiven(const Ogre::String& datablockName); // Destroy all datablocks, except the one passed
         EditorHlmsTypes getCurrentDatablockType(void); // Returns the current hlms type
         void loadTextureBrowserCfg(void);
-        void setCurrentDatablockNames(const Ogre::IdString& name, const Ogre::String& fullName)
-        {
-            mCurrentDatablockFullName = fullName;
-            mCurrentDatablockName = name;
-        }
+        void setCurrentDatablockNames(const Ogre::IdString& name, const Ogre::String& fullName);
+        const Ogre::String& getCurrentDatablockFullName (void) {return mCurrentDatablockFullName;}
+        const Ogre::IdString& getCurrentDatablockName (void) {return mCurrentDatablockName;}
 
     protected:
         // Save the content of a resource vector

@@ -165,8 +165,8 @@ Ogre::HlmsUnlitDatablock* HlmsUnlitBuilder::createUnlitDatablock (Magus::OgreMan
     }
 
     // Set the datablock in the item
-    Ogre::Item* item = ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
-    item->setDatablock(datablock);
+    //Ogre::Item* item = ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
+    //item->setDatablock(datablock);
     return datablock;
 }
 
