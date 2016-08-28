@@ -59,9 +59,11 @@ MainWindow::MainWindow(void) :
 
     // Create the Ogre Manager
     mOgreManager = new Magus::OgreManager();
+    mHlmsUtilsManager = new HlmsUtilsManager();
     newProjectName();
     mHlmsName = QString("");
-    mCurrentDatablockName = Ogre::String("");
+    mCurrentDatablockFullName = Ogre::String("");
+    mCurrentDatablockName = "";
     mTempString = QString("");
     mTempOgreString = "";
     
@@ -96,12 +98,19 @@ MainWindow::MainWindow(void) :
     File.open(QFile::ReadOnly);
     QString styleSheet = QLatin1String(File.readAll());
     setStyleSheet(styleSheet);
-	showMaximized();
+
+    // Set the max. width/height of the mainwindow
+    showMaximized();
+
+    // Delete all datablocks that are loaded at startup, so that the datablock
+    // administration in mHlmsUtilsManager is up-to-date
+    mHlmsUtilsManager->destroyDatablocks(true); // Exclude the 'special' datablocks
 }
 
 //****************************************************************************/
 MainWindow::~MainWindow(void)
 {
+    delete mHlmsUtilsManager;
     delete mOgreManager;
 }
 
@@ -345,10 +354,24 @@ void MainWindow::createDockWindows(void)
 //****************************************************************************/
 void MainWindow::doNewProjectAction(void)
 {
+    mOgreManager->pauseRendering(true);
+
+    // Clear the material- and texture browser
     mMaterialBrowser->clearResources();
     mTextureDockWidget->clearResources();
+
+    // Clear the property- and node widgets
+    mPropertiesDockWidget->clear();
+    mNodeEditorDockWidget->clear();
     newProjectName();
-    clearDatablocks();
+
+    // Set the datablock of the Item in the Ogre widget to 'default'
+    // Also destroy the datablocks in memory; strictly speaking this is not required, but it cleans up a bit
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
+    mHlmsUtilsManager->destroyDatablocks(true); // Exclude the 'special' datablocks
+    mHlmsName = QString("");
+
+    mOgreManager->pauseRendering(false);
 }
 
 //****************************************************************************/
@@ -364,88 +387,18 @@ void MainWindow::newProjectName(void)
 //****************************************************************************/
 void MainWindow::doNewHlmsPbsAction(void)
 {
-    initDatablock();
-    mPropertiesDockWidget->clear();
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
+    mHlmsName = QString("");
     mNodeEditorDockWidget->newHlmsPbs();
 }
 
 //****************************************************************************/
 void MainWindow::doNewHlmsUnlitAction(void)
 {
-    initDatablock();
-    mPropertiesDockWidget->clear();
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
+    Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
+    mHlmsName = QString("");
     mNodeEditorDockWidget->newHlmsUnlit();
-}
-
-//****************************************************************************/
-void MainWindow::clearDatablocks(void)
-{
-    initDatablocks(); // Destroy all datablocks
-    mPropertiesDockWidget->clear();
-    mNodeEditorDockWidget->clear();
-}
-
-//****************************************************************************/
-void MainWindow::destroyDatablocksExceptGiven(const Ogre::String& datablockName)
-{
-    // Iterate through all datablocks and delete them, except the given one
-    Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
-    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
-    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
-
-    // Iterate through all pbs datablocks and remove them
-    Ogre::Hlms::HlmsDatablockMap::const_iterator itorPbs = hlmsPbs->getDatablockMap().begin();
-    Ogre::Hlms::HlmsDatablockMap::const_iterator endPbs  = hlmsPbs->getDatablockMap().end();
-    Ogre::HlmsPbsDatablock* pbsDatablock;
-    while( itorPbs != endPbs)
-    {
-        pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itorPbs->second.datablock);
-        if (pbsDatablock != hlmsPbs->getDefaultDatablock() &&
-                pbsDatablock != hlmsUnlit->getDefaultDatablock() &&
-                pbsDatablock->getName() != Magus::AXIS_MATERIAL_NAME &&
-                pbsDatablock->getName() != datablockName)
-        {
-            try
-            {
-                hlmsPbs->destroyDatablock(pbsDatablock->getName());
-                itorPbs = hlmsPbs->getDatablockMap().begin(); // Start from the beginning again
-                endPbs = hlmsPbs->getDatablockMap().end();
-            }
-            catch (Ogre::Exception e)
-            {
-                ++itorPbs;
-            }
-        }
-        else
-            ++itorPbs;
-    }
-
-    // Iterate through all unlit datablocks and remove them
-    Ogre::Hlms::HlmsDatablockMap::const_iterator itorUnlit = hlmsUnlit->getDatablockMap().begin();
-    Ogre::Hlms::HlmsDatablockMap::const_iterator endUnlit  = hlmsUnlit->getDatablockMap().end();
-    Ogre::HlmsUnlitDatablock* unlitDatablock;
-    while( itorUnlit != endUnlit)
-    {
-        unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itorUnlit->second.datablock);
-        if (unlitDatablock != hlmsPbs->getDefaultDatablock() &&
-                unlitDatablock != hlmsUnlit->getDefaultDatablock() &&
-                unlitDatablock->getName() != Magus::AXIS_MATERIAL_NAME &&
-                unlitDatablock->getName() != datablockName)
-        {
-            try
-            {
-                hlmsUnlit->destroyDatablock(unlitDatablock->getName());
-                itorUnlit = hlmsUnlit->getDatablockMap().begin(); // Start from the beginning again
-                endUnlit = hlmsUnlit->getDatablockMap().end();
-            }
-            catch (Ogre::Exception e)
-            {
-                ++itorUnlit;
-            }
-        }
-        else
-            ++itorUnlit;
-    }
 }
 
 //****************************************************************************/
@@ -505,7 +458,11 @@ void MainWindow::loadProject(const QString& fileName)
                 file.close();
                 setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
                 appendRecentProject(fileName);
-                clearDatablocks();
+                mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
+                mHlmsUtilsManager->destroyDatablocks(true); // Exclude the 'special' datablocks
+                mHlmsName = QString("");
+                mPropertiesDockWidget->clear();
+                mNodeEditorDockWidget->clear();
             }
         }
     }
@@ -526,17 +483,58 @@ void MainWindow::doOpenDatablockMenuAction(void)
 //****************************************************************************/
 void MainWindow::loadDatablockAndSet(const QString jsonFileName)
 {
-    initDatablock();
-    mPropertiesDockWidget->clear();
-    if (!loadDatablock(jsonFileName))
-        Ogre::LogManager::getSingleton().logMessage("MainWindow::doOpenDatablockMenuAction(); Could not load the materials\n");
+    HlmsUtilsManager::DatablockStruct datablockStruct = mHlmsUtilsManager->loadDatablock(jsonFileName);
+    if (!datablockStruct.datablock)
+    {
+        Ogre::LogManager::getSingleton().logMessage("MainWindow::loadDatablockAndSet -> Cannot continue; datablock is 0\n");
+        return;
+    }
 
-    // Continue although the datablock was not loaded; the Hlms material might is probably already loaded
     mHlmsName = jsonFileName;
     appendRecentHlms(jsonFileName);
+    mCurrentDatablockFullName = datablockStruct.datablockFullName;
+    mCurrentDatablockName = datablockStruct.datablockId;
 
-    // Get the (list of) datablocks and assign the first datablock to the current 'item' to be rendered
-    getAndSetFirstDatablock();
+    // Set the datablock in the entity
+    Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
+    Ogre::HlmsDatablock* oldDatablock = item->getSubItem(0)->getDatablock();
+    Ogre::String oldDatablockFullName = *oldDatablock->getFullName();
+
+    if (oldDatablockFullName == datablockStruct.datablockFullName)
+    {
+        mNodeEditorDockWidget->nodeSelected(0);
+        Ogre::LogManager::getSingleton().logMessage("MainWindow::loadDatablockAndSet -> Loaded datablock is equal to the one in the Item\n");
+        return;
+    }
+
+    // Set the datablock
+    item->setDatablock(datablockStruct.datablock);
+
+    // Create the pbs node structure
+    QString s = datablockStruct.datablockFullName.c_str();
+    if (datablockStruct.type == EditorHlmsTypes::HLMS_PBS)
+    {
+        HlmsNodePbsDatablock* node = mNodeEditorDockWidget->createPbsNodeStructure(s);
+        if (node)
+        {
+            node->setSelected(true);
+            mNodeEditorDockWidget->nodeSelected(node);
+        }
+        mPropertiesDockWidget->setTextureTypePropertyVisible(true);
+        mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
+    }
+    else if (datablockStruct.type == EditorHlmsTypes::HLMS_UNLIT)
+    {
+        // Create the unlit node structure
+        HlmsNodeUnlitDatablock* node = mNodeEditorDockWidget->createUnlitNodeStructure(s);
+        if (node)
+        {
+            node->setSelected(true);
+            mNodeEditorDockWidget->nodeSelected(node);
+        }
+        mPropertiesDockWidget->setTextureTypePropertyVisible(false);
+        mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
+    }
 }
 
 //****************************************************************************/
@@ -549,7 +547,11 @@ void MainWindow::doOpenModelMenuAction(void)
                                             QString("MESH (*.mesh);;"
                                                     "All files (*.*)"));
     if (!fileName.isEmpty())
+    {
+        mOgreManager->pauseRendering(true);
         loadModel(fileName);
+        mOgreManager->pauseRendering(false);
+    }
 }
 
 //****************************************************************************/
@@ -587,7 +589,8 @@ void MainWindow::loadModel(const QString modelFileName)
             // Create an item and add it to the renderwindow
             Ogre::SceneManager* sceneManager = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getSceneManager();
             Ogre::Item* item = sceneManager->createItem(v2MeshPtr, Ogre::SCENE_DYNAMIC);
-            mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setItem(item, Ogre::Vector3::UNIT_SCALE);
+            Ogre::Item* itemRtt = sceneManager->createItem(v2MeshPtr, Ogre::SCENE_DYNAMIC);
+            mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setItem(item, itemRtt, Ogre::Vector3::UNIT_SCALE);
 
             // Save the V2 mesh (ask whether it must be saved)
             QMessageBox::StandardButton reply;
@@ -735,182 +738,12 @@ Ogre::DataStreamPtr MainWindow::openFile(Ogre::String source)
 }
 
 //****************************************************************************/
-void MainWindow::destroyAllDatablocks(void)
-{
-    // Get the datablock from the item and remove it
-    //mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
-
-    Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
-    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
-    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
-
-    // Iterate through all pbs datablocks and remove them
-    Ogre::Hlms::HlmsDatablockMap::const_iterator itorPbs = hlmsPbs->getDatablockMap().begin();
-    Ogre::Hlms::HlmsDatablockMap::const_iterator endPbs  = hlmsPbs->getDatablockMap().end();
-    Ogre::HlmsPbsDatablock* pbsDatablock;
-    while( itorPbs != endPbs)
-    {
-        pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itorPbs->second.datablock);
-        if (pbsDatablock != hlmsPbs->getDefaultDatablock() &&
-                pbsDatablock != hlmsUnlit->getDefaultDatablock() &&
-                pbsDatablock->getName() != Magus::AXIS_MATERIAL_NAME)
-        {
-            hlmsPbs->destroyDatablock(pbsDatablock->getName());
-            itorPbs = hlmsPbs->getDatablockMap().begin(); // Start from the beginning again
-            endPbs = hlmsPbs->getDatablockMap().end();
-        }
-        else
-            ++itorPbs;
-    }
-
-    // Iterate through all unlit datablocks and remove them
-    Ogre::Hlms::HlmsDatablockMap::const_iterator itorUnlit = hlmsUnlit->getDatablockMap().begin();
-    Ogre::Hlms::HlmsDatablockMap::const_iterator endUnlit  = hlmsUnlit->getDatablockMap().end();
-    Ogre::HlmsUnlitDatablock* unlitDatablock;
-    while( itorUnlit != endUnlit)
-    {
-        unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itorUnlit->second.datablock);
-        if (unlitDatablock != hlmsPbs->getDefaultDatablock() &&
-                unlitDatablock != hlmsUnlit->getDefaultDatablock() &&
-                unlitDatablock->getName() != Magus::AXIS_MATERIAL_NAME)
-        {
-            hlmsUnlit->destroyDatablock(unlitDatablock->getName());
-            itorUnlit = hlmsUnlit->getDatablockMap().begin(); // Start from the beginning again
-            endUnlit = hlmsUnlit->getDatablockMap().end();
-        }
-        else
-            ++itorUnlit;
-    }
-}
-
-//****************************************************************************/
 void MainWindow::destroyDatablock(const QString& datablockName)
 {
     HlmsPbsBuilder pbsBuilder(0); // Do not pass the node editor (not needed in this case)
     HlmsUnlitBuilder unlitBuilder(0); // Do not pass the node editor (not needed in this case)
     pbsBuilder.deletePbsDatablock (mOgreManager, datablockName);
     unlitBuilder.deleteUnlitDatablock(mOgreManager, datablockName);
-}
-
-
-//****************************************************************************/
-void MainWindow::getAndSetFirstDatablock(void)
-{
-    // Get the name/fullname from the current item in the renderwindow
-    Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
-    Ogre::HlmsDatablock* oldDatablock = item->getSubItem(0)->getDatablock();
-    Ogre::String oldDatablockName = *oldDatablock->getFullName();
-    Ogre::IdString oldDatablockId = oldDatablock->getName();
-
-    // Determine whether the HlmsManager contains a HLMS_PBS datablock or a HLMS_UNLIT datablock.
-    // Depending on the result, the datablock of that type is retrieved and set in the mesh (item).
-    Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
-    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
-    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
-
-    if (hlmsPbs)
-    {
-        int size = hlmsPbs->getDatablockMap().size();
-        if (size> 2)
-        {
-            // It is a PBS; Note, that there is also a default and the pbs material of the light axis (so always 2)
-            Ogre::Hlms::HlmsDatablockMap::const_iterator itor = hlmsPbs->getDatablockMap().begin();
-            Ogre::Hlms::HlmsDatablockMap::const_iterator end  = hlmsPbs->getDatablockMap().end();
-            Ogre::HlmsPbsDatablock* newDatablock;
-            Ogre::String newDatablockName;
-            while( itor != end )
-            {
-                newDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itor->second.datablock);
-                if (newDatablock != hlmsPbs->getDefaultDatablock() &&
-                        newDatablock != hlmsUnlit->getDefaultDatablock() &&
-                        newDatablock->getName() != Magus::AXIS_MATERIAL_NAME)
-                {
-                    // Get the first datablock
-                    newDatablockName = *newDatablock->getFullName();
-                    if (oldDatablockName != newDatablockName)
-                    {
-                        // Assign the datablock to the item (and destroy the items' old datablock, if still available)
-                        item->setDatablock(newDatablock);
-                        if (oldDatablock != hlmsPbs->getDefaultDatablock() &&
-                                oldDatablock != hlmsUnlit->getDefaultDatablock() &&
-                                oldDatablock->getName() != Magus::AXIS_MATERIAL_NAME)
-                        {
-                            if (oldDatablock->getCreator()->getType() == Ogre::HLMS_PBS)
-                                hlmsPbs->destroyDatablock(oldDatablockId);
-                            else if (hlmsUnlit && oldDatablock->getCreator()->getType() == Ogre::HLMS_UNLIT)
-                                hlmsUnlit->destroyDatablock(oldDatablockId);
-                        }
-
-                        // Create the node structure
-                        QString s = newDatablockName.c_str();
-                        HlmsNodePbsDatablock* node = mNodeEditorDockWidget->createPbsNodeStructure(s);
-                        if (node)
-                        {
-                            node->setSelected(true);
-                            mNodeEditorDockWidget->nodeSelected(node);
-                        }
-                        mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-                        mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
-                        break;
-                    }
-                }
-                ++itor;
-            }
-            return;
-        }
-    }
-
-    if (hlmsUnlit)
-    {
-        int size = hlmsUnlit->getDatablockMap().size();
-        if (size > 1)
-        {
-            // It is an Unlit; Note, that there is also a default (so always 1)
-            Ogre::Hlms::HlmsDatablockMap::const_iterator itor = hlmsUnlit->getDatablockMap().begin();
-            Ogre::Hlms::HlmsDatablockMap::const_iterator end  = hlmsUnlit->getDatablockMap().end();
-            Ogre::HlmsUnlitDatablock* newDatablock;
-            Ogre::String newDatablockName;
-            while( itor != end )
-            {
-                newDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itor->second.datablock);
-                if (newDatablock != hlmsPbs->getDefaultDatablock() &&
-                        newDatablock != hlmsUnlit->getDefaultDatablock() &&
-                        newDatablock->getName() != Magus::AXIS_MATERIAL_NAME)
-                {
-                    // Get the first datablock
-                    newDatablockName = *newDatablock->getFullName();
-                    if (oldDatablockName != newDatablockName)
-                    {
-                        // Assign the datablock to the item (and destroy the items' old datablock, if still available)
-                        item->setDatablock(newDatablock);
-                        if (oldDatablock != hlmsPbs->getDefaultDatablock() &&
-                                oldDatablock != hlmsUnlit->getDefaultDatablock() &&
-                                oldDatablock->getName() != Magus::AXIS_MATERIAL_NAME)
-                        {
-                            if (oldDatablock->getCreator()->getType() == Ogre::HLMS_UNLIT)
-                                hlmsUnlit->destroyDatablock(oldDatablockId);
-                            else if (hlmsPbs && oldDatablock->getCreator()->getType() == Ogre::HLMS_PBS)
-                                hlmsPbs->destroyDatablock(oldDatablockId);
-                        }
-
-                        // Create the node structure
-                        QString s = newDatablockName.c_str();
-                        HlmsNodeUnlitDatablock* node = mNodeEditorDockWidget->createUnlitNodeStructure(s);
-                        if (node)
-                        {
-                            node->setSelected(true);
-                            mNodeEditorDockWidget->nodeSelected(node);
-                        }
-                        mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-                        mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
-                        break;
-                    }
-                }
-                ++itor;
-            }
-            return;
-        }
-    }
 }
 
 //****************************************************************************/
@@ -1015,41 +848,6 @@ void MainWindow::doSaveAsDatablockMenuAction(void)
 }
 
 //****************************************************************************/
-bool MainWindow::loadDatablock(const QString& jsonFileName)
-{
-    bool success = false;
-
-    if (!jsonFileName.isEmpty())
-    {
-        // Read the json file as text file and feed it to the HlmsManager::loadMaterials() function
-        // Note, that the resources (textures, etc.) must be present
-        success = true;
-        Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
-        QFile file(jsonFileName);
-        file.open(QFile::ReadOnly | QFile::Text);
-        QTextStream readFile(&file);
-        QString jsonString = readFile.readAll();
-        QByteArray ba = jsonString.toLatin1();
-        char* jsonChar = ba.data();
-        Ogre::String fname = jsonFileName.toStdString();
-        Ogre::HlmsJson hlmsJson(hlmsManager);
-        try
-        {
-            // Load the datablocks (which also creates them)
-            hlmsJson.loadMaterials(fname, jsonChar);
-        }
-
-        catch (Ogre::Exception e)
-        {
-            success = false;
-        }
-        file.close();
-    }
-
-    return success;
-}
-
-//****************************************************************************/
 void MainWindow::saveDatablock(void)
 {
     Ogre::String fname = mHlmsName.toStdString();
@@ -1059,8 +857,19 @@ void MainWindow::saveDatablock(void)
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->saveToFile(THUMBS_PATH + thumb.toStdString());
 
     // Clear all other datablocks, except the current one
+    // First, detach the datablocks from the Item
     detachMaterialsFromItem();
-    destroyDatablocksExceptGiven(mCurrentDatablockName); // mCurrentDatablockName was set by detachMaterialsFromItem
+
+    // Destroy all special datablocks (axis, highlight and unlit rtt), otherwise they will also be saved or exported
+    destroySpecialDatablocks();
+
+    //destroyDatablocksExceptGiven(mCurrentDatablockFullName); // mCurrentDatablockFullName was set by detachMaterialsFromItem
+
+    // Destroy the rest of the datablock, except the current one
+    // Do not exclude special datablocks (although the are allready destroyed
+    // Keep the list with loaded materials
+    // Do not destroy the current datablock
+    mHlmsUtilsManager->destroyDatablocks(false, true, mCurrentDatablockFullName);
 
     Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
     if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_PBS)
@@ -1076,7 +885,8 @@ void MainWindow::saveDatablock(void)
         appendRecentHlms(mHlmsName);
     }
 
-    // Attach the materials again
+    // Recreate and attach the materials again
+    mHlmsUtilsManager->reloadNonSpecialDatablocks();
     restoreMaterialsOfItem();
 }
 
@@ -1209,7 +1019,6 @@ void MainWindow::doTextureBrowserImportMenuAction(void)
         textureFolder = fileNames.at(0);
 
         // Add all texture files to a group in mTextureDockWidget
-        //QString path;
         QString fileName;
 
         QDirIterator dirIt(textureFolder, QDirIterator::Subdirectories);
@@ -1269,7 +1078,7 @@ void MainWindow::doResetWindowLayoutMenuAction(void)
 {
     mRenderwindowDockWidget->show();
     addDockWidget(Qt::LeftDockWidgetArea, mRenderwindowDockWidget);
-    mPropertiesDockWidget->show();
+    //mPropertiesDockWidget->show();
     addDockWidget(Qt::LeftDockWidgetArea, mPropertiesDockWidget);
 
     mTextureDockWidget->show();
@@ -1429,22 +1238,10 @@ void MainWindow::update(void)
 }
 
 //****************************************************************************/
-void MainWindow::initDatablocks(void)
+void MainWindow::initCurrentDatablockFileName(void)
 {
-    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
-    destroyAllDatablocks();
     mHlmsName = QString("");
-}
-
-//****************************************************************************/
-void MainWindow::initDatablock(void)
-{
-    Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
-    Ogre::HlmsDatablock* currentDatablock = item->getSubItem(0)->getDatablock();
-    mCurrentDatablockName = *currentDatablock->getFullName();
-    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
-    destroyDatablock(mCurrentDatablockName.c_str());
-    mHlmsName = QString("");
+    mPropertiesDockWidget->clear();
 }
 
 //****************************************************************************/
@@ -1522,8 +1319,8 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
         newDatablock = data.mInOutCurrentDatablock;
         if (newDatablock && oldDatablock != newDatablock)
         {
-            // The pointer was changed (and not 0), so the assumption is that it points to a new datablock
-            getAndSetFirstDatablock();
+            // Set the newDatablock to the Item?
+            // TODO: Not sure what to do here
         }
         text = data.mOutSuccessText.c_str();
         if (text.isEmpty())
@@ -1565,7 +1362,8 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
 {
     // Make sure that the materials are not attached to the entity before they are deleted
     detachMaterialsFromItem();
-    destroyAllDatablocks(); // Start with a clean situation
+    destroySpecialDatablocks();
+    mHlmsUtilsManager->destroyDatablocks(false, true);
 
     Ogre::HlmsEditorPluginData data;
     QString text;
@@ -1612,7 +1410,7 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
             fileName = *it;
             if (!fileName.empty())
             {
-                loadDatablock(fileName.c_str());
+                mHlmsUtilsManager->loadDatablock(fileName.c_str());
             }
             ++it;
         }
@@ -1649,7 +1447,7 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
 
     // Perform pre-export actions (by the editor)
     if (plugin->getActionFlag() & Ogre::PAF_PRE_EXPORT_DELETE_ALL_DATABLOCKS)
-        destroyAllDatablocks();
+        mHlmsUtilsManager->destroyDatablocks(false, true);
 
     // Perform pre-export actions (by the plugin)
     plugin->performPreExportActions();
@@ -1677,9 +1475,10 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
 
     // Perform post-export actions (by the editor)
     if (plugin->getActionFlag() & Ogre::PAF_POST_EXPORT_DELETE_ALL_DATABLOCKS)
-        destroyAllDatablocks();
+        mHlmsUtilsManager->destroyDatablocks(false, true);
 
-    // Set the material again to the ogre widget
+    // Recreate and attach the materials again
+    mHlmsUtilsManager->reloadNonSpecialDatablocks();
     restoreMaterialsOfItem();
 }
 
@@ -1934,24 +1733,43 @@ void MainWindow::detachMaterialsFromItem (void)
 {
     // Detach the current datablock(s)
     // TODO: There are more when multiple subitems are used
-    Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
-    Ogre::HlmsDatablock* currentDatablock = item->getSubItem(0)->getDatablock();
-    mCurrentDatablockName = *currentDatablock->getFullName();
-    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
 
-    // First destroy the material of the axis, otherwise it will also be saved
+    //Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
+    //Ogre::HlmsDatablock* currentDatablock = item->getSubItem(0)->getDatablock();
+    //mCurrentDatablockFullName = *currentDatablock->getFullName();
+    //mCurrentDatablockName = currentDatablock->getName();
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
+}
+
+//****************************************************************************/
+void MainWindow::destroySpecialDatablocks(void)
+{
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->destroyLightAxisMaterial();
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->destroyHighlightMaterial();
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->destroyUnlitDatablocksRtt();
 }
 
 //****************************************************************************/
 void MainWindow::restoreMaterialsOfItem (void)
 {
+    // First remove all 'dangling'  datablocks from mItem
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
+
     // Recreate other datablocks if needed
     // TODO: There are more when multiple subitems are used
-    loadDatablock(mHlmsName); // Assume that the datablock was deleted
+    //mHlmsUtilsManager->loadDatablock(mHlmsName);
     Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
     item->setDatablock(mCurrentDatablockName);
 
-    // Recreate the axis the material again
+    // Recreate the axis and highlight the material again
+    createSpecialDatablocks();
+}
+
+//****************************************************************************/
+void MainWindow::createSpecialDatablocks (void)
+{
+    // Recreate the axis and highlight the material again
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->createLightAxisMaterial();
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->createHighlightMaterial();
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->createUnlitDatablocksRtt();
 }

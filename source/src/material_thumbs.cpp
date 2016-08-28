@@ -40,14 +40,14 @@ MaterialThumbsDockWidget::MaterialThumbsDockWidget(const QString& iconDir, const
 
     // Create PBS selection widget
     mPbsSelection = new Magus::QtDefaultTextureWidget(this);
-    mPbsSelection->setTextureSize(QSize(120, 120));
+    mPbsSelection->setTextureSize(QSize(210, 120)); // 210 = 1.78 x 120 (1.78 = 16/9; the width/height ratio of the renderwindow)
     connect(mPbsSelection, SIGNAL(selected(QString,QString)), this, SLOT(handleAssetSelected(QString,QString)));
     connect(mPbsSelection, SIGNAL(doubleClicked(QString,QString)), this, SLOT(handleAssetDoubleClicked(QString,QString)));
     connect(mPbsSelection, SIGNAL(assetDeleted(QString,QString)), this, SLOT(handleAssetDeleted(QString,QString)));
 
     // Create Unlit selection widget
     mUnlitSelection = new Magus::QtDefaultTextureWidget(this);
-    mUnlitSelection->setTextureSize(QSize(120, 120));
+    mUnlitSelection->setTextureSize(QSize(210, 120));
     connect(mUnlitSelection, SIGNAL(selected(QString,QString)), this, SLOT(handleAssetSelected(QString,QString)));
     connect(mUnlitSelection, SIGNAL(doubleClicked(QString,QString)), this, SLOT(handleAssetDoubleClicked(QString,QString)));
     connect(mUnlitSelection, SIGNAL(assetDeleted(QString,QString)), this, SLOT(handleAssetDeleted(QString,QString)));

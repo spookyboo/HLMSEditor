@@ -37,7 +37,8 @@ QT_END_NAMESPACE
 
 namespace Magus
 {
-    static const int TOOL_RESOURCETREE_ICON_WIDTH = 24;
+    static const int TOOL_RESOURCETREE_DEFAULT_ICON_WIDTH = 24;
+    static const int TOOL_RESOURCETREE_DEFAULT_ICON_HEIGHT = 24;
     static const int TOOL_RESOURCETREE_KEY_RESOURCEID = 1;
     static const int TOOL_RESOURCETREE_KEY_PARENTID = 2;
     static const int TOOL_RESOURCETREE_KEY_ICONNAME = 3;
@@ -388,6 +389,9 @@ namespace Magus
             void setAddAssetAfterDuplicateAssetSelected (bool addAssetAfterDuplicateAssetSelected)
                 {mAddAssetAfterDuplicateAssetSelected = addAssetAfterDuplicateAssetSelected;}
 
+            void setAssetIconWidth(int width) {assetIconWidth = width;}
+            void setAssetIconHeigth(int height) {assetIconWidth = height;}
+
         public slots:
             // Activated when a contextmenu item is selected
             void contextMenuItemSelected(QAction* action);
@@ -501,6 +505,8 @@ namespace Magus
             QPushButton* mSearchClearButton;
             QString mSubgroupIconName;
             bool mCollapsed;
+            int assetIconWidth;
+            int assetIconHeight;
     };
 }
 

@@ -73,7 +73,8 @@ HEADERS       = \
     source/header/hlms_editor_plugin_action.h \
     source/header/recent_file_action.h \
     source/header/config_dialog.h \
-    source/header/config_pages.h
+    source/header/config_pages.h \
+    source/header/hlms_utils_manager.h
 
 
 SOURCES       = \
@@ -135,7 +136,8 @@ SOURCES       = \
     source/src/hlms_editor_plugin_action.cpp \
     source/src/recent_file_action.cpp \
     source/src/config_dialog.cpp \
-    source/src/config_pages.cpp
+    source/src/config_pages.cpp \
+    source/src/hlms_utils_manager.cpp
 
 
 INCLUDEPATH += "../HLMSEditor/source/header/"

@@ -187,7 +187,6 @@ HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNodeStructure(Magus::OgreMa
 
         // Create the unlit node
         unlitnode = createUnlitNode();
-        repositionUnlitNode(unlitnode);
         enrichUnlitNode(unlitnode, datablock);
 
         // Get all textures from the unlit
@@ -362,6 +361,7 @@ HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNode(void)
     HlmsNodeUnlitDatablock* node = new HlmsNodeUnlitDatablock(NODE_TITLE_UNLIT_DATABLOCK);
     node->setType(NODE_TYPE_UNLIT_DATABLOCK);
     mNodeEditor->addNode(node);
+    repositionUnlitNode(node);
     return node;
 }
 
@@ -497,8 +497,8 @@ void HlmsUnlitBuilder::repositionUnlitNode(HlmsNodeUnlitDatablock* unlitnode)
 
     // Reposition the unlit node (this is only done once)
     QPointF pos = unlitnode->pos();
-    pos.setX(-1.5f * unlitnode->getWidth());
-    pos.setY(-1.0f * unlitnode->getHeigth());
+    //pos.setX(-1.0f * unlitnode->getWidth());
+    //pos.setY(-0.5f * unlitnode->getHeigth());
     unlitnode->setPos(pos);
 }
 
@@ -525,7 +525,7 @@ void HlmsUnlitBuilder::connectNodes(HlmsNodeUnlitDatablock* unlitnode,
     // Reposition the sampler node
     QPointF pos = unlitnode->pos();
     pos.setX(pos.x() + unlitnode->getWidth() + 2 * portUnlit->pos().y());
-    pos.setY(portUnlit->pos().y() - unlitnode->getHeigth());
+    pos.setY(portUnlit->pos().y());
     samplernode->setPos(pos);
 }
 

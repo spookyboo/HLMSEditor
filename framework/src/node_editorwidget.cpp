@@ -41,7 +41,7 @@ namespace Magus
         connect(mView, SIGNAL(dropped()), this, SLOT(handleDropped())); // Check if something is dropped
 
         QRect rcontent = mView->contentsRect();
-        mView->setSceneRect(0, 0, rcontent.width(), rcontent.height()); // Prevent unwanted jumping and scrollbars
+        mView->setSceneRect(0, 0, rcontent.width() + 500, rcontent.height() + 500); // Prevent unwanted jumping and scrollbars
         mScene = new QtNodeGraphicsScene();
         mScene->installEventFilter(this);
         mView->setScene(mScene);

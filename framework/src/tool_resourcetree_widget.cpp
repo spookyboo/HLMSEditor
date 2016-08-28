@@ -35,6 +35,8 @@ namespace Magus
     //****************************************************************************/
     QtResourceTreeWidget::QtResourceTreeWidget(const QString& iconDir, QWidget* parent) : QWidget(parent)
     {
+        assetIconWidth = TOOL_RESOURCETREE_DEFAULT_ICON_WIDTH;
+        assetIconHeight = TOOL_RESOURCETREE_DEFAULT_ICON_HEIGHT;
         mActionCreateToplevelGroupText = TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP;
         mActionCreateSubGroupText = TOOL_RESOURCETREE_ACTION_CREATE_SUBGROUP;
         mActionCreateAssetText = TOOL_RESOURCETREE_ACTION_CREATE_ASSET;
@@ -91,18 +93,18 @@ namespace Magus
 
         // Create findbutton
         QImage imageSearch(mIconDir + TOOL_RESOURCETREE_ICON_SEARCH);
-        QPixmap pixMapSearch = QPixmap::fromImage(imageSearch).scaled(TOOL_RESOURCETREE_ICON_WIDTH, TOOL_RESOURCETREE_ICON_WIDTH);
+        QPixmap pixMapSearch = QPixmap::fromImage(imageSearch).scaled(TOOL_RESOURCETREE_DEFAULT_ICON_WIDTH, TOOL_RESOURCETREE_DEFAULT_ICON_HEIGHT);
         mSearchLabel = new QLabel();
         mSearchLabel->setPixmap(pixMapSearch);
         mSearchLabel->setContentsMargins(-8, -8, -8, -8);
 
         // Create clearbutton
         QImage imageClear(mIconDir + TOOL_RESOURCETREE_ICON_CLOSE);
-        QPixmap pixMapClear = QPixmap::fromImage(imageClear).scaled(TOOL_RESOURCETREE_ICON_WIDTH, TOOL_RESOURCETREE_ICON_WIDTH);
+        QPixmap pixMapClear = QPixmap::fromImage(imageClear).scaled(TOOL_RESOURCETREE_DEFAULT_ICON_WIDTH, TOOL_RESOURCETREE_DEFAULT_ICON_HEIGHT);
         mSearchClearButton = new QPushButton();
         mSearchClearButton->setStyleSheet(QString("QPushButton {border: none; background: transparent;} QPushButton:hover {background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #565656, stop:1 #464646);}"));
         mSearchClearButton->setIcon(QIcon(pixMapClear));
-        mSearchClearButton->setIconSize(QSize(TOOL_RESOURCETREE_ICON_WIDTH, TOOL_RESOURCETREE_ICON_WIDTH));
+        mSearchClearButton->setIconSize(QSize(TOOL_RESOURCETREE_DEFAULT_ICON_WIDTH, TOOL_RESOURCETREE_DEFAULT_ICON_HEIGHT));
         mSearchClearButton->setContentsMargins(-8, -8, -8, -8);
         connect(mSearchClearButton, SIGNAL(clicked()), this, SLOT(clearSearchLine()));
 
@@ -649,7 +651,8 @@ namespace Magus
         if (!iconName.isEmpty())
         {
             QImage imageIcon(mIconDir + iconName);
-            QPixmap pixMapIcon = QPixmap::fromImage(imageIcon).scaled(TOOL_RESOURCETREE_ICON_WIDTH, TOOL_RESOURCETREE_ICON_WIDTH);
+            //QPixmap pixMapIcon = QPixmap::fromImage(imageIcon).scaled(TOOL_RESOURCETREE_ICON_WIDTH, TOOL_RESOURCETREE_ICON_WIDTH);
+            QPixmap pixMapIcon = QPixmap::fromImage(imageIcon).scaled(assetIconWidth, assetIconHeight);
             resourceItem->setData(0, Qt::DecorationRole, QVariant(pixMapIcon));
         }
 

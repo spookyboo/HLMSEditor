@@ -112,7 +112,7 @@ class NodeEditorDockWidget : public QDockWidget
         QAction* mCogHToolbarAction;
         QToolBar* mHToolBar; 
         Magus::QtNodeEditor* mNodeEditor;
-        QString mLatestDatablockName;
+        //QString mLatestDatablockName;
         QString mCurrentDatablockName;
         HlmsNodePbsDatablock* mHlmsPbsDatablockNode;
         HlmsNodeUnlitDatablock* mHlmsUnlitDatablockNode;

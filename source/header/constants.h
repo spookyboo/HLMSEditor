@@ -24,6 +24,7 @@
 #include <QString>
 #include <QMessageBox>
 #include "OgreString.h"
+#include "ogre3_widget.h"
 
 //****************************************************************************/
 static const QString WINDOW_TITLE = QString("HLMS editor");
@@ -59,6 +60,9 @@ static const QString ICON_COLOUR = QString("../common/icons/colour.png");
 static const QString ICON_INFO = QString("../common/icons/info.png");
 static const QString ICON_MODEL = QString("../common/icons/model.png");
 static const QString ICON_LIGHT = QString("../common/icons/lightbulb.png");
+static const QString ICON_MARKER = QString("../common/icons/marker.png");
+static const QString ICON_HOOVER_ON = QString("../common/icons/hoover_on.png");
+static const QString ICON_HOOVER_OFF = QString("../common/icons/hoover_off.png");
 static const QString ICON_HLMS = QString("../common/icons/HLMSEditor.png");
 static const QString ICON_PBS_DATABLOCK_NO_PATH = QString("pbs.png");
 static const QString ICON_PBS_DATABLOCK_SMALL_NO_PATH = QString("pbs_small.png");

@@ -51,17 +51,17 @@ NodeEditorDockWidget::NodeEditorDockWidget(QString title, MainWindow* parent, Qt
     mInnerMain->setCentralWidget(mNodeEditor);
     mHlmsPbsDatablockNode = 0;
     mHlmsUnlitDatablockNode = 0;
-    mLatestDatablockName = DEFAULT_PBS_DATABLOCK_NAME;
+    //mLatestDatablockName = DEFAULT_PBS_DATABLOCK_NAME;
     mCurrentDatablockName = DEFAULT_PBS_DATABLOCK_NAME;
     mHlmsPbsBuilder = new HlmsPbsBuilder(mNodeEditor);
     mHlmsUnlitBuilder = new HlmsUnlitBuilder(mNodeEditor);
     mNodeEditor->setZoom(0.9f);
 
     // Make some space
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    //setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     QRect rec = QApplication::desktop()->screenGeometry();
-    setMinimumHeight(0.1 * rec.height());
-    layout()->setSizeConstraint(QLayout::SetMinimumSize);
+    setMinimumHeight(0.3 * rec.height());
+    //layout()->setSizeConstraint(QLayout::SetMinimumSize);
 }
 
 //****************************************************************************/
@@ -122,7 +122,7 @@ void NodeEditorDockWidget::createToolBars(void)
     mHToolBar = new QToolBar();
     mInnerMain->addToolBar(Qt::TopToolBarArea, mHToolBar);
     mHToolBar->setMinimumHeight(32);
-    mHToolBar->setMinimumWidth(8 * 32);
+    //mHToolBar->setMinimumWidth(8 * 32);
     mHToolBar->addAction(mNewHlmsPbsDatablockHToolbarAction);
     mHToolBar->addAction(mNewHlmsUnlitDatablockHToolbarAction);
     mHToolBar->addSeparator();
@@ -221,7 +221,7 @@ HlmsNodePbsDatablock* NodeEditorDockWidget::doNewHlmsPbsDatablockAction(void)
         mHlmsPbsDatablockNode = mHlmsPbsBuilder->createPbsNode();
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
         mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
-        mParent->initDatablock(); // Don't destroy all other datablocks
+        mParent->initCurrentDatablockFileName(); // Don't destroy all other datablocks
         if (mHlmsPbsDatablockNode)
             mHlmsPbsDatablockNode->setSelected(true);
         nodeSelected(mHlmsPbsDatablockNode);
@@ -247,7 +247,7 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::doNewHlmsUnlitDatablockAction(void
         mHlmsUnlitDatablockNode = mHlmsUnlitBuilder->createUnlitNode();
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
         mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
-        mParent->initDatablock(); // Don't destroy all other datablocks
+        mParent->initCurrentDatablockFileName(); // Don't destroy all other datablocks
         if (mHlmsUnlitDatablockNode)
             mHlmsUnlitDatablockNode->setSelected(true);
         nodeSelected(mHlmsUnlitDatablockNode);
@@ -322,7 +322,10 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
         mParent->destroyDatablock(mCurrentDatablockName);
         Ogre::HlmsPbsDatablock* datablock = mHlmsPbsBuilder->createPbsDatablock(ogreManager, mHlmsPbsDatablockNode);
         if (datablock)
-            mLatestDatablockName = mHlmsPbsDatablockNode->getName();
+        {
+            mParent->setCurrentDatablockNames(datablock->getName(), *datablock->getFullName());
+            //mLatestDatablockName = mHlmsPbsDatablockNode->getName();
+        }
     }
     else if (mHlmsUnlitDatablockNode)
     {
@@ -333,7 +336,10 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
         mParent->destroyDatablock(mCurrentDatablockName);
         Ogre::HlmsUnlitDatablock* datablock = mHlmsUnlitBuilder->createUnlitDatablock(ogreManager, mHlmsUnlitDatablockNode);
         if (datablock)
-            mLatestDatablockName = mHlmsUnlitDatablockNode->getName();
+        {
+            mParent->setCurrentDatablockNames(datablock->getName(), *datablock->getFullName());
+            //mLatestDatablockName = mHlmsUnlitDatablockNode->getName();
+        }
     }
 }
 
@@ -345,14 +351,14 @@ void NodeEditorDockWidget::nodeToBeDeleted(QtNode* node)
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
         mHlmsPbsBuilder->deletePbsDatablock(ogreManager, mHlmsPbsDatablockNode->getName());
         mHlmsPbsDatablockNode = 0;
-        mParent->initDatablock();
+        mParent->initCurrentDatablockFileName();
     }
     else if (mHlmsUnlitDatablockNode == node)
     {
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
         mHlmsUnlitBuilder->deleteUnlitDatablock(ogreManager, mHlmsUnlitDatablockNode->getName());
         mHlmsUnlitDatablockNode = 0;
-        mParent->initDatablock();
+        mParent->initCurrentDatablockFileName();
     }
 }
 
@@ -360,37 +366,69 @@ void NodeEditorDockWidget::nodeToBeDeleted(QtNode* node)
 void NodeEditorDockWidget::nodeSelected(QtNode* node)
 {
     if (!node)
+    {
+        HlmsPropertiesPbsDatablock* hlmsPropertiesPbsDatablock = mParent->mPropertiesDockWidget->mHlmsPropertiesPbsDatablock;
+        if (hlmsPropertiesPbsDatablock)
+        {
+            hlmsPropertiesPbsDatablock->setObject(static_cast<HlmsNodePbsDatablock*>(node));
+            mParent->mPropertiesDockWidget->setHlmsPropertiesPbsDatablockVisible(true);
+        }
+        else
+        {
+            HlmsPropertiesUnlitDatablock* hlmsPropertiesUnlitDatablock = mParent->mPropertiesDockWidget->mHlmsPropertiesUnlitDatablock;
+            if (hlmsPropertiesUnlitDatablock)
+            {
+                hlmsPropertiesUnlitDatablock->setObject(static_cast<HlmsNodeUnlitDatablock*>(node));
+                mParent->mPropertiesDockWidget->setHlmsPropertiesUnlitDatablockVisible(true);
+            }
+        }
         return;
+    }
 
     if (node->getTitle() == NODE_TITLE_PBS_DATABLOCK)
     {
         HlmsPropertiesPbsDatablock* hlmsPropertiesPbsDatablock = mParent->mPropertiesDockWidget->mHlmsPropertiesPbsDatablock;
-        hlmsPropertiesPbsDatablock->setObject(static_cast<HlmsNodePbsDatablock*>(node));
-        mParent->mPropertiesDockWidget->setHlmsPropertiesPbsDatablockVisible(true);
+        if (hlmsPropertiesPbsDatablock)
+        {
+            hlmsPropertiesPbsDatablock->setObject(static_cast<HlmsNodePbsDatablock*>(node));
+            mParent->mPropertiesDockWidget->setHlmsPropertiesPbsDatablockVisible(true);
+        }
     }
     else if (node->getTitle() == NODE_TITLE_UNLIT_DATABLOCK)
     {
         HlmsPropertiesUnlitDatablock* hlmsPropertiesUnlitDatablock = mParent->mPropertiesDockWidget->mHlmsPropertiesUnlitDatablock;
-        hlmsPropertiesUnlitDatablock->setObject(static_cast<HlmsNodeUnlitDatablock*>(node));
-        mParent->mPropertiesDockWidget->setHlmsPropertiesUnlitDatablockVisible(true);
+        if (hlmsPropertiesUnlitDatablock)
+        {
+            hlmsPropertiesUnlitDatablock->setObject(static_cast<HlmsNodeUnlitDatablock*>(node));
+            mParent->mPropertiesDockWidget->setHlmsPropertiesUnlitDatablockVisible(true);
+        }
     }
     else if (node->getTitle() == NODE_TITLE_SAMPLERBLOCK)
     {
         HlmsPropertiesSamplerblock* hlmsPropertiesSamplerblock = mParent->mPropertiesDockWidget->mHlmsPropertiesSamplerblock;
-        hlmsPropertiesSamplerblock->setObject(static_cast<HlmsNodeSamplerblock*>(node));
-        mParent->mPropertiesDockWidget->setHlmsPropertiesSamplerblockVisible(true);
+        if (hlmsPropertiesSamplerblock)
+        {
+            hlmsPropertiesSamplerblock->setObject(static_cast<HlmsNodeSamplerblock*>(node));
+            mParent->mPropertiesDockWidget->setHlmsPropertiesSamplerblockVisible(true);
+        }
     }
     else if (node->getTitle() == NODE_TITLE_MACROBLOCK)
     {
         HlmsPropertiesMacroblock* hlmsPropertiesMacroblock = mParent->mPropertiesDockWidget->mHlmsPropertiesMacroblock;
-        hlmsPropertiesMacroblock->setObject(static_cast<HlmsNodeMacroblock*>(node));
-        mParent->mPropertiesDockWidget->setHlmsPropertiesMacroblockVisible(true);
+        if (hlmsPropertiesMacroblock)
+        {
+            hlmsPropertiesMacroblock->setObject(static_cast<HlmsNodeMacroblock*>(node));
+            mParent->mPropertiesDockWidget->setHlmsPropertiesMacroblockVisible(true);
+        }
     }
     else if (node->getTitle() == NODE_TITLE_BLENDBLOCK)
     {
         HlmsPropertiesBlendblock* hlmsPropertiesBlendblock = mParent->mPropertiesDockWidget->mHlmsPropertiesBlendblock;
-        hlmsPropertiesBlendblock->setObject(static_cast<HlmsNodeBlendblock*>(node));
-        mParent->mPropertiesDockWidget->setHlmsPropertiesBlendblockVisible(true);
+        if (hlmsPropertiesBlendblock)
+        {
+            hlmsPropertiesBlendblock->setObject(static_cast<HlmsNodeBlendblock*>(node));
+            mParent->mPropertiesDockWidget->setHlmsPropertiesBlendblockVisible(true);
+        }
     }
 }
 

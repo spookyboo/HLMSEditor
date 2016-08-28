@@ -38,6 +38,7 @@
 #include "ogre3_renderman.h"
 #include "hlms_editor_plugin.h"
 #include "recent_file_action.h"
+#include "hlms_utils_manager.h"
 #include "constants.h"
 
 QT_BEGIN_NAMESPACE
@@ -59,15 +60,18 @@ class MainWindow : public QMainWindow
         Magus::OgreManager* getOgreManager(void) const {return mOgreManager;}
         PropertiesDockWidget* mPropertiesDockWidget; // Make is public for easy access
         TextureDockWidget* mTextureDockWidget; // Make is public for easy access
-        void initDatablocks(void); // To be called by the editor window, to indicate that a new Hlms datablock is created
-        void initDatablock(void); // To be called by the editor window, to indicate that a new Hlms datablock is created (new version, which doesn't destroy all datablocks)
+        void initCurrentDatablockFileName(void); // Set the name of the current json file to ""
         void getListOfResources(void); // Function to test which resources are loaded
-        void getAndSetFirstDatablock(void); // Get the first datablock from all datablocks and set it to the item in the renderwindow
-        void destroyAllDatablocks(void); // Destroy all datablocks
+        //void destroyAllDatablocks(void); // Destroy all datablocks
         void destroyDatablock (const QString& datablockName); // Destroy a particular datablock
-        void destroyDatablocksExceptGiven(const Ogre::String& datablockName); // Destroy all datablocks, except the one passed
+        //void destroyDatablocksExceptGiven(const Ogre::String& datablockName); // Destroy all datablocks, except the one passed
         EditorHlmsTypes getCurrentDatablockType(void); // Returns the current hlms type
         void loadTextureBrowserCfg(void);
+        void setCurrentDatablockNames(const Ogre::IdString& name, const Ogre::String& fullName)
+        {
+            mCurrentDatablockFullName = fullName;
+            mCurrentDatablockName = name;
+        }
 
     protected:
         // Save the content of a resource vector
@@ -82,6 +86,8 @@ class MainWindow : public QMainWindow
         void saveV2Mesh(Ogre::MeshPtr v2MeshPtr, QString modelFileName);
         void detachMaterialsFromItem (void);
         void restoreMaterialsOfItem (void);
+        void createSpecialDatablocks (void);
+        void destroySpecialDatablocks(void);
 
 	private slots:
         void doNewProjectAction(void);
@@ -125,7 +131,7 @@ class MainWindow : public QMainWindow
         void loadDatablockAndSet(const QString jsonFileName);
         void loadModel(const QString modelFileName);
         void loadProject(const QString& fileName);
-        bool loadDatablock(const QString& jsonFileName);
+        //bool loadDatablock(const QString& jsonFileName);
         void saveDatablock(void);
         void loadMaterialBrowserCfg(void);
         void saveMaterialBrowserCfg(void);
@@ -133,7 +139,7 @@ class MainWindow : public QMainWindow
         void saveRecentHlmsFilesCfg(void);
         void loadRecentProjectFilesCfg(void);
         void saveRecentProjectFilesCfg(void);
-        void clearDatablocks(void);
+        //void clearDatablocks(void);
         Ogre::DataStreamPtr openFile(Ogre::String source);
 
         bool mFirst;
@@ -173,7 +179,8 @@ class MainWindow : public QMainWindow
         QString mMaterialFileName;
         QString mTextureFileName;
         QString mHlmsName; // Used to determine whether a hlms was already saved
-        Ogre::String mCurrentDatablockName; // The datablockname of mHlmsName; only used to temp store the name
+        Ogre::IdString mCurrentDatablockName; // The datablock name
+        Ogre::String mCurrentDatablockFullName; // The datablock full name
         bool mSaveTextureBrowserTimerActive;
         struct RecentFileStruct
         {
@@ -184,6 +191,7 @@ class MainWindow : public QMainWindow
         QList<RecentFileStruct> mRecentProjectFiles; // Used for recent Project files in menu
         QPoint mMaterialBrowserPosition;
         QSize mMaterialBrowserSize;
+        HlmsUtilsManager* mHlmsUtilsManager;
 };
 
 #endif

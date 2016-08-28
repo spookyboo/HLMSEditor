@@ -57,10 +57,10 @@ PropertiesDockWidget::PropertiesDockWidget(QString title, MainWindow* parent, Qt
     clear();
 
     // Make some space
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+    //setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     QRect rec = QApplication::desktop()->screenGeometry();
-    setMinimumWidth(0.25 * rec.width());
-    layout()->setSizeConstraint(QLayout::SetMinimumSize);
+    setMinimumWidth(0.1 * rec.width());
+    //layout()->setSizeConstraint(QLayout::SetMinimumSize);
 }
 
 //****************************************************************************/
@@ -89,6 +89,7 @@ void PropertiesDockWidget::createToolBars(void)
 //****************************************************************************/
 void PropertiesDockWidget::setHlmsPropertiesPbsDatablockVisible(bool visible)
 {
+    setVisible(true);
     mHlmsPropertiesPbsDatablock->setVisible(visible);
     if (visible)
         setWidget(mHlmsPropertiesPbsDatablock);
@@ -97,6 +98,7 @@ void PropertiesDockWidget::setHlmsPropertiesPbsDatablockVisible(bool visible)
 //****************************************************************************/
 void PropertiesDockWidget::setHlmsPropertiesUnlitDatablockVisible(bool visible)
 {
+    setVisible(true);
     mHlmsPropertiesUnlitDatablock->setVisible(visible);
     if (visible)
         setWidget(mHlmsPropertiesUnlitDatablock);
@@ -105,6 +107,7 @@ void PropertiesDockWidget::setHlmsPropertiesUnlitDatablockVisible(bool visible)
 //****************************************************************************/
 void PropertiesDockWidget::setHlmsPropertiesBlendblockVisible(bool visible)
 {
+    setVisible(true);
     mHlmsPropertiesBlendblock->setVisible(visible);
     if (visible)
         setWidget(mHlmsPropertiesBlendblock);
@@ -113,6 +116,7 @@ void PropertiesDockWidget::setHlmsPropertiesBlendblockVisible(bool visible)
 //****************************************************************************/
 void PropertiesDockWidget::setHlmsPropertiesMacroblockVisible(bool visible)
 {
+    setVisible(true);
     mHlmsPropertiesMacroblock->setVisible(visible);
     if (visible)
         setWidget(mHlmsPropertiesMacroblock);
@@ -121,6 +125,7 @@ void PropertiesDockWidget::setHlmsPropertiesMacroblockVisible(bool visible)
 //****************************************************************************/
 void PropertiesDockWidget::setHlmsPropertiesSamplerblockVisible(bool visible)
 {
+    setVisible(true);
     mHlmsPropertiesSamplerblock->setVisible(visible);
     if (visible)
         setWidget(mHlmsPropertiesSamplerblock);
@@ -130,11 +135,14 @@ void PropertiesDockWidget::setHlmsPropertiesSamplerblockVisible(bool visible)
 void PropertiesDockWidget::clear()
 {
     // Make all property windows invisible
+    setVisible(false);
+    /*
     mHlmsPropertiesPbsDatablock->setVisible(false);
     mHlmsPropertiesUnlitDatablock->setVisible(false);
     mHlmsPropertiesBlendblock->setVisible(false);
     mHlmsPropertiesMacroblock->setVisible(false);
     mHlmsPropertiesSamplerblock->setVisible(false);
+    */
 }
 
 //****************************************************************************/

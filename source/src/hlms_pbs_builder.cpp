@@ -193,7 +193,6 @@ HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNodeStructure(Magus::OgreManager*
 
         // Create the pbs node
         pbsnode = createPbsNode();
-        repositionPbsNode(pbsnode);
         enrichPbsNode(pbsnode, datablock);
 
         // Get all textures from the pbs
@@ -350,6 +349,7 @@ HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNode(void)
     HlmsNodePbsDatablock* node = new HlmsNodePbsDatablock(NODE_TITLE_PBS_DATABLOCK);
     node->setType(NODE_TYPE_PBS_DATABLOCK);
     mNodeEditor->addNode(node);
+    repositionPbsNode(node);
     return node;
 }
 
@@ -601,8 +601,8 @@ void HlmsPbsBuilder::repositionPbsNode(HlmsNodePbsDatablock* pbsnode)
 
     // Reposition the pbs node (this is only done once)
     QPointF pos = pbsnode->pos();
-    pos.setX(-1.5f * pbsnode->getWidth());
-    pos.setY(-1.0f * pbsnode->getHeigth());
+    //pos.setX(-1.0f * pbsnode->getWidth());
+    //pos.setY(-0.5f * pbsnode->getHeigth());
     pbsnode->setPos(pos);
 }
 
@@ -629,7 +629,7 @@ void HlmsPbsBuilder::connectNodes(HlmsNodePbsDatablock* pbsnode,
     // Reposition the sampler node
     QPointF pos = pbsnode->pos();
     pos.setX(pos.x() + pbsnode->getWidth() + 2 * portPbs->pos().y());
-    pos.setY(portPbs->pos().y() - pbsnode->getHeigth());
+    pos.setY(portPbs->pos().y());
     samplernode->setPos(pos);
 }
 

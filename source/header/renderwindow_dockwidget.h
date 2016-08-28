@@ -63,6 +63,8 @@ class RenderwindowDockWidget : public QDockWidget
 	private slots:
         void doChangeItemAction(QAction* action);
         void handleToggleModelAndLight(void);
+        void handleMarker(void);
+        void handleToggleHoover(void);
         void doTransformationWidgetValueChanged(void);
         void doChangeBackgroundAction(void);
 
@@ -73,6 +75,7 @@ class RenderwindowDockWidget : public QDockWidget
         // Something has been screwed up (Ogre bug?) but I didn't bother to look into it. Preloading of all meshes in
         // the models.cfg solves the issue.
         void preLoadMeshMap(void);
+        virtual void resizeEvent(QResizeEvent *e);
 
 	private:
 		MainWindow* mParent;
@@ -81,12 +84,19 @@ class RenderwindowDockWidget : public QDockWidget
         QAction* mChangeBackgroundAction;
         QToolBar* mHToolBar;
         QPushButton* mButtonToggleModelAndLight;
+        QPushButton* mButtonMarker;
+        QPushButton* mButtonToggleHoover;
         QMap<QString, MeshStruct> mMeshMap;
         Magus::TransformationWidget* mTransformationWidget;
         QMenu* mMeshMenu;
         bool mButtonModelActive;
-        QIcon mLightIcon;
-        QIcon mModelIcon;
+        bool mToggleHooverOn; // If true, use mouseover to highlight the subItems
+        QIcon* mLightIcon;
+        QIcon* mModelIcon;
+        QIcon* mMarkerIcon;
+        QIcon* mHooverOnIcon;
+        QIcon* mHooverOffIcon;
+
 };
 
 #endif

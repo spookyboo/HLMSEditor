@@ -29,7 +29,15 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
 	QDockWidget (title, parent, flags), 
     mParent(parent),
     mButtonToggleModelAndLight(0),
-    mButtonModelActive(true)
+    mButtonMarker(0),
+    mButtonToggleHoover(0),
+    mButtonModelActive(true),
+    mToggleHooverOn(false),
+    mLightIcon(0),
+    mModelIcon(0),
+    mMarkerIcon(0),
+    mHooverOnIcon(0),
+    mHooverOffIcon(0)
 {
     // Create the meshMap
     QFile file(QString("models.cfg"));
@@ -72,12 +80,32 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     parent->getOgreManager()->registerOgreWidget(OGRE_WIDGET_RENDERWINDOW, mOgreWidget);
     mOgreWidget->createRenderWindow(parent->getOgreManager());
 
+    // Set the max. width of the renderwindow
+    QRect rec = QApplication::desktop()->screenGeometry();
+    setMaximumWidth(1.78 * rec.height()); // 1.78 = 16/9
+
+    // Load the list with meshes
     preLoadMeshMap();
+
+    mOgreWidget->setFocus();
 }
 
 //****************************************************************************/
 RenderwindowDockWidget::~RenderwindowDockWidget(void)
 {
+}
+
+//-------------------------------------------------------------------------------------
+void RenderwindowDockWidget::resizeEvent(QResizeEvent *e)
+{
+    // The heigth of the renderwindow follows the width, because the renderwindow must alway be
+    // square; this is because the render-texture for picking and highlighting is square
+    // Note, that this setup makes manual resizing of the height impossible
+    if(e->isAccepted())
+    {
+        setMinimumHeight(0.5625 * e->size().width()); // 0.5625 = 9/16
+        setMaximumHeight(0.5625 * e->size().width());
+    }
 }
 
 //****************************************************************************/
@@ -141,10 +169,19 @@ void RenderwindowDockWidget::createToolBars(void)
 
     // Button to switch between model and light movement/rotation
     mButtonToggleModelAndLight = new QPushButton();
-    mModelIcon = QIcon(ICON_MODEL);
-    mLightIcon = QIcon(ICON_LIGHT);
-    mButtonToggleModelAndLight->setIcon(mModelIcon);
+    mButtonMarker = new QPushButton();
+    mButtonToggleHoover = new QPushButton();
+    mModelIcon = new QIcon(ICON_MODEL);
+    mLightIcon = new QIcon(ICON_LIGHT);
+    mMarkerIcon = new QIcon(ICON_MARKER);
+    mHooverOnIcon = new QIcon(ICON_HOOVER_ON);
+    mHooverOffIcon = new QIcon(ICON_HOOVER_OFF);
+    mButtonToggleModelAndLight->setIcon(*mModelIcon);
+    mButtonMarker->setIcon(*mMarkerIcon);
+    mButtonToggleHoover->setIcon(*mHooverOffIcon);
     connect(mButtonToggleModelAndLight, SIGNAL(clicked(bool)), this, SLOT(handleToggleModelAndLight()));
+    connect(mButtonMarker, SIGNAL(clicked(bool)), this, SLOT(handleMarker()));
+    connect(mButtonToggleHoover, SIGNAL(clicked(bool)), this, SLOT(handleToggleHoover()));
 
     // Transformation widget
     mTransformationWidget = new Magus::TransformationWidget(mHToolBar);
@@ -153,13 +190,15 @@ void RenderwindowDockWidget::createToolBars(void)
     mTransformationWidget->setListEnabled(false);
     mInnerMain->addToolBar(Qt::TopToolBarArea, mHToolBar);
     mHToolBar->setMinimumHeight(32);
-    mHToolBar->setMinimumWidth(8 * 32);
+    //mHToolBar->setMinimumWidth(8 * 32);
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     // Add widgets
     mHToolBar->addWidget(mTransformationWidget);
     mHToolBar->addWidget(mButtonToggleModelAndLight);
+    mHToolBar->addWidget(mButtonMarker);
+    mHToolBar->addWidget(mButtonToggleHoover);
     mHToolBar->addWidget(spacer);
     mHToolBar->addAction(mChangeBackgroundAction);
     connect(mTransformationWidget, SIGNAL(valueChanged()), this, SLOT(doTransformationWidgetValueChanged()));
@@ -193,18 +232,34 @@ void RenderwindowDockWidget::handleToggleModelAndLight(void)
     if (mButtonModelActive)
     {
         // Enable Light axis
-        mButtonToggleModelAndLight->setIcon(mLightIcon);
+        mButtonToggleModelAndLight->setIcon(*mLightIcon);
         mOgreWidget->enableLightItem(true);
     }
     else
     {
         // Disable Light axis
-        mButtonToggleModelAndLight->setIcon(mModelIcon);
+        mButtonToggleModelAndLight->setIcon(*mModelIcon);
         mOgreWidget->enableLightItem(false);
     }
     mButtonModelActive = !mButtonModelActive;
 }
 
+//****************************************************************************/
+void RenderwindowDockWidget::handleMarker(void)
+{
+    mOgreWidget->resetCamera();
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::handleToggleHoover(void)
+{
+    if (mToggleHooverOn)
+        mButtonToggleHoover->setIcon(*mHooverOffIcon);
+    else
+        mButtonToggleHoover->setIcon(*mHooverOnIcon);
+    mToggleHooverOn = !mToggleHooverOn;
+    mOgreWidget->setHoover(mToggleHooverOn);
+}
 
 //****************************************************************************/
 void RenderwindowDockWidget::updateTransformationWidgetFromOgreWidget(void)

@@ -22,16 +22,19 @@
 #include "ogre3_renderman.h"
 #include "Compositor/OgreCompositorManager2.h"
 #include "Compositor/OgreCompositorNodeDef.h"
+#include "Compositor/OgreCompositorWorkspace.h"
 #include "Compositor/Pass/OgreCompositorPassDef.h"
 #include "Compositor/Pass/PassClear/OgreCompositorPassClearDef.h"
 #include "OgreRenderSystem.h"
+#include "OgreHardwarePixelBuffer.h"
 #include "OgreCommon.h"
 #include "OgreTextureManager.h"
 #include "OgreTimer.h"
-#include "OgreHlmsPbs.h"
-#include "OgreHlmsUnlit.h"
 #include "OgreHlmsManager.h"
+#include "OgreHlmsPbs.h"
 #include "OgreHlmsPbsDatablock.h"
+#include "OgreHlmsUnlit.h"
+#include "OgreHlmsUnlitDatablock.h"
 #include "constants.h"
 
 namespace Magus
@@ -40,36 +43,135 @@ namespace Magus
     QOgreWidget::QOgreWidget(QWidget* parent) :
         QWidget(parent),
         mRoot(0),
+        mWorkspace(0),
+        mWorkspaceRtt(0),
+        mRtt(0),
         mOgreRenderWindow(0),
         mCamera(0),
         mCameraManager(0),
         mTimeSinceLastFrame (0.0f),
         mItem(0),
+        mItemRtt(0),
         mLightAxisItem(0),
         mLight(0),
         mSceneNode(0),
+        mSceneNodeRtt(0),
         mLightNode(0),
         mLightAxisNode(0),
         mSceneCreated(false),
         mSystemInitialized(false),
         mRotateCameraMode(true),
         mShiftDown(false),
-        mMouseDown(false)
+        mMouseDown(false),
+        mLatestSubItemIndexHighlighted(-1),
+        mLatestSubItemDatablock(0),
+        mHoover(false)
     {
         setAttribute(Qt::WA_OpaquePaintEvent);
         setAttribute(Qt::WA_PaintOnScreen);
-        setMinimumSize(240,240);
-        resize(800,600);
+        mSize = QSize(100, 100);
+        resize(mSize);
         setFocusPolicy(Qt::StrongFocus);
         setMouseTracking(true);
         mBackground = Ogre::ColourValue(0.1f, 0.1f, 0.1f);
         mAbsolute = Ogre::Vector2::ZERO;
         mRelative = Ogre::Vector2::ZERO;
-    }
+        mHelpColour = Ogre::ColourValue::Red;
+        mCustomRenderTexture.setNull();
+
+        // Fill the colourmap
+
+        // Index 0-9
+        mColourMap[0] = QVector3D(0.1f, 0.0f, 0.0f);
+        mColourMap[1] = QVector3D(0.2f, 0.0f, 0.0f);
+        mColourMap[2] = QVector3D(0.3f, 0.0f, 0.0f);
+        mColourMap[3] = QVector3D(0.4f, 0.0f, 0.0f);
+        mColourMap[4] = QVector3D(0.5f, 0.0f, 0.0f);
+        mColourMap[5] = QVector3D(0.6f, 0.0f, 0.0f);
+        mColourMap[6] = QVector3D(0.7f, 0.0f, 0.0f);
+        mColourMap[7] = QVector3D(0.8f, 0.0f, 0.0f);
+        mColourMap[8] = QVector3D(0.9f, 0.0f, 0.0f);
+        mColourMap[9] = QVector3D(1.0f, 0.0f, 0.0f);
+
+        // Index 10-19
+        mColourMap[10] = QVector3D(0.0f, 0.1f, 0.0f);
+        mColourMap[11] = QVector3D(0.0f, 0.2f, 0.0f);
+        mColourMap[12] = QVector3D(0.0f, 0.3f, 0.0f);
+        mColourMap[13] = QVector3D(0.0f, 0.4f, 0.0f);
+        mColourMap[14] = QVector3D(0.0f, 0.5f, 0.0f);
+        mColourMap[15] = QVector3D(0.0f, 0.6f, 0.0f);
+        mColourMap[16] = QVector3D(0.0f, 0.7f, 0.0f);
+        mColourMap[17] = QVector3D(0.0f, 0.8f, 0.0f);
+        mColourMap[18] = QVector3D(0.0f, 0.9f, 0.0f);
+        mColourMap[19] = QVector3D(0.0f, 1.0f, 0.0f);
+
+        // Index 20-29
+        mColourMap[20] = QVector3D(0.0f, 0.0f, 0.1f);
+        mColourMap[21] = QVector3D(0.0f, 0.0f, 0.2f);
+        mColourMap[22] = QVector3D(0.0f, 0.0f, 0.3f);
+        mColourMap[23] = QVector3D(0.0f, 0.0f, 0.4f);
+        mColourMap[24] = QVector3D(0.0f, 0.0f, 0.5f);
+        mColourMap[25] = QVector3D(0.0f, 0.0f, 0.6f);
+        mColourMap[26] = QVector3D(0.0f, 0.0f, 0.7f);
+        mColourMap[27] = QVector3D(0.0f, 0.0f, 0.8f);
+        mColourMap[28] = QVector3D(0.0f, 0.0f, 0.9f);
+        mColourMap[29] = QVector3D(0.0f, 0.0f, 1.0f);
+
+        // Index 30-39
+        mColourMap[30] = QVector3D(0.1f, 0.1f, 0.0f);
+        mColourMap[31] = QVector3D(0.2f, 0.2f, 0.0f);
+        mColourMap[32] = QVector3D(0.3f, 0.3f, 0.0f);
+        mColourMap[33] = QVector3D(0.4f, 0.4f, 0.0f);
+        mColourMap[34] = QVector3D(0.5f, 0.5f, 0.0f);
+        mColourMap[35] = QVector3D(0.6f, 0.6f, 0.0f);
+        mColourMap[36] = QVector3D(0.7f, 0.7f, 0.0f);
+        mColourMap[37] = QVector3D(0.8f, 0.8f, 0.0f);
+        mColourMap[38] = QVector3D(0.9f, 0.9f, 0.0f);
+        mColourMap[39] = QVector3D(1.0f, 1.0f, 0.0f);
+
+        // Index 40-49
+        mColourMap[40] = QVector3D(0.1f, 0.0f, 0.1f);
+        mColourMap[41] = QVector3D(0.2f, 0.0f, 0.2f);
+        mColourMap[42] = QVector3D(0.3f, 0.0f, 0.3f);
+        mColourMap[43] = QVector3D(0.4f, 0.0f, 0.4f);
+        mColourMap[44] = QVector3D(0.5f, 0.0f, 0.5f);
+        mColourMap[45] = QVector3D(0.6f, 0.0f, 0.6f);
+        mColourMap[46] = QVector3D(0.7f, 0.0f, 0.7f);
+        mColourMap[47] = QVector3D(0.8f, 0.0f, 0.8f);
+        mColourMap[48] = QVector3D(0.9f, 0.0f, 0.9f);
+        mColourMap[49] = QVector3D(1.0f, 0.0f, 1.0f);
+
+        // Index 50-59
+        mColourMap[50] = QVector3D(0.0f, 0.1f, 0.1f);
+        mColourMap[51] = QVector3D(0.0f, 0.2f, 0.2f);
+        mColourMap[52] = QVector3D(0.0f, 0.3f, 0.3f);
+        mColourMap[53] = QVector3D(0.0f, 0.4f, 0.4f);
+        mColourMap[54] = QVector3D(0.0f, 0.5f, 0.5f);
+        mColourMap[55] = QVector3D(0.0f, 0.6f, 0.6f);
+        mColourMap[56] = QVector3D(0.0f, 0.7f, 0.7f);
+        mColourMap[57] = QVector3D(0.0f, 0.8f, 0.8f);
+        mColourMap[58] = QVector3D(0.0f, 0.9f, 0.9f);
+        mColourMap[59] = QVector3D(0.0f, 1.0f, 1.0f);
+}
 
     //****************************************************************************/
     QOgreWidget::~QOgreWidget()
     {
+        // Cannot destroy the render texture here, because that would be too late (Ogre root is already deleted)
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::cleanup(void)
+    {
+        Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
+        compositorManager->removeAllWorkspaceDefinitions();
+        mWorkspaceRtt = 0;
+        mWorkspace = 0;
+
+        mCustomRenderTexture->unload();
+        Ogre::TextureManager::getSingleton().unload(mRenderTextureName);
+        Ogre::TextureManager::getSingleton().remove(mRenderTextureName);
+        mCustomRenderTexture.setNull();
     }
 
     //****************************************************************************/
@@ -112,7 +214,7 @@ namespace Magus
         }
 
         #if defined(Q_OS_MAC) || defined(Q_OS_WIN)
-            Ogre::String windowHandle = Ogre::StringConverter::toString((size_t)(this->winId()));;
+            Ogre::String windowHandle = Ogre::StringConverter::toString((size_t)(this->winId()));
             parameters["externalWindowHandle"] = windowHandle;
             parameters["parentWindowHandle"] = windowHandle;
         #else
@@ -157,6 +259,9 @@ namespace Magus
 
         // Create the compositor
         createCompositor();
+
+        // Create the compositor RTT
+        createCompositorRenderToTexture();
     }
 
     //****************************************************************************/
@@ -164,18 +269,21 @@ namespace Magus
     {
         // Create the node and attach the entity
         mSceneNode = mSceneManager->getRootSceneNode( Ogre::SCENE_DYNAMIC )->createChildSceneNode( Ogre::SCENE_DYNAMIC );
+        mSceneNodeRtt = mSceneNode->createChildSceneNode( Ogre::SCENE_DYNAMIC );
         mSceneNode->setPosition(0.0, 0.0, 0.0);
+        mSceneNodeRtt->setPosition(0.0, 0.0, 0.0);
         mCameraManager->setTarget(mSceneNode);
 
         // Create an item
         Ogre::Vector3 scale(25.0f, 25.0f, 25.0f);
         createItem ("cube.mesh", scale);
 
-        // Remove the datablock currently set on this mesh
+        // Remove the datablock currently set on this item
         Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
         Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
 
         setDefaultDatablockItem();
+
         if (hlmsPbs->getDatablock(DATABLOCK_DEBUG_CUBE))
             hlmsPbs->destroyDatablock(DATABLOCK_DEBUG_CUBE);
 
@@ -200,13 +308,15 @@ namespace Magus
         mLightAxisNode->attachObject(mLightAxisItem);
         mLightAxisNode->setScale(Ogre::Vector3(0.12f, 0.12f, 0.12f));
         createLightAxisMaterial();
-        mLightAxisItem->setVisible(false); // TEST
+        mLightAxisItem->setVisible(false);
+        createHighlightMaterial();
 
         // Put some light at the bottom, so the materials are not completely dark
         mSceneManager->setAmbientLight( Ogre::ColourValue::White,
                                         Ogre::ColourValue::White,
                                         Ogre::Vector3( 0, 1, 0 ).normalisedCopy());
 
+        resetCamera();
         mSystemInitialized = true;
     }
 
@@ -215,19 +325,25 @@ namespace Magus
     {
         try
         {
-            // Create a Pbs datablock
             Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
             Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
+            Ogre::HlmsDatablock* datablock = hlmsPbs->getDatablock(AXIS_MATERIAL_NAME);
+
+            // Return  if the datablock already exists
+            if (datablock)
+                return;
+
+            // Create a Pbs datablock
             Ogre::HlmsMacroblock macroblock;
             macroblock.mDepthCheck = false;
             macroblock.mDepthWrite = false;
-            Ogre::HlmsPbsDatablock* datablock = static_cast<Ogre::HlmsPbsDatablock*>(
+            Ogre::HlmsPbsDatablock*datablockPbs = static_cast<Ogre::HlmsPbsDatablock*>(
                         hlmsPbs->createDatablock( AXIS_MATERIAL_NAME,
                                                   AXIS_MATERIAL_NAME,
                                                   macroblock,
                                                   Ogre::HlmsBlendblock(),
                                                   Ogre::HlmsParamVec()));
-            datablock->setDiffuse(Ogre::Vector3(1, 0, 0));
+            datablockPbs->setDiffuse(Ogre::Vector3(1, 0, 0));
             mLightAxisItem->setDatablock(AXIS_MATERIAL_NAME);
         }
         catch (Ogre::Exception e){}
@@ -238,27 +354,56 @@ namespace Magus
     {
         try
         {
-             mLightAxisItem->setDatablock(DEFAULT_DATABLOCK_NAME);
-             Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
-             Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
-             if (hlmsPbs->getDatablock(AXIS_MATERIAL_NAME))
-                 hlmsPbs->destroyDatablock(AXIS_MATERIAL_NAME);
+            mLightAxisItem->setDatablock(DEFAULT_DATABLOCK_NAME);
+            Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+            Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
+            Ogre::HlmsDatablock* datablock = hlmsPbs->getDatablock(AXIS_MATERIAL_NAME);
+            if (datablock && datablock->getLinkedRenderables().size() == 0)
+                hlmsPbs->destroyDatablock(AXIS_MATERIAL_NAME);
         }
         catch (Ogre::Exception e){}
     }
 
     //****************************************************************************/
-    void QOgreWidget::setLightAxisMaterial(void)
+    void QOgreWidget::createHighlightMaterial(void)
     {
+        // The highlight material is used for mItem
         try
         {
-             mLightAxisItem->setDatablock("1234567890HlmsLightAxisItem");
+            // Create a Pbs datablock
+            Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+            Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
+            Ogre::HlmsMacroblock macroblock;
+            macroblock.mDepthCheck = true;
+            macroblock.mDepthWrite = true;
+            Ogre::HlmsPbsDatablock* datablock = static_cast<Ogre::HlmsPbsDatablock*>(
+                        hlmsPbs->createDatablock( HIGHLIGHT_MATERIAL_NAME,
+                                                  HIGHLIGHT_MATERIAL_NAME,
+                                                  macroblock,
+                                                  Ogre::HlmsBlendblock(),
+                                                  Ogre::HlmsParamVec()));
+            datablock->setDiffuse(Ogre::Vector3(0.0f, 1.0f, 0.0f));
+            datablock->setSpecular(Ogre::Vector3(0.0f, 1.0f, 0.0f));
         }
         catch (Ogre::Exception e){}
     }
 
     //****************************************************************************/
-    void QOgreWidget::createItem(const Ogre::String& itemName, const Ogre::Vector3& scale)
+    void QOgreWidget::destroyHighlightMaterial(void)
+    {
+        resetHighlight();
+        try
+        {
+            Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+            Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
+            if (hlmsPbs->getDatablock(HIGHLIGHT_MATERIAL_NAME))
+                hlmsPbs->destroyDatablock(HIGHLIGHT_MATERIAL_NAME);
+        }
+        catch (Ogre::Exception e){}
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::createItem(const Ogre::String& meshName, const Ogre::Vector3& scale)
     {
         try
         {
@@ -274,7 +419,7 @@ namespace Magus
             }
 
             // Create a new item
-            mItem = mSceneManager->createItem(itemName,
+            mItem = mSceneManager->createItem(meshName,
                                               Ogre::ResourceGroupManager::
                                               AUTODETECT_RESOURCE_GROUP_NAME,
                                               Ogre::SCENE_DYNAMIC );
@@ -284,14 +429,33 @@ namespace Magus
             if (!datablockName.empty())
                 mItem->setDatablock(datablockName);
             mItem->setRenderQueueGroup(1);
+
+            // Delete the old itemRtt if available
+            if (mItemRtt)
+            {
+                destroyUnlitDatablocksRtt();
+                mSceneNodeRtt->detachAllObjects();
+                mSceneManager->destroyItem(mItemRtt);
+            }
+
+            // Create a new itemRtt
+            mItemRtt = mSceneManager->createItem(meshName,
+                                                 Ogre::ResourceGroupManager::
+                                                 AUTODETECT_RESOURCE_GROUP_NAME,
+                                                 Ogre::SCENE_DYNAMIC );
+
+            mSceneNodeRtt->attachObject(mItemRtt);
+            createUnlitDatablocksRtt();
+            mItemRtt->setRenderQueueGroup(1);
         }
+
         catch (Ogre::Exception e)
         {
         }
     }
 
     //****************************************************************************/
-    void QOgreWidget::setItem(Ogre::Item* item, const Ogre::Vector3& scale)
+    void QOgreWidget::setItem(Ogre::Item* item, Ogre::Item* itemRtt, const Ogre::Vector3& scale)
     {
         Ogre::String datablockName = "";
 
@@ -311,11 +475,29 @@ namespace Magus
         if (!datablockName.empty())
             mItem->setDatablock(datablockName);
         mItem->setRenderQueueGroup(1);
+
+        // Delete the old itemRtt if available
+        if (mItemRtt)
+        {
+            destroyUnlitDatablocksRtt();
+            mSceneNodeRtt->detachAllObjects();
+            mSceneManager->destroyItem(mItemRtt);
+        }
+
+        // Set the new itemRtt
+        mItemRtt = itemRtt;
+        mSceneNodeRtt->attachObject(mItemRtt);
+        createUnlitDatablocksRtt();
+        mItemRtt->setRenderQueueGroup(1);
     }
 
     //****************************************************************************/
     void QOgreWidget::setDefaultDatablockItem(void)
     {
+        // If one of the subItems was highlighted, restore it
+        resetHighlight();
+
+        // Set the default datablock
         Ogre::HlmsDatablock* itemDatablock = mItem->getSubItem(0)->getDatablock();
         Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
         Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
@@ -328,6 +510,107 @@ namespace Magus
                 mItem->setDatablock(hlmsPbs->getDefaultDatablock());
             else
                 mItem->setDatablock(DEFAULT_DATABLOCK_NAME);
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::setDefaultDatablockItemRtt(void)
+    {
+        Ogre::HlmsDatablock* itemRttDatablock = mItemRtt->getSubItem(0)->getDatablock();
+        Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+        Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
+        Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+
+        if (itemRttDatablock != hlmsUnlit->getDefaultDatablock())
+            mItemRtt->setDatablock(hlmsUnlit->getDefaultDatablock());
+        else
+            if (itemRttDatablock != hlmsPbs->getDefaultDatablock())
+                mItemRtt->setDatablock(hlmsPbs->getDefaultDatablock());
+            else
+                mItemRtt->setDatablock(DEFAULT_DATABLOCK_NAME);
+
+        // Set latest index and datablock to default value
+        //mLatestSubItemIndexHighlighted = -1;
+        //mLatestSubItemDatablock = 0;
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::createUnlitDatablocksRtt(void)
+    {
+        // Iterate through the subItems of mItemRtt and assign a colourvalue that corresponds with the subItem index
+        // Set an unlit datablock with that colour
+        Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+        Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT) );
+        Ogre::HlmsMacroblock macroblock;
+        Ogre::HlmsBlendblock blendblock;
+        Ogre::ColourValue colour;
+        Ogre::String datablockName;
+
+        // Create a new datablock
+        size_t numSubItems = mItemRtt->getNumSubItems();
+        Ogre::SubItem* subItem;
+        for (size_t i = 0; i < numSubItems; ++i)
+        {
+            subItem = mItemRtt->getSubItem(i);
+            datablockName = Ogre::StringConverter::toString(i);
+            Ogre::HlmsUnlitDatablock* datablock = static_cast<Ogre::HlmsUnlitDatablock*>(
+                        hlmsUnlit->createDatablock( datablockName,
+                                                    datablockName,
+                                                    macroblock,
+                                                    blendblock,
+                                                    Ogre::HlmsParamVec()));
+            colour = calculateIndexToColour(i);
+            datablock->setUseColour(true);
+            datablock->setColour(colour);
+            subItem->setDatablock(datablockName);
+        }
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::destroyUnlitDatablocksRtt(void)
+    {
+        // Detach all datablocks from mItemRtt
+        setDefaultDatablockItemRtt();
+
+        // Destroy all unlit materials; assume they are not attached anymore
+        Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+        Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+        size_t numSubItems = mItemRtt->getNumSubItems();
+        for (size_t i = 0; i < numSubItems; ++i)
+        {
+            hlmsUnlit->destroyDatablock(Ogre::StringConverter::toString(i));
+        }
+    }
+
+    //****************************************************************************/
+    const Ogre::ColourValue& QOgreWidget::calculateIndexToColour(int index)
+    {
+        QVector3D v = mColourMap[index];
+        mHelpColour.r = v.x();
+        mHelpColour.g = v.y();
+        mHelpColour.b = v.z();
+        return mHelpColour;
+    }
+
+    //****************************************************************************/
+    int QOgreWidget::calculateColourToIndex(const Ogre::ColourValue& colourValue)
+    {
+        QVector3D v;
+        int index = -1;
+        QMap <int, QVector3D>::iterator it = mColourMap.begin();
+        QMap <int, QVector3D>::iterator itEnd = mColourMap.end();
+        while (it != itEnd)
+        {
+            v = it.value();
+            index = it.key();
+            if (qAbs(v.x() - colourValue.r) < 0.05f &&
+                qAbs(v.y() - colourValue.g) < 0.05f &&
+                qAbs(v.z() - colourValue.b) < 0.05f)
+                return index;
+
+            ++it;
+        }
+
+        return -1;
     }
 
     //****************************************************************************/
@@ -388,10 +671,39 @@ namespace Magus
         }
 
         mTimeSinceLastFrame = timeSinceLastFrame;
+
+        // Repaint
         repaint();
         if (this->size() != this->parentWidget()->size())
+        {
             resize(this->parentWidget()->size());
-    }
+        }
+
+        if (mWorkspaceRtt)
+        {
+            mSceneNode->setVisible(false);
+            bool lightVisibility;
+            if (mLightAxisItem)
+            {
+                lightVisibility = mLightAxisItem->getVisible();
+                mLightAxisItem->setVisible(false);
+            }
+            mSceneNodeRtt->setVisible(true);
+            mSceneManager->updateSceneGraph();
+
+            // Update workspace: begin
+            mWorkspaceRtt->_beginUpdate(true);
+            mWorkspaceRtt->_update();
+            mWorkspaceRtt->_endUpdate(true);
+            // Update workspace: end
+
+            // Reset the visibility
+            mSceneNode->setVisible(true);
+            mSceneNodeRtt->setVisible(false);
+            if (mLightAxisItem)
+                mLightAxisItem->setVisible(lightVisibility);
+        }
+}
 
     //-------------------------------------------------------------------------------------
     QPaintEngine* QOgreWidget::paintEngine() const
@@ -411,12 +723,12 @@ namespace Magus
     {
         if(e->isAccepted())
         {
-            const QSize &newSize = e->size();
+            mSize = e->size();
             if(mCamera && mOgreRenderWindow)
             {
-                mOgreRenderWindow->resize(newSize.width(), newSize.height());
+                mOgreRenderWindow->resize(mSize.width(), mSize.height());
                 mOgreRenderWindow->windowMovedOrResized();
-                Ogre::Real aspectRatio = Ogre::Real(newSize.width()) / Ogre::Real(newSize.height());
+                Ogre::Real aspectRatio = Ogre::Real(mSize.width()) / Ogre::Real(mSize.height());
                 mCamera->setAspectRatio(aspectRatio);
             }
         }
@@ -426,20 +738,26 @@ namespace Magus
     void QOgreWidget::keyPressEvent(QKeyEvent * ev)
     {
         if(mSystemInitialized)
+        {
             mCameraManager->injectKeyDown(ev);
+            if(ev->key() == Qt::Key_Shift)
+                mShiftDown = true;
 
-        if(ev->key() == Qt::Key_Shift)
-            mShiftDown = true;
+            // Testcode to write the render-texture to a file
+            if(ev->key() == Qt::Key_S)
+                mRtt->writeContentsToFile("rtt.png");
+        }
     }
 
     //****************************************************************************/
     void QOgreWidget::keyReleaseEvent(QKeyEvent * ev)
     {
         if(mSystemInitialized)
+        {
             mCameraManager->injectKeyUp(ev);
-
-        if(ev->key() == Qt::Key_Shift)
-            mShiftDown = false;
+            if(ev->key() == Qt::Key_Shift)
+                mShiftDown = false;
+        }
     }
 
     //****************************************************************************/
@@ -450,6 +768,13 @@ namespace Magus
             mRotateCameraMode = !enabled; // We want to rotate the light if enabled = true
             mLightAxisItem->setVisible(enabled);
         }
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::setHoover(bool hoover)
+    {
+        mHoover = hoover;
+        resetHighlight();
     }
 
     //****************************************************************************/
@@ -464,6 +789,10 @@ namespace Magus
                 mCameraManager->injectMouseMove(mRelative);
             else
                 rotateLight(mRelative);
+
+            // Determine over which subItem the mouse hoovers
+            if (mHoover)
+                highlightSubItem(mAbsolute);
         }
     }
 
@@ -482,29 +811,32 @@ namespace Magus
     void QOgreWidget::wheelEvent(QWheelEvent *e)
     {
         if(mSystemInitialized)
+        {
             mCameraManager->injectMouseWheel(e);
-
-        mLightAxisNode->setPosition(mCamera->getPosition() + Ogre::Vector3(0, -27, -100));
+            mLightAxisNode->setPosition(mCamera->getPosition() + Ogre::Vector3(0, -27, -100));
+        }
     }
 
     //****************************************************************************/
     void QOgreWidget::mousePressEvent( QMouseEvent* e )
     {
         if(mSystemInitialized)
+        {
             mCameraManager->injectMouseDown(e);
-
-        if (e->button() == Qt::MiddleButton || e->button() == Qt::LeftButton)
-            mMouseDown = true;
+            if (e->button() == Qt::MiddleButton || e->button() == Qt::LeftButton)
+                mMouseDown = true;
+        }
     }
 
     //****************************************************************************/
     void QOgreWidget::mouseReleaseEvent( QMouseEvent* e )
     {
         if(mSystemInitialized)
+        {
             mCameraManager->injectMouseUp(e);
-
-        if (e->button() == Qt::MiddleButton || e->button() == Qt::LeftButton)
-            mMouseDown = false;
+            if (e->button() == Qt::MiddleButton || e->button() == Qt::LeftButton)
+                mMouseDown = false;
+        }
     }
 
     //****************************************************************************/
@@ -526,4 +858,122 @@ namespace Magus
     {
         mOgreRenderWindow->writeContentsToFile(fileName);
     }
+
+    //****************************************************************************/
+    void QOgreWidget::createCompositorRenderToTexture(void)
+    {
+        // Create a render-texture to determine on which subitem the mouse pointer is pointing at
+        mCustomRenderTexture = Ogre::TextureManager::getSingleton().createManual(mRenderTextureName,
+                                                                                 Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                                                                 Ogre::TEX_TYPE_2D,
+                                                                                 RTT_SIZE_X,
+                                                                                 RTT_SIZE_Y,
+                                                                                 1,
+                                                                                 Ogre::PF_R8G8B8A8,
+                                                                                 Ogre::TU_RENDERTARGET);
+        mCustomRenderTexture->load();
+        mRtt = mCustomRenderTexture->getBuffer(0)->getRenderTarget();
+        Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
+        const Ogre::String workspaceName = Ogre::StringConverter::toString(mRoot->getTimer()->getMicroseconds());
+        const Ogre::IdString workspaceNameHash = workspaceName;
+        compositorManager->createBasicWorkspaceDef(workspaceName, Ogre::ColourValue::Black);
+        mWorkspaceRtt = compositorManager->addWorkspace(mSceneManager, (Ogre::RenderTarget*)mRtt, mCamera, workspaceNameHash, false);
+    }
+
+    //****************************************************************************/
+    const Ogre::ColourValue& QOgreWidget::getColourAtRenderToTexture(size_t x, size_t y)
+    {
+        // Sometimes the mousecoordinates are beyond the renderwindow. To prevent crashes in
+        // pixelbox.getColourAt the maximum values of the mousecoordinates are validated
+        mHelpColour = Ogre::ColourValue::Black;
+        if (x > RTT_SIZE_X || y > RTT_SIZE_Y)
+            return mHelpColour;
+
+        size_t formatSize = Ogre::PixelUtil::getNumElemBytes(Ogre::PF_R8G8B8A8);
+        Ogre::uchar* data = OGRE_ALLOC_T(Ogre::uchar, RTT_SIZE_X * RTT_SIZE_Y * formatSize, Ogre::MEMCATEGORY_RENDERSYS);
+        Ogre::PixelBox pixelbox (RTT_SIZE_X, RTT_SIZE_Y, 1, Ogre::PF_R8G8B8A8, data);
+        mRtt->copyContentsToMemory(pixelbox, Ogre::RenderTarget::FB_AUTO);
+        mHelpColour = pixelbox.getColourAt(x, y, 0);
+        OGRE_FREE(data, Ogre::MEMCATEGORY_RENDERSYS);
+        return mHelpColour;
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::highlightSubItem(Ogre::Vector2 mousePos)
+    {
+        size_t x = (mousePos.x / (float)mSize.width()) * RTT_SIZE_X;
+        size_t y = ((mousePos.y) / (float)mSize.height()) * RTT_SIZE_Y;
+        Ogre::ColourValue colour = getColourAtRenderToTexture (x, y); // Get the colour of the mouse position (from the render texture)
+        int index = calculateColourToIndex (colour); // Get the index of the subitem, based on the colour at the mouse position
+
+        // Determine whether index is out of bounds (because of the symplistic scalar to colour mapping algorithm)
+        if (index >= 0 && index >= mItem->getNumSubItems())
+            return;
+
+        // Determine whether the mouse is still over the latest subitem
+        if (index == mLatestSubItemIndexHighlighted)
+            return;
+
+        // Determine whether index is still on a subitem
+        if (index < 0)
+        {
+            if (mLatestSubItemIndexHighlighted >= 0)
+            {
+                // The mouse is currently not pointing to any subitem, but was previously pointing to a subitem, so restore the material
+                resetHighlight();
+            }
+            else
+            {
+                // The mouse is currently not pointing to any subitem and was previously also not pointing to a subitem
+                return;
+            }
+        }
+        else
+        {
+            if (mLatestSubItemIndexHighlighted >= 0)
+            {
+                // The mouse is pointing to a subitem and previously pointing to another subitem, so restore the material
+                resetHighlight();
+            }
+
+            // Highlight the subItem
+            mLatestSubItemIndexHighlighted = index;
+            setHighlightDatablockToSubItem (index);
+        }
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::setHighlightDatablockToSubItem(int index)
+    {
+        mLatestSubItemDatablock = mItem->getSubItem(index)->getDatablock();
+        mItem->getSubItem(index)->setDatablock(HIGHLIGHT_MATERIAL_NAME);
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::resetHighlight(void)
+    {
+        if (!mItem || !mLatestSubItemDatablock)
+            return;
+
+        if (mLatestSubItemIndexHighlighted == -1)
+            return;
+
+        if (mLatestSubItemIndexHighlighted >= 0 && mLatestSubItemIndexHighlighted >= mItem->getNumSubItems())
+            return;
+
+        mItem->getSubItem(mLatestSubItemIndexHighlighted)->setDatablock(mLatestSubItemDatablock);
+        mLatestSubItemIndexHighlighted = -1;
+        mLatestSubItemDatablock = 0;
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::resetCamera(void)
+    {
+        mCamera->setPosition( Ogre::Vector3( 0, 40, 145) );
+        mCamera->lookAt( Ogre::Vector3( 0, 0, 0 ) );
+        mCamera->getParentSceneNode()->setOrientation(Ogre::Quaternion::IDENTITY);
+        mLightAxisNode->setPosition(mCamera->getPosition() + Ogre::Vector3(0, -27, -100));
+        mLightAxisNode->setOrientation(Ogre::Quaternion::IDENTITY);
+    }
+
 }

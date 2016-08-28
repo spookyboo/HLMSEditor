@@ -34,6 +34,7 @@ namespace Magus
     {
         mGlContext = 0;
         mCompositorPassProvider = 0;
+        mPauseRendering = true;
 
         #ifdef _DEBUG
             mResourcesCfg = "resources_d.cfg";
@@ -104,6 +105,16 @@ namespace Magus
         compositorManager->setCompositorPassProvider(0);
         OGRE_DELETE mCompositorPassProvider;
 
+        // Destroy render textures
+        // This is a piece of custom code specific for the HLMS Editor (assume that the OgreWidget is still available)
+        QMap<int, QOgreWidget*>::iterator i;
+        QOgreWidget* item = 0;
+        for (i = mQOgreWidgetMap.begin(); i != mQOgreWidgetMap.end(); ++i)
+        {
+            item = i.value();
+            item->cleanup();
+        }
+
         // Delete Ogre root
         delete mRoot;
     }
@@ -126,7 +137,12 @@ namespace Magus
             Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
         }
         catch (Ogre::Exception e){}
-
+        mPauseRendering = false;
+        try
+        {
+            mRoot->renderOneFrame(); // Render first
+        }
+        catch (Ogre::Exception e) {}
     }
 
     //-------------------------------------------------------------------------------------
@@ -237,6 +253,9 @@ namespace Magus
     //****************************************************************************/
     void OgreManager::renderOgreWidgetsOneFrame(void)
     {
+        if (mPauseRendering)
+            return;
+
         if (mRoot && !mQOgreWidgetMap.isEmpty())
         {
             // Determine time since last frame
@@ -245,7 +264,6 @@ namespace Magus
 
             // Render an one frame
             startTime = mTimer->getMillisecondsCPU();
-            mRoot->renderOneFrame();
             timeSinceLastFrame = (mTimer->getMillisecondsCPU() - startTime) / 1000.0f;
 
             // Update all QOgreWidgets
@@ -256,6 +274,13 @@ namespace Magus
                 item = i.value();
                 item->updateOgre(timeSinceLastFrame);
             }
+
+            try
+            {
+                // Put in a try-catch, because sometimes the application crashes after loading a big mesh
+                mRoot->renderOneFrame();
+            }
+            catch (Ogre::Exception e) {}
         }
     }
 
@@ -281,5 +306,11 @@ namespace Magus
     Ogre::Root* OgreManager::getOgreRoot(void)
     {
         return mRoot;
+    }
+
+    //****************************************************************************/
+    void OgreManager::pauseRendering (bool pause)
+    {
+        mPauseRendering = pause;
     }
 }
