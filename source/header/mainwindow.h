@@ -78,10 +78,10 @@ class MainWindow : public QMainWindow
         void newProjectName(void);
         void appendRecentHlms(const QString fileName); // Used for recent Hlms files in menu
         void appendRecentProject(const QString fileName); // Used for recent Project files in menu
-        bool isMeshV1(const QString modelFileName);
-        bool isMeshV2(const QString modelFileName);
+        bool isMeshV1(const QString meshFileName);
+        bool isMeshV2(const QString meshFileName);
         Ogre::MeshPtr convertMeshV1ToV2(const QString fileNameMeshV1);
-        void saveV2Mesh(Ogre::MeshPtr v2MeshPtr, QString modelFileName);
+        void saveV2Mesh(Ogre::MeshPtr v2MeshPtr, QString meshFileName);
         void detachMaterialsFromItem (void);
         void restoreMaterialsOfItem (void);
         void createSpecialDatablocks (void);
@@ -93,11 +93,12 @@ class MainWindow : public QMainWindow
         void doNewHlmsUnlitAction(void);
         void doOpenProjectMenuAction(void);
         void doOpenDatablockMenuAction(void);
-        void doOpenModelMenuAction(void);
+        void doOpenMeshMenuAction(void);
         void doSaveProjectMenuAction(void);
         void doSaveDatablockMenuAction(void);
         void doSaveAsProjectMenuAction(void);
         void doSaveAsDatablockMenuAction(void);
+        void doSaveAsMeshMenuAction(void);
         void doMaterialBrowserOpenMenuAction(void);
         void doMaterialBrowserAddMenuAction(void);
         void doQuitMenuAction(void);
@@ -114,8 +115,7 @@ class MainWindow : public QMainWindow
         void constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data);
         void doRecentHlmsFileAction(const QString& fileName);
         void doRecentProjectFileAction(const QString& fileName);
-        //void doMaterialBrowserAccepted(void);
-        void doMaterialBrowserAccepted(const QString& fileName); // TEST
+        void doMaterialBrowserAccepted(const QString& fileName);
         void doMaterialBrowserRejected(void);
         void doMaterialBrowserClosed(void);
 
@@ -127,9 +127,8 @@ class MainWindow : public QMainWindow
 		void createDockWindows(void);
 		void closeEvent(QCloseEvent* event);
         void loadDatablockAndSet(const QString jsonFileName);
-        void loadModel(const QString modelFileName);
+        void loadMesh(const QString meshFileName);
         void loadProject(const QString& fileName);
-        //bool loadDatablock(const QString& jsonFileName);
         void saveDatablock(void);
         void loadMaterialBrowserCfg(void);
         void saveMaterialBrowserCfg(void);
@@ -137,7 +136,6 @@ class MainWindow : public QMainWindow
         void saveRecentHlmsFilesCfg(void);
         void loadRecentProjectFilesCfg(void);
         void saveRecentProjectFilesCfg(void);
-        //void clearDatablocks(void);
         Ogre::DataStreamPtr openFile(Ogre::String source);
 
         bool mFirst;
@@ -155,11 +153,12 @@ class MainWindow : public QMainWindow
         QAction* mNewHlmsUnlitAction;
         QAction* mOpenProjectMenuAction;
         QAction* mOpenDatablockMenuAction;
-        QAction* mOpenModelMenuAction;
+        QAction* mOpenMeshMenuAction;
         QAction* mSaveProjectMenuAction;
         QAction* mSaveDatablockMenuAction;
         QAction* mSaveAsProjectMenuAction;
         QAction* mSaveAsDatablockMenuAction;
+        QAction* mSaveAsMeshMenuAction;
         QAction* mMaterialBrowserOpenMenuAction;
         QAction* mMaterialBrowserAddMenuAction;
         QAction* mTextureBrowserImportMenuAction;

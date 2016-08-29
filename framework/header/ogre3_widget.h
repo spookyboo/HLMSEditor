@@ -83,6 +83,9 @@ namespace Magus
             void resetCamera(void); // Set position/orientation to default
             void setHoover(bool hoover); // Determines whether the subItems are highlighted when the mousecursor hoovers over them
             void setCurrentDatablockName(const Ogre::IdString& datablockName);
+            void makeSnapshotOfItemMaterials(void); // Keep a map of all materials per subItem
+            void restoreSnapshotOfItemMaterials(void); // Assign the material to each subItem
+            Ogre::MeshPtr getCurrentMeshWithMaterialNames(void); // Returns the mesh associated with mItem
             void cleanup(void);
 
         protected:
@@ -119,6 +122,11 @@ namespace Magus
             Ogre::HlmsDatablock* mLatestSubItemDatablock;
             QSize mSize;
             Ogre::IdString mCurrentDatablockName;
+            const size_t RTT_SIZE_X = 256;
+            const size_t RTT_SIZE_Y = 144; // 9/16 x RTT_SIZE_X
+            QMap <int, QVector3D> mColourMap;
+            QMap <int, Ogre::String> mSnapshotDatablocks;
+            bool mHoover;
 
             virtual void createCompositor();
             virtual void createCompositorRenderToTexture();
@@ -154,10 +162,8 @@ namespace Magus
             void setHighlightDatablockToSubItem(int index);
             void setColourToDatablockOfSubItem(int index, const Ogre::ColourValue& colour);
             const Ogre::ColourValue& getColourOfDatablockOfSubItem(int index);
-            const size_t RTT_SIZE_X = 256;
-            const size_t RTT_SIZE_Y = 144; // 9/16 x RTT_SIZE_X
-            QMap <int, QVector3D> mColourMap;
-            bool mHoover;
+
+            Ogre::HlmsDatablock* getDatablockByFullName(const Ogre::String& fullName);
     };
 }
 

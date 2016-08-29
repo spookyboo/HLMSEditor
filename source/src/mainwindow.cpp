@@ -162,9 +162,9 @@ void MainWindow::createActions(void)
     mOpenDatablockMenuAction = new QAction(QString("Open Hlms"), this);
     mOpenDatablockMenuAction->setShortcut(QKeySequence(QString("Ctrl+Alt+O")));
     connect(mOpenDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doOpenDatablockMenuAction()));
-    mOpenModelMenuAction = new QAction(QString("Open Mesh"), this);
-    mOpenModelMenuAction->setShortcut(QKeySequence(QString("Ctrl+O")));
-    connect(mOpenModelMenuAction, SIGNAL(triggered()), this, SLOT(doOpenModelMenuAction()));
+    mOpenMeshMenuAction = new QAction(QString("Open Mesh"), this);
+    mOpenMeshMenuAction->setShortcut(QKeySequence(QString("Ctrl+O")));
+    connect(mOpenMeshMenuAction, SIGNAL(triggered()), this, SLOT(doOpenMeshMenuAction()));
 
     // Save
     mSaveProjectMenuAction = new QAction(QString("Save Project"), this);
@@ -181,6 +181,9 @@ void MainWindow::createActions(void)
     mSaveAsDatablockMenuAction = new QAction(QString("Save Hlms as"), this);
     mSaveAsDatablockMenuAction->setShortcut(QKeySequence(QString("Ctrl+Alt+A")));
     connect(mSaveAsDatablockMenuAction, SIGNAL(triggered()), this, SLOT(doSaveAsDatablockMenuAction()));
+    mSaveAsMeshMenuAction = new QAction(QString("Save Mesh as"), this);
+    mSaveAsMeshMenuAction->setShortcut(QKeySequence(QString("Ctrl+A")));
+    connect(mSaveAsMeshMenuAction, SIGNAL(triggered()), this, SLOT(doSaveAsMeshMenuAction()));
 
     // Quit
     mQuitMenuAction = new QAction(QString("Quit"), this);
@@ -235,7 +238,7 @@ void MainWindow::createMenus(void)
     fileMenuAction->addSeparator();
     fileMenuAction->addAction(mOpenDatablockMenuAction);
     fileMenuAction->addSeparator();
-    fileMenuAction->addAction(mOpenModelMenuAction);
+    fileMenuAction->addAction(mOpenMeshMenuAction);
 
     // Save
     fileMenuAction = mFileMenu->addMenu("Save");
@@ -248,6 +251,8 @@ void MainWindow::createMenus(void)
     fileMenuAction->addAction(mSaveAsProjectMenuAction);
     fileMenuAction->addSeparator();
     fileMenuAction->addAction(mSaveAsDatablockMenuAction);
+    fileMenuAction->addSeparator();
+    fileMenuAction->addAction(mSaveAsMeshMenuAction);
 
     // Import/Export
     Ogre::Root::PluginInstanceList plugins = mOgreManager->getOgreRoot()->getInstalledPlugins();
@@ -387,7 +392,6 @@ void MainWindow::newProjectName(void)
 //****************************************************************************/
 void MainWindow::doNewHlmsPbsAction(void)
 {
-    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
     mHlmsName = QString("");
     mNodeEditorDockWidget->newHlmsPbs();
 }
@@ -395,8 +399,6 @@ void MainWindow::doNewHlmsPbsAction(void)
 //****************************************************************************/
 void MainWindow::doNewHlmsUnlitAction(void)
 {
-    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
-    Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
     mHlmsName = QString("");
     mNodeEditorDockWidget->newHlmsUnlit();
 }
@@ -469,6 +471,12 @@ void MainWindow::loadProject(const QString& fileName)
             }
         }
     }
+
+    // TODO:
+    // Check the current mesh and determine which materials is uses
+    // Iterate through the materialbrowser of the loaded project and load the
+    // materials that are used in the mesh
+
     QApplication::restoreOverrideCursor();
 }
 
@@ -496,21 +504,6 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
     mHlmsName = jsonFileName;
     appendRecentHlms(jsonFileName);
     setCurrentDatablockNames (datablockStruct.datablockId, datablockStruct.datablockFullName);
-
-    // Set the datablock in the entity
-    //Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
-    //Ogre::HlmsDatablock* oldDatablock = item->getSubItem(0)->getDatablock();
-    //Ogre::String oldDatablockFullName = *oldDatablock->getFullName();
-
-    //if (oldDatablockFullName == datablockStruct.datablockFullName)
-    //{
-        //mNodeEditorDockWidget->nodeSelected(0);
-        //Ogre::LogManager::getSingleton().logMessage("MainWindow::loadDatablockAndSet -> Loaded datablock is equal to the one in the Item\n");
-        //return;
-    //}
-
-    // Set the datablock
-    //item->setDatablock(datablockStruct.datablock);
 
     // Create the pbs node structure
     QString s = datablockStruct.datablockFullName.c_str();
@@ -540,45 +533,46 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
 }
 
 //****************************************************************************/
-void MainWindow::doOpenModelMenuAction(void)
+void MainWindow::doOpenMeshMenuAction(void)
 {
-    // Load a model
+    // Load a mesh
     QString fileName;
-    fileName = QFileDialog::getOpenFileName(this, QString("Open Model"),
+    fileName = QFileDialog::getOpenFileName(this, QString("Open Mesh"),
                                             QString(""),
                                             QString("MESH (*.mesh);;"
                                                     "All files (*.*)"));
     if (!fileName.isEmpty())
     {
         mOgreManager->pauseRendering(true);
-        loadModel(fileName);
+        loadMesh(fileName);
         mOgreManager->pauseRendering(false);
     }
 }
 
 //****************************************************************************/
-void MainWindow::loadModel(const QString modelFileName)
+void MainWindow::loadMesh(const QString meshFileName)
 {
-    if (!Magus::fileExist(modelFileName))
+    if (!Magus::fileExist(meshFileName))
     {
-        QMessageBox::information(0, QString("Warning"), modelFileName + QString(" does not exist."));
+        QMessageBox::information(0, QString("Warning"), meshFileName + QString(" does not exist."));
         return;
     }
 
-    // 1. Model is an Ogre mesh?
-    QFileInfo info(modelFileName);
+    // 1. Mesh is an Ogre mesh?
+    QFileInfo info(meshFileName);
     QString suffix = info.suffix();
     QString baseName = info.fileName();
     if (suffix != "mesh")
     {
         // Only Ogre3d meshes allowed for now
-        QMessageBox::information(0, QString("Warning"), modelFileName + QString(" is not an Ogre3d mesh file."));
+        QMessageBox::information(0, QString("Warning"), meshFileName + QString(" is not an Ogre3d mesh file."));
         return;
     }
 
     // 2. Check mesh version
+    bool loaded = false;
     Ogre::String dataFolder = info.path().toStdString();
-    if (isMeshV1 (modelFileName))
+    if (isMeshV1 (meshFileName))
     {
         try
         {
@@ -588,15 +582,16 @@ void MainWindow::loadModel(const QString modelFileName)
             // Convert v1 mesh to v2 mesh
             Ogre::MeshPtr v2MeshPtr = convertMeshV1ToV2(baseName);
 
-            // Create an item and add it to the renderwindow
+            // Create (by the scenemanager) an item and rtt item from the v2MeshPtr and set them in the ogre widget
             Ogre::SceneManager* sceneManager = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getSceneManager();
             Ogre::Item* item = sceneManager->createItem(v2MeshPtr, Ogre::SCENE_DYNAMIC);
             Ogre::Item* itemRtt = sceneManager->createItem(v2MeshPtr, Ogre::SCENE_DYNAMIC);
             mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setItem(item, itemRtt, Ogre::Vector3::UNIT_SCALE);
 
             // Save the V2 mesh (ask whether it must be saved)
+            /*
             QMessageBox::StandardButton reply;
-            reply = QMessageBox::question(this, "Info", modelFileName +
+            reply = QMessageBox::question(this, "Info", meshFileName +
                                           QString(" is converted to a V2 mesh. Do you want to save it?"),
                                           QMessageBox::Yes|QMessageBox::No);
             if (reply == QMessageBox::Yes)
@@ -610,18 +605,19 @@ void MainWindow::loadModel(const QString modelFileName)
                 if (!fileName.isEmpty())
                     saveV2Mesh(v2MeshPtr, fileName);
             }
+            */
 
             // Add to mesh map
             mRenderwindowDockWidget->addToMeshMap(baseName, baseName, QVector3D(1.0f, 1.0f, 1.0f));
 
-            return;
+            loaded = false;
         }
         catch (Ogre::Exception e)
         {
-            QMessageBox::information(0, QString("Warning"), QString("Error while converting V1 mesh ") + modelFileName);
+            QMessageBox::information(0, QString("Warning"), QString("Error while converting V1 mesh ") + meshFileName);
         }
     }
-    if (isMeshV2 (modelFileName))
+    if (!loaded && isMeshV2 (meshFileName))
     {
         // 3. Load the V2 mesh
         try
@@ -629,7 +625,7 @@ void MainWindow::loadModel(const QString modelFileName)
             // Add the resource location first
             mOgreManager->getOgreRoot()->addResourceLocation(dataFolder, "FileSystem", "General");
 
-            // Create the mesh and add it to the render window
+            // Create (by the ogre widget) the V2 mesh, the item and the rtt item
             mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->createItem(baseName.toStdString(), Ogre::Vector3::UNIT_SCALE);
 
             // Add to mesh map
@@ -637,20 +633,28 @@ void MainWindow::loadModel(const QString modelFileName)
         }
         catch (Ogre::Exception e)
         {
-            QMessageBox::information(0, QString("Warning"), QString("Cannot load ") + modelFileName);
+            QMessageBox::information(0, QString("Warning"), QString("Cannot load ") + meshFileName);
         }
     }
+
+    // 4. Load all materials needed in the mesh. Get them from the materialbrowser
+    // Note, that it is assumed that the materialbrowser contains all the materials
+    // needed for the mesh.
+    // TODO:
+    // - Get a list of material names from the mesh
+    // - Search in the materialbrowser for the json files of those materials
+    // - Call mHlmsUtilsManager to load the json files
 }
 
 //****************************************************************************/
-void MainWindow::saveV2Mesh(Ogre::MeshPtr v2MeshPtr, QString modelFileName)
+void MainWindow::saveV2Mesh(Ogre::MeshPtr v2MeshPtr, QString meshFileName)
 {
     Ogre::MeshSerializer meshSerializer( 0 );
-    meshSerializer.exportMesh(v2MeshPtr.get(), modelFileName.toStdString());
+    meshSerializer.exportMesh(v2MeshPtr.get(), meshFileName.toStdString());
 }
 
 //****************************************************************************/
-bool MainWindow::isMeshV1(const QString modelFileName)
+bool MainWindow::isMeshV1(const QString meshFileName)
 {
     Ogre::SceneManager* sceneManager = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getSceneManager();
     if (!sceneManager)
@@ -660,7 +664,7 @@ bool MainWindow::isMeshV1(const QString modelFileName)
     try
     {
         Ogre::v1::MeshSerializer meshSerializer;
-        Ogre::DataStreamPtr stream(openFile(modelFileName.toStdString()));
+        Ogre::DataStreamPtr stream(openFile(meshFileName.toStdString()));
         Ogre::String name = Ogre::StringConverter::toString(mOgreManager->getOgreRoot()->getTimer()->getMicroseconds());
         v1MeshPtr = Ogre::v1::MeshManager::getSingleton().createManual(name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
         meshSerializer.importMesh(stream, v1MeshPtr.get());
@@ -675,7 +679,7 @@ bool MainWindow::isMeshV1(const QString modelFileName)
 }
 
 //****************************************************************************/
-bool MainWindow::isMeshV2(const QString modelFileName)
+bool MainWindow::isMeshV2(const QString meshFileName)
 {
     Ogre::SceneManager* sceneManager = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getSceneManager();
     if (!sceneManager)
@@ -687,7 +691,7 @@ bool MainWindow::isMeshV2(const QString modelFileName)
         Ogre::RenderSystem* renderSystem = mOgreManager->getOgreRoot()->getRenderSystem();
         Ogre::VaoManager* vaoManager = renderSystem->getVaoManager();
         Ogre::MeshSerializer meshSerializer(vaoManager);
-        Ogre::DataStreamPtr stream(openFile(modelFileName.toStdString()));
+        Ogre::DataStreamPtr stream(openFile(meshFileName.toStdString()));
         Ogre::String name = Ogre::StringConverter::toString(mOgreManager->getOgreRoot()->getTimer()->getMicroseconds());
         v2MeshPtr = Ogre::MeshManager::getSingleton().createManual(name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
         meshSerializer.importMesh(stream, v2MeshPtr.get());
@@ -756,12 +760,12 @@ void MainWindow::getListOfResources(void)
     while (it.hasMoreElements())
     {
         Ogre::ResourceManager* man = it.getNext();
-        Ogre::LogManager::getSingleton().logMessage("Resource Type = " + man->getResourceType());
+        //Ogre::LogManager::getSingleton().logMessage("Resource Type = " + man->getResourceType()); // DEBUG
         Ogre::ResourceManager::ResourceMapIterator mapit = man->getResourceIterator() ;
         while (mapit.hasMoreElements())
         {
             Ogre::ResourcePtr ptr = mapit.getNext();
-            Ogre::LogManager::getSingleton().logMessage("Resource Name = " + ptr->getName());
+            //Ogre::LogManager::getSingleton().logMessage("Resource Name = " + ptr->getName()); // DEBUG
         }
     }
 }
@@ -832,11 +836,12 @@ void MainWindow::doSaveDatablockMenuAction(void)
 void MainWindow::doSaveAsDatablockMenuAction(void)
 {
     // Get hlms name
-    mHlmsName = QString(mNodeEditorDockWidget->getCurrentDatablockName());
+    //mHlmsName = QString(mNodeEditorDockWidget->getCurrentDatablockName());
+    mHlmsName = mCurrentDatablockFullName.c_str();
     mHlmsName = mHlmsName + QString(".material.json");
     QString fileName = mHlmsName;
 
-    // Save all datablocks to one file
+    // Save the datablock to one file
     fileName = QFileDialog::getSaveFileName(this,
                                             QString("Save the Hlms"),
                                             mHlmsName,
@@ -856,7 +861,10 @@ void MainWindow::saveDatablock(void)
     QString baseNameJson = mHlmsName;
     baseNameJson = getBaseFileName(baseNameJson);
     QString thumb = baseNameJson + ".png";
+
+    // Update the thumb image in the material browser
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->saveToFile(THUMBS_PATH + thumb.toStdString());
+    loadMaterialBrowserCfg();
 
     // Clear all other datablocks, except the current one
     // First, detach the datablocks from the Item
@@ -865,10 +873,8 @@ void MainWindow::saveDatablock(void)
     // Destroy all special datablocks (axis, highlight and unlit rtt), otherwise they will also be saved or exported
     destroySpecialDatablocks();
 
-    //destroyDatablocksExceptGiven(mCurrentDatablockFullName); // mCurrentDatablockFullName was set by detachMaterialsFromItem
-
     // Destroy the rest of the datablock, except the current one
-    // Do not exclude special datablocks (although the are allready destroyed
+    // Do not exclude special datablocks (although the are already destroyed
     // Keep the list with loaded materials
     // Do not destroy the current datablock
     mHlmsUtilsManager->destroyDatablocks(false, true, mCurrentDatablockFullName);
@@ -877,19 +883,34 @@ void MainWindow::saveDatablock(void)
     if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_PBS)
     {
         hlmsManager->saveMaterials (Ogre::HLMS_PBS, fname);
-        mMaterialBrowser->addMaterial(baseNameJson, mHlmsName, thumb, HLMS_PBS);
         appendRecentHlms(mHlmsName);
     }
     else if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_UNLIT)
     {
         hlmsManager->saveMaterials (Ogre::HLMS_UNLIT, fname);
-        mMaterialBrowser->addMaterial(baseNameJson, mHlmsName, thumb, HLMS_UNLIT);
         appendRecentHlms(mHlmsName);
     }
 
     // Recreate and attach the materials again
-    mHlmsUtilsManager->reloadNonSpecialDatablocks();
-    restoreMaterialsOfItem();
+    mHlmsUtilsManager->reloadNonSpecialDatablocks(); // Reloades (and re-creates) the non-special datablocks
+    createSpecialDatablocks(); // Create special-datablocks and set them in the right (sub)Item (if needed)
+    restoreMaterialsOfItem(); // Set one or more of the reloaded datablocks back to the subitem in which it was
+}
+
+//****************************************************************************/
+void MainWindow::doSaveAsMeshMenuAction(void)
+{
+    // Save the mesh
+    QString meshFileName = "*.mesh";
+    Ogre::MeshPtr v2MeshPtr = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getCurrentMeshWithMaterialNames();
+    QFileInfo info(meshFileName);
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    QString("Save the mesh"),
+                                                    info.path() + QString("/.mesh"),
+                                                    QString("V2 mesh file (*.mesh)"));
+
+    if (!fileName.isEmpty())
+        saveV2Mesh(v2MeshPtr, fileName);
 }
 
 //****************************************************************************/
@@ -1080,7 +1101,6 @@ void MainWindow::doResetWindowLayoutMenuAction(void)
 {
     mRenderwindowDockWidget->show();
     addDockWidget(Qt::LeftDockWidgetArea, mRenderwindowDockWidget);
-    //mPropertiesDockWidget->show();
     addDockWidget(Qt::LeftDockWidgetArea, mPropertiesDockWidget);
 
     mTextureDockWidget->show();
@@ -1364,7 +1384,12 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
 {
     // Make sure that the materials are not attached to the entity before they are deleted
     detachMaterialsFromItem();
+
+    // Destroy the special datablocks
     destroySpecialDatablocks();
+
+    // Do not destroy special datablocks and destroy all other datablocks, but keep the list with loaded
+    // datablocks, although they are destroyed. This list is reused to recreate the datablocks again.
     mHlmsUtilsManager->destroyDatablocks(false, true);
 
     Ogre::HlmsEditorPluginData data;
@@ -1449,7 +1474,7 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
 
     // Perform pre-export actions (by the editor)
     if (plugin->getActionFlag() & Ogre::PAF_PRE_EXPORT_DELETE_ALL_DATABLOCKS)
-        mHlmsUtilsManager->destroyDatablocks(false, true);
+        mHlmsUtilsManager->destroyDatablocks(false, true); // Keep the list with loaded datablocks
 
     // Perform pre-export actions (by the plugin)
     plugin->performPreExportActions();
@@ -1477,11 +1502,16 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
 
     // Perform post-export actions (by the editor)
     if (plugin->getActionFlag() & Ogre::PAF_POST_EXPORT_DELETE_ALL_DATABLOCKS)
-        mHlmsUtilsManager->destroyDatablocks(false, true);
+        mHlmsUtilsManager->destroyDatablocks(false, true); // Keep the list with loaded datablocks
 
-    // Recreate and attach the materials again
+    // Recreate the datablocks from the list with datablocks that were loaded at the begin of this function
     mHlmsUtilsManager->reloadNonSpecialDatablocks();
+
+    // Attach the datablocks to the subItems
     restoreMaterialsOfItem();
+
+    // Recreate the special datablocks
+    createSpecialDatablocks();
 }
 
 //****************************************************************************/
@@ -1733,19 +1763,15 @@ void MainWindow::doMaterialBrowserClosed(void)
 //****************************************************************************/
 void MainWindow::detachMaterialsFromItem (void)
 {
-    // Detach the current datablock(s)
-    // TODO: There are more when multiple subitems are used
-
-    //Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
-    //Ogre::HlmsDatablock* currentDatablock = item->getSubItem(0)->getDatablock();
-    //mCurrentDatablockFullName = *currentDatablock->getFullName();
-    //mCurrentDatablockName = currentDatablock->getName();
+    // Make a snaphost of the item's materials and set the default datablock
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->makeSnapshotOfItemMaterials();
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
 }
 
 //****************************************************************************/
 void MainWindow::destroySpecialDatablocks(void)
 {
+    // Destroy the axis, highlight and rtt material
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->destroyLightAxisMaterial();
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->destroyHighlightMaterial();
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->destroyUnlitDatablocksRtt();
@@ -1754,23 +1780,17 @@ void MainWindow::destroySpecialDatablocks(void)
 //****************************************************************************/
 void MainWindow::restoreMaterialsOfItem (void)
 {
-    // First remove all 'dangling'  datablocks from mItem
+    // First remove all 'dangling'  datablocks from mItem just in case
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
 
-    // Recreate other datablocks if needed
-    // TODO: There are more when multiple subitems are used
-    //mHlmsUtilsManager->loadDatablock(mHlmsName);
-    Ogre::Item* item = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
-    item->setDatablock(mCurrentDatablockName);
-
-    // Recreate the axis and highlight the material again
-    createSpecialDatablocks();
+    // Restore the snapshot
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->restoreSnapshotOfItemMaterials();
 }
 
 //****************************************************************************/
 void MainWindow::createSpecialDatablocks (void)
 {
-    // Recreate the axis and highlight the material again
+    // (Re)create the axis, highlight and rtt material
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->createLightAxisMaterial();
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->createHighlightMaterial();
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->createUnlitDatablocksRtt();

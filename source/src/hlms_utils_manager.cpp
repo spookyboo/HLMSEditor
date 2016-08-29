@@ -50,7 +50,8 @@ HlmsUtilsManager::~HlmsUtilsManager(void)
 }
 
 //****************************************************************************/
-HlmsUtilsManager::DatablockStruct HlmsUtilsManager::loadDatablock(const QString& jsonFileName)
+HlmsUtilsManager::DatablockStruct HlmsUtilsManager::loadDatablock(const QString& jsonFileName,
+                                                                  bool makeSnaphot)
 {
     mLoadedDatablockStruct.datablock = 0;
     mLoadedDatablockStruct.datablockFullName = "";
@@ -77,10 +78,13 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::loadDatablock(const QString&
         Ogre::HlmsJson hlmsJson(hlmsManager);
         try
         {
-            // Make snapshot of the already loaded datablocks
-            makeSnapshotDatablocks();
+            if (makeSnaphot)
+            {
+                // Make snapshot of the already loaded datablocks
+                makeSnapshotDatablocks();
+            }
 
-            // Load the json file and crete the datablock(s)
+            // Load the json file and create the datablock(s)
             hlmsJson.loadMaterials(fname, jsonChar);
         }
 
@@ -88,14 +92,17 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::loadDatablock(const QString&
 
         file.close();
 
-        // Compare the snapshot with the loaded datablocks vector that is managed by 'this'  object
-        // The returned datablock is the newly created one (no exception) or the one that
-        // was already loaded (catched exception)
-        mLoadedDatablockStruct = compareSnapshotWithLoadedDatablocksAndAdminister(jsonFileName);
-
-        if (!mLoadedDatablockStruct.datablock)
+        if (makeSnaphot)
         {
-            Ogre::LogManager::getSingleton().logMessage("HlmsUtilsManager::loadDatablock -> Could not load the materialfile\n");
+            // Compare the snapshot with the loaded datablocks vector that is managed by 'this'  object
+            // The returned datablock is the newly created one (no exception) or the one that
+            // was already loaded (catched exception)
+            mLoadedDatablockStruct = compareSnapshotWithLoadedDatablocksAndAdminister(jsonFileName);
+
+            if (!mLoadedDatablockStruct.datablock)
+            {
+                Ogre::LogManager::getSingleton().logMessage("HlmsUtilsManager::loadDatablock -> Could not load the materialfile\n");
+            }
         }
 
     }
@@ -147,16 +154,14 @@ void HlmsUtilsManager::makeSnapshotDatablocks(void)
 //****************************************************************************/
 void HlmsUtilsManager::reloadNonSpecialDatablocks(void)
 {
-    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+    // Although mLoadedDatablocks suggest that it concerns loaded datablocks this is not
+    // always true. In some cases mLoadedDatablocks contains a list of previously loaded
+    // datablocks, but these datablocks are not actually in memory.
     QVectorIterator<DatablockStruct> itLoadedDatablocks(mLoadedDatablocks);
     while (itLoadedDatablocks.hasNext())
     {
         helperDatablockStruct = itLoadedDatablocks.next();
-        if (!hlmsManager->getDatablock(helperDatablockStruct.datablockId))
-        {
-            // The datablock does not exist anymore; reload it
-            loadDatablock(helperDatablockStruct.jsonFileName.c_str());
-        }
+        loadDatablock(helperDatablockStruct.jsonFileName.c_str(), false);
     }
 }
 
@@ -377,7 +382,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
         // If not excluded, mark it to be destroyed
         if (!exclude)
         {
-            Ogre::LogManager::getSingleton().logMessage("To be destroyed: " + fullName); // DEBUG
+            //Ogre::LogManager::getSingleton().logMessage("To be destroyed: " + fullName); // DEBUG
             pbsDatablocksToBeDestroyed.append(pbsDatablock);
         }
 
@@ -427,7 +432,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
         // If not excluded, mark it to be destroyed
         if (!exclude)
         {
-            Ogre::LogManager::getSingleton().logMessage("To be destroyed: " + fullName); // DEBUG
+            //Ogre::LogManager::getSingleton().logMessage("To be destroyed: " + fullName); // DEBUG
             unlitDatablocksToBeDestroyed.append(unlitDatablock);
         }
 
@@ -441,7 +446,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
         pbsDatablock = itPbsToBeDestroyed.next();
         if (pbsDatablock)
         {
-            Ogre::LogManager::getSingleton().logMessage("Destroying Pbs: " + *pbsDatablock->getFullName()); // DEBUG
+            //Ogre::LogManager::getSingleton().logMessage("Destroying Pbs: " + *pbsDatablock->getFullName()); // DEBUG
             hlmsPbs->destroyDatablock(pbsDatablock->getName());
         }
     }
@@ -453,7 +458,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
         unlitDatablock = itUnlitToBeDestroyed.next();
         if (unlitDatablock)
         {
-            Ogre::LogManager::getSingleton().logMessage("Destroying Unlit: " + *unlitDatablock->getFullName()); // DEBUG
+            //Ogre::LogManager::getSingleton().logMessage("Destroying Unlit: " + *unlitDatablock->getFullName()); // DEBUG
             hlmsUnlit->destroyDatablock(unlitDatablock->getName());
         }
     }

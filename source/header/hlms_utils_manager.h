@@ -53,10 +53,12 @@ class HlmsUtilsManager
          * - If the jsonFile is loaded, the first datablock found in the json file is returned
          * - If the datablock was already loaded, the loaded datablock is returned
          * - If the json file could not be loaded, a 0 is returned
-         * The HlmsUtilsManager keeps track of every loaded datablock and stores the
-         * name of the datablock, the type of the datablock and the reference to the jsonFileName
+         * When makeSnaphot == true, the HlmsUtilsManager keeps track of every loaded datablock and
+         * stores the name of the datablock, the type of the datablock and the reference to
+         * the jsonFileName.
          */
-        DatablockStruct loadDatablock(const QString& jsonFileName);
+        DatablockStruct loadDatablock(const QString& jsonFileName,
+                                      bool makeSnaphot = true);
 
         /* Returns the latest loaded datablock
          */

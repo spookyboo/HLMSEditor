@@ -35,6 +35,8 @@
 #include "OgreHlmsPbsDatablock.h"
 #include "OgreHlmsUnlit.h"
 #include "OgreHlmsUnlitDatablock.h"
+#include "OgreMesh2.h"
+#include "OgreSubMesh2.h"
 #include "constants.h"
 
 namespace Magus
@@ -427,8 +429,8 @@ namespace Magus
 
             mSceneNode->attachObject(mItem);
             mSceneNode->setScale(scale);
-            if (!datablockName.empty())
-                mItem->setDatablock(datablockName);
+//            if (!datablockName.empty())
+//                mItem->setDatablock(datablockName);
             mItem->setRenderQueueGroup(1);
 
             // Delete the old itemRtt if available
@@ -473,8 +475,8 @@ namespace Magus
         mItem = item;
         mSceneNode->attachObject(mItem);
         mSceneNode->setScale(scale);
-        if (!datablockName.empty())
-            mItem->setDatablock(datablockName);
+//        if (!datablockName.empty())
+//            mItem->setDatablock(datablockName);
         mItem->setRenderQueueGroup(1);
 
         // Delete the old itemRtt if available
@@ -532,6 +534,7 @@ namespace Magus
     //****************************************************************************/
     void QOgreWidget::setDefaultDatablockItemRtt(void)
     {
+        resetHighlight(); // TEST
         Ogre::HlmsDatablock* itemRttDatablock = mItemRtt->getSubItem(0)->getDatablock();
         Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
         Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
@@ -1027,6 +1030,120 @@ namespace Magus
         mCurrentDatablockName = datablockName;
         if (!mHoover)
             mItem->setDatablock(datablockName);
+    }
+
+
+    //****************************************************************************/
+    void QOgreWidget::makeSnapshotOfItemMaterials(void)
+    {
+        Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+        Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
+        Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+        size_t numSubItems = mItemRtt->getNumSubItems();
+        Ogre::SubItem* subItem;
+        Ogre::HlmsDatablock* datablock;
+        Ogre::String datablockFullName;
+
+        for (size_t i = 0; i < numSubItems; ++i)
+        {
+            subItem = mItem->getSubItem(i);
+            datablock = subItem->getDatablock();
+            if (datablock)
+            {
+                datablockFullName = *datablock->getFullName();
+                if (    datablock != hlmsPbs->getDefaultDatablock() &&
+                        datablock != hlmsUnlit->getDefaultDatablock() &&
+                        datablockFullName != DEFAULT_DATABLOCK_NAME &&
+                        datablockFullName != Magus::AXIS_MATERIAL_NAME &&
+                        datablockFullName != Magus::HIGHLIGHT_MATERIAL_NAME)
+                {
+                    mSnapshotDatablocks[i] = datablockFullName;
+                    //Ogre::LogManager::getSingleton().logMessage("make snaphot: " +  datablockFullName + "\n"); // DEBUG
+                }
+
+            }
+        }
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::restoreSnapshotOfItemMaterials(void)
+    {
+        QMap <int, Ogre::String>::iterator it = mSnapshotDatablocks.begin();
+        QMap <int, Ogre::String>::iterator itEnd = mSnapshotDatablocks.end();
+        int index;
+        Ogre::String datablockFullName;
+        Ogre::HlmsDatablock* datablock;
+
+        while (it != itEnd)
+        {
+            datablockFullName = it.value();
+            index = it.key();
+            datablock = getDatablockByFullName(datablockFullName);
+            if (datablock)
+            {
+                mItem->getSubItem(index)->setDatablock(datablock);
+                //Ogre::LogManager::getSingleton().logMessage("restore snaphot: " +  datablockFullName + "\n"); // DEBUG
+            }
+            ++it;
+        }
+    }
+
+    //****************************************************************************/
+    Ogre::HlmsDatablock* QOgreWidget::getDatablockByFullName(const Ogre::String& fullName)
+    {
+        Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+        Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
+        Ogre::HlmsPbs* hlmsUnlit = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+
+        Ogre::Hlms::HlmsDatablockMap::const_iterator itorPbs = hlmsPbs->getDatablockMap().begin();
+        Ogre::Hlms::HlmsDatablockMap::const_iterator endPbs = hlmsPbs->getDatablockMap().end();
+        Ogre::HlmsDatablock* datablock;
+        while (itorPbs != endPbs)
+        {
+            datablock = itorPbs->second.datablock;
+            if (datablock && *datablock->getFullName() == fullName)
+                return datablock;
+
+            ++itorPbs;
+        }
+
+        Ogre::Hlms::HlmsDatablockMap::const_iterator itorUnlit = hlmsUnlit->getDatablockMap().begin();
+        Ogre::Hlms::HlmsDatablockMap::const_iterator endUnlit = hlmsUnlit->getDatablockMap().end();
+        while (itorUnlit != endUnlit)
+        {
+            datablock = itorUnlit->second.datablock;
+            if (datablock && *datablock->getFullName() == fullName)
+                return datablock;
+
+            ++itorUnlit;
+        }
+
+        return 0;
+    }
+
+
+    //****************************************************************************/
+    Ogre::MeshPtr QOgreWidget::getCurrentMeshWithMaterialNames(void)
+    {
+        Ogre::MeshPtr mesh = mItem->getMesh();
+        Ogre::Mesh* meshPtr = mesh.getPointer();
+        size_t numSubItems = mItem->getNumSubItems();
+        Ogre::SubItem* subItem;
+        Ogre::HlmsDatablock* datablock;
+        Ogre::String datablockFullName;
+
+        for (size_t i = 0; i < numSubItems; ++i)
+        {
+            subItem = mItem->getSubItem(i);
+            datablock = subItem->getDatablock();
+            if (datablock)
+            {
+                datablockFullName = *datablock->getFullName();
+                meshPtr->getSubMesh(i)->setMaterialName(datablockFullName);
+            }
+        }
+
+        return mItem->getMesh();
     }
 
 }
