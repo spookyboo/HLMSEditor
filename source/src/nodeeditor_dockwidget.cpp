@@ -312,19 +312,24 @@ void NodeEditorDockWidget::doNewMacroblockAction(void)
 //****************************************************************************/
 void NodeEditorDockWidget::doCogHToolbarAction(void)
 {
+    Ogre::IdString name;
+
     // Construct a datablock and set it to the current item in the renderwindow
     if (mHlmsPbsDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
         mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
         mCurrentDatablockName = mHlmsPbsDatablockNode->getName();
+        name = mCurrentDatablockName.toStdString();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
-        mParent->destroyDatablock(mCurrentDatablockName);
+
+        QVector<int> indices = mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
+        mParent->destroyDatablock(name);
         Ogre::HlmsPbsDatablock* datablock = mHlmsPbsBuilder->createPbsDatablock(ogreManager, mHlmsPbsDatablockNode);
         if (datablock)
         {
+            mParent->replaceCurrentDatablock(indices, datablock->getName());
             mParent->setCurrentDatablockNames(datablock->getName(), *datablock->getFullName());
-            //mLatestDatablockName = mHlmsPbsDatablockNode->getName();
         }
     }
     else if (mHlmsUnlitDatablockNode)
@@ -332,13 +337,16 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
         mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
         mCurrentDatablockName = mHlmsUnlitDatablockNode->getName();
+        name = mCurrentDatablockName.toStdString();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
-        mParent->destroyDatablock(mCurrentDatablockName);
+
+        QVector<int> indices = mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
+        mParent->destroyDatablock(name);
         Ogre::HlmsUnlitDatablock* datablock = mHlmsUnlitBuilder->createUnlitDatablock(ogreManager, mHlmsUnlitDatablockNode);
         if (datablock)
         {
+            mParent->replaceCurrentDatablock(indices, datablock->getName());
             mParent->setCurrentDatablockNames(datablock->getName(), *datablock->getFullName());
-            //mLatestDatablockName = mHlmsUnlitDatablockNode->getName();
         }
     }
 }
@@ -347,19 +355,29 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
 void NodeEditorDockWidget::nodeToBeDeleted(QtNode* node)
 {
     if (mHlmsPbsDatablockNode == node)
-    {
-        Magus::OgreManager* ogreManager = mParent->getOgreManager();
-        mHlmsPbsBuilder->deletePbsDatablock(ogreManager, mHlmsPbsDatablockNode->getName());
-        mHlmsPbsDatablockNode = 0;
-        mParent->initCurrentDatablockFileName();
-    }
+        deleteHlmsPbsDatablockNode();
     else if (mHlmsUnlitDatablockNode == node)
-    {
-        Magus::OgreManager* ogreManager = mParent->getOgreManager();
-        mHlmsUnlitBuilder->deleteUnlitDatablock(ogreManager, mHlmsUnlitDatablockNode->getName());
-        mHlmsUnlitDatablockNode = 0;
-        mParent->initCurrentDatablockFileName();
-    }
+        deleteHlmsUnlitDatablockNode();
+}
+
+//****************************************************************************/
+void NodeEditorDockWidget::deleteHlmsPbsDatablockNode(void)
+{
+    Ogre::IdString name = mHlmsPbsDatablockNode->getName().toStdString();
+    mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
+    mParent->destroyDatablock(name);
+    mHlmsPbsDatablockNode = 0;
+    mParent->initCurrentDatablockFileName();
+}
+
+//****************************************************************************/
+void NodeEditorDockWidget::deleteHlmsUnlitDatablockNode(void)
+{
+    Ogre::IdString name = mHlmsUnlitDatablockNode->getName().toStdString();
+    mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
+    mParent->destroyDatablock(name);
+    mHlmsUnlitDatablockNode = 0;
+    mParent->initCurrentDatablockFileName();
 }
 
 //****************************************************************************/
@@ -493,6 +511,12 @@ QMessageBox::StandardButton NodeEditorDockWidget::fileDoesNotExistsWarning(const
 //****************************************************************************/
 void NodeEditorDockWidget::clear (void)
 {
+    // First delete the current datablock node (because mNodeEditor->clear() doesnt't call nodeToBeDeleted)
+    if (mHlmsPbsDatablockNode)
+        deleteHlmsPbsDatablockNode();
+    else if (mHlmsUnlitDatablockNode)
+        deleteHlmsUnlitDatablockNode();
+
     mNodeEditor->clear();
     mHlmsPbsDatablockNode = 0;
     mHlmsUnlitDatablockNode = 0;

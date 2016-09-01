@@ -62,18 +62,17 @@ class MainWindow : public QMainWindow
         TextureDockWidget* mTextureDockWidget; // Make is public for easy access
         void initCurrentDatablockFileName(void); // Set the name of the current json file to ""
         void getListOfResources(void); // Function to test which resources are loaded
-        //void destroyAllDatablocks(void); // Destroy all datablocks
-        void destroyDatablock (const QString& datablockName); // Destroy a particular datablock
-        //void destroyDatablocksExceptGiven(const Ogre::String& datablockName); // Destroy all datablocks, except the one passed
         EditorHlmsTypes getCurrentDatablockType(void); // Returns the current hlms type
         void loadTextureBrowserCfg(void);
         void setCurrentDatablockNames(const Ogre::IdString& name, const Ogre::String& fullName);
+        QVector<int> getSubItemIndicesWithDatablockAndReplaceWithDefault(const Ogre::IdString& datablockName); // Get list of indeces, which have datablock 'datablockName'
+        void replaceCurrentDatablock(QVector<int> indices, Ogre::IdString datablockName); // Set the datablocks in the subItems, identified by 'indices'
         const Ogre::String& getCurrentDatablockFullName (void) {return mCurrentDatablockFullName;}
         const Ogre::IdString& getCurrentDatablockName (void) {return mCurrentDatablockName;}
+        void destroyDatablock(const Ogre::IdString& datablockName);
 
     protected:
-        // Save the content of a resource vector
-        void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources);
+        void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources); // Save the content of a resource vector
         QMessageBox::StandardButton fileDoesNotExistsWarning(const QString& fileName);
         void newProjectName(void);
         void appendRecentHlms(const QString fileName); // Used for recent Hlms files in menu
@@ -86,6 +85,25 @@ class MainWindow : public QMainWindow
         void restoreMaterialsOfItem (void);
         void createSpecialDatablocks (void);
         void destroySpecialDatablocks(void);
+        void setDatablocksFromMaterialBrowserInItem(void);
+        const Ogre::String& getJsonFileNameFromMaterialBrowser(const Ogre::String& fullName);
+        void createActions(void);
+        void createMenus(void);
+        void createToolBars(void);
+        void createStatusBar(void);
+        void createDockWindows(void);
+        void closeEvent(QCloseEvent* event);
+        void loadDatablockAndSet(const QString jsonFileName);
+        void loadMesh(const QString meshFileName);
+        void loadProject(const QString& fileName);
+        void saveDatablock(void);
+        void loadMaterialBrowserCfg(void);
+        void saveMaterialBrowserCfg(void);
+        void loadRecentHlmsFilesCfg(void);
+        void saveRecentHlmsFilesCfg(void);
+        void loadRecentProjectFilesCfg(void);
+        void saveRecentProjectFilesCfg(void);
+        Ogre::DataStreamPtr openFile(Ogre::String source);
 
 	private slots:
         void doNewProjectAction(void);
@@ -120,24 +138,6 @@ class MainWindow : public QMainWindow
         void doMaterialBrowserClosed(void);
 
 	private:
-		void createActions(void);
-		void createMenus(void);
-		void createToolBars(void);
-		void createStatusBar(void);
-		void createDockWindows(void);
-		void closeEvent(QCloseEvent* event);
-        void loadDatablockAndSet(const QString jsonFileName);
-        void loadMesh(const QString meshFileName);
-        void loadProject(const QString& fileName);
-        void saveDatablock(void);
-        void loadMaterialBrowserCfg(void);
-        void saveMaterialBrowserCfg(void);
-        void loadRecentHlmsFilesCfg(void);
-        void saveRecentHlmsFilesCfg(void);
-        void loadRecentProjectFilesCfg(void);
-        void saveRecentProjectFilesCfg(void);
-        Ogre::DataStreamPtr openFile(Ogre::String source);
-
         bool mFirst;
         QString mTempString;
         Ogre::String mTempOgreString;
@@ -189,6 +189,8 @@ class MainWindow : public QMainWindow
         QPoint mMaterialBrowserPosition;
         QSize mMaterialBrowserSize;
         HlmsUtilsManager* mHlmsUtilsManager;
+        Ogre::String mHelperName;
+        QVector<int> helperIndices;
 };
 
 #endif

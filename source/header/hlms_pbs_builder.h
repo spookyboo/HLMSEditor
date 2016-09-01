@@ -51,9 +51,6 @@ class HlmsPbsBuilder : public HlmsBuilder
         Ogre::HlmsPbsDatablock* createPbsDatablock (Magus::OgreManager* ogreManager,
                                                     HlmsNodePbsDatablock* pbsnode);
 
-        // Delete a Hlms Pbs datablock with a certain name
-        void deletePbsDatablock (Magus::OgreManager* ogreManager, const QString& datablockName);
-
         // Create a node structure (HlmsNodePbsDatablock, HlmsNodeSamplerblock, HlmsNodeBlendblock and
         // HlmsNodeMacroblock) from a given datablockName (this corresponding datablock name is retrieved
         // from the Ogre::HlmsPbs).

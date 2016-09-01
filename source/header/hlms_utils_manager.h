@@ -102,6 +102,16 @@ class HlmsUtilsManager
                                bool keepVecLoadedDatablock = false,
                                const Ogre::String& excludeDatablockFullName = "");
 
+
+        /* Delete a particular datablock
+         */
+        void destroyDatablock(const Ogre::IdString& datablockName);
+
+        /* Returns the datablock info of a given full name (datablockFullName)
+         * If there is no datablock with this name, a default DatablockStruct is returned
+         */
+        DatablockStruct getDatablockStructOfFullName (const Ogre::String& datablockFullName);
+
     protected:
         bool isInLoadedDatablocksVec (const Ogre::String& datablockFullName);
 

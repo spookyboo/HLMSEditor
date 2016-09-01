@@ -476,14 +476,84 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
 }
 
 //****************************************************************************/
+void HlmsUtilsManager::destroyDatablock(const Ogre::IdString& datablockName)
+{
+    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
+    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+    Ogre::HlmsDatablock* datablock;
+    bool destroyed = false;
+
+    // Try to delete the datablock when it is a pbs
+    try
+    {
+        datablock = hlmsPbs->getDatablock(datablockName);
+        if (datablock)
+        {
+            hlmsPbs->destroyDatablock(datablockName);
+            destroyed = true;
+        }
+    }
+    catch (Ogre::Exception e) {}
+
+    // Try to delete the datablock when it is an unlit
+    try
+    {
+        datablock = hlmsUnlit->getDatablock(datablockName);
+        if (datablock)
+        {
+            hlmsUnlit->destroyDatablock(datablockName);
+            destroyed = true;
+        }
+    }
+    catch (Ogre::Exception e) {}
+
+    // Also delete it from mLoadedDatablocks (if present)
+    QVector<DatablockStruct>::iterator itLoadedDatablocks = mLoadedDatablocks.begin();
+    QVector<DatablockStruct>::iterator itLoadedDatablocksEnd = mLoadedDatablocks.end();
+    DatablockStruct datablockStruct;
+    while (itLoadedDatablocks != itLoadedDatablocksEnd)
+    {
+        datablockStruct = *itLoadedDatablocks;
+        if (datablockStruct.datablockId == datablockName)
+            mLoadedDatablocks.erase(itLoadedDatablocks);
+        ++itLoadedDatablocks;
+    }
+}
+
+
+//****************************************************************************/
 bool HlmsUtilsManager::isInLoadedDatablocksVec (const Ogre::String& datablockFullName)
 {
     QVectorIterator<DatablockStruct> itLoadedDatablocks(mLoadedDatablocks);
-    Ogre::String fullName;
     while (itLoadedDatablocks.hasNext())
     {
         if (itLoadedDatablocks.next().datablockFullName == datablockFullName)
             return true;
     }
     return false;
+}
+
+//****************************************************************************/
+HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablockStructOfFullName (const Ogre::String& datablockFullName)
+{
+    helperDatablockStruct.datablock = 0;
+    helperDatablockStruct.datablockFullName = "";
+    helperDatablockStruct.datablockId = "";
+    helperDatablockStruct.jsonFileName = "";
+    helperDatablockStruct.type = EditorHlmsTypes::HLMS_NONE;
+
+    QVectorIterator<DatablockStruct> itLoadedDatablocks(mLoadedDatablocks);
+    DatablockStruct datablockStruct;
+    while (itLoadedDatablocks.hasNext())
+    {
+        datablockStruct = itLoadedDatablocks.next();
+        if (datablockStruct.datablockFullName == datablockFullName)
+        {
+            helperDatablockStruct = datablockStruct;
+            return helperDatablockStruct;
+        }
+    }
+
+    return helperDatablockStruct;
 }

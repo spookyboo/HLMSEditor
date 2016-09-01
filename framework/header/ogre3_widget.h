@@ -83,9 +83,14 @@ namespace Magus
             void resetCamera(void); // Set position/orientation to default
             void setHoover(bool hoover); // Determines whether the subItems are highlighted when the mousecursor hoovers over them
             void setCurrentDatablockName(const Ogre::IdString& datablockName);
+            const QVector<int>& getSubItemIndicesWithDatablock(const Ogre::IdString& datablockName); // Get the list of indices of subItems that have 'datablockName'
             void makeSnapshotOfItemMaterials(void); // Keep a map of all materials per subItem
             void restoreSnapshotOfItemMaterials(void); // Assign the material to each subItem
-            Ogre::MeshPtr getCurrentMeshWithMaterialNames(void); // Returns the mesh associated with mItem
+            Ogre::MeshPtr getCurrentMeshEnrichedWithItemDatablocksFullName(void); // Returns the mesh associated with mItem, but with the datablocknames of the mItem added to the mesh
+            Ogre::MeshPtr getCurrentMesh(void); // Returns the mesh associated with mItem, but with the original materialnames in the mesh
+            const QMap<int, Ogre::String>& getMaterialNamesFromCurrentMesh(void); // Returns map with index (of subMeash) and its materialname
+            void setDatablockInSubItem(int index, const Ogre::IdString datablockName); // Set the datablock in the subitem, based on the id (datablockName) of the datablock
+            void setDatablockInSubItems(const QVector<int>& indices, const Ogre::IdString& datablockName); // Set the datablock in the subitems, identified by indices
             void cleanup(void);
 
         protected:
@@ -127,6 +132,8 @@ namespace Magus
             QMap <int, QVector3D> mColourMap;
             QMap <int, Ogre::String> mSnapshotDatablocks;
             bool mHoover;
+            QMap<int, Ogre::String> helperIndicesAndNames;
+            QVector<int> helperIndices;
 
             virtual void createCompositor();
             virtual void createCompositorRenderToTexture();

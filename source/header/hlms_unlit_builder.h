@@ -52,9 +52,6 @@ class HlmsUnlitBuilder : public HlmsBuilder
         HlmsNodeUnlitDatablock* createUnlitNodeStructure (Magus::OgreManager* ogreManager,
                                                           const QString& datablockName);
 
-        // Delete a Hlms Unlit datablock with a certain name
-        void deleteUnlitDatablock (Magus::OgreManager* ogreManager, const QString& datablockName);
-
         // Create an Unlit node and add it to the node editor canvas
         HlmsNodeUnlitDatablock* createUnlitNode(void);
 

@@ -116,3 +116,4 @@ void MaterialBrowserDialog::closeEvent(QCloseEvent *event)
 {
     emit closeClicked();
 }
+

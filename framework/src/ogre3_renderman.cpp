@@ -34,7 +34,7 @@ namespace Magus
     {
         mGlContext = 0;
         mCompositorPassProvider = 0;
-        mPauseRendering = true;
+        mPause = true;
 
         #ifdef _DEBUG
             mResourcesCfg = "resources_d.cfg";
@@ -137,7 +137,7 @@ namespace Magus
             Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
         }
         catch (Ogre::Exception e){}
-        mPauseRendering = false;
+        mPause = false;
         try
         {
             mRoot->renderOneFrame(); // Render first
@@ -253,7 +253,7 @@ namespace Magus
     //****************************************************************************/
     void OgreManager::renderOgreWidgetsOneFrame(void)
     {
-        if (mPauseRendering)
+        if (mPause)
             return;
 
         if (mRoot && !mQOgreWidgetMap.isEmpty())
@@ -309,8 +309,8 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void OgreManager::pauseRendering (bool pause)
+    void OgreManager::setPause (bool pause)
     {
-        mPauseRendering = pause;
+        mPause = pause;
     }
 }

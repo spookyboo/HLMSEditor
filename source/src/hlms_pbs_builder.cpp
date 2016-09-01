@@ -43,29 +43,6 @@ HlmsPbsBuilder::~HlmsPbsBuilder(void)
 }
 
 //****************************************************************************/
-void HlmsPbsBuilder::deletePbsDatablock (Magus::OgreManager* ogreManager, const QString& datablockName)
-{
-    Ogre::String name = datablockName.toStdString();
-    if (name == DEFAULT_DATABLOCK_NAME)
-        return;
-
-    // Get the ogre manager, root and hlms managers
-    Ogre::Root* root = ogreManager->getOgreRoot();
-    Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
-    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
-    if (hlmsPbs->getDatablock(name))
-    {
-        // Destroy any existing datablock with that name
-        try
-        {
-            ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
-            hlmsPbs->destroyDatablock(name);
-        }
-        catch (Ogre::Exception e){}
-    }
-}
-
-//****************************************************************************/
 Ogre::HlmsPbsDatablock* HlmsPbsBuilder::createPbsDatablock (Magus::OgreManager* ogreManager,
                                                             HlmsNodePbsDatablock* pbsnode)
 {

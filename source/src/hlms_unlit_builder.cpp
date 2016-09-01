@@ -40,29 +40,6 @@ HlmsUnlitBuilder::~HlmsUnlitBuilder(void)
 }
 
 //****************************************************************************/
-void HlmsUnlitBuilder::deleteUnlitDatablock (Magus::OgreManager* ogreManager, const QString& datablockName)
-{
-    Ogre::String name = datablockName.toStdString();
-    if (name == DEFAULT_DATABLOCK_NAME)
-        return;
-
-    // Get the ogre manager, root and hlms managers
-    Ogre::Root* root = ogreManager->getOgreRoot();
-    Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
-    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT) );
-    if (hlmsUnlit->getDatablock(name))
-    {
-        // Destroy any existing datablock with that name
-        try
-        {
-            ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setDefaultDatablockItem();
-            hlmsUnlit->destroyDatablock(name);
-        }
-        catch (Ogre::Exception e){}
-    }
-}
-
-//****************************************************************************/
 Ogre::HlmsUnlitDatablock* HlmsUnlitBuilder::createUnlitDatablock (Magus::OgreManager* ogreManager,
                                                                   HlmsNodeUnlitDatablock* unlitnode)
 {

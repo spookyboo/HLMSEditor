@@ -429,8 +429,6 @@ namespace Magus
 
             mSceneNode->attachObject(mItem);
             mSceneNode->setScale(scale);
-//            if (!datablockName.empty())
-//                mItem->setDatablock(datablockName);
             mItem->setRenderQueueGroup(1);
 
             // Delete the old itemRtt if available
@@ -475,8 +473,6 @@ namespace Magus
         mItem = item;
         mSceneNode->attachObject(mItem);
         mSceneNode->setScale(scale);
-//        if (!datablockName.empty())
-//            mItem->setDatablock(datablockName);
         mItem->setRenderQueueGroup(1);
 
         // Delete the old itemRtt if available
@@ -534,7 +530,7 @@ namespace Magus
     //****************************************************************************/
     void QOgreWidget::setDefaultDatablockItemRtt(void)
     {
-        resetHighlight(); // TEST
+        resetHighlight();
         Ogre::HlmsDatablock* itemRttDatablock = mItemRtt->getSubItem(0)->getDatablock();
         Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
         Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
@@ -547,10 +543,6 @@ namespace Magus
                 mItemRtt->setDatablock(hlmsPbs->getDefaultDatablock());
             else
                 mItemRtt->setDatablock(DEFAULT_DATABLOCK_NAME);
-
-        // Set latest index and datablock to default value
-        //mLatestSubItemIndexHighlighted = -1;
-        //mLatestSubItemDatablock = 0;
     }
 
     //****************************************************************************/
@@ -875,15 +867,16 @@ namespace Magus
     //****************************************************************************/
     void QOgreWidget::mouseDoubleClickEvent(QMouseEvent *event)
     {
-        // TODO: Make more robust!!!
         if(mSystemInitialized)
         {
             int index = mLatestSubItemIndexHighlighted;
             if (index > -1)
-            {
                 resetHighlight();
+
+            if (mHoover)
                 mItem->getSubItem(index)->setDatablock(mCurrentDatablockName);
-            }
+            else
+                mItem->setDatablock(mCurrentDatablockName);
         }
     }
 
@@ -1028,10 +1021,26 @@ namespace Magus
     void QOgreWidget::setCurrentDatablockName(const Ogre::IdString& datablockName)
     {
         mCurrentDatablockName = datablockName;
-        if (!mHoover)
-            mItem->setDatablock(datablockName);
     }
 
+    //****************************************************************************/
+    const QVector<int>& QOgreWidget::getSubItemIndicesWithDatablock(const Ogre::IdString& datablockName)
+    {
+        helperIndices.clear();
+        size_t numSubItems = mItem->getNumSubItems();
+        Ogre::SubItem* subItem;
+        Ogre::HlmsDatablock* datablock;
+
+        for (size_t i = 0; i < numSubItems; ++i)
+        {
+            subItem = mItem->getSubItem(i);
+            datablock = subItem->getDatablock();
+            if (datablock->getName() == datablockName)
+                helperIndices.append(i);
+        }
+
+        return helperIndices;
+    }
 
     //****************************************************************************/
     void QOgreWidget::makeSnapshotOfItemMaterials(void)
@@ -1123,7 +1132,7 @@ namespace Magus
 
 
     //****************************************************************************/
-    Ogre::MeshPtr QOgreWidget::getCurrentMeshWithMaterialNames(void)
+    Ogre::MeshPtr QOgreWidget::getCurrentMeshEnrichedWithItemDatablocksFullName(void)
     {
         Ogre::MeshPtr mesh = mItem->getMesh();
         Ogre::Mesh* meshPtr = mesh.getPointer();
@@ -1144,6 +1153,65 @@ namespace Magus
         }
 
         return mItem->getMesh();
+    }
+
+    //****************************************************************************/
+    Ogre::MeshPtr QOgreWidget::getCurrentMesh(void)
+    {
+        return mItem->getMesh();
+    }
+
+
+    //****************************************************************************/
+    const QMap<int, Ogre::String>& QOgreWidget::getMaterialNamesFromCurrentMesh(void)
+    {
+        // Iterate through the current mesh and return a map with materialnames
+        helperIndicesAndNames.clear();
+        if (mItem)
+        {
+            Ogre::MeshPtr mesh;
+            Ogre::Mesh* meshPtr;
+            Ogre::SubMesh* subMesh;
+            size_t numSubMeshes;
+            mesh = mItem->getMesh();
+            meshPtr = mesh.getPointer();
+            numSubMeshes= meshPtr->getNumSubMeshes();
+            for (size_t i = 0; i < numSubMeshes; ++i)
+            {
+                subMesh = meshPtr->getSubMesh(i);
+                helperIndicesAndNames[i] = subMesh->getMaterialName();
+            }
+        }
+
+        return helperIndicesAndNames;
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::setDatablockInSubItem(int index, const Ogre::IdString datablockName)
+    {
+        if (mItem)
+        {
+            Ogre::SubItem* subItem = mItem->getSubItem(index);
+            if (subItem)
+                subItem->setDatablock(datablockName);
+        }
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::setDatablockInSubItems(const QVector<int>& indices,
+                                             const Ogre::IdString& datablockName)
+    {
+        int index;
+        Ogre::SubItem* subItem;
+        QVectorIterator<int> it(indices);
+        while(it.hasNext())
+        {
+            index = it.next();
+            subItem = mItem->getSubItem(index);
+            subItem->setDatablock(datablockName);
+        }
+
+        mCurrentDatablockName = datablockName;
     }
 
 }
