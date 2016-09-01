@@ -874,7 +874,10 @@ namespace Magus
                 resetHighlight();
 
             if (mHoover)
-                mItem->getSubItem(index)->setDatablock(mCurrentDatablockName);
+            {
+                if (index > -1)
+                    mItem->getSubItem(index)->setDatablock(mCurrentDatablockName);
+            }
             else
                 mItem->setDatablock(mCurrentDatablockName);
         }
