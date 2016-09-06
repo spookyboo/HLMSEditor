@@ -51,7 +51,6 @@ NodeEditorDockWidget::NodeEditorDockWidget(QString title, MainWindow* parent, Qt
     mInnerMain->setCentralWidget(mNodeEditor);
     mHlmsPbsDatablockNode = 0;
     mHlmsUnlitDatablockNode = 0;
-    //mLatestDatablockName = DEFAULT_PBS_DATABLOCK_NAME;
     mCurrentDatablockName = DEFAULT_PBS_DATABLOCK_NAME;
     mHlmsPbsBuilder = new HlmsPbsBuilder(mNodeEditor);
     mHlmsUnlitBuilder = new HlmsUnlitBuilder(mNodeEditor);
@@ -178,7 +177,7 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::newHlmsUnlit(void)
 }
 
 //****************************************************************************/
-HlmsNodePbsDatablock* NodeEditorDockWidget::createPbsNodeStructure(const QString& pbsDatablock)
+HlmsNodePbsDatablock* NodeEditorDockWidget::createPbsNodeStructure(const HlmsUtilsManager::DatablockStruct& pbsDatablock)
 {
     mHlmsPbsDatablockNode = mHlmsPbsBuilder->createPbsNodeStructure(mParent->getOgreManager(), pbsDatablock);
     mHlmsUnlitDatablockNode = 0;
@@ -186,7 +185,7 @@ HlmsNodePbsDatablock* NodeEditorDockWidget::createPbsNodeStructure(const QString
 }
 
 //****************************************************************************/
-HlmsNodeUnlitDatablock* NodeEditorDockWidget::createUnlitNodeStructure(const QString& unlitDatablock)
+HlmsNodeUnlitDatablock* NodeEditorDockWidget::createUnlitNodeStructure(const HlmsUtilsManager::DatablockStruct& unlitDatablock)
 {
     mHlmsUnlitDatablockNode = mHlmsUnlitBuilder->createUnlitNodeStructure(mParent->getOgreManager(), unlitDatablock);
     mHlmsPbsDatablockNode = 0;

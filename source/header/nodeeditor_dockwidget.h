@@ -34,6 +34,7 @@
 #include "hlms_node_samplerblock.h"
 #include "hlms_node_macroblock.h"
 #include "hlms_node_blenddblock.h"
+#include "hlms_utils_manager.h"
 
 QT_BEGIN_NAMESPACE
 class QDockWidget;
@@ -65,8 +66,8 @@ class NodeEditorDockWidget : public QDockWidget
         HlmsNodePbsDatablock* newHlmsPbs(void);
         void newHlmsUnlitAndSampler(void);
         HlmsNodeUnlitDatablock* newHlmsUnlit(void);
-        HlmsNodePbsDatablock* createPbsNodeStructure(const QString& pbsDatablock);
-        HlmsNodeUnlitDatablock* createUnlitNodeStructure(const QString& unlitDatablock);
+        HlmsNodePbsDatablock* createPbsNodeStructure(const HlmsUtilsManager::DatablockStruct& pbsDatablock);
+        HlmsNodeUnlitDatablock* createUnlitNodeStructure(const HlmsUtilsManager::DatablockStruct& unlitDatablock);
         const QString& getCurrentDatablockName(void);
         EditorHlmsTypes getCurrentDatablockType (void);
         void newSamplerblockNode (const QString& fileName);
@@ -114,7 +115,6 @@ class NodeEditorDockWidget : public QDockWidget
         QAction* mCogHToolbarAction;
         QToolBar* mHToolBar; 
         Magus::QtNodeEditor* mNodeEditor;
-        //QString mLatestDatablockName;
         QString mCurrentDatablockName;
         HlmsNodePbsDatablock* mHlmsPbsDatablockNode;
         HlmsNodeUnlitDatablock* mHlmsUnlitDatablockNode;

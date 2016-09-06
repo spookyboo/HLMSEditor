@@ -16,6 +16,14 @@ layout(location = FRAG_COLOR, index = 0) out float outColour;
 in vec4 gl_FragCoord;
 @end
 
+@property( two_sided_lighting )
+	@property( !hlms_forward3d_flipY )
+		@piece( two_sided_flip_normal )* (gl_FrontFacing ? -1.0 : 1.0)@end
+	@end @property( hlms_forward3d_flipY )
+		@piece( two_sided_flip_normal )* (gl_FrontFacing ? 1.0 : -1.0)@end
+	@end
+@end
+
 // START UNIFORM DECLARATION
 @property( !hlms_shadowcaster || alpha_test )
 	@property( !hlms_shadowcaster )
@@ -216,8 +224,12 @@ void main()
 {
     @insertpiece( custom_ps_preExecution )
 @property( hlms_normal || hlms_qtangent )
-	uint materialId	= instance.worldMaterialIdx[inPs.drawId].x & 0x1FFu;
-	material = materialArray.m[materialId];
+	@property( !lower_gpu_overhead )
+		uint materialId	= instance.worldMaterialIdx[inPs.drawId].x & 0x1FFu;
+		material = materialArray.m[materialId];
+	@end @property( lower_gpu_overhead )
+		material = materialArray.m[0];
+	@end
 @property( diffuse_map )	diffuseIdx			= material.indices0_3.x & 0x0000FFFFu;@end
 @property( normal_map_tex )	normalIdx			= material.indices0_3.x >> 16u;@end
 @property( specular_map )	specularIdx			= material.indices0_3.y & 0x0000FFFFu;@end
@@ -287,10 +299,10 @@ void main()
 
 @property( !normal_map )
 	// Geometric normal
-	nNormal = normalize( inPs.normal );
+	nNormal = normalize( inPs.normal ) @insertpiece( two_sided_flip_normal );
 @end @property( normal_map )
 	//Normal mapping.
-	vec3 geomNormal = normalize( inPs.normal );
+	vec3 geomNormal = normalize( inPs.normal ) @insertpiece( two_sided_flip_normal );
 	vec3 vTangent = normalize( inPs.tangent );
 
 	//Get the TBN matrix
@@ -477,8 +489,12 @@ void main()
 	@insertpiece( custom_ps_preExecution )
 
 @property( alpha_test )
-	uint materialId	= instance.worldMaterialIdx[inPs.drawId].x & 0x1FFu;
-	material = materialArray.m[materialId];
+	@property( !lower_gpu_overhead )
+		uint materialId	= instance.worldMaterialIdx[inPs.drawId].x & 0x1FFu;
+		material = materialArray.m[materialId];
+	@end @property( lower_gpu_overhead )
+		material = materialArray.m[0];
+	@end
 @property( diffuse_map )	diffuseIdx			= material.indices0_3.x & 0x0000FFFFu;@end
 @property( detail_weight_map )	weightMapIdx		= material.indices0_3.z & 0x0000FFFFu;@end
 @property( detail_map0 )	detailMapIdx0		= material.indices0_3.z >> 16u;@end

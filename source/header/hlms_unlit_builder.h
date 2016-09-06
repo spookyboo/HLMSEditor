@@ -27,6 +27,7 @@
 #include "hlms_node_samplerblock.h"
 #include "hlms_node_macroblock.h"
 #include "hlms_node_blenddblock.h"
+#include "hlms_utils_manager.h"
 #include "OgreHlmsManager.h"
 #include "OgreHlmsUnlit.h"
 #include "OgreHlmsUnlitDatablock.h"
@@ -47,10 +48,11 @@ class HlmsUnlitBuilder : public HlmsBuilder
                                                         HlmsNodeUnlitDatablock* unlitnode);
 
         // Create a node structure (HlmsNodeUnlitDatablock, HlmsNodeSamplerblock, HlmsNodeBlendblock and
-        // HlmsNodeMacroblock) from a given datablockName (this corresponding datablock name is retrieved
-        // from the Ogre::HlmsUnlit).
+        // HlmsNodeMacroblock) from a given datablock structure.
+        //HlmsNodeUnlitDatablock* createUnlitNodeStructure (Magus::OgreManager* ogreManager,
+        //                                                  const QString& datablockName);
         HlmsNodeUnlitDatablock* createUnlitNodeStructure (Magus::OgreManager* ogreManager,
-                                                          const QString& datablockName);
+                                                          const HlmsUtilsManager::DatablockStruct& datablockStruct);
 
         // Create an Unlit node and add it to the node editor canvas
         HlmsNodeUnlitDatablock* createUnlitNode(void);
@@ -58,7 +60,8 @@ class HlmsUnlitBuilder : public HlmsBuilder
         // Enrich the unlit node with sampler nodes
         void createSamplerNodes (Magus::OgreManager* ogreManager,
                                  HlmsNodeUnlitDatablock* unlitnode,
-                                 Ogre::HlmsUnlitDatablock* datablock);
+                                 Ogre::HlmsUnlitDatablock* datablock,
+                                 const HlmsUtilsManager::DatablockStruct& datablockStruct);
 
         // Set the Unlit node to an initial position
         void repositionUnlitNode(HlmsNodeUnlitDatablock* unlitnode);
@@ -73,15 +76,6 @@ class HlmsUnlitBuilder : public HlmsBuilder
         void connectNodes(HlmsNodeUnlitDatablock* unlitnode,
                           HlmsNodeBlendblock* blendnode);
 
-        // Some convenience functions (eg used for plugins; that is the reason std and Ogre types are used)
-        // Get the alias name from an unlit datablock
-        const Ogre::String& getTextureName(Magus::OgreManager* ogreManager,
-                                           Ogre::HlmsUnlitDatablock* unlitDatablock,
-                                           Ogre::uint8 textureType);
-
-        // Get all alias names from all currently available unlit datablocks
-        void getTexturesFromAvailableDatablocks(Magus::OgreManager* ogreManager, std::vector<Ogre::String>* v);
-
     private:
         Magus::QtNodeEditor* mNodeEditor;
         Ogre::String mTempOgreString;
@@ -91,7 +85,7 @@ class HlmsUnlitBuilder : public HlmsBuilder
         void enrichUnlitDatablock(Ogre::HlmsUnlitDatablock* datablock,
                                   HlmsNodeUnlitDatablock* unlitnode);
 
-        // The ublit node is enriched with values from a given unlit datablock
+        // The unlit node is enriched with values from a given unlit datablock
         void enrichUnlitNode(HlmsNodeUnlitDatablock* unlitnode,
                              Ogre::HlmsUnlitDatablock* datablock);
 
@@ -101,10 +95,10 @@ class HlmsUnlitBuilder : public HlmsBuilder
                                  HlmsNodeSamplerblock* samplernode);
 
         // The sampler node is enriched with values from a sampler block
-        void enrichSamplerNode (Magus::OgreManager* ogreManager,
-                                HlmsNodeSamplerblock* samplernode,
+        void enrichSamplerNode (HlmsNodeSamplerblock* samplernode,
                                 const Ogre::HlmsSamplerblock* samplerblock,
                                 Ogre::HlmsUnlitDatablock* datablock,
+                                const HlmsUtilsManager::DatablockStruct& datablockStruct,
                                 Ogre::uint8 textType);
 
 

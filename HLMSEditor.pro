@@ -147,6 +147,7 @@ INCLUDEPATH += "$$OGREHOME/Components/Hlms/Common/include"
 INCLUDEPATH += "$$OGREHOME/Components/Hlms/Pbs/include"
 INCLUDEPATH += "$$OGREHOME/Components/Hlms/Unlit/include"
 INCLUDEPATH += "$$OGREHOME/VCBuild/include"
+INCLUDEPATH += "$$OGREHOME/Dependencies"
 INCLUDEPATH += .
 
 Debug:LIBS += -L"$$OGREHOME/VCBuild/lib/Debug"

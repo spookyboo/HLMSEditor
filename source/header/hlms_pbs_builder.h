@@ -25,6 +25,7 @@
 #include "hlms_builder.h"
 #include "hlms_node_pbs_datablock.h"
 #include "hlms_node_samplerblock.h"
+#include "hlms_utils_manager.h"
 #include "OgreHlmsPbs.h"
 #include "OgreHlmsPbsDatablock.h"
 #include "node_editorwidget.h"
@@ -52,10 +53,11 @@ class HlmsPbsBuilder : public HlmsBuilder
                                                     HlmsNodePbsDatablock* pbsnode);
 
         // Create a node structure (HlmsNodePbsDatablock, HlmsNodeSamplerblock, HlmsNodeBlendblock and
-        // HlmsNodeMacroblock) from a given datablockName (this corresponding datablock name is retrieved
-        // from the Ogre::HlmsPbs).
+        // HlmsNodeMacroblock) from a given datablock structure.
+        //HlmsNodePbsDatablock* createPbsNodeStructure (Magus::OgreManager* ogreManager,
+        //                                              const QString& datablockName);
         HlmsNodePbsDatablock* createPbsNodeStructure (Magus::OgreManager* ogreManager,
-                                                      const QString& datablockName);
+                                                      const HlmsUtilsManager::DatablockStruct& datablockStruct);
 
         // Create a Pbs node and add it to the node editor canvas
         HlmsNodePbsDatablock* createPbsNode(void);
@@ -74,15 +76,6 @@ class HlmsPbsBuilder : public HlmsBuilder
         // Connect PBS node and Blend node in the editor canvas
         void connectNodes(HlmsNodePbsDatablock* pbsnode,
                           HlmsNodeBlendblock* blendnode);
-
-        // Some convenience functions (eg used for plugins; that is the reason std and Ogre types are used)
-        // Get the alias name from a pbs datablock
-        const Ogre::String& getTextureName(Magus::OgreManager* ogreManager,
-                                           Ogre::HlmsPbsDatablock* pbsDatablock,
-                                           Ogre::PbsTextureTypes textureType);
-
-        // Get all alias names from all currently available pbs datablocks
-        void getTexturesFromAvailableDatablocks(Magus::OgreManager* ogreManager, std::vector<Ogre::String>* v);
 
 	private:
         Magus::QtNodeEditor* mNodeEditor;
@@ -114,9 +107,9 @@ class HlmsPbsBuilder : public HlmsBuilder
                                  HlmsNodeSamplerblock* samplernode);
 
         // The sampler node is enriched with values from a datablock and samplerblock
-        void enrichSamplerNode (Magus::OgreManager* ogreManager,
-                                HlmsNodeSamplerblock* samplernode,
+        void enrichSamplerNode (HlmsNodeSamplerblock* samplernode,
                                 Ogre::HlmsPbsDatablock* datablock,
+                                const HlmsUtilsManager::DatablockStruct& datablockStruct,
                                 Ogre::PbsTextureTypes textureType);
 
         Ogre::PbsBrdf::PbsBrdf getBrdfFromIndex (unsigned int index);

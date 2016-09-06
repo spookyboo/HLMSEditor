@@ -24,6 +24,7 @@
 #include "constants.h"
 #include "OgreRoot.h"
 #include "OgreHlmsManager.h"
+#include "rapidjson/document.h"
 
 /****************************************************************************
  This class contains some Hlms utilities to make life easier. Note, that this
@@ -41,6 +42,7 @@ class HlmsUtilsManager
             Ogre::IdString datablockId;
             EditorHlmsTypes type; // Type of the datablock
             Ogre::String jsonFileName; // Json file that contains the description of the datablock
+            QMap <unsigned short, Ogre::String> textureMap; // Contains the textures used in the datablock
         };
 
         // Constructor
@@ -78,7 +80,7 @@ class HlmsUtilsManager
          * The first difference that is encountered is used to compare it with mLoadedDatablocks
          * mLoadedDatablocks is used, because Ogre doesn't administer the json files.
          */
-        DatablockStruct compareSnapshotWithLoadedDatablocksAndAdminister(const QString& jsonFileName);
+        DatablockStruct compareSnapshotWithLoadedDatablocksAndAdminister(const QString& jsonFileName, const char* jsonChar);
 
         /* Destroy datablocks, depending on the arguments.
          * excludeSpecialDatablocks == true and excludeDatablockFullName == ""
@@ -112,8 +114,29 @@ class HlmsUtilsManager
          */
         DatablockStruct getDatablockStructOfFullName (const Ogre::String& datablockFullName);
 
+        /* Returns a vector with all texturenames from the loaded Pbs/Unlit datablocks
+         */
+        void getTexturesFromLoadedPbsDatablocks(std::vector<Ogre::String>* v);
+        void getTexturesFromLoadedUnlitDatablocks(std::vector<Ogre::String>* v);
+
+
     protected:
         bool isInLoadedDatablocksVec (const Ogre::String& datablockFullName);
+
+        /* Parse a json string and get the details (texture names) from the string.
+         * This function was added because it is easier to have these values in the datastructure.
+         * Otherwise HlmsTextureManager::findAliasNamefindAliasName must be used.
+         */
+        bool parseJsonAndRetrieveDetails (HlmsUtilsManager::DatablockStruct* datablockStruct, const char* jsonChar);
+
+        // Parse a texturetype fragment of a pbs datablock
+        void parsePbsTextureType (HlmsUtilsManager::DatablockStruct* datablockStruct,
+                                  const rapidjson::Value& textureTypeJson,
+                                  const char* textureType,
+                                  unsigned short index);
+
+        // Parse a texture fragment of an unlit datablock
+        void parseUnlitTexture (HlmsUtilsManager::DatablockStruct* datablockStruct, const rapidjson::Value& textureJson);
 
     private:
         DatablockStruct helperDatablockStruct;

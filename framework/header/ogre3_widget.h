@@ -88,7 +88,7 @@ namespace Magus
             void restoreSnapshotOfItemMaterials(void); // Assign the material to each subItem
             Ogre::MeshPtr getCurrentMeshEnrichedWithItemDatablocksFullName(void); // Returns the mesh associated with mItem, but with the datablocknames of the mItem added to the mesh
             Ogre::MeshPtr getCurrentMesh(void); // Returns the mesh associated with mItem, but with the original materialnames in the mesh
-            const QMap<int, Ogre::String>& getMaterialNamesFromCurrentMesh(void); // Returns map with index (of subMeash) and its materialname
+            const QMap<unsigned short, Ogre::String>& getMaterialNamesFromCurrentMesh(void); // Returns map with index (of subMeash) and its materialname
             void setDatablockInSubItem(int index, const Ogre::IdString datablockName); // Set the datablock in the subitem, based on the id (datablockName) of the datablock
             void setDatablockInSubItems(const QVector<int>& indices, const Ogre::IdString& datablockName); // Set the datablock in the subitems, identified by indices
             void cleanup(void);
@@ -130,9 +130,9 @@ namespace Magus
             const size_t RTT_SIZE_X = 256;
             const size_t RTT_SIZE_Y = 144; // 9/16 x RTT_SIZE_X
             QMap <int, QVector3D> mColourMap;
-            QMap <int, Ogre::String> mSnapshotDatablocks;
+            QMap <size_t, Ogre::String> mSnapshotDatablocks;
             bool mHoover;
-            QMap<int, Ogre::String> helperIndicesAndNames;
+            QMap<unsigned short, Ogre::String> helperIndicesAndNames;
             QVector<int> helperIndices;
 
             virtual void createCompositor();

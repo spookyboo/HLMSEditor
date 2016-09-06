@@ -25,8 +25,6 @@
 #include "hlms_pbs_builder.h"
 #include "OgreItem.h"
 #include "OgreResourceGroupManager.h"
-//#include "OgreHlmsPbs.h"
-//#include "OgreHlmsPbsDatablock.h"
 #include "OgreHlmsManager.h"
 
 //****************************************************************************/
@@ -123,7 +121,7 @@ Ogre::HlmsPbsDatablock* HlmsPbsBuilder::createPbsDatablock (Magus::OgreManager* 
                             dataFolder = samplernode->getPathTexture().toStdString();
                             if (!isResourceLocationExisting(dataFolder))
                             {
-                                root->addResourceLocation(dataFolder, "FileSystem", "General");
+                                root->addResourceLocation(dataFolder, "FileSystem", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
                                 saveAllResourcesLocations();
                             }
 
@@ -154,16 +152,21 @@ Ogre::HlmsPbsDatablock* HlmsPbsBuilder::createPbsDatablock (Magus::OgreManager* 
 }
 
 //****************************************************************************/
+//HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNodeStructure(Magus::OgreManager* ogreManager,
+//                                                             const QString& datablockName)
+
 HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNodeStructure(Magus::OgreManager* ogreManager,
-                                                             const QString& datablockName)
+                                                             const HlmsUtilsManager::DatablockStruct& datablockStruct)
+
 {
     // Get the datablock
     HlmsNodePbsDatablock* pbsnode;
     Ogre::Root* root = ogreManager->getOgreRoot();
     Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
     Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
-    Ogre::String name = datablockName.toStdString();
-    Ogre::HlmsPbsDatablock* datablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmsPbs->getDatablock(name));
+    //Ogre::String name = datablockName.toStdString();
+    //Ogre::HlmsPbsDatablock* datablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmsPbs->getDatablock(name));
+    Ogre::HlmsPbsDatablock* datablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmsPbs->getDatablock(datablockStruct.datablockId));
     if (datablock)
     {
         mNodeEditor->clear();
@@ -176,50 +179,50 @@ HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNodeStructure(Magus::OgreManager*
         // Note, that each texture becomes one samplernode, while a datablock may contain multiple textures, but for example only one samplerblock
         HlmsNodeSamplerblock* samplernode;
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_DIFFUSE);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_DIFFUSE);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_DIFFUSE);
 
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_NORMAL);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_NORMAL);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_NORMAL);
 
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_SPECULAR);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_SPECULAR);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_SPECULAR);
 
         // PBSM_METALLIC is same as PBSM_SPECULAR, so do not duplicate it
         //samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_METALLIC);
-        //enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_METALLIC);
+        //enrichSamplerNode(samplernode, datablock, Ogre::PBSM_METALLIC);
 
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_ROUGHNESS);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_ROUGHNESS);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_ROUGHNESS);
 
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_DETAIL_WEIGHT);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_DETAIL_WEIGHT);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_DETAIL_WEIGHT);
 
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_DETAIL0);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_DETAIL0);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_DETAIL0);
 
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_DETAIL1);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_DETAIL1);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_DETAIL1);
 
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_DETAIL2);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_DETAIL2);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_DETAIL2);
 
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_DETAIL3);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_DETAIL3);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_DETAIL3);
 
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_DETAIL0_NM);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_DETAIL0_NM);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_DETAIL0_NM);
 
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_DETAIL1_NM);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_DETAIL1_NM);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_DETAIL1_NM);
 
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_DETAIL2_NM);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_DETAIL2_NM);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_DETAIL2_NM);
 
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_DETAIL3_NM);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_DETAIL3_NM);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_DETAIL3_NM);
 
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_REFLECTION);
-        enrichSamplerNode(ogreManager, samplernode, datablock, Ogre::PBSM_REFLECTION);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_REFLECTION);
 
         // Create and fill properties of the macronode with the values of the macroblock and connect the node to the pbs node
         const Ogre::HlmsMacroblock* macroblock = datablock->getMacroblock();
@@ -408,9 +411,9 @@ void HlmsPbsBuilder::enrichPbsNode(HlmsNodePbsDatablock* pbsnode,
 }
 
 //****************************************************************************/
-void HlmsPbsBuilder::enrichSamplerNode (Magus::OgreManager* ogreManager,
-                                        HlmsNodeSamplerblock* samplernode,
+void HlmsPbsBuilder::enrichSamplerNode (HlmsNodeSamplerblock* samplernode,
                                         Ogre::HlmsPbsDatablock* datablock,
+                                        const HlmsUtilsManager::DatablockStruct& datablockStruct,
                                         Ogre::PbsTextureTypes textureType)
 {
     if (!samplernode)
@@ -425,28 +428,13 @@ void HlmsPbsBuilder::enrichSamplerNode (Magus::OgreManager* ogreManager,
 
     // ******** Texture (name) ********
     // Getting the filename of the texture
-    Ogre::HlmsManager* hlmsManager = ogreManager->getOgreRoot()->getHlmsManager();
-    Ogre::HlmsTextureManager::TextureLocation texLocation;
-    texLocation.texture = datablock->getTexture(textureType);
-    Ogre::String basename;
-    const Ogre::String* pBasename;
-    if (!texLocation.texture.isNull())
+    Ogre::String basename = datablockStruct.textureMap[textureType];
+    if (basename.empty())
     {
-       texLocation.xIdx = datablock->_getTextureIdx(textureType);
-       texLocation.yIdx = 0;
-       texLocation.divisor = 1;
-       pBasename = hlmsManager->getTextureManager()->findAliasName(texLocation); // findAliasName could return 0 pointer
-       if (pBasename)
-       {
-           basename = *pBasename;
-       }
-       else
-       {
-           QMessageBox::information(0, QString("Error"), QString("Cannot find image file. Is the resource location present in " +
-                                                                 getResourcesCfg() +
-                                                                 QString("?")));
-           return;
-       }
+        QMessageBox::information(0, QString("Error"), QString("Cannot find image file. Is the resource location present in " +
+                                                              getResourcesCfg() +
+                                                              QString("?")));
+        return;
     }
 
     // Search the file and path
@@ -1200,61 +1188,4 @@ Ogre::HlmsTextureManager::TextureMapType HlmsPbsBuilder::getTextureMapTypeFromSa
         break;
     }
     return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
-}
-
-//****************************************************************************/
-const Ogre::String& HlmsPbsBuilder::getTextureName(Magus::OgreManager* ogreManager,
-                                                   Ogre::HlmsPbsDatablock* pbsDatablock,
-                                                   Ogre::PbsTextureTypes textureType)
-{
-    mTempOgreString = "";
-    Ogre::Root* root = ogreManager->getOgreRoot();
-    Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
-    Ogre::HlmsTextureManager::TextureLocation texLocation;
-    texLocation.texture = pbsDatablock->getTexture(textureType);
-    const Ogre::String* pBasename;
-    if (!texLocation.texture.isNull())
-    {
-       texLocation.xIdx = pbsDatablock->_getTextureIdx(textureType);
-       texLocation.yIdx = 0;
-       texLocation.divisor = 1;
-       pBasename = hlmsManager->getTextureManager()->findAliasName(texLocation); // findAliasName could return 0 pointer
-       if (pBasename)
-       {
-           mTempOgreString = *pBasename;
-       }
-    }
-
-    return mTempOgreString;
-}
-
-//****************************************************************************/
-void HlmsPbsBuilder::getTexturesFromAvailableDatablocks(Magus::OgreManager* ogreManager, std::vector<Ogre::String>* v)
-{
-    // Get all textures from the currently available pbs datablocks
-    Ogre::Root* root = ogreManager->getOgreRoot();
-    Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
-    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
-
-    // Iterate through all Pbs
-    Ogre::Hlms::HlmsDatablockMap::const_iterator itorPbs = hlmsPbs->getDatablockMap().begin();
-    Ogre::Hlms::HlmsDatablockMap::const_iterator endPbs = hlmsPbs->getDatablockMap().end();
-    Ogre::HlmsTextureManager::TextureLocation texLocation;
-    Ogre::HlmsPbsDatablock* pbsDatablock;
-    Ogre::String basename;
-    while (itorPbs != endPbs)
-    {
-        pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itorPbs->second.datablock);
-        size_t texType = Ogre::PBSM_DIFFUSE;
-        while (texType < Ogre::NUM_PBSM_TEXTURE_TYPES)
-        {
-            basename = getTextureName(ogreManager, pbsDatablock, (Ogre::PbsTextureTypes)texType);
-            if (!basename.empty())
-                v->push_back(basename);
-
-            ++texType;
-        }
-
-        ++itorPbs;
-    }
 }

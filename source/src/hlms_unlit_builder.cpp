@@ -115,7 +115,9 @@ Ogre::HlmsUnlitDatablock* HlmsUnlitBuilder::createUnlitDatablock (Magus::OgreMan
                             dataFolder = samplernode->getPathTexture().toStdString();
                             if (!isResourceLocationExisting(dataFolder))
                             {
-                                root->addResourceLocation(dataFolder, "FileSystem", "General");
+                                root->addResourceLocation(dataFolder,
+                                                          "FileSystem",
+                                                          Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
                                 saveAllResourcesLocations();
                             }
 
@@ -148,16 +150,21 @@ Ogre::HlmsUnlitDatablock* HlmsUnlitBuilder::createUnlitDatablock (Magus::OgreMan
 }
 
 //****************************************************************************/
+//HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNodeStructure(Magus::OgreManager* ogreManager,
+//                                                                   const QString& datablockName)
+
 HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNodeStructure(Magus::OgreManager* ogreManager,
-                                                                   const QString& datablockName)
+                                                                   const HlmsUtilsManager::DatablockStruct& datablockStruct)
+
 {
     // Get the datablock
     HlmsNodeUnlitDatablock* unlitnode;
     Ogre::Root* root = ogreManager->getOgreRoot();
     Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
     Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT) );
-    Ogre::String name = datablockName.toStdString();
-    Ogre::HlmsUnlitDatablock* datablock = static_cast<Ogre::HlmsUnlitDatablock*>(hlmsUnlit->getDatablock(name));
+    //Ogre::String name = datablockName.toStdString();
+    //Ogre::HlmsUnlitDatablock* datablock = static_cast<Ogre::HlmsUnlitDatablock*>(hlmsUnlit->getDatablock(name));
+    Ogre::HlmsUnlitDatablock* datablock = static_cast<Ogre::HlmsUnlitDatablock*>(hlmsUnlit->getDatablock(datablockStruct.datablockId));
     if (datablock)
     {
         mNodeEditor->clear();
@@ -168,7 +175,7 @@ HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNodeStructure(Magus::OgreMa
 
         // Get all textures from the unlit
         // Note, that each texture becomes one samplernode, while a datablock may contain multiple textures, but for example only one samplerblock
-        createSamplerNodes(ogreManager, unlitnode, datablock);
+        createSamplerNodes(ogreManager, unlitnode, datablock, datablockStruct);
 
         // Create and fill properties of the macronode with the values of the macroblock and connect the node to the unlit node
         // Note, that the default macroblock of an Unlit datablock has cull mode == CULL_ANTICLOCKWISE (this differs from PBS)
@@ -345,7 +352,8 @@ HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNode(void)
 //****************************************************************************/
 void HlmsUnlitBuilder::createSamplerNodes (Magus::OgreManager* ogreManager,
                                            HlmsNodeUnlitDatablock* unlitnode,
-                                           Ogre::HlmsUnlitDatablock* datablock)
+                                           Ogre::HlmsUnlitDatablock* datablock,
+                                           const HlmsUtilsManager::DatablockStruct& datablockStruct)
 {
     Ogre::uint8 max = Ogre::UnlitTextureTypes::NUM_UNLIT_TEXTURE_TYPES;
     Ogre::uint8 i;
@@ -357,7 +365,7 @@ void HlmsUnlitBuilder::createSamplerNodes (Magus::OgreManager* ogreManager,
         if (samplerblock)
         {
             samplernode = createSamplerNode(mNodeEditor);
-            enrichSamplerNode (ogreManager, samplernode, samplerblock, datablock, i);
+            enrichSamplerNode (samplernode, samplerblock, datablock, datablockStruct, i);
             connectNodes(unlitnode, samplernode);
         }
     }
@@ -387,37 +395,21 @@ void HlmsUnlitBuilder::enrichSamplerblock (Ogre::HlmsUnlitDatablock* datablock,
 
 
 //****************************************************************************/
-void HlmsUnlitBuilder::enrichSamplerNode (Magus::OgreManager* ogreManager,
-                                          HlmsNodeSamplerblock* samplernode,
+void HlmsUnlitBuilder::enrichSamplerNode (HlmsNodeSamplerblock* samplernode,
                                           const Ogre::HlmsSamplerblock* samplerblock,
                                           Ogre::HlmsUnlitDatablock* datablock,
+                                          const HlmsUtilsManager::DatablockStruct& datablockStruct,
                                           Ogre::uint8 textureType)
 {
     // ******** Texture (name) ********
     // Getting the filename of the texture
-    Ogre::HlmsManager* hlmsManager = ogreManager->getOgreRoot()->getHlmsManager();
-    Ogre::HlmsTextureManager::TextureLocation texLocation;
-    texLocation.texture = datablock->getTexture(textureType);
-    Ogre::String basename;
-    const Ogre::String* pBasename;
-    if (!texLocation.texture.isNull())
+    Ogre::String basename = datablockStruct.textureMap[textureType];
+    if (basename.empty())
     {
-       texLocation.xIdx = 0;
-       //texLocation.xIdx = datablock->_getTextureIdx( textureType ); // TODO: Change as result in Ogre commit 21b9540
-       texLocation.yIdx = 0;
-       texLocation.divisor = 1;
-       pBasename = hlmsManager->getTextureManager()->findAliasName(texLocation); // findAliasName could return 0 pointer
-       if (pBasename)
-       {
-           basename = *pBasename;
-       }
-       else
-       {
-           QMessageBox::information(0, QString("Error"), QString("Cannot find image file. Is the resource location present in " +
-                                                                 getResourcesCfg() +
-                                                                 QString("?")));
-           return;
-       }
+        QMessageBox::information(0, QString("Error"), QString("Cannot find image file. Is the resource location present in " +
+                                                              getResourcesCfg() +
+                                                              QString("?")));
+        return;
     }
 
     // Search the file and path
@@ -650,59 +642,3 @@ Ogre::UnlitBlendModes HlmsUnlitBuilder::getBlendModeFromIndex (unsigned int inde
     return Ogre::UNLIT_BLEND_NORMAL_NON_PREMUL;
 }
 
-//****************************************************************************/
-const Ogre::String& HlmsUnlitBuilder::getTextureName(Magus::OgreManager* ogreManager,
-                                                     Ogre::HlmsUnlitDatablock* unlitDatablock,
-                                                     Ogre::uint8 textureType)
-{
-    mTempOgreString = "";
-    Ogre::Root* root = ogreManager->getOgreRoot();
-    Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
-    Ogre::HlmsTextureManager::TextureLocation texLocation;
-    texLocation.texture = unlitDatablock->getTexture(textureType);
-    const Ogre::String* pBasename;
-    if (!texLocation.texture.isNull())
-    {
-       texLocation.xIdx = 0;
-       //texLocation.xIdx = datablock->_getTextureIdx( textureType ); // TODO: Change as result in Ogre commit 21b9540
-       texLocation.yIdx = 0;
-       texLocation.divisor = 1;
-       pBasename = hlmsManager->getTextureManager()->findAliasName(texLocation); // findAliasName could return 0 pointer
-       if (pBasename)
-       {
-           mTempOgreString = *pBasename;
-       }
-    }
-
-    return mTempOgreString;
-}
-
-//****************************************************************************/
-void HlmsUnlitBuilder::getTexturesFromAvailableDatablocks(Magus::OgreManager* ogreManager, std::vector<Ogre::String>* v)
-{
-    // Get all textures from the currently available unlit datablocks
-    Ogre::Root* root = ogreManager->getOgreRoot();
-    Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
-    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>(hlmsManager->getHlms(Ogre::HLMS_UNLIT));
-
-    // Iterate through all Unlit
-    Ogre::Hlms::HlmsDatablockMap::const_iterator itorUnlit = hlmsUnlit->getDatablockMap().begin();
-    Ogre::Hlms::HlmsDatablockMap::const_iterator endUnlit = hlmsUnlit->getDatablockMap().end();
-    Ogre::HlmsUnlitDatablock* unlitDatablock;
-    Ogre::String basename;
-    while (itorUnlit != endUnlit)
-    {
-        unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itorUnlit->second.datablock);
-        Ogre::uint8 texType = 0;
-        while (texType < Ogre::NUM_UNLIT_TEXTURE_TYPES)
-        {
-            basename = getTextureName(ogreManager, unlitDatablock, texType);
-            if (!basename.empty())
-                v->push_back(basename);
-
-            ++texType;
-        }
-
-        ++itorUnlit;
-    }
-}

@@ -132,7 +132,7 @@ void RenderwindowDockWidget::preLoadMeshMap(void)
     {
         meshName = it.value().meshName.toStdString();
         Ogre::MeshPtr v2MeshPtr = Ogre::MeshManager::getSingleton().load(
-                    meshName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+                    meshName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     }
 }
 

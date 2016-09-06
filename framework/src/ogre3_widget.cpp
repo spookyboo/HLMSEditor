@@ -81,6 +81,8 @@ namespace Magus
         mRelative = Ogre::Vector2::ZERO;
         mHelpColour = Ogre::ColourValue::Red;
         mCustomRenderTexture.setNull();
+        mSnapshotDatablocks.clear();
+        helperIndicesAndNames.clear();
 
         // Fill the colourmap
 
@@ -304,8 +306,7 @@ namespace Magus
         mLightAxisNode = mCameraManager->mCameraNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
         mLightAxisNode->setPosition(mCamera->getPosition() + Ogre::Vector3(0, -27, -100));
         mLightAxisItem = mSceneManager->createItem("axis.mesh",
-                                                   Ogre::ResourceGroupManager::
-                                                   AUTODETECT_RESOURCE_GROUP_NAME,
+                                                   Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                                                    Ogre::SCENE_DYNAMIC );
         mLightAxisItem->setRenderQueueGroup(2);
         mLightAxisNode->attachObject(mLightAxisItem);
@@ -423,10 +424,8 @@ namespace Magus
 
             // Create a new item
             mItem = mSceneManager->createItem(meshName,
-                                              Ogre::ResourceGroupManager::
-                                              AUTODETECT_RESOURCE_GROUP_NAME,
+                                              Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                                               Ogre::SCENE_DYNAMIC );
-
             mSceneNode->attachObject(mItem);
             mSceneNode->setScale(scale);
             mItem->setRenderQueueGroup(1);
@@ -441,8 +440,7 @@ namespace Magus
 
             // Create a new itemRtt
             mItemRtt = mSceneManager->createItem(meshName,
-                                                 Ogre::ResourceGroupManager::
-                                                 AUTODETECT_RESOURCE_GROUP_NAME,
+                                                 Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                                                  Ogre::SCENE_DYNAMIC );
 
             mSceneNodeRtt->attachObject(mItemRtt);
@@ -504,7 +502,7 @@ namespace Magus
         bool success = false;
         try
         {
-            mItem->setDatablock(hlmsPbs->getDefaultDatablock());
+            mItem->setDatablock(hlmsPbs->getDefaultDatablock()->getName());
             success = true;
         }
         catch (Ogre::Exception e) {}
@@ -521,7 +519,7 @@ namespace Magus
         {
             try
             {
-                mItem->setDatablock(hlmsUnlit->getDefaultDatablock());
+                mItem->setDatablock(hlmsUnlit->getDefaultDatablock()->getName());
             }
             catch (Ogre::Exception e) {}
         }
@@ -537,10 +535,10 @@ namespace Magus
         Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
 
         if (itemRttDatablock != hlmsUnlit->getDefaultDatablock())
-            mItemRtt->setDatablock(hlmsUnlit->getDefaultDatablock());
+            mItemRtt->setDatablock(hlmsUnlit->getDefaultDatablock()->getName());
         else
             if (itemRttDatablock != hlmsPbs->getDefaultDatablock())
-                mItemRtt->setDatablock(hlmsPbs->getDefaultDatablock());
+                mItemRtt->setDatablock(hlmsPbs->getDefaultDatablock()->getName());
             else
                 mItemRtt->setDatablock(DEFAULT_DATABLOCK_NAME);
     }
@@ -728,7 +726,7 @@ namespace Magus
             if (toggleBackgroundColour)
                 setBackgroundColour(c);
         }
-}
+    }
 
     //-------------------------------------------------------------------------------------
     QPaintEngine* QOgreWidget::paintEngine() const
@@ -1005,7 +1003,7 @@ namespace Magus
         if (mLatestSubItemIndexHighlighted >= 0 && mLatestSubItemIndexHighlighted >= mItem->getNumSubItems())
             return;
 
-        mItem->getSubItem(mLatestSubItemIndexHighlighted)->setDatablock(mLatestSubItemDatablock);
+        mItem->getSubItem(mLatestSubItemIndexHighlighted)->setDatablock(mLatestSubItemDatablock->getName());
         mLatestSubItemIndexHighlighted = -1;
         mLatestSubItemDatablock = 0;
     }
@@ -1048,10 +1046,11 @@ namespace Magus
     //****************************************************************************/
     void QOgreWidget::makeSnapshotOfItemMaterials(void)
     {
+        mSnapshotDatablocks.clear();
         Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
         Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
         Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
-        size_t numSubItems = mItemRtt->getNumSubItems();
+        size_t numSubItems = mItem->getNumSubItems();
         Ogre::SubItem* subItem;
         Ogre::HlmsDatablock* datablock;
         Ogre::String datablockFullName;
@@ -1070,9 +1069,8 @@ namespace Magus
                         datablockFullName != Magus::HIGHLIGHT_MATERIAL_NAME)
                 {
                     mSnapshotDatablocks[i] = datablockFullName;
-                    //Ogre::LogManager::getSingleton().logMessage("make snaphot: " +  datablockFullName + "\n"); // DEBUG
+                    //Ogre::LogManager::getSingleton().logMessage("make snaphot: " +  datablockFullName); // DEBUG
                 }
-
             }
         }
     }
@@ -1080,9 +1078,9 @@ namespace Magus
     //****************************************************************************/
     void QOgreWidget::restoreSnapshotOfItemMaterials(void)
     {
-        QMap <int, Ogre::String>::iterator it = mSnapshotDatablocks.begin();
-        QMap <int, Ogre::String>::iterator itEnd = mSnapshotDatablocks.end();
-        int index;
+        QMap <size_t, Ogre::String>::iterator it = mSnapshotDatablocks.begin();
+        QMap <size_t, Ogre::String>::iterator itEnd = mSnapshotDatablocks.end();
+        size_t index;
         Ogre::String datablockFullName;
         Ogre::HlmsDatablock* datablock;
 
@@ -1091,10 +1089,21 @@ namespace Magus
             datablockFullName = it.value();
             index = it.key();
             datablock = getDatablockByFullName(datablockFullName);
-            if (datablock)
+            Ogre::SubItem* subItem;
+            if (mItem && datablock)
             {
-                mItem->getSubItem(index)->setDatablock(datablock);
-                //Ogre::LogManager::getSingleton().logMessage("restore snaphot: " +  datablockFullName + "\n"); // DEBUG
+                subItem = mItem->getSubItem(index);
+                if (subItem)
+                {
+                    try
+                    {
+                        Ogre::LogManager::getSingleton().logMessage("make snaphot: " +  *datablock->getFullName()); // DEBUG
+                        subItem->setDatablock(datablock->getName());
+                        //subItem->setDatablock(datablock);
+                    }
+                    catch (Ogre::Exception e){}
+                }
+                //Ogre::LogManager::getSingleton().logMessage("restore snaphot: " +  datablockFullName); // DEBUG
             }
             ++it;
         }
@@ -1166,7 +1175,7 @@ namespace Magus
 
 
     //****************************************************************************/
-    const QMap<int, Ogre::String>& QOgreWidget::getMaterialNamesFromCurrentMesh(void)
+    const QMap<unsigned short, Ogre::String>& QOgreWidget::getMaterialNamesFromCurrentMesh(void)
     {
         // Iterate through the current mesh and return a map with materialnames
         helperIndicesAndNames.clear();

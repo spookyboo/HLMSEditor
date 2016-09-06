@@ -506,7 +506,7 @@ Ogre::FilterOptions HlmsBuilder::getFilterOptionFromIndex (unsigned int index)
 bool HlmsBuilder::isResourceLocationExisting(const Ogre::String& path)
 {
     Ogre::ResourceGroupManager::LocationList resourceLocations = Ogre::ResourceGroupManager::getSingletonPtr()->
-            getResourceLocationList("General");
+            getResourceLocationList(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     Ogre::ResourceGroupManager::LocationList::iterator it;
     Ogre::ResourceGroupManager::LocationList::iterator itStart = resourceLocations.begin();
     Ogre::ResourceGroupManager::LocationList::iterator itEnd = resourceLocations.end();
