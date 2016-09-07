@@ -261,8 +261,6 @@ namespace Magus
             // Determine time since last frame
             Ogre::Real timeSinceLastFrame = 0.0f;
             unsigned long startTime = 0;
-
-            // Render an one frame
             startTime = mTimer->getMillisecondsCPU();
             timeSinceLastFrame = (mTimer->getMillisecondsCPU() - startTime) / 1000.0f;
 
@@ -277,6 +275,7 @@ namespace Magus
 
             try
             {
+                // Render an one frame
                 // Put in a try-catch, because sometimes the application crashes after loading a big mesh
                 mRoot->renderOneFrame();
             }

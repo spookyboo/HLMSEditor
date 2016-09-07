@@ -444,8 +444,14 @@ namespace Magus
                                                  Ogre::SCENE_DYNAMIC );
 
             mSceneNodeRtt->attachObject(mItemRtt);
+            mSceneNodeRtt->setVisible(false);
             createUnlitDatablocksRtt();
             mItemRtt->setRenderQueueGroup(1);
+
+            // Put an extra renderOneFrame, because of an exception in Debug (D3D11 device cannot Clear State)
+            #if _DEBUG || DEBUG
+                mRoot->renderOneFrame();
+            #endif
         }
 
         catch (Ogre::Exception e)

@@ -143,16 +143,10 @@ Ogre::HlmsUnlitDatablock* HlmsUnlitBuilder::createUnlitDatablock (Magus::OgreMan
         }
     }
 
-    // Set the datablock in the item
-    //Ogre::Item* item = ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
-    //item->setDatablock(datablock);
     return datablock;
 }
 
 //****************************************************************************/
-//HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNodeStructure(Magus::OgreManager* ogreManager,
-//                                                                   const QString& datablockName)
-
 HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNodeStructure(Magus::OgreManager* ogreManager,
                                                                    const HlmsUtilsManager::DatablockStruct& datablockStruct)
 
@@ -162,8 +156,6 @@ HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNodeStructure(Magus::OgreMa
     Ogre::Root* root = ogreManager->getOgreRoot();
     Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
     Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT) );
-    //Ogre::String name = datablockName.toStdString();
-    //Ogre::HlmsUnlitDatablock* datablock = static_cast<Ogre::HlmsUnlitDatablock*>(hlmsUnlit->getDatablock(name));
     Ogre::HlmsUnlitDatablock* datablock = static_cast<Ogre::HlmsUnlitDatablock*>(hlmsUnlit->getDatablock(datablockStruct.datablockId));
     if (datablock)
     {

@@ -77,8 +77,9 @@ class HlmsUtilsManager
         void reloadNonSpecialDatablocks(void);
 
         /* The snapshot (taken from the Ogre::HlmsManager) is compared with the datablocks from Ogre::HlmsManager
-         * The first difference that is encountered is used to compare it with mLoadedDatablocks
-         * mLoadedDatablocks is used, because Ogre doesn't administer the json files.
+         * The first difference that is encountered is used to compare with mLoadedDatablocks
+         * mLoadedDatablocks is used, because Ogre doesn't administer the json files and we want to
+         * keep the relation between datablocks, textures and the json file.
          */
         DatablockStruct compareSnapshotWithLoadedDatablocksAndAdminister(const QString& jsonFileName, const char* jsonChar);
 
@@ -91,7 +92,7 @@ class HlmsUtilsManager
          * excludeSpecialDatablocks == true and excludeDatablockFullName is filled with a valid datablock name (full name)
          * - Exclude the default datablocks from destroying
          * - Exclude Axis and Highlight materials from destroying
-         * - Exclude the unlit materials associated with the 'render-texture'  item  from destroying (defined by 0, 1, 2, 3, ...)
+         * - Exclude the unlit materials associated with the 'render-texture'  item  from destroying (defined by name 0, 1, 2, 3, ...)
          * - Exclude the datablock with the same name as 'excludeDatablockFullName' from destroying
          *
          * excludeSpecialDatablocks == false and excludeDatablockFullName == ""
@@ -123,9 +124,11 @@ class HlmsUtilsManager
     protected:
         bool isInLoadedDatablocksVec (const Ogre::String& datablockFullName);
 
-        /* Parse a json string and get the details (texture names) from the string.
-         * This function was added because it is easier to have these values in the datastructure.
-         * Otherwise HlmsTextureManager::findAliasNamefindAliasName must be used.
+        /* Parse a json string and get the details (texture names) from the string. This function was
+         * added because it is easier to retrieve texture names from the json file instead of  using
+         * HlmsTextureManager::findAliasNamefindAliasName.
+         * Unfortunalty, the json file gets parsed twice (first time by Ogre and second time by the
+         * editor, but this is only as part of loading from disk, which is slow already.
          */
         bool parseJsonAndRetrieveDetails (HlmsUtilsManager::DatablockStruct* datablockStruct, const char* jsonChar);
 

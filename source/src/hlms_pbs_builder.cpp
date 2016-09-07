@@ -145,16 +145,10 @@ Ogre::HlmsPbsDatablock* HlmsPbsBuilder::createPbsDatablock (Magus::OgreManager* 
         }
     }
 
-    // Set the datablock in the item
-    //Ogre::Item* item = ogreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getItem();
-    //item->setDatablock(datablock);
     return datablock;
 }
 
 //****************************************************************************/
-//HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNodeStructure(Magus::OgreManager* ogreManager,
-//                                                             const QString& datablockName)
-
 HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNodeStructure(Magus::OgreManager* ogreManager,
                                                              const HlmsUtilsManager::DatablockStruct& datablockStruct)
 
@@ -164,8 +158,6 @@ HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNodeStructure(Magus::OgreManager*
     Ogre::Root* root = ogreManager->getOgreRoot();
     Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
     Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
-    //Ogre::String name = datablockName.toStdString();
-    //Ogre::HlmsPbsDatablock* datablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmsPbs->getDatablock(name));
     Ogre::HlmsPbsDatablock* datablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmsPbs->getDatablock(datablockStruct.datablockId));
     if (datablock)
     {

@@ -604,12 +604,6 @@ void MainWindow::loadMesh(const QString meshFileName)
             // Create (by the ogre widget) the V2 mesh, the item and the rtt item
             ogreWidget->createItem(v2MeshPtr.getPointer()->getName(), Ogre::Vector3::UNIT_SCALE);
 
-            // Create (by the scenemanager) an item and rtt item from the v2MeshPtr and set them in the ogre widget
-            //Ogre::SceneManager* sceneManager = ogreWidget->getSceneManager();
-            //Ogre::Item* item = sceneManager->createItem(v2MeshPtr, Ogre::SCENE_DYNAMIC);
-            //Ogre::Item* itemRtt = sceneManager->createItem(v2MeshPtr, Ogre::SCENE_DYNAMIC);
-            //ogreWidget->setItem(item, itemRtt, Ogre::Vector3::UNIT_SCALE);
-
             // Add to mesh map
             mRenderwindowDockWidget->addToMeshMap(baseName, baseName, QVector3D(1.0f, 1.0f, 1.0f));
 

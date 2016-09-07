@@ -69,22 +69,6 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::loadDatablock(const QString&
     }
     else
     {
-        /*
-        try
-        {
-            if (makeSnaphot)
-            {
-                // Make snapshot of the already loaded datablocks
-                makeSnapshotDatablocks();
-            }
-            Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
-            Ogre::String fname = jsonFileName.toStdString();
-            hlmsManager->loadMaterials(fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-            Ogre::LogManager::getSingleton().logMessage("HlmsUtilsManager::loadDatablock: " + fname + " loaded"); // DEBUG
-        }
-        catch (Ogre::Exception e){}
-        */
-
         // Read the json file as text file and feed it to the HlmsManager::loadMaterials() function
         // Note, that the resources (textures, etc.) must be present
         Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
@@ -620,26 +604,26 @@ bool HlmsUtilsManager::parseJsonAndRetrieveDetails (HlmsUtilsManager::DatablockS
     rapidjson::Value::ConstMemberIterator itorPbs = d.FindMember("pbs");
     if( itorPbs != d.MemberEnd() && itorPbs->value.IsObject() )
     {
-        // Only get the fist datablock
+        // Only get the first datablock; ignore the rest (this IS an editor, so I am in control).
         rapidjson::Value::ConstMemberIterator itorDatablock = itorPbs->value.MemberBegin();
         if (itorDatablock != itorPbs->value.MemberEnd() && itorDatablock->value.IsObject() )
         {
             // Parse all texture types
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "diffuse", 0);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "normal", 1);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "specular", 2);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "metallness", 2);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "roughness", 3);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_weight", 4);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_diffuse0", 5);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_diffuse1", 6);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_diffuse2", 7);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_diffuse3", 8);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_normal0", 9);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_normal1", 10);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_normal2", 11);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_normal3", 12);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_normal", 13);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "diffuse", Ogre::PBSM_DIFFUSE);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "normal", Ogre::PBSM_NORMAL);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "specular", Ogre::PBSM_SPECULAR);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "metallness", Ogre::PBSM_METALLIC);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "roughness", Ogre::PBSM_ROUGHNESS);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_weight", Ogre::PBSM_DETAIL_WEIGHT);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_diffuse0", Ogre::PBSM_DETAIL0);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_diffuse1", Ogre::PBSM_DETAIL1);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_diffuse2", Ogre::PBSM_DETAIL2);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_diffuse3", Ogre::PBSM_DETAIL3);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_normal0", Ogre::PBSM_DETAIL0_NM);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_normal1", Ogre::PBSM_DETAIL1_NM);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_normal2", Ogre::PBSM_DETAIL2_NM);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_normal3", Ogre::PBSM_DETAIL3);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "reflection", Ogre::PBSM_REFLECTION);
         }
     }
 
@@ -655,6 +639,8 @@ bool HlmsUtilsManager::parseJsonAndRetrieveDetails (HlmsUtilsManager::DatablockS
             parseUnlitTexture (datablockStruct, itorDatablock->value);
         }
     }
+
+    return true;
 }
 
 //****************************************************************************/
@@ -681,7 +667,7 @@ void HlmsUtilsManager::parseUnlitTexture (HlmsUtilsManager::DatablockStruct* dat
                                          const rapidjson::Value& textureJson)
 {
     Ogre::String diffuseMap;
-    for (unsigned short index = 0; index < 16; ++index)
+    for (unsigned short index = 0; index < Ogre::UnlitTextureTypes::NUM_UNLIT_TEXTURE_TYPES; ++index)
     {
         diffuseMap = "diffuse_map" + Ogre::StringConverter::toString(index);
         rapidjson::Value::ConstMemberIterator itorTextureType = textureJson.FindMember(diffuseMap.c_str());
