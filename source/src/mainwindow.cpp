@@ -658,9 +658,11 @@ bool MainWindow::isMeshV1(const QString meshFileName)
     Ogre::v1::MeshPtr v1MeshPtr;
     try
     {
-        v1MeshPtr = Ogre::v1::MeshManager::getSingleton().load(
-                    meshFileName.toStdString(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                    Ogre::v1::HardwareBuffer::HBU_STATIC, Ogre::v1::HardwareBuffer::HBU_STATIC);
+        Ogre::v1::MeshSerializer meshSerializer;
+        Ogre::DataStreamPtr stream(openFile(meshFileName.toStdString()));
+        Ogre::String name = Ogre::StringConverter::toString(mOgreManager->getOgreRoot()->getTimer()->getMicroseconds());
+        v1MeshPtr = Ogre::v1::MeshManager::getSingleton().createManual(name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
+        meshSerializer.importMesh(stream, v1MeshPtr.get());
         v1MeshPtr->unload();
     }
     catch (Ogre::Exception e)
@@ -824,12 +826,6 @@ void MainWindow::doSaveDatablockMenuAction(void)
 //****************************************************************************/
 void MainWindow::doSaveAsDatablockMenuAction(void)
 {
-    if (mCurrentDatablockFullName.empty())
-    {
-        QMessageBox::information(0, QString("Error"), QString("Cannot save an Hlms without a name. Provide a name, Generate the Hlms and save again"));
-        return;
-    }
-
     // Get hlms name
     mHlmsName = mCurrentDatablockFullName.c_str();
     mHlmsName = mHlmsName + QString(".material.json");
@@ -851,12 +847,6 @@ void MainWindow::doSaveAsDatablockMenuAction(void)
 //****************************************************************************/
 void MainWindow::saveDatablock(void)
 {
-    if (mCurrentDatablockFullName.empty())
-    {
-        QMessageBox::information(0, QString("Error"), QString("Cannot save an Hlms without a name. Provide a name, recompile and save again"));
-        return;
-    }
-
     Ogre::String fname = mHlmsName.toStdString();
     QString baseNameJson = mHlmsName;
     baseNameJson = getBaseFileName(baseNameJson);
@@ -1345,7 +1335,7 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
         }
         text = data.mOutSuccessText.c_str();
         if (text.isEmpty())
-            text = QString ("Import completed into ") + data.mInImportPath.c_str();
+            text = QString ("Import completed");
         QMessageBox::information(0, QString("Info"), text);
     }
     else
@@ -1805,9 +1795,6 @@ void MainWindow::setCurrentDatablockNames(const Ogre::IdString& name, const Ogre
     mCurrentDatablockName = name;
 
     // Pass the datablock name to the ogre widget
-    // The Ogre widget should ask the MainWindow for the name, but the MainWindow
-    // is not its parent (there are two levels in between); passing it directly
-    // from the MainWindow to the Ogre widget is just convenience
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setCurrentDatablockName(mCurrentDatablockName);
 }
 

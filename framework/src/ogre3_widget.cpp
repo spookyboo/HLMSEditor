@@ -1103,8 +1103,9 @@ namespace Magus
                 {
                     try
                     {
-                        //Ogre::LogManager::getSingleton().logMessage("make snaphot: " +  *datablock->getFullName()); // DEBUG
+                        Ogre::LogManager::getSingleton().logMessage("make snaphot: " +  *datablock->getFullName()); // DEBUG
                         subItem->setDatablock(datablock->getName());
+                        //subItem->setDatablock(datablock);
                     }
                     catch (Ogre::Exception e){}
                 }
