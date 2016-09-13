@@ -34,13 +34,43 @@ static const Ogre::String GENERAL_HLMS_PLUGIN_NAME = "HlmsEditorPlugin";
 
 namespace Ogre
 {
+    /* The PLUGIN_ACTION_FLAG is set by the plugin to indicate which actions the HLMS editor must perform (because
+     * it cannot perform these actions itself)
+     */
     enum PLUGIN_ACTION_FLAG
     {
-        PAF_PRE_IMPORT_MK_DIR = 1 << 0,
-        PAF_POST_IMPORT_OPEN_PROJECT = 1 << 1,
-        PAF_POST_IMPORT_SAVE_RESOURCE_LOCATIONS = 1 << 2,
+        // The plugin indicates that the HLMS Editor must open a filedialog before the
+        // executeImport() function is added. The filename (mInFileDialogName + mInFileDialogPath) is passed
+        PAF_PRE_IMPORT_OPEN_FILE_DIALOG = 1 << 0,
+
+        // Create a directory before importing
+        PAF_PRE_IMPORT_MK_DIR = 1 << 1,
+
+        // The plugin indicates that the HLMS Editor must open a filedialog before the
+        // executeExport () function is executed. The output directory (mInFileDialogPath) is passed
+        PAF_PRE_EXPORT_OPEN_DIR_DIALOG = 1 << 2,
+
+        // Delete all datablocks before the export is executed and keep the list of
+        // datablocks (files) to rebuild them after the export
         PAF_PRE_EXPORT_DELETE_ALL_DATABLOCKS = 1 << 3,
-        PAF_POST_EXPORT_DELETE_ALL_DATABLOCKS = 1 << 4
+
+        // The HLMS editor fills the mInTexturesUsedByDatablocks vector.
+        // This is a performance improvement (otherwise the editor always provides the data even if not needed)
+        PAF_PRE_EXPORT_TEXTURES_USED_BY_DATABLOCK = 1 << 4,
+
+        // Load a project after the import (mOutReference contains the project file)
+        PAF_POST_IMPORT_OPEN_PROJECT = 1 << 5,
+
+        PAF_POST_IMPORT_SAVE_RESOURCE_LOCATIONS = 1 << 6,
+
+        // Load a mesh after the import (mOutReference contains the mesh file)
+        PAF_POST_IMPORT_LOAD_MESH = 1 << 7,
+
+        // Delete all datablocks after the export is executed
+        PAF_POST_EXPORT_DELETE_ALL_DATABLOCKS = 1 << 8,
+
+        // Do not display the 'ok' message after a succesful import or export
+        PAF_POST_ACTION_SUPPRESS_OK_MESSAGE = 1 << 9
     };
 
     /** Class to pass data from Hlms editor to plugins */
@@ -78,7 +108,7 @@ namespace Ogre
 
 
             // Output (output from the plugin, input for the HLMS Editor)
-            String mOutExportReference; // To be filled in by the plugin; this can be a (file) reference of the export
+            String mOutReference; // To be filled in by the plugin; this can be a (file) reference of the import or export
             String mOutSuccessText; // In case the function was executed correctly, this text can be displayed
             String mOutErrorText; // In case the function was not executed correctly, this errortext can be displayed
 
@@ -100,7 +130,7 @@ namespace Ogre
                 mInSceneManager = 0;
                 mInOutCurrentDatablock = 0;
                 mOutErrorText = "Error while performing this function";
-                mOutExportReference = "";
+                mOutReference = "";
                 mOutSuccessText = "";
                 mInMaterialFileNameVector.clear();
                 mInTextureFileNameVector.clear();
@@ -118,21 +148,9 @@ namespace Ogre
             HlmsEditorPlugin (void) {}
             virtual ~HlmsEditorPlugin (void) {}
 
-            // The plugin indicates that the HLMS Editor must open a filedialog before the
-            // executeImport() function is added. The filename (mInFileDialogName + mInFileDialogPath) must be passed
-            virtual bool isOpenFileDialogForImport (void) const = 0;
-
             // Does the plugin perform an import?
 			virtual bool isImport (void) const = 0;
 			
-            // The plugin indicates that the HLMS Editor must open a filedialog before the
-            // executeExport () function is added. The output directory (mInFileDialogPath) must be passed
-            virtual bool isOpenFileDialogForExport (void) const = 0;
-
-            // If true, the HLMS editor fills the mInTexturesUsedByDatablocks vector
-            // This is a performance improvement (otherwise the editor always provides the data even if not needed)
-            virtual bool isTexturesUsedByDatablocksForExport (void) const = 0;
-
             // Does the plugin perform an export?
 			virtual bool isExport (void) const = 0;
 

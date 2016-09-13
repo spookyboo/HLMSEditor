@@ -1,3 +1,3 @@
 hlmsEditor v1.0
-C:/Users/Henry/Documents/Visual Studio 2015/Projects/HLMSEditor/examples/example_project_materials.cfg
-C:/Users/Henry/Documents/Visual Studio 2015/Projects/HLMSEditor/examples/example_project_textures.cfg
+../examples/example_project_materials.cfg
+../examples/example_project_textures.cfg

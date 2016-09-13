@@ -1278,7 +1278,7 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
     constructHlmsEditorPluginData(&data);
 
     // Is a filedialog needed before import (to select the file to be imported)?
-    if (plugin->isOpenFileDialogForImport())
+    if (plugin->getActionFlag() & Ogre::PAF_PRE_IMPORT_OPEN_FILE_DIALOG)
     {
         QString fileName;
         fileName = QFileDialog::getOpenFileName(this, QString("Import"),
@@ -1326,17 +1326,20 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
     QApplication::restoreOverrideCursor();
     if (result)
     {
-        // Check whether a new datablock was created
-        newDatablock = data.mInOutCurrentDatablock;
-        if (newDatablock && oldDatablock != newDatablock)
+        if (!plugin->getActionFlag() & Ogre::PAF_POST_ACTION_SUPPRESS_OK_MESSAGE)
         {
-            // Set the newDatablock to the Item?
-            // TODO: Not sure what to do here
+            // Check whether a new datablock was created
+            newDatablock = data.mInOutCurrentDatablock;
+            if (newDatablock && oldDatablock != newDatablock)
+            {
+                // Set the newDatablock to the Item?
+                // TODO: Not sure what to do here
+            }
+            text = data.mOutSuccessText.c_str();
+            if (text.isEmpty())
+                text = QString ("Import completed");
+            QMessageBox::information(0, QString("Info"), text);
         }
-        text = data.mOutSuccessText.c_str();
-        if (text.isEmpty())
-            text = QString ("Import completed");
-        QMessageBox::information(0, QString("Info"), text);
     }
     else
     {
@@ -1361,8 +1364,15 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
     if (plugin->getActionFlag() & Ogre::PAF_POST_IMPORT_OPEN_PROJECT)
     {
         // Open a project (referered to by means of data.mOutExportReference)
-        QString fileName = QString::fromStdString(data.mOutExportReference);
+        QString fileName = QString::fromStdString(data.mOutReference);
         loadProject(fileName);
+    }
+    if (plugin->getActionFlag() & Ogre::PAF_POST_IMPORT_LOAD_MESH)
+    {
+        // Load a mesh file
+        QString fileName = QString::fromStdString(data.mOutReference);
+        if (!fileName.isEmpty())
+            loadMesh(fileName);
     }
 
     QApplication::restoreOverrideCursor();
@@ -1387,20 +1397,20 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
     constructHlmsEditorPluginData(&data);
 
     // Is a filedialog needed before export (to select the dir to be exported)?
-    if (plugin->isOpenFileDialogForExport())
+    if (plugin->getActionFlag() & Ogre::PAF_PRE_EXPORT_OPEN_DIR_DIALOG)
     {
-        QString textureFolder;
+        QString path;
         QFileDialog dialog;
         dialog.setFileMode(QFileDialog::Directory);
         if (dialog.exec())
         {
             QStringList fileNames = dialog.selectedFiles();
-            textureFolder = fileNames.at(0);
+            path = fileNames.at(0);
         }
 
-        if (!textureFolder.isEmpty())
+        if (!path.isEmpty())
         {
-            data.mInFileDialogPath = (textureFolder + QString("/")).toStdString();
+            data.mInFileDialogPath = (path + QString("/")).toStdString();
             data.mInExportPath = data.mInFileDialogPath;
         }
         else
@@ -1413,7 +1423,7 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
     // Are the textures of all datablocks in the material browser needed?
-    if (plugin->isTexturesUsedByDatablocksForExport())
+    if (plugin->getActionFlag() & Ogre::PAF_PRE_EXPORT_TEXTURES_USED_BY_DATABLOCK)
     {
         // Reload all datablocks from the material browser
         std::vector<Ogre::String> materials;
@@ -1557,7 +1567,7 @@ void MainWindow::constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data)
     data->mInSceneManager = widget->getSceneManager();
     data->mInTextureFileName = mTextureFileName.toStdString();
     data->mOutErrorText = "Error while performing this function";
-    data->mOutExportReference = "";
+    data->mOutReference = "";
     data->mOutSuccessText = "";
     data->mInTexturesUsedByDatablocks.clear();
 }
