@@ -36,9 +36,10 @@ class HlmsPropertiesPbsDatablock : public QWidget
     Q_OBJECT
 
     public:
-        HlmsPropertiesPbsDatablock(const QString& fileNameIcon, QWidget* parent = 0);
-        virtual ~HlmsPropertiesPbsDatablock(void);
+        HlmsPropertiesPbsDatablock (const QString& fileNameIcon, QWidget* parent = 0);
+        virtual ~HlmsPropertiesPbsDatablock (void);
         void setObject (HlmsNodePbsDatablock* hlmsNodePbsDatablock);
+        void setBackgroundDiffusePropertyVisible (bool visible);
 
     private slots:
         void propertyValueChanged(QtProperty* property);

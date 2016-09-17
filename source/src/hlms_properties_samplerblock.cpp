@@ -32,8 +32,8 @@
 #include "hlms_node_samplerblock.h"
 
 //****************************************************************************/
-HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIcon, QWidget* parent) : QWidget(parent)
-
+HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIcon, QWidget* parent) :
+    QWidget(parent)
 {
     mHlmsNodeSamplerblock = 0;
     QVBoxLayout* mainLayout = new QVBoxLayout;

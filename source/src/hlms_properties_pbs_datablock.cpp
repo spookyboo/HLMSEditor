@@ -435,3 +435,11 @@ void HlmsPropertiesPbsDatablock::infoClicked(void)
     PropertiesDockWidget* parent = static_cast<PropertiesDockWidget*>(parentWidget());
     parent->displayInfo(INFO_PBS, QString("Info"));
 }
+
+//****************************************************************************/
+void HlmsPropertiesPbsDatablock::setBackgroundDiffusePropertyVisible(bool visible)
+{
+    Magus::QtColorProperty* colorProperty;
+    colorProperty = static_cast<Magus::QtColorProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_BACKGROUND));
+    colorProperty->setVisible(visible);
+}

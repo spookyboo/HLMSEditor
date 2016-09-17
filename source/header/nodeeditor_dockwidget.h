@@ -75,11 +75,13 @@ class NodeEditorDockWidget : public QDockWidget
 
     public slots:
         void nodeSelected(QtNode* node);
+        void nodeConnected(QtNode* baseNode, QtNode* targetNode);
         void deleteHlmsPbsDatablockNode(void);
         void deleteHlmsUnlitDatablockNode(void);
 
     protected:
         QMessageBox::StandardButton fileDoesNotExistsWarning(const QString& fileName);
+        void setBackgroundDiffusePropertyVisibleBasedOnSamplerNodes (void);
 
     signals:
         // Emitted when something was dropped on this widget

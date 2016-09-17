@@ -47,6 +47,7 @@ NodeEditorDockWidget::NodeEditorDockWidget(QString title, MainWindow* parent, Qt
 
     connect(mNodeEditor, SIGNAL(nodeToBeRemoved(QtNode*)), this, SLOT(nodeToBeDeleted(QtNode*)));
     connect(mNodeEditor, SIGNAL(nodeSelected(QtNode*)), this, SLOT(nodeSelected(QtNode*)));
+    connect(mNodeEditor, SIGNAL(nodeConnected(QtNode*,QtNode*)), this, SLOT(nodeConnected(QtNode*,QtNode*)));
     connect(mNodeEditor, SIGNAL(dropped()), this, SLOT(handleDropped()));
     mInnerMain->setCentralWidget(mNodeEditor);
     mHlmsPbsDatablockNode = 0;
@@ -267,12 +268,14 @@ HlmsNodeSamplerblock* NodeEditorDockWidget::doNewSamplerblockAction(void)
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
         mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
         mHlmsPbsBuilder->connectNodes(mHlmsPbsDatablockNode, sampler);
+        nodeConnected(mHlmsPbsDatablockNode, sampler);
     }
     else if (mHlmsUnlitDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
         mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
         mHlmsUnlitBuilder->connectNodes(mHlmsUnlitDatablockNode, sampler);
+        nodeConnected(mHlmsPbsDatablockNode, sampler);
     }
 
     return sampler;
@@ -357,6 +360,9 @@ void NodeEditorDockWidget::nodeToBeDeleted(QtNode* node)
         deleteHlmsPbsDatablockNode();
     else if (mHlmsUnlitDatablockNode == node)
         deleteHlmsUnlitDatablockNode();
+
+    if (node->getType() == NODE_TYPE_SAMPLERBLOCK)
+        setBackgroundDiffusePropertyVisibleBasedOnSamplerNodes();
 }
 
 //****************************************************************************/
@@ -407,6 +413,10 @@ void NodeEditorDockWidget::nodeSelected(QtNode* node)
         HlmsPropertiesPbsDatablock* hlmsPropertiesPbsDatablock = mParent->mPropertiesDockWidget->mHlmsPropertiesPbsDatablock;
         if (hlmsPropertiesPbsDatablock)
         {
+            // Determine whether the background colour property is visible
+            setBackgroundDiffusePropertyVisibleBasedOnSamplerNodes();
+
+            // Display the pbs properties
             hlmsPropertiesPbsDatablock->setObject(static_cast<HlmsNodePbsDatablock*>(node));
             mParent->mPropertiesDockWidget->setHlmsPropertiesPbsDatablockVisible(true);
         }
@@ -447,6 +457,23 @@ void NodeEditorDockWidget::nodeSelected(QtNode* node)
             mParent->mPropertiesDockWidget->setHlmsPropertiesBlendblockVisible(true);
         }
     }
+}
+
+//****************************************************************************/
+void NodeEditorDockWidget::nodeConnected(QtNode* baseNode, QtNode* targetNode)
+{
+    // One of the nodes must be a sampler node; otherwise. don't bother
+    HlmsNodeSamplerblock* hlmsNodeSamplerblock = 0;
+    if (baseNode->getType() == NODE_TYPE_SAMPLERBLOCK)
+        hlmsNodeSamplerblock = static_cast<HlmsNodeSamplerblock*>(baseNode);
+    else if (targetNode->getType() == NODE_TYPE_SAMPLERBLOCK)
+        hlmsNodeSamplerblock = static_cast<HlmsNodeSamplerblock*>(targetNode);
+    if (!hlmsNodeSamplerblock)
+        return;
+
+    // Ignore the baseNode and targetNode; just check whether the pbs node is available and is attached
+    // to a samplernode with a diffuse texture
+    setBackgroundDiffusePropertyVisibleBasedOnSamplerNodes();
 }
 
 //****************************************************************************/
@@ -520,3 +547,34 @@ void NodeEditorDockWidget::clear (void)
     mHlmsPbsDatablockNode = 0;
     mHlmsUnlitDatablockNode = 0;
 }
+
+//****************************************************************************/
+void NodeEditorDockWidget::setBackgroundDiffusePropertyVisibleBasedOnSamplerNodes (void)
+{
+    if (!mHlmsPbsDatablockNode)
+        return;
+
+    // Iterate over all sampler nodes and determine whether one of them applies to a diffuse texture
+    QVector<QtNode*> samplerBlockNodes = mHlmsPbsDatablockNode->getNodesConnectedToPorts((PORT_SAMPLERBLOCK));
+    HlmsNodeSamplerblock* samplerBlockNode;
+    bool diffuseTexture = false;
+    foreach(QtNode* node, samplerBlockNodes)
+    {
+        samplerBlockNode = static_cast<HlmsNodeSamplerblock*>(node);
+        if (samplerBlockNode->getTextureType() == 0)
+        {
+            diffuseTexture = true;
+            break;
+        }
+    }
+
+    HlmsPropertiesPbsDatablock* hlmsPropertiesPbsDatablock = mParent->mPropertiesDockWidget->mHlmsPropertiesPbsDatablock;
+    if (!hlmsPropertiesPbsDatablock)
+        return;
+
+    if (diffuseTexture)
+        hlmsPropertiesPbsDatablock->setBackgroundDiffusePropertyVisible(false);
+    else
+        hlmsPropertiesPbsDatablock->setBackgroundDiffusePropertyVisible(true);
+}
+

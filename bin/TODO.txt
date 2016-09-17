@@ -1,6 +1,5 @@
 V 1.0 updates:
 =============
-- http://www.ogre3d.org/forums/viewtopic.php?f=25&t=85264&p=530357&hilit=two+sided#p530190
 - Use resource.cfg per project
 - Remove unused functions in .h/.cpp files in the 'sources' directory
 - Texture browser:
@@ -14,6 +13,14 @@ V 1.0 updates:
 
 V 1.0 Bugs:
 ==========
+- Resetting position and orientation of the camera/mesh in the renderwindow requires two mouse clicks on the same marker button
+- Error scenario:
+  1. open project; 
+  2. open material browser; 
+  3. double click on a material (material A); 
+  4. remove a samplerblock and rebuild the material; 
+  5. select another material from the material browser (material B)
+  6. select the previous material again (material A) ==> Error: MainWindow::loadDatablockAndSet -> Cannot continue; datablock is 0
 - Scroll wheel not linear? Moving a mesh is too fast when the object is zoomed in a lot
 - If thumb is missing and the noimage.png is displayed, the thumb is not refreshed when reloaded and added again to the material browser;
   only after a restart the thumb is refreshed (minor bug).
