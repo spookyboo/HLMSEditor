@@ -42,6 +42,10 @@ class HlmsNodePbsDatablock : public Magus::QtNode
         float getDiffuseRed(void) const {return mDiffuseRed;}
         float getDiffuseGreen(void) const {return mDiffuseGreen;}
         float getDiffuseBlue(void) const {return mDiffuseBlue;}
+        float getBackgroundDiffuseRed(void) const {return mBackgroundDiffuseRed;}
+        float getBackgroundDiffuseGreen(void) const {return mBackgroundDiffuseGreen;}
+        float getBackgroundDiffuseBlue(void) const {return mBackgroundDiffuseBlue;}
+        float getBackgroundDiffuseAlpha(void) const {return mBackgroundDiffuseAlpha;}
         float getSpecularRed(void) const {return mSpecularRed;}
         float getSpecularGreen(void) const {return mSpecularGreen;}
         float getSpecularBlue(void) const {return mSpecularBlue;}
@@ -54,6 +58,7 @@ class HlmsNodePbsDatablock : public Magus::QtNode
         float getFresnelBlue(void) const {return mFresnelBlue;}
         float getTransparencyValue(void) const {return mTransparencyValue;}
         unsigned int getTransparencyMode(void) const {return mTransparencyMode;}
+        bool isTwoSidedLighting(void) const {return mTwoSidedLighting;}
         bool isUseAlphaFromTexture(void) const {return mUseAlphaFromTexture;}
         unsigned int getBrdf(void) {return mBrdf;}
         unsigned int getAlphaTest(void) const {return mAlphaTest;}
@@ -64,6 +69,10 @@ class HlmsNodePbsDatablock : public Magus::QtNode
         void setDiffuseRed(float diffuseRed) {mDiffuseRed = diffuseRed;}
         void setDiffuseGreen(float diffuseGreen) {mDiffuseGreen = diffuseGreen;}
         void setDiffuseBlue(float diffuseBlue) {mDiffuseBlue = diffuseBlue;}
+        void setBackgroundDiffuseRed(float backgroundDiffuseRed) {mBackgroundDiffuseRed = backgroundDiffuseRed;}
+        void setBackgroundDiffuseGreen(float backgroundDiffuseGreen) {mBackgroundDiffuseGreen = backgroundDiffuseGreen;}
+        void setBackgroundDiffuseBlue(float backgroundDiffuseBlue) {mBackgroundDiffuseBlue = backgroundDiffuseBlue;}
+        void setBackgroundDiffuseAlpha(float backgroundDiffuseAlpha) {mBackgroundDiffuseAlpha = backgroundDiffuseAlpha;}
         void setSpecularRed(float specularRed) {mSpecularRed = specularRed;}
         void setSpecularGreen(float specularGreen) {mSpecularGreen = specularGreen;}
         void setSpecularBlue(float specularBlue) {mSpecularBlue = specularBlue;}
@@ -76,6 +85,7 @@ class HlmsNodePbsDatablock : public Magus::QtNode
         void setFresnelBlue(float fresnelBlue) {mFresnelBlue = fresnelBlue;}
         void setTransparencyValue(float transparencyValue) {mTransparencyValue = transparencyValue;}
         void setTransparencyMode(unsigned int transparencyMode) {mTransparencyMode = transparencyMode;}
+        void setTwoSidedLighting(bool twoSidedLighting) {mTwoSidedLighting = twoSidedLighting;}
         void setUseAlphaFromTexture(bool useAlphaFromTexture) {mUseAlphaFromTexture = useAlphaFromTexture;}
         void setBrdf(unsigned int brdf) {mBrdf = brdf;}
         void setAlphaTest(unsigned int alphaTest) {mAlphaTest = alphaTest;}
@@ -86,6 +96,10 @@ class HlmsNodePbsDatablock : public Magus::QtNode
         float mDiffuseRed;
         float mDiffuseGreen;
         float mDiffuseBlue;
+        float mBackgroundDiffuseRed;
+        float mBackgroundDiffuseGreen;
+        float mBackgroundDiffuseBlue;
+        float mBackgroundDiffuseAlpha;
         float mSpecularRed;
         float mSpecularGreen;
         float mSpecularBlue;
@@ -102,6 +116,7 @@ class HlmsNodePbsDatablock : public Magus::QtNode
         unsigned int mTransparencyMode; // 0 = None
                                         // 1 = Transparent
                                         // 2 = Fade
+        bool mTwoSidedLighting;
         bool mUseAlphaFromTexture;
         unsigned int mBrdf;
         unsigned int mAlphaTest;

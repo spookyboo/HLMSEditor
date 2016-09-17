@@ -49,6 +49,7 @@ HlmsPropertiesPbsDatablock::HlmsPropertiesPbsDatablock(const QString& fileNameIc
     // Create container - General
     Magus::QtContainerWidget* container = 0;
     container = mAssetWidget->createContainer(CONTAINER_PBS_DATABLOCK_GENERAL, QString(""));
+    container = mAssetWidget->createContainer(CONTAINER_PBS_DATABLOCK_COLOUR, QString("Colour"));
 
     // Create properties
     // ******** Name ********
@@ -56,24 +57,6 @@ HlmsPropertiesPbsDatablock::HlmsPropertiesPbsDatablock(const QString& fileNameIc
                                  PROPERTY_PBS_DATABLOCK_NAME,
                                  QString("Name"),
                                  Magus::QtProperty::STRING);
-
-    // ******** Diffuse ********
-    mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
-                                 PROPERTY_PBS_DATABLOCK_DIFFUSE,
-                                 QString("Diffuse [0..255]"),
-                                 Magus::QtProperty::COLOR);
-
-    // ******** Specular ********
-    mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
-                                 PROPERTY_PBS_DATABLOCK_SPECULAR,
-                                 QString("Specular [0..255]"),
-                                 Magus::QtProperty::COLOR);
-
-    // ******** Roughness ********
-    mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
-                                 PROPERTY_PBS_DATABLOCK_ROUGHNESS,
-                                 QString("Roughness [0..inf]"),
-                                 Magus::QtProperty::DECIMAL);
 
     // ******** Workflow ********
     QStringList stringListWorkflow;
@@ -86,6 +69,12 @@ HlmsPropertiesPbsDatablock::HlmsPropertiesPbsDatablock(const QString& fileNameIc
                                           QString("Workflow"),
                                           Magus::QtProperty::SELECT));
     selectProperty->addValues(stringListWorkflow);
+
+    // ******** Roughness ********
+    mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
+                                 PROPERTY_PBS_DATABLOCK_ROUGHNESS,
+                                 QString("Roughness [0..inf]"),
+                                 Magus::QtProperty::DECIMAL);
 
     // ******** Metalness ********
     mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
@@ -122,6 +111,12 @@ HlmsPropertiesPbsDatablock::HlmsPropertiesPbsDatablock(const QString& fileNameIc
                                           QString("Transparency Mode"),
                                           Magus::QtProperty::SELECT));
     selectProperty->addValues(stringListTransparencyMode);
+
+    // ******** Two-sided lighting ********
+    mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
+                                 PROPERTY_PBS_DATABLOCK_TWO_SIDED_LIGHTING,
+                                 QString("Two sided lighting"),
+                                 Magus::QtProperty::CHECKBOX);
 
     // ******** Use alpha from textures ********
     mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
@@ -175,6 +170,24 @@ HlmsPropertiesPbsDatablock::HlmsPropertiesPbsDatablock(const QString& fileNameIc
                                  QString("Alpha test threshold"),
                                  Magus::QtProperty::DECIMAL);
 
+    // ******** Diffuse ********
+    mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_COLOUR,
+                                 PROPERTY_PBS_DATABLOCK_DIFFUSE,
+                                 QString("Diffuse [0..255]"),
+                                 Magus::QtProperty::COLOR);
+
+    // ******** Background diffuse ********
+    mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_COLOUR,
+                                 PROPERTY_PBS_DATABLOCK_BACKGROUND,
+                                 QString("Background [0..255]"),
+                                 Magus::QtProperty::COLOR);
+
+    // ******** Specular ********
+    mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_COLOUR,
+                                 PROPERTY_PBS_DATABLOCK_SPECULAR,
+                                 QString("Specular [0..255]"),
+                                 Magus::QtProperty::COLOR);
+
     // Layout
     mainLayout->addWidget(mAssetWidget);
     setLayout(mainLayout);
@@ -209,6 +222,13 @@ void HlmsPropertiesPbsDatablock::setObject (HlmsNodePbsDatablock* hlmsNodePbsDat
     colorProperty->setColor(mHlmsNodePbsDatablock->getDiffuseRed(),
                             mHlmsNodePbsDatablock->getDiffuseGreen(),
                             mHlmsNodePbsDatablock->getDiffuseBlue(),
+                            255.0f);
+
+    // ******** Background diffuse ********
+    colorProperty = static_cast<Magus::QtColorProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_BACKGROUND));
+    colorProperty->setColor(mHlmsNodePbsDatablock->getBackgroundDiffuseRed(),
+                            mHlmsNodePbsDatablock->getBackgroundDiffuseGreen(),
+                            mHlmsNodePbsDatablock->getBackgroundDiffuseBlue(),
                             255.0f);
 
     // ******** Specular ********
@@ -247,6 +267,10 @@ void HlmsPropertiesPbsDatablock::setObject (HlmsNodePbsDatablock* hlmsNodePbsDat
     // ******** Transparency mode ********
     selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_TRANPARENCY_MODE));
     selectProperty->setCurentIndex(mHlmsNodePbsDatablock->getTransparencyMode());
+
+    // ******** Two-sided lighting ********
+    checkBoxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_TWO_SIDED_LIGHTING));
+    checkBoxProperty->setValue(mHlmsNodePbsDatablock->isTwoSidedLighting());
 
     // ******** Use alpha from textures ********
     checkBoxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_USE_ALPHA_FROM_TEXTURES));
@@ -293,6 +317,15 @@ void HlmsPropertiesPbsDatablock::propertyValueChanged(QtProperty* property)
             mHlmsNodePbsDatablock->setDiffuseRed(colorProperty->getRed());
             mHlmsNodePbsDatablock->setDiffuseGreen(colorProperty->getGreen());
             mHlmsNodePbsDatablock->setDiffuseBlue(colorProperty->getBlue());
+        }
+        break;
+
+        case PROPERTY_PBS_DATABLOCK_BACKGROUND:
+        {
+            colorProperty = static_cast<Magus::QtColorProperty*>(property);
+            mHlmsNodePbsDatablock->setBackgroundDiffuseRed(colorProperty->getRed());
+            mHlmsNodePbsDatablock->setBackgroundDiffuseGreen(colorProperty->getGreen());
+            mHlmsNodePbsDatablock->setBackgroundDiffuseBlue(colorProperty->getBlue());
         }
         break;
 
@@ -356,6 +389,13 @@ void HlmsPropertiesPbsDatablock::propertyValueChanged(QtProperty* property)
         {
             selectProperty = static_cast<Magus::QtSelectProperty*>(property);
             mHlmsNodePbsDatablock->setTransparencyMode(selectProperty->getCurrentIndex());
+        }
+        break;
+
+        case PROPERTY_PBS_DATABLOCK_TWO_SIDED_LIGHTING:
+        {
+            checkBoxProperty = static_cast<Magus::QtCheckBoxProperty*>(property);
+            mHlmsNodePbsDatablock->setTwoSidedLighting(checkBoxProperty->getValue());
         }
         break;
 

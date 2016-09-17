@@ -1,9 +1,7 @@
 V 1.0 updates:
 =============
-- http://www.ogre3d.org/forums/viewtopic.php?f=11&t=84816&start=75#p530795
 - http://www.ogre3d.org/forums/viewtopic.php?f=25&t=85264&p=530357&hilit=two+sided#p530190
 - Use resource.cfg per project
-- Align the dock widgets (so they are displayed with the correct height and width after start)
 - Remove unused functions in .h/.cpp files in the 'sources' directory
 - Texture browser:
   - Also apply any searchPattern in case the search filter was still active and a group/asset was selected
@@ -16,10 +14,9 @@ V 1.0 updates:
 
 V 1.0 Bugs:
 ==========
-- hlms_unlit_builder.cpp => Change as result in Ogre commit 21b9540: texLocation.xIdx = datablock->_getTextureIdx( textureType );
-- Material browser:
-  - If thumb is missing and the noimage.png is displayed, the thumb is not refreshed when reloaded and added again to the material browser;
-    only after a restart the thumb is refreshed (minor bug).
+- Scroll wheel not linear? Moving a mesh is too fast when the object is zoomed in a lot
+- If thumb is missing and the noimage.png is displayed, the thumb is not refreshed when reloaded and added again to the material browser;
+  only after a restart the thumb is refreshed (minor bug).
 - Cubemap json generates a lot of warnings in the log when depth is enabled (this is with all non-depth textures); the log message is only in Debug.
 - F5 (generate HLMS) does not work when the focus in on a certain dock window (eg. node editor). Must be possible independent of window focus.
 

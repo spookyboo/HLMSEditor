@@ -92,7 +92,9 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::loadDatablock(const QString&
             hlmsJson.loadMaterials(fname, jsonChar);
         }
 
-        catch (Ogre::Exception e) {}
+        catch (Ogre::Exception e)
+        {
+        }
 
         file.close();
 

@@ -337,6 +337,12 @@ void HlmsPbsBuilder::enrichPbsNode(HlmsNodePbsDatablock* pbsnode,
     pbsnode->setDiffuseGreen(255.0f * datablock->getDiffuse().y);
     pbsnode->setDiffuseBlue(255.0f * datablock->getDiffuse().z);
 
+    // ******** Background diffuse ********
+    pbsnode->setBackgroundDiffuseRed(255.0f * datablock->getBackgroundDiffuse().r);
+    pbsnode->setBackgroundDiffuseGreen(255.0f * datablock->getBackgroundDiffuse().g);
+    pbsnode->setBackgroundDiffuseBlue(255.0f * datablock->getBackgroundDiffuse().b);
+    pbsnode->setBackgroundDiffuseBlue(255.0f * datablock->getBackgroundDiffuse().a);
+
     // ******** Specular ********
     pbsnode->setSpecularRed(255.0f * datablock->getSpecular().x);
     pbsnode->setSpecularGreen(255.0f * datablock->getSpecular().y);
@@ -391,6 +397,9 @@ void HlmsPbsBuilder::enrichPbsNode(HlmsNodePbsDatablock* pbsnode,
     pbsnode->setTransparencyMode(transparencyMode);
     pbsnode->setUseAlphaFromTexture(datablock->getUseAlphaFromTextures());
     pbsnode->setTransparencyValue(datablock->getTransparency());
+
+    // ******** Two-sided lighting ********
+    pbsnode->setTwoSidedLighting(datablock->getTwoSidedLighting());
 
     // ******** Brdf ********
     pbsnode->setBrdf(datablock->getBrdf());
@@ -649,6 +658,14 @@ void HlmsPbsBuilder::enrichPbsDatablock(Ogre::HlmsPbsDatablock* datablock,
     colour.z = (float)pbsnode->getDiffuseBlue() / 255.0f;
     datablock->setDiffuse(colour);
 
+    // ******** Background diffuse ********
+    Ogre::ColourValue colourValue;
+    colourValue.r = (float)pbsnode->getBackgroundDiffuseRed() / 255.0f;
+    colourValue.g = (float)pbsnode->getBackgroundDiffuseGreen() / 255.0f;
+    colourValue.b = (float)pbsnode->getBackgroundDiffuseBlue() / 255.0f;
+    colourValue.a = (float)pbsnode->getBackgroundDiffuseAlpha() / 255.0f;
+    datablock->setBackgroundDiffuse(colourValue);
+
     // ******** Specular ********
     colour.x = (float)pbsnode->getSpecularRed() / 255.0f;
     colour.y = (float)pbsnode->getSpecularGreen() / 255.0f;
@@ -706,6 +723,9 @@ void HlmsPbsBuilder::enrichPbsDatablock(Ogre::HlmsPbsDatablock* datablock,
                                transparencyMode,
                                pbsnode->isUseAlphaFromTexture(),
                                true);
+
+    // ******** Two-sided lighting ********
+    datablock->setTwoSidedLighting(pbsnode->isTwoSidedLighting());
 
     // ******** Brdf ********
     datablock->setBrdf(getBrdfFromIndex(pbsnode->getBrdf()));

@@ -1022,6 +1022,9 @@ namespace Magus
         mCamera->getParentSceneNode()->setOrientation(Ogre::Quaternion::IDENTITY);
         mLightAxisNode->setPosition(mCamera->getPosition() + Ogre::Vector3(0, -27, -100));
         mLightAxisNode->setOrientation(Ogre::Quaternion::IDENTITY);
+        mSceneNode->setPosition(0.0, 0.0, 0.0);
+        mSceneNodeRtt->setPosition(0.0, 0.0, 0.0);
+        mCameraManager->resetCameraNode();
     }
 
     //****************************************************************************/

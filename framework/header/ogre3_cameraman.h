@@ -453,6 +453,16 @@ namespace Magus
 		    mCameraNode->translate(transVector, Ogre::Node::TS_LOCAL);
 		}
 
+        /*-----------------------------------------------------------------------------
+        | Set the cameramode to its original position/orientation
+        -----------------------------------------------------------------------------*/
+        void resetCameraNode(void)
+        {
+            mCameraNode->setOrientation(Ogre::Quaternion::IDENTITY);
+            mCameraNode->setPosition(0.0, 0.0, 0.0);
+        }
+
+
     protected:
 		Ogre::Camera* mCamera;
 		Ogre::SceneNode* mTarget;

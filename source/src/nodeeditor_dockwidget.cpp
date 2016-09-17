@@ -363,8 +363,8 @@ void NodeEditorDockWidget::nodeToBeDeleted(QtNode* node)
 void NodeEditorDockWidget::deleteHlmsPbsDatablockNode(void)
 {
     Ogre::IdString name = mHlmsPbsDatablockNode->getName().toStdString();
-    mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
-    mParent->destroyDatablock(name);
+    //mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
+    //mParent->destroyDatablock(name);
     mHlmsPbsDatablockNode = 0;
     mParent->initCurrentDatablockFileName();
 }
@@ -373,8 +373,8 @@ void NodeEditorDockWidget::deleteHlmsPbsDatablockNode(void)
 void NodeEditorDockWidget::deleteHlmsUnlitDatablockNode(void)
 {
     Ogre::IdString name = mHlmsUnlitDatablockNode->getName().toStdString();
-    mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
-    mParent->destroyDatablock(name);
+    //mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
+    //mParent->destroyDatablock(name);
     mHlmsUnlitDatablockNode = 0;
     mParent->initCurrentDatablockFileName();
 }
