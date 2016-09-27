@@ -59,14 +59,16 @@ class RenderwindowDockWidget : public QDockWidget
         void addToMeshMap(const QString name,
                           const QString meshName,
                           QVector3D scale);
+        void mousePressEventPublic( QMouseEvent* e );
 
 	private slots:
-        void doChangeItemAction(QAction* action);
+        void doChangeMeshAction(QAction* action);
         void handleToggleModelAndLight(void);
         void handleMarker(void);
         void handleToggleHoover(void);
         void doTransformationWidgetValueChanged(void);
         void doChangeBackgroundAction(void);
+        void contextMenuSelected(QAction* action);
 
     protected:
         // This function is used to preload the meshes in the dropdown listbox. Strictly speaking this is not needed,
@@ -75,7 +77,13 @@ class RenderwindowDockWidget : public QDockWidget
         // Something has been screwed up (Ogre bug?) but I didn't bother to look into it. Preloading of all meshes in
         // the models.cfg solves the issue.
         void preLoadMeshMap(void);
+
         virtual void resizeEvent(QResizeEvent *e);
+        virtual void mousePressEvent( QMouseEvent* e );
+        void addMeshNameToContextMenu (const QString& meshName, bool checked);
+        void addSkyBoxNameToContextMenu (const QString& skyBoxName, bool checked);
+        void setCheckedMeshNameInContextMenu (const QString& meshName);
+        void setCheckedSkyBoxNameInContextMenu (const QString& skyBoxName);
 
 	private:
 		MainWindow* mParent;
@@ -96,7 +104,11 @@ class RenderwindowDockWidget : public QDockWidget
         QIcon* mMarkerIcon;
         QIcon* mHooverOnIcon;
         QIcon* mHooverOffIcon;
-
+        QMenu* mContextMenu;
+        QMenu* mMeshesSubMenu;
+        QActionGroup* mActionGroupMeshes;
+        QMenu* mSkyBoxSubMenu;
+        QActionGroup* mActionGroupSkyBox;
 };
 
 #endif

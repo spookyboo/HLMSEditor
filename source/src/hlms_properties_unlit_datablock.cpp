@@ -29,9 +29,14 @@
 #include "hlms_properties_unlit_datablock.h"
 #include "properties_dockwidget.h"
 #include "hlms_node_unlit_datablock.h"
+#include "properties_dockwidget.h"
 
 //****************************************************************************/
-HlmsPropertiesUnlitDatablock::HlmsPropertiesUnlitDatablock(const QString& fileNameIcon, QWidget* parent) : QWidget(parent)
+HlmsPropertiesUnlitDatablock::HlmsPropertiesUnlitDatablock(const QString& fileNameIcon,
+                                                           PropertiesDockWidget* propertiesDockWidget,
+                                                           QWidget* parent) :
+    mPropertiesDockWidget(propertiesDockWidget),
+    QWidget(parent)
 {
     mHlmsNodeUnlitDatablock = 0;
     QVBoxLayout* mainLayout = new QVBoxLayout;
@@ -174,6 +179,9 @@ void HlmsPropertiesUnlitDatablock::propertyValueChanged(QtProperty* property)
         }
         break;
     }
+
+    // Inform the propertiesDockWidget that a property is changed, so the material is rebuild
+    mPropertiesDockWidget->notifyHlmsChanged();
 }
 
 //****************************************************************************/

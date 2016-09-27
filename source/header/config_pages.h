@@ -21,7 +21,9 @@
 #ifndef CONFIG_PAGES_H
 #define CONFIG_PAGES_H
 
+#include <QMap>
 #include <QWidget>
+#include <QTableWidget>
 #include <QLineEdit>
 #include <QRadioButton>
 #include <QPushButton>
@@ -35,10 +37,13 @@ class GeneralPage : public QWidget
 
 public:
     GeneralPage(ConfigDialog *parent = 0);
+    void setSkyBoxMap (QMap<QString, QString> skyBoxMap);
 
 private slots:
     void doSetImportDir (void);
     void doResetAllSettings (void);
+    void doSkyBoxCellChanged(int row,int col);
+    void doLoadSkyboxFile (void);
 
 protected:
     void loadSettings(void);
@@ -48,6 +53,10 @@ private:
     ConfigDialog* mParent;
     QString mImportPath;
     QLineEdit* mImportEdit;
+    QTableWidget* mSkyboxTableWidget;
+    bool mSkyboxTableWidgetSignalsEnabled;
+    QLineEdit* mLoadSkyboxEdit;
+    QString mSkyboxFullQualifiedFileName;
 };
 
 //****************************************************************************/

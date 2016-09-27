@@ -30,9 +30,13 @@
 #include "hlms_properties_samplerblock.h"
 #include "properties_dockwidget.h"
 #include "hlms_node_samplerblock.h"
+#include "properties_dockwidget.h"
 
 //****************************************************************************/
-HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIcon, QWidget* parent) :
+HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIcon,
+                                                       PropertiesDockWidget* propertiesDockWidget,
+                                                       QWidget* parent) :
+    mPropertiesDockWidget(propertiesDockWidget),
     QWidget(parent)
 {
     mHlmsNodeSamplerblock = 0;
@@ -549,6 +553,9 @@ void HlmsPropertiesSamplerblock::propertyValueChanged(QtProperty* property)
         }
         break;
     }
+
+    // Inform the propertiesDockWidget that a property is changed, so the material is rebuild
+    mPropertiesDockWidget->notifyHlmsChanged();
 }
 
 //****************************************************************************/

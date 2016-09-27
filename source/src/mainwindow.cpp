@@ -1081,7 +1081,7 @@ void MainWindow::doConfigureMenuAction(void)
     configDialog.setMinimumHeight(400);
     if (configDialog.exec())
     {
-        // TODO
+        configDialog.saveSettings();
     }
 }
 
@@ -1876,4 +1876,10 @@ void MainWindow::replaceCurrentDatablock(QVector<int> indices, Ogre::IdString da
 void MainWindow::destroyDatablock(const Ogre::IdString& datablockName)
 {
     mHlmsUtilsManager->destroyDatablock(datablockName);
+}
+
+//****************************************************************************/
+void MainWindow::notifyHlmsChanged (void)
+{
+    mNodeEditorDockWidget->generateDatablock();
 }

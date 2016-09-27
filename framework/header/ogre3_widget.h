@@ -31,11 +31,14 @@
 #include "OgreItem.h"
 #include "ogre3_cameraman.h"
 #include "ogre_prereqs.h"
+#include <QDockWidget>
 
 namespace Magus
 {
     static const Ogre::String AXIS_MATERIAL_NAME = "AMN0894587568";
     static const Ogre::String HIGHLIGHT_MATERIAL_NAME = "HLM1234567890";
+    static const Ogre::String SKYBOX_WORKSPACE = "SkyPostprocessWorkspace";
+    static const Ogre::String SKYBOX_MATERIAL_NAME = "SkyPostprocess";
 
     class OgreManager;
 
@@ -75,6 +78,7 @@ namespace Magus
             void enableLightItem(bool enabled); // Used to switch to ' light rotation mode'
             void createLightAxisMaterial(void); // Create the datablock of the light axis item
             void destroyLightAxisMaterial(void); // Destroy the datablock of the light axis item
+            void updateSkyBoxMaterial(const Ogre::String& cubeMapBaseFileName); // Update the material of the skybox item
             void createHighlightMaterial(void); // Create the datablock used to highlight a subItem of mItem
             void destroyHighlightMaterial(void); // Destroy the datablock used to highlight a subItem of mItem
             void createUnlitDatablocksRtt(void); // Create datablocks of mItemRtt
@@ -82,7 +86,7 @@ namespace Magus
             void resetHighlight(void); // Undo highlight of mItem (preserving its datablocks)
             void resetCamera(void); // Set position/orientation to default
             void setHoover(bool hoover); // Determines whether the subItems are highlighted when the mousecursor hoovers over them
-            void setCurrentDatablockName(const Ogre::IdString& datablockName);
+            void setCurrentDatablockName(const Ogre::IdString& datablockName); // Only set the new datablock name; the new datablock is not set in an item/subitem
             const QVector<int>& getSubItemIndicesWithDatablock(const Ogre::IdString& datablockName); // Get the list of indices of subItems that have 'datablockName'
             void makeSnapshotOfItemMaterials(void); // Keep a map of all materials per subItem
             void restoreSnapshotOfItemMaterials(void); // Assign the material to each subItem
@@ -92,6 +96,10 @@ namespace Magus
             void setDatablockInSubItem(int index, const Ogre::IdString datablockName); // Set the datablock in the subitem, based on the id (datablockName) of the datablock
             void setDatablockInSubItems(const QVector<int>& indices, const Ogre::IdString& datablockName); // Set the datablock in the subitems, identified by indices
             void cleanup(void);
+            void setRenderwindowDockWidget(QDockWidget* renderwindowDockWidget);
+            void assignCurrentDatablock(void); // Set the current datablock in the item or subItem
+            bool isSkyBoxVisible (void);
+            void setSkyBoxVisible (bool visible);
 
         protected:
             Ogre::Root* mRoot;
@@ -115,6 +123,7 @@ namespace Magus
             Ogre::SceneNode* mLightAxisNode;
             Ogre::CompositorWorkspace* mWorkspace;
             Ogre::CompositorWorkspace* mWorkspaceRtt;
+            Ogre::CompositorWorkspace* mWorkspaceRttSkyBox;
             bool mRotateCameraMode;
             bool mShiftDown;
             bool mMouseDown;
@@ -134,9 +143,11 @@ namespace Magus
             bool mHoover;
             QMap<unsigned short, Ogre::String> helperIndicesAndNames;
             QVector<int> helperIndices;
+            QDockWidget* mRenderwindowDockWidget;
 
             virtual void createCompositor();
             virtual void createCompositorRenderToTexture();
+            void createSkyBoxCompositor();
             virtual void paintEvent(QPaintEvent *e);
             virtual void resizeEvent(QResizeEvent *e);
             virtual void keyPressEvent(QKeyEvent * ev);

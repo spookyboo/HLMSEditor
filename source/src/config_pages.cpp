@@ -19,14 +19,17 @@
 ****************************************************************************/
 
 #include <QtWidgets>
+#include <QTableWidgetItem>
 #include <QMessageBox>
 #include "constants.h"
+#include "hlms_builder.h"
 #include "config_pages.h"
 
 //****************************************************************************/
 GeneralPage::GeneralPage(ConfigDialog *parent)
     : QWidget(parent),
-      mParent(parent)
+      mParent(parent),
+      mSkyboxTableWidgetSignalsEnabled(false)
 {
     // Paths
     QGroupBox* pathGroup = new QGroupBox(tr("Paths"));
@@ -42,11 +45,50 @@ GeneralPage::GeneralPage(ConfigDialog *parent)
     pathLayout->addWidget(importButton, 0, 2);
     pathGroup->setLayout(pathLayout);
 
+    // Skybox table
+    QGroupBox* skyboxGroup = new QGroupBox(tr("Skybox"));
+    mSkyboxTableWidget = new QTableWidget(1, 2, this);
+    mSkyboxTableWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    mSkyboxTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    mSkyboxTableWidget->setAcceptDrops(false);
+    mSkyboxTableWidget->setShowGrid(false);
+    mSkyboxTableWidget->viewport()->installEventFilter(this);
+    mSkyboxTableWidget->setColumnWidth(0, 80);
+    mSkyboxTableWidget->setColumnWidth(1, 256);
+    mSkyboxTableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    mSkyboxTableWidget->verticalHeader()->hide();
+    setStyleSheet("QLineEdit{padding: 0 0px; margin-left: 0px; margin-right: 0px; max-height: 28px; height: 28px;}");
+    connect(mSkyboxTableWidget, SIGNAL(cellChanged(int,int)), this, SLOT(doSkyBoxCellChanged(int,int)));
+
+    // Set headers skybox table
+    QStringList headers;
+    headers << tr("Enabled") << tr("Skybox cubemap");
+    mSkyboxTableWidget->setHorizontalHeaderLabels(headers);
+    QFont font;
+    font.setBold(true);
+    mSkyboxTableWidget->horizontalHeader()->setFont(font);
+    mSkyboxTableWidget->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+    QVBoxLayout* skyboxLayout = new QVBoxLayout;
+    skyboxLayout->addWidget(mSkyboxTableWidget);
+
+    // Add new skybox
+    QLabel* skyboxLabel = new QLabel(tr("Add skybox:"));
+    mLoadSkyboxEdit = new QLineEdit;
+    mLoadSkyboxEdit->setEnabled(false);
+    QPushButton* loadSkyboxButton = new QPushButton(tr(".."));
+    connect(loadSkyboxButton, SIGNAL(clicked(bool)), this, SLOT(doLoadSkyboxFile(void)));
+    QGridLayout* skyboxNewLayout = new QGridLayout;
+    skyboxNewLayout->addWidget(skyboxLabel, 0, 0);
+    skyboxNewLayout->addWidget(mLoadSkyboxEdit, 0, 1);
+    skyboxNewLayout->addWidget(loadSkyboxButton, 0, 2);
+    skyboxLayout->addLayout(skyboxNewLayout);
+    skyboxGroup->setLayout(skyboxLayout);
+
     // Restore
     QGroupBox* restoreGroup = new QGroupBox(tr("Restore"));
     QPushButton* restoreButton = new QPushButton(tr("Restore all settings"));
     connect(restoreButton, SIGNAL(clicked(bool)), this, SLOT(doResetAllSettings(void)));
-    QHBoxLayout *restoreLayout = new QHBoxLayout;
+    QHBoxLayout* restoreLayout = new QHBoxLayout;
     restoreLayout->addStretch(2);
     restoreLayout->addWidget(restoreButton);
     restoreLayout->addStretch(2);
@@ -55,6 +97,8 @@ GeneralPage::GeneralPage(ConfigDialog *parent)
     // Set layout
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->addWidget(pathGroup);
+    mainLayout->addSpacing(12);
+    mainLayout->addWidget(skyboxGroup);
     mainLayout->addSpacing(12);
     mainLayout->addWidget(restoreGroup);
     mainLayout->addStretch(1);
@@ -73,6 +117,36 @@ void GeneralPage::doSetImportDir (void)
         mImportEdit->setText(mParent->mImportPath);
         mParent->saveSettings();
         //QMessageBox::information(0, QString("Info"), QString("The import path is immediately active"));
+    }
+}
+
+//****************************************************************************/
+void GeneralPage::doLoadSkyboxFile (void)
+{
+    QString fileName = QFileDialog::getOpenFileName(this, QString("Add cubemap skybox"),
+                                                    QString(""),
+                                                    QString("DDS (*.dds);;"
+                                                            "All files (*.*)"));
+
+    if (!fileName.isEmpty())
+    {
+        QFileInfo fileInfo(fileName);
+        QTableWidgetItem* item1 = new QTableWidgetItem();
+        QTableWidgetItem* item2 = new QTableWidgetItem();
+        unsigned int row = mSkyboxTableWidget->rowCount();
+        mSkyboxTableWidget->insertRow(row-1);
+        item1->setCheckState(Qt::Checked);
+        item2->setText(fileInfo.fileName());
+        mSkyboxTableWidget->setItem(row-1, 0, item1);
+        mSkyboxTableWidget->setItem(row-1, 1, item2);
+        mParent->saveSettings();
+
+        // Add the location of the cubemap also to the resourcelocations and save the config file
+        HlmsBuilder builder;
+        Ogre::Root::getSingletonPtr()->addResourceLocation(fileInfo.path().toStdString(),
+                                                           "FileSystem",
+                                                           Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+        builder.saveAllResourcesLocations();
     }
 }
 
@@ -104,6 +178,52 @@ void GeneralPage::doResetAllSettings (void)
 
         QMessageBox::information(0, QString("Info"), QString("The restored settings are active after the application has been restarted"));
     }
+}
+
+
+//****************************************************************************/
+void GeneralPage::setSkyBoxMap (QMap<QString, QString> skyBoxMap)
+{
+    QMap<QString, QString>::iterator it = skyBoxMap.begin();
+    QMap<QString, QString>::iterator itEnd = skyBoxMap.end();
+    QString key;
+    QString value;
+    QTableWidgetItem* item1;
+    QTableWidgetItem* item2;
+    unsigned int row = 0;
+    mSkyboxTableWidgetSignalsEnabled = false;
+    while (it != itEnd)
+    {
+        value = it.value();
+        item1 = new QTableWidgetItem();
+        item2 = new QTableWidgetItem();
+        mSkyboxTableWidget->insertRow(row);
+        item1->setCheckState(Qt::Checked);
+        item2->setText(value);
+        mSkyboxTableWidget->setItem(row, 0, item1);
+        mSkyboxTableWidget->setItem(row, 1, item2);
+        ++it;
+        ++row;
+    }
+    mSkyboxTableWidgetSignalsEnabled = true;
+}
+
+//****************************************************************************/
+void GeneralPage::doSkyBoxCellChanged(int row,int col)
+{
+    if (!mSkyboxTableWidgetSignalsEnabled)
+        return;
+
+    QTableWidgetItem* item1 = mSkyboxTableWidget->item(row, 0);
+    QTableWidgetItem* item2 = mSkyboxTableWidget->item(row, 1);
+    if (!item1 || !item2)
+        return;
+
+    bool enabled = item1->checkState() == Qt::Checked;
+    QString skyboxName = item2->text();
+    mParent->skyBoxTableUpdated(enabled, skyboxName);
+    mParent->saveSettings();
+    QMessageBox::information(0, QString("Info"), QString("The settings are active after the application has been restarted"));
 }
 
 //****************************************************************************/

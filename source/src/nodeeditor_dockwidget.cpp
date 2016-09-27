@@ -363,6 +363,9 @@ void NodeEditorDockWidget::nodeToBeDeleted(QtNode* node)
 
     if (node->getType() == NODE_TYPE_SAMPLERBLOCK)
         setBackgroundDiffusePropertyVisibleBasedOnSamplerNodes();
+
+    // Rebuid the datablock again
+    generateDatablock();
 }
 
 //****************************************************************************/
@@ -373,6 +376,8 @@ void NodeEditorDockWidget::deleteHlmsPbsDatablockNode(void)
     //mParent->destroyDatablock(name);
     mHlmsPbsDatablockNode = 0;
     mParent->initCurrentDatablockFileName();
+
+    generateDatablock();
 }
 
 //****************************************************************************/
@@ -474,6 +479,9 @@ void NodeEditorDockWidget::nodeConnected(QtNode* baseNode, QtNode* targetNode)
     // Ignore the baseNode and targetNode; just check whether the pbs node is available and is attached
     // to a samplernode with a diffuse texture
     setBackgroundDiffusePropertyVisibleBasedOnSamplerNodes();
+
+    // Rebuid the datablock again
+    generateDatablock();
 }
 
 //****************************************************************************/
@@ -512,6 +520,9 @@ void NodeEditorDockWidget::handleDropped (void)
             mParent->mTextureDockWidget->deleteTexture(fileName);
         }
     }
+
+    // Rebuid the datablock again
+    generateDatablock();
 }
 
 //****************************************************************************/

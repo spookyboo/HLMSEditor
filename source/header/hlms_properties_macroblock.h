@@ -31,12 +31,15 @@ QT_END_NAMESPACE
 
 using namespace Magus; // Use 'namespace Magus' because of issues with signal and slots;
 
+class PropertiesDockWidget;
 class HlmsPropertiesMacroblock : public QWidget
 {
     Q_OBJECT
 
     public:
-        HlmsPropertiesMacroblock(const QString& fileNameIcon, QWidget* parent = 0);
+        HlmsPropertiesMacroblock(const QString& fileNameIcon,
+                                 PropertiesDockWidget* propertiesDockWidget,
+                                 QWidget* parent = 0);
         virtual ~HlmsPropertiesMacroblock(void);
         void setObject (HlmsNodeMacroblock* hlmsNodeMacroblock);
 
@@ -47,6 +50,7 @@ class HlmsPropertiesMacroblock : public QWidget
     private:
         HlmsNodeMacroblock* mHlmsNodeMacroblock;
         Magus::QtAssetWidget* mAssetWidget;
+        PropertiesDockWidget* mPropertiesDockWidget;
 };
 
 #endif

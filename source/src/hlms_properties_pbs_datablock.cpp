@@ -31,9 +31,14 @@
 #include "hlms_properties_pbs_datablock.h"
 #include "properties_dockwidget.h"
 #include "hlms_node_pbs_datablock.h"
+#include "properties_dockwidget.h"
 
 //****************************************************************************/
-HlmsPropertiesPbsDatablock::HlmsPropertiesPbsDatablock(const QString& fileNameIcon, QWidget* parent) : QWidget(parent)
+HlmsPropertiesPbsDatablock::HlmsPropertiesPbsDatablock(const QString& fileNameIcon,
+                                                       PropertiesDockWidget* propertiesDockWidget,
+                                                       QWidget* parent) :
+    mPropertiesDockWidget(propertiesDockWidget),
+    QWidget(parent)
 {
     mHlmsNodePbsDatablock = 0;
     QVBoxLayout* mainLayout = new QVBoxLayout;
@@ -427,6 +432,9 @@ void HlmsPropertiesPbsDatablock::propertyValueChanged(QtProperty* property)
         }
         break;
     }
+
+    // Inform the propertiesDockWidget that a property is changed, so the material is rebuild
+    mPropertiesDockWidget->notifyHlmsChanged();
 }
 
 //****************************************************************************/

@@ -47,11 +47,11 @@ PropertiesDockWidget::PropertiesDockWidget(QString title, MainWindow* parent, Qt
     createActions();
     createMenus();
     createToolBars();
-    mHlmsPropertiesPbsDatablock = new HlmsPropertiesPbsDatablock(ICON_PBS_DATABLOCK, mInnerMain);
-    mHlmsPropertiesUnlitDatablock = new HlmsPropertiesUnlitDatablock(ICON_UNLIT_DATABLOCK, mInnerMain);
-    mHlmsPropertiesBlendblock = new HlmsPropertiesBlendblock(ICON_BLENDBLOCK, mInnerMain);
-    mHlmsPropertiesMacroblock = new HlmsPropertiesMacroblock(ICON_MACROBLOCK, mInnerMain);
-    mHlmsPropertiesSamplerblock = new HlmsPropertiesSamplerblock(ICON_SAMPLERBLOCK, mInnerMain);
+    mHlmsPropertiesPbsDatablock = new HlmsPropertiesPbsDatablock(ICON_PBS_DATABLOCK, this, mInnerMain);
+    mHlmsPropertiesUnlitDatablock = new HlmsPropertiesUnlitDatablock(ICON_UNLIT_DATABLOCK, this, mInnerMain);
+    mHlmsPropertiesBlendblock = new HlmsPropertiesBlendblock(ICON_BLENDBLOCK, this, mInnerMain);
+    mHlmsPropertiesMacroblock = new HlmsPropertiesMacroblock(ICON_MACROBLOCK, this, mInnerMain);
+    mHlmsPropertiesSamplerblock = new HlmsPropertiesSamplerblock(ICON_SAMPLERBLOCK, this, mInnerMain);
 
     // Make all property windows invisible
     clear();
@@ -136,13 +136,6 @@ void PropertiesDockWidget::clear()
 {
     // Make all property windows invisible
     setVisible(false);
-    /*
-    mHlmsPropertiesPbsDatablock->setVisible(false);
-    mHlmsPropertiesUnlitDatablock->setVisible(false);
-    mHlmsPropertiesBlendblock->setVisible(false);
-    mHlmsPropertiesMacroblock->setVisible(false);
-    mHlmsPropertiesSamplerblock->setVisible(false);
-    */
 }
 
 //****************************************************************************/
@@ -182,4 +175,10 @@ void PropertiesDockWidget::displayInfo(const QString& fileName, const QString& h
     mTextViewer->setWindowTitle(headerText);
     mTextViewer->show();
     setCursor(Qt::ArrowCursor);
+}
+
+//****************************************************************************/
+void PropertiesDockWidget::notifyHlmsChanged(void)
+{
+    mParent->notifyHlmsChanged();
 }

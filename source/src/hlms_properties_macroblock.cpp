@@ -27,9 +27,14 @@
 #include "hlms_properties_macroblock.h"
 #include "properties_dockwidget.h"
 #include "hlms_node_macroblock.h"
+#include "properties_dockwidget.h"
 
 //****************************************************************************/
-HlmsPropertiesMacroblock::HlmsPropertiesMacroblock(const QString& fileNameIcon, QWidget* parent) : QWidget(parent)
+HlmsPropertiesMacroblock::HlmsPropertiesMacroblock(const QString& fileNameIcon,
+                                                   PropertiesDockWidget* propertiesDockWidget,
+                                                   QWidget* parent) :
+    mPropertiesDockWidget(propertiesDockWidget),
+    QWidget(parent)
 {
     mHlmsNodeMacroblock = 0;
     QVBoxLayout* mainLayout = new QVBoxLayout;
@@ -262,6 +267,9 @@ void HlmsPropertiesMacroblock::propertyValueChanged(QtProperty* property)
         }
         break;
     }
+
+    // Inform the propertiesDockWidget that a property is changed, so the material is rebuild
+    mPropertiesDockWidget->notifyHlmsChanged();
 }
 
 //****************************************************************************/

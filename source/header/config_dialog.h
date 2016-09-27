@@ -22,6 +22,7 @@
 #define CONFIG_DIALOG_H
 
 #include <QDialog>
+#include <QMap>
 
 QT_BEGIN_NAMESPACE
 class QListWidget;
@@ -37,25 +38,27 @@ class ConfigDialog : public QDialog
 {
     Q_OBJECT
 
-public:
-    ConfigDialog(MainWindow* parent);
-    GeneralPage* mGeneralPage;
-    HlmsPage* mHlmsPage;
-    void loadSettings(void);
-    void saveSettings(void);
-    QString mImportPath;
-    unsigned int mSamplerblockFilterIndex;
+    public:
+        ConfigDialog(MainWindow* parent);
+        void skyBoxTableUpdated(bool enabled, QString skyboxName);
 
-public slots:
-    void changePage(QListWidgetItem *current, QListWidgetItem *previous);
-    void okAndAccept(void);
+        GeneralPage* mGeneralPage;
+        HlmsPage* mHlmsPage;
+        void loadSettings(void);
+        void saveSettings(void);
+        QString mImportPath;
+        unsigned int mSamplerblockFilterIndex;
+        unsigned int mNumberOfSkyBoxes;
+        QMap<QString, QString> mSkyBoxMap;
 
-private:
-    void createIcons();
+    public slots:
+        void changePage(QListWidgetItem *current, QListWidgetItem *previous);
+        void okAndAccept(void);
 
-    QListWidget *contentsWidget;
-    QStackedWidget *pagesWidget;
-
+    private:
+        void createIcons();
+        QListWidget *contentsWidget;
+        QStackedWidget *pagesWidget;
 };
 
 #endif

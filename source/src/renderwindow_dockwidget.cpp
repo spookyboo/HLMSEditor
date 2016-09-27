@@ -39,16 +39,52 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     mHooverOnIcon(0),
     mHooverOffIcon(0)
 {
+    // Create a context menu
+    installEventFilter(this);
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    mContextMenu = new QMenu(this);
+    mContextMenu->addAction(new QAction(ACTION_SET_CURRENT_MATERIAL, this));
+    mMeshesSubMenu = mContextMenu->addMenu("Select mesh");
+    mActionGroupMeshes = new QActionGroup(mMeshesSubMenu);
+    mActionGroupMeshes->setExclusive(true);
+    mContextMenu->addAction(new QAction(ACTION_TOGGLE_LIGHT_DIRECTION, this));
+    mContextMenu->addAction(new QAction(ACTION_RESET_CAMERA, this));
+    mContextMenu->addAction(new QAction(ACTION_TOGGLE_SUBMESH_SELECTION, this));
+    mContextMenu->addAction(new QAction(ACTION_SELECT_BACKGROUND_COLOUR, this));
+
+    // Add skyboxes to the context menu
+    mSkyBoxSubMenu = mContextMenu->addMenu("Select skybox");
+    mActionGroupSkyBox = new QActionGroup(mSkyBoxSubMenu);
+    mActionGroupSkyBox->setExclusive(true);
+    addSkyBoxNameToContextMenu (NO_SKYBOX, true);
+    QSettings settings(FILE_SETTINGS, QSettings::IniFormat);
+    unsigned int numberOfSkyboxes = settings.value(SETTINGS_NUMBER_OF_SKYBOXES).toInt();
+    QString key;
+    QString value;
+    for (unsigned int i = 0; i < numberOfSkyboxes; ++i)
+    {
+        key = SETTINGS_PREFIX_SKYBOX + QVariant(i).toString();
+        value = settings.value(key).toString();
+        if (!value.isEmpty())
+        {
+            addSkyBoxNameToContextMenu (value, false);
+        }
+    }
+
+    // Define signal and slot for the context menu
+    connect(mContextMenu, SIGNAL(triggered(QAction*)), this, SLOT(contextMenuSelected(QAction*)));
+
     // Create the meshMap
     QFile file(QString("models.cfg"));
     file.open(QFile::ReadOnly | QFile::Text);
     QTextStream readFile(&file);
     MeshStruct meshStruct;
     QString line;
-    QString key;
+    key = "";
     QString x;
     QString y;
     QString z;
+    bool first = true;
     while (!readFile.atEnd())
     {
         line = readFile.readLine();
@@ -64,6 +100,15 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
             QVector3D scale(x.toFloat(), y.toFloat(), z.toFloat());
             meshStruct.scale = scale;
             mMeshMap.insert(key, meshStruct);
+
+            // Also add it to the context menu
+            if (first)
+            {
+                addMeshNameToContextMenu(key, true);
+                first = false;
+            }
+            else
+                addMeshNameToContextMenu(key, false);
         }
     }
 
@@ -76,6 +121,7 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     createToolBars();
 
     mOgreWidget = new Magus::QOgreWidget();
+    mOgreWidget->setRenderwindowDockWidget(this);
     mInnerMain->setCentralWidget(mOgreWidget);
     parent->getOgreManager()->registerOgreWidget(OGRE_WIDGET_RENDERWINDOW, mOgreWidget);
     mOgreWidget->createRenderWindow(parent->getOgreManager());
@@ -93,6 +139,24 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
 //****************************************************************************/
 RenderwindowDockWidget::~RenderwindowDockWidget(void)
 {
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::mousePressEventPublic( QMouseEvent* e )
+{
+    mousePressEvent(e);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::mousePressEvent( QMouseEvent* e )
+{
+    if (e->button() == Qt::RightButton)
+    {
+        QPoint pos;
+        pos.setX(e->screenPos().x());
+        pos.setY(e->screenPos().y());
+        mContextMenu->popup(pos);
+    }
 }
 
 //-------------------------------------------------------------------------------------
@@ -117,8 +181,9 @@ void RenderwindowDockWidget::addToMeshMap(const QString name,
     meshStruct.meshName = meshName;
     meshStruct.scale = scale;
     mMeshMap.insert(name, meshStruct);
-    QAction* item = new QAction(name, this);
-    mMeshMenu->addAction(item);
+    QAction* mesh = new QAction(name, this);
+    mMeshMenu->addAction(mesh);
+    addMeshNameToContextMenu(name, true);
 }
 
 //****************************************************************************/
@@ -146,7 +211,7 @@ void RenderwindowDockWidget::createActions(void)
 //****************************************************************************/
 void RenderwindowDockWidget::createMenus(void)
 {
-    QAction* item;
+    QAction* mesh;
     QMenuBar* menuBar = mInnerMain->menuBar();
     mMeshMenu = menuBar->addMenu(QString("Change mesh"));
 
@@ -155,10 +220,10 @@ void RenderwindowDockWidget::createMenus(void)
     QMap<QString, MeshStruct>::iterator itEnd = mMeshMap.end();
     for (it = itStart; it != itEnd; ++it)
     {
-        item = new QAction(it.key(), this);
-        mMeshMenu->addAction(item);
+        mesh = new QAction(it.key(), this);
+        mMeshMenu->addAction(mesh);
     }
-    connect(mMeshMenu, SIGNAL(triggered(QAction*)), this, SLOT(doChangeItemAction(QAction*)));
+    connect(mMeshMenu, SIGNAL(triggered(QAction*)), this, SLOT(doChangeMeshAction(QAction*)));
 }
 
 //****************************************************************************/
@@ -205,7 +270,7 @@ void RenderwindowDockWidget::createToolBars(void)
 }
 
 //****************************************************************************/
-void RenderwindowDockWidget::doChangeItemAction(QAction* action)
+void RenderwindowDockWidget::doChangeMeshAction(QAction* action)
 {
     QMap<QString, MeshStruct>::iterator it;
     QMap<QString, MeshStruct>::iterator itStart = mMeshMap.begin();
@@ -213,6 +278,7 @@ void RenderwindowDockWidget::doChangeItemAction(QAction* action)
     MeshStruct meshStruct;
     for (it = itStart; it != itEnd; ++it)
     {
+        QString actionText = action->text();
         if (action->text() == it.key())
         {
             meshStruct = it.value();
@@ -222,6 +288,7 @@ void RenderwindowDockWidget::doChangeItemAction(QAction* action)
             Ogre::String meshName = meshStruct.meshName.toStdString();
             mOgreWidget->createItem(meshName, scale);
             updateTransformationWidgetFromOgreWidget();
+            setCheckedMeshNameInContextMenu(it.key()); // Point to the selected meshname in the contextmenu
         }
     }
 }
@@ -305,4 +372,127 @@ void RenderwindowDockWidget::doChangeBackgroundAction(void)
     QColor c = dialog.getColor();
     Ogre::ColourValue colour(c.red()/255.0f, c.green()/255.0f, c.blue()/255.0f, 1.0f);
     mOgreWidget->setBackgroundColour(colour);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::addMeshNameToContextMenu (const QString& meshName, bool checked)
+{
+    // First set all items to unchecked (only if checked is 'true')
+    QAction* action;
+    if (checked)
+    {
+        foreach (action, mActionGroupMeshes->actions())
+            action->setChecked(false);
+    }
+
+    action = new QAction(meshName, this);
+    action->setCheckable(true);
+    action->setChecked(checked); // Set the added one to checked/unchecked
+    mActionGroupMeshes->addAction(action);
+    mMeshesSubMenu->addActions(mActionGroupMeshes->actions());
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::setCheckedMeshNameInContextMenu (const QString& meshName)
+{
+    QAction* action;
+    foreach (action, mActionGroupMeshes->actions())
+    {
+        if (action->text() == meshName)
+            action->setChecked(true);
+        else
+            action->setChecked(false);
+    }
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::addSkyBoxNameToContextMenu (const QString& skyBoxName, bool checked)
+{
+    // First set all items to unchecked (only if checked is 'true')
+    QAction* action;
+    if (checked)
+    {
+        foreach (action, mActionGroupSkyBox->actions())
+            action->setChecked(false);
+    }
+
+    action = new QAction(skyBoxName, this);
+    action->setCheckable(true);
+    action->setChecked(checked); // Set the added one to checked/unchecked
+    mActionGroupSkyBox->addAction(action);
+    mSkyBoxSubMenu->addActions(mActionGroupSkyBox->actions());
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::setCheckedSkyBoxNameInContextMenu (const QString& skyBoxName)
+{
+    QAction* action;
+    foreach (action, mActionGroupSkyBox->actions())
+    {
+        if (action->text() == skyBoxName)
+            action->setChecked(true);
+        else
+            action->setChecked(false);
+    }
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::contextMenuSelected(QAction* action)
+{
+    if (action->text() == ACTION_SET_CURRENT_MATERIAL)
+    {
+        mOgreWidget->assignCurrentDatablock();
+        return;
+    }
+    else if (action->text() == ACTION_TOGGLE_LIGHT_DIRECTION)
+    {
+        handleToggleModelAndLight();
+        return;
+    }
+    else if (action->text() == ACTION_RESET_CAMERA)
+    {
+        handleMarker();
+        return;
+    }
+    else if (action->text() == ACTION_TOGGLE_SUBMESH_SELECTION)
+    {
+        handleToggleHoover();
+        return;
+    }
+    else if (action->text() == ACTION_SELECT_BACKGROUND_COLOUR)
+    {
+        doChangeBackgroundAction();
+        return;
+    }
+    else
+    {
+        // It could be a skybox
+        if (action->text() == NO_SKYBOX)
+        {
+            // Make skybox node invisible
+            mOgreWidget->setSkyBoxVisible(false);
+            return;
+        }
+        else
+        {
+            QSettings settings(FILE_SETTINGS, QSettings::IniFormat);
+            unsigned int numberOfSkyboxes = settings.value(SETTINGS_NUMBER_OF_SKYBOXES).toInt();
+            QString key;
+            QString value;
+            for (unsigned int i = 0; i < numberOfSkyboxes; ++i)
+            {
+                key = SETTINGS_PREFIX_SKYBOX + QVariant(i).toString();
+                value = settings.value(key).toString();
+                if (value == action->text())
+                {
+                    // A skybox was selected; create it
+                    mOgreWidget->updateSkyBoxMaterial(value.toStdString());
+                    return;
+                }
+            }
+        }
+    }
+
+    // Action is not recognized; it is probably a selected mesh
+    doChangeMeshAction(action);
 }

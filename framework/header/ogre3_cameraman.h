@@ -91,6 +91,7 @@ namespace Magus
 		{
 			mCamera = cam;
             mCameraNode = mCamera->getSceneManager()->getRootSceneNode()->createChildSceneNode();
+            mCameraNode->setOrientation(Ogre::Quaternion::IDENTITY);
             mCamera->detachFromParent();
             mCameraNode->attachObject( mCamera );
             mCamera->setPosition( Ogre::Vector3( 0, 5, 15 ) );

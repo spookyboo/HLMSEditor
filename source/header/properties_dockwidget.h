@@ -61,6 +61,7 @@ class PropertiesDockWidget : public QDockWidget
         void setDetailMapPropertiesVisible(bool visible);
         void clear();
         void displayInfo(const QString& fileName, const QString& headerText); // Used for displaying info files
+        void notifyHlmsChanged(void); // Called when a property is changed
 
         // Make the properties widgets public for easy access
         HlmsPropertiesPbsDatablock* mHlmsPropertiesPbsDatablock;

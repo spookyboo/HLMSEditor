@@ -18,6 +18,7 @@
 **
 ****************************************************************************/
 
+#include <QFile>
 #include "ogre3_widget.h"
 #include "ogre3_renderman.h"
 #include "Compositor/OgreCompositorManager2.h"
@@ -38,6 +39,7 @@
 #include "OgreMesh2.h"
 #include "OgreSubMesh2.h"
 #include "constants.h"
+#include "renderwindow_dockwidget.h"
 
 namespace Magus
 {
@@ -47,6 +49,7 @@ namespace Magus
         mRoot(0),
         mWorkspace(0),
         mWorkspaceRtt(0),
+        mWorkspaceRttSkyBox(0),
         mRtt(0),
         mOgreRenderWindow(0),
         mCamera(0),
@@ -157,7 +160,7 @@ namespace Magus
         mColourMap[57] = QVector3D(0.0f, 0.8f, 0.8f);
         mColourMap[58] = QVector3D(0.0f, 0.9f, 0.9f);
         mColourMap[59] = QVector3D(0.0f, 1.0f, 1.0f);
-}
+    }
 
     //****************************************************************************/
     QOgreWidget::~QOgreWidget()
@@ -254,6 +257,7 @@ namespace Magus
         mSceneManager = mRoot->createSceneManager(Ogre::ST_GENERIC, numThreads, threadedCullingMethod);
         mSceneManager->getRenderQueue()->setRenderQueueMode(1, Ogre::RenderQueue::FAST);
         mSceneManager->getRenderQueue()->setRenderQueueMode(2, Ogre::RenderQueue::FAST);
+        mSceneManager->getRenderQueue()->setRenderQueueMode(3, Ogre::RenderQueue::FAST);
         mSceneManager->setShadowDirectionalLightExtrusionDistance( 500.0f );
         mSceneManager->setShadowFarDistance( 500.0f );
 
@@ -263,15 +267,24 @@ namespace Magus
         mCameraManager = new CameraMan(mCamera);
 
         // Create the compositor
-        createCompositor();
+        //createCompositor();
 
         // Create the compositor RTT
-        createCompositorRenderToTexture();
+        //createCompositorRenderToTexture();
     }
 
     //****************************************************************************/
     void QOgreWidget::createScene()
     {
+        // Create the compositor
+        createCompositor();
+
+        // Create the compositor RTT
+        createCompositorRenderToTexture();
+
+        // Create the skybox compositor
+        createSkyBoxCompositor();
+
         // Create the node and attach the entity
         mSceneNode = mSceneManager->getRootSceneNode( Ogre::SCENE_DYNAMIC )->createChildSceneNode( Ogre::SCENE_DYNAMIC );
         mSceneNodeRtt = mSceneNode->createChildSceneNode( Ogre::SCENE_DYNAMIC );
@@ -280,7 +293,7 @@ namespace Magus
         mCameraManager->setTarget(mSceneNode);
 
         // Create an item
-        Ogre::Vector3 scale(25.0f, 25.0f, 25.0f);
+        Ogre::Vector3 scale(20.0f, 20.0f, 20.0f);
         createItem ("cube.mesh", scale);
 
         // Remove the datablock currently set on this item
@@ -308,7 +321,7 @@ namespace Magus
         mLightAxisItem = mSceneManager->createItem("axis.mesh",
                                                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                                                    Ogre::SCENE_DYNAMIC );
-        mLightAxisItem->setRenderQueueGroup(2);
+        mLightAxisItem->setRenderQueueGroup(3);
         mLightAxisNode->attachObject(mLightAxisItem);
         mLightAxisNode->setScale(Ogre::Vector3(0.12f, 0.12f, 0.12f));
         createLightAxisMaterial();
@@ -407,6 +420,33 @@ namespace Magus
     }
 
     //****************************************************************************/
+    bool QOgreWidget::isSkyBoxVisible (void)
+    {
+        return mWorkspaceRttSkyBox->getEnabled();
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::setSkyBoxVisible (bool visible)
+    {
+        mWorkspaceRttSkyBox->setEnabled(visible);
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::updateSkyBoxMaterial(const Ogre::String& cubeMapBaseFileName)
+    {
+        Ogre::MaterialPtr materialPtr = Ogre::MaterialManager::getSingletonPtr()->getByName(SKYBOX_MATERIAL_NAME);
+        if (materialPtr.isNull())
+            return;
+
+        Ogre::Material* material = materialPtr.getPointer();
+        Ogre::TextureUnitState* tex = material->getTechnique(0)->getPass(0)->getTextureUnitState(0);
+        tex->setCubicTextureName(cubeMapBaseFileName, true);
+        tex->setGamma(2.0);
+        material->compile();
+        setSkyBoxVisible(true);
+    }
+
+    //****************************************************************************/
     void QOgreWidget::createItem(const Ogre::String& meshName, const Ogre::Vector3& scale)
     {
         try
@@ -428,7 +468,7 @@ namespace Magus
                                               Ogre::SCENE_DYNAMIC );
             mSceneNode->attachObject(mItem);
             mSceneNode->setScale(scale);
-            mItem->setRenderQueueGroup(1);
+            mItem->setRenderQueueGroup(2);
 
             // Delete the old itemRtt if available
             if (mItemRtt)
@@ -446,7 +486,7 @@ namespace Magus
             mSceneNodeRtt->attachObject(mItemRtt);
             mSceneNodeRtt->setVisible(false);
             createUnlitDatablocksRtt();
-            mItemRtt->setRenderQueueGroup(1);
+            mItemRtt->setRenderQueueGroup(2);
 
             // Put an extra renderOneFrame, because of an exception in Debug (D3D11 device cannot Clear State)
             #if _DEBUG || DEBUG
@@ -477,7 +517,7 @@ namespace Magus
         mItem = item;
         mSceneNode->attachObject(mItem);
         mSceneNode->setScale(scale);
-        mItem->setRenderQueueGroup(1);
+        mItem->setRenderQueueGroup(2);
 
         // Delete the old itemRtt if available
         if (mItemRtt)
@@ -491,7 +531,7 @@ namespace Magus
         mItemRtt = itemRtt;
         mSceneNodeRtt->attachObject(mItemRtt);
         createUnlitDatablocksRtt();
-        mItemRtt->setRenderQueueGroup(1);
+        mItemRtt->setRenderQueueGroup(2);
     }
 
     //****************************************************************************/
@@ -679,6 +719,35 @@ namespace Magus
     }
 
     //****************************************************************************/
+    void QOgreWidget::createCompositorRenderToTexture(void)
+    {
+        // Create a render-texture to determine on which subitem the mouse pointer is pointing at
+        mCustomRenderTexture = Ogre::TextureManager::getSingleton().createManual(mRenderTextureName,
+                                                                                 Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                                                                 Ogre::TEX_TYPE_2D,
+                                                                                 RTT_SIZE_X,
+                                                                                 RTT_SIZE_Y,
+                                                                                 1,
+                                                                                 Ogre::PF_R8G8B8A8,
+                                                                                 Ogre::TU_RENDERTARGET);
+        mCustomRenderTexture->load();
+        mRtt = mCustomRenderTexture->getBuffer(0)->getRenderTarget();
+        Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
+        const Ogre::String workspaceName = Ogre::StringConverter::toString(mRoot->getTimer()->getMicroseconds());
+        const Ogre::IdString workspaceNameHash = workspaceName;
+        compositorManager->createBasicWorkspaceDef(workspaceName, Ogre::ColourValue::Black);
+        mWorkspaceRtt = compositorManager->addWorkspace(mSceneManager, (Ogre::RenderTarget*)mRtt, mCamera, workspaceNameHash, false);
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::createSkyBoxCompositor()
+    {
+        Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
+        mWorkspaceRttSkyBox = compositorManager->addWorkspace(mSceneManager, mOgreRenderWindow, mCamera, SKYBOX_WORKSPACE, true);
+        mWorkspaceRttSkyBox->setEnabled(false);
+    }
+
+    //****************************************************************************/
     void QOgreWidget::updateOgre(Ogre::Real timeSinceLastFrame)
     {
         if (!mSceneCreated)
@@ -707,13 +776,21 @@ namespace Magus
                 setBackgroundColour(Ogre::ColourValue::Black);
             }
 
+            // Make items that not need to be rendered to the rtt to 'invisible'
             mSceneNode->setVisible(false);
             bool lightVisibility;
+            bool skyBoxVisibility;
             if (mLightAxisItem)
             {
                 lightVisibility = mLightAxisItem->getVisible();
                 mLightAxisItem->setVisible(false);
             }
+
+            // Make any skybox invisible
+            skyBoxVisibility = mWorkspaceRttSkyBox->getEnabled();
+            mWorkspaceRttSkyBox->setEnabled(false);
+
+            // Make the render texture workspace invisible
             mSceneNodeRtt->setVisible(true);
             mSceneManager->updateSceneGraph();
 
@@ -728,6 +805,7 @@ namespace Magus
             mSceneNodeRtt->setVisible(false);
             if (mLightAxisItem)
                 mLightAxisItem->setVisible(lightVisibility);
+            mWorkspaceRttSkyBox->setEnabled(skyBoxVisibility);
 
             if (toggleBackgroundColour)
                 setBackgroundColour(c);
@@ -854,6 +932,12 @@ namespace Magus
             mCameraManager->injectMouseDown(e);
             if (e->button() == Qt::MiddleButton || e->button() == Qt::LeftButton)
                 mMouseDown = true;
+            else if (e->button() == Qt::RightButton)
+            {
+                // Forward it to the render window dockwidget
+                // (note the cast; this is needed, because everything points to each other)
+                static_cast<RenderwindowDockWidget*>(mRenderwindowDockWidget)->mousePressEventPublic(e);
+            }
         }
     }
 
@@ -870,6 +954,12 @@ namespace Magus
 
     //****************************************************************************/
     void QOgreWidget::mouseDoubleClickEvent(QMouseEvent *event)
+    {
+        assignCurrentDatablock();
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::assignCurrentDatablock()
     {
         if(mSystemInitialized)
         {
@@ -905,27 +995,6 @@ namespace Magus
     void QOgreWidget::saveToFile(const Ogre::String& fileName)
     {
         mOgreRenderWindow->writeContentsToFile(fileName);
-    }
-
-    //****************************************************************************/
-    void QOgreWidget::createCompositorRenderToTexture(void)
-    {
-        // Create a render-texture to determine on which subitem the mouse pointer is pointing at
-        mCustomRenderTexture = Ogre::TextureManager::getSingleton().createManual(mRenderTextureName,
-                                                                                 Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                                                                 Ogre::TEX_TYPE_2D,
-                                                                                 RTT_SIZE_X,
-                                                                                 RTT_SIZE_Y,
-                                                                                 1,
-                                                                                 Ogre::PF_R8G8B8A8,
-                                                                                 Ogre::TU_RENDERTARGET);
-        mCustomRenderTexture->load();
-        mRtt = mCustomRenderTexture->getBuffer(0)->getRenderTarget();
-        Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
-        const Ogre::String workspaceName = Ogre::StringConverter::toString(mRoot->getTimer()->getMicroseconds());
-        const Ogre::IdString workspaceNameHash = workspaceName;
-        compositorManager->createBasicWorkspaceDef(workspaceName, Ogre::ColourValue::Black);
-        mWorkspaceRtt = compositorManager->addWorkspace(mSceneManager, (Ogre::RenderTarget*)mRtt, mCamera, workspaceNameHash, false);
     }
 
     //****************************************************************************/
@@ -1232,6 +1301,13 @@ namespace Magus
         }
 
         mCurrentDatablockName = datablockName;
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::setRenderwindowDockWidget(QDockWidget* renderwindowDockWidget)
+    {
+        // This is needed to be able to forward the right mousepress to the RenderwindowDockWidget
+        mRenderwindowDockWidget = renderwindowDockWidget;
     }
 
 }

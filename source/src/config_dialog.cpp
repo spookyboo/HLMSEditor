@@ -38,6 +38,7 @@ ConfigDialog::ConfigDialog(MainWindow* parent) : QDialog(parent)
     // Pages
     pagesWidget = new QStackedWidget;
     mGeneralPage = new GeneralPage(this);
+    mGeneralPage->setSkyBoxMap(mSkyBoxMap);
     mHlmsPage = new HlmsPage(this);
     pagesWidget->addWidget(mGeneralPage);
     pagesWidget->addWidget(mHlmsPage);
@@ -64,7 +65,8 @@ ConfigDialog::ConfigDialog(MainWindow* parent) : QDialog(parent)
     mainLayout->addLayout(buttonsLayout);
     setLayout(mainLayout);
     setWindowTitle(tr("Config Dialog"));
-    showMaximized();
+    //showMaximized();
+    show();
 }
 
 //****************************************************************************/
@@ -112,12 +114,26 @@ void ConfigDialog::loadSettings(void)
         mImportPath = DEFAULT_IMPORT_PATH;
 
     mSamplerblockFilterIndex = settings.value(SETTINGS_SAMPLERBLOCK_FILTER_INDEX).toInt();
+    mNumberOfSkyBoxes = settings.value(SETTINGS_NUMBER_OF_SKYBOXES).toInt();
+
+    // Load the skybox names
+    QString key;
+    QString value;
+    for (unsigned int i = 0; i < mNumberOfSkyBoxes; ++i)
+    {
+        key = SETTINGS_PREFIX_SKYBOX + QVariant(i).toString();
+        value = settings.value(key).toString();
+        mSkyBoxMap[key] = value;
+    }
 }
 
 //****************************************************************************/
 void ConfigDialog::saveSettings(void)
 {
+    QString key;
+    QString value;
     QFile file(FILE_SETTINGS);
+
     if (file.open(QFile::WriteOnly|QFile::Truncate))
     {
         QTextStream stream(&file);
@@ -133,6 +149,75 @@ void ConfigDialog::saveSettings(void)
                << mSamplerblockFilterIndex
                << "\""
                << "\n";
+        stream << SETTINGS_NUMBER_OF_SKYBOXES
+               << " = "
+               << "\""
+               << mNumberOfSkyBoxes
+               << "\""
+               << "\n";
+
+        // Save the skybox names
+        QMap<QString, QString>::iterator it = mSkyBoxMap.begin();
+        QMap<QString, QString>::iterator itEnd = mSkyBoxMap.end();
+        while (it != itEnd)
+        {
+            key = it.key();
+            value = it.value();
+            stream << key
+                   << " = "
+                   << "\""
+                   << value
+                   << "\""
+                   << "\n";
+            ++it;
+        }
+
         file.close();
     }
+}
+
+//****************************************************************************/
+void ConfigDialog::skyBoxTableUpdated(bool enabled, QString skyboxName)
+{
+    // Rebuild the map
+    QMap<QString, QString> newMap;
+    QMap<QString, QString>::iterator it = mSkyBoxMap.begin();
+    QMap<QString, QString>::iterator itEnd = mSkyBoxMap.end();
+    unsigned int number = 0;
+    QString key;
+    QString value;
+    bool found = false;
+    while (it != itEnd)
+    {
+        key = tr("skybox") + QVariant(number).toString();
+        value = it.value();
+        if (skyboxName == value)
+        {
+            found = true;
+            if (enabled)
+            {
+                newMap[key] = value;
+                ++number;
+            }
+            // If not enabled, skip it
+        }
+        else
+        {
+            newMap[key] = value;
+            ++number;
+        }
+        ++it;
+    }
+
+    // The skyboxName was not found, but it is enabled, so it has to be added to the map
+    // This is at the end of the map, so the order of the map and the table of the config page are not in sync
+    if (!found && enabled)
+    {
+        key = tr("skybox") + QVariant(number).toString();
+        newMap[key] = skyboxName;
+    }
+
+    mSkyBoxMap.clear();
+    mSkyBoxMap = newMap;
+    mNumberOfSkyBoxes = mSkyBoxMap.size();
 }

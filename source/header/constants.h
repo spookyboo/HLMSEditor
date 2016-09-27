@@ -97,6 +97,9 @@ static const QString DEFAULT_IMPORT_PATH = "../import/";
 static const QString SETTINGS_GROUP_GENERAL = "General";
 static const QString SETTINGS_IMPORT_PATH = "importPath";
 static const QString SETTINGS_SAMPLERBLOCK_FILTER_INDEX = "samplerblockFilterIndex";
+static const QString SETTINGS_NUMBER_OF_SKYBOXES = "numberOfSkyboxes";
+static const QString SETTINGS_PREFIX_SKYBOX = "skybox";
+static const QString NO_SKYBOX = "None";
 
 // Static function to determine the 'resources' file
 static const QString& getResourcesCfg (void)
@@ -151,6 +154,14 @@ static QString getBaseFileName(QString& fileName)
 
     return mTempString;
 }
+
+//****************************************************************************/
+// Contextmenu action
+static const QString ACTION_SET_CURRENT_MATERIAL = QString("Set current material");
+static const QString ACTION_TOGGLE_LIGHT_DIRECTION = QString("Light direction");
+static const QString ACTION_RESET_CAMERA = QString("Reset camera position/direction");
+static const QString ACTION_TOGGLE_SUBMESH_SELECTION = QString("Toggle Mesh/Submesh selection");
+static const QString ACTION_SELECT_BACKGROUND_COLOUR = QString("Select background colour");
 
 //****************************************************************************/
 // Ports

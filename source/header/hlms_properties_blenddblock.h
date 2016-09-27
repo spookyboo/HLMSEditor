@@ -33,12 +33,15 @@ using namespace Magus; // Use 'namespace Magus' because of issues with signal an
                        // eg. void nodeSelected(Magus::QtNode* node); does not work, but
                        // void nodeSelected(QtNode* node); does work!
 
+class PropertiesDockWidget;
 class HlmsPropertiesBlendblock : public QWidget
 {
     Q_OBJECT
 
     public:
-        HlmsPropertiesBlendblock(const QString& fileNameIcon, QWidget* parent = 0);
+        HlmsPropertiesBlendblock(const QString& fileNameIcon,
+                                 PropertiesDockWidget* propertiesDockWidget,
+                                 QWidget* parent = 0);
         virtual ~HlmsPropertiesBlendblock(void);
         void setObject (HlmsNodeBlendblock* hlmsNodeBlendblock);
 
@@ -49,6 +52,7 @@ class HlmsPropertiesBlendblock : public QWidget
     private:
         HlmsNodeBlendblock* mHlmsNodeBlendblock;
         Magus::QtAssetWidget* mAssetWidget;
+        PropertiesDockWidget* mPropertiesDockWidget;
         void adjustTransparent(unsigned int indexSourceBF, unsigned int indexDestBF);
 };
 

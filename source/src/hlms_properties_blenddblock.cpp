@@ -26,9 +26,14 @@
 #include "hlms_properties_blenddblock.h"
 #include "properties_dockwidget.h"
 #include "hlms_node_blenddblock.h"
+#include "properties_dockwidget.h"
 
 //****************************************************************************/
-HlmsPropertiesBlendblock::HlmsPropertiesBlendblock(const QString& fileNameIcon, QWidget* parent) : QWidget(parent)
+HlmsPropertiesBlendblock::HlmsPropertiesBlendblock(const QString& fileNameIcon,
+                                                   PropertiesDockWidget* propertiesDockWidget,
+                                                   QWidget* parent) :
+    mPropertiesDockWidget(propertiesDockWidget),
+    QWidget(parent)
 {
     mHlmsNodeBlendblock = 0;
     QVBoxLayout* mainLayout = new QVBoxLayout;
@@ -333,6 +338,9 @@ void HlmsPropertiesBlendblock::propertyValueChanged(QtProperty* property)
         }
         break;
     }
+
+    // Inform the propertiesDockWidget that a property is changed, so the material is rebuild
+    mPropertiesDockWidget->notifyHlmsChanged();
 }
 
 //****************************************************************************/

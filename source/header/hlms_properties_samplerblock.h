@@ -33,12 +33,15 @@ QT_END_NAMESPACE
 
 using namespace Magus; // Use 'namespace Magus' because of issues with signal and slots;
 
+class PropertiesDockWidget;
 class HlmsPropertiesSamplerblock : public QWidget
 {
     Q_OBJECT
 
     public:
-        HlmsPropertiesSamplerblock(const QString& fileNameIcon, QWidget* parent = 0);
+        HlmsPropertiesSamplerblock(const QString& fileNameIcon,
+                                   PropertiesDockWidget* propertiesDockWidget,
+                                   QWidget* parent = 0);
         virtual ~HlmsPropertiesSamplerblock(void);
         void setObject (HlmsNodeSamplerblock* hlmsNodeSamplerblock);
 
@@ -56,6 +59,7 @@ class HlmsPropertiesSamplerblock : public QWidget
         Magus::QtSelectProperty* mTextureTypeSelectProperty;
         Magus::QtDecimalProperty* mMapWeightSelectProperty;
         Magus::QtContainerWidget* mDetailMapContainer;
+        PropertiesDockWidget* mPropertiesDockWidget;
 };
 
 #endif
