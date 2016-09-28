@@ -13,6 +13,7 @@ V 1.0 updates:
 
 V 1.0 Bugs:
 ==========
+- Resetting position and orientation of the camera/mesh in the renderwindow results in not rotating the skybox anymore
 - Resetting position and orientation of the camera/mesh in the renderwindow requires two mouse clicks on the same marker button
 - Error scenario:
   1. open project; 

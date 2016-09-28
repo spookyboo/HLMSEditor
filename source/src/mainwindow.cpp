@@ -106,6 +106,21 @@ MainWindow::MainWindow(void) :
     // Delete all datablocks that are loaded at startup, so that the datablock
     // administration in mHlmsUtilsManager is up-to-date
     mHlmsUtilsManager->destroyDatablocks(true); // Exclude the 'special' datablocks
+
+    // Display Qt's supported image formats in Ogre.log
+    QList<QByteArray> formats = QImageReader::supportedImageFormats();
+    QByteArray ba;
+    QString supportedFormatString = tr("");
+    QList<QByteArray>::iterator it = formats.begin();
+    QList<QByteArray>::iterator itEnd = formats.end();
+    while (it != itEnd)
+    {
+        ba = *it;
+        QString str(ba);
+        supportedFormatString += str + tr(", ");
+        ++it;
+    }
+    Ogre::LogManager::getSingleton().logMessage("Supported Qt formats: " + supportedFormatString.toStdString());
 }
 
 //****************************************************************************/
