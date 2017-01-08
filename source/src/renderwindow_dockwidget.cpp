@@ -22,7 +22,7 @@
 #include "constants.h"
 #include "mainwindow.h"
 #include "OgreMeshManager2.h"
-#include "Renderwindow_dockwidget.h"
+#include "renderwindow_dockwidget.h"
 
 //****************************************************************************/
 RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags) : 

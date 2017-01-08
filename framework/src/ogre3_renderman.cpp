@@ -184,13 +184,13 @@ namespace Magus
     }
 
     //****************************************************************************/
-    HGLRC OgreManager::getGlContext(void) const
+    GL_CONTEXT OgreManager::getGlContext(void) const
     {
         return mGlContext;
     }
 
     //****************************************************************************/
-    void OgreManager::setGlContext(HGLRC glContext)
+    void OgreManager::setGlContext(GL_CONTEXT glContext)
     {
         mGlContext = glContext;
     }

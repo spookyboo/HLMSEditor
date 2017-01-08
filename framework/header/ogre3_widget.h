@@ -40,6 +40,7 @@ namespace Magus
     static const Ogre::String SKYBOX_WORKSPACE = "SkyPostprocessWorkspace";
     static const Ogre::String SKYBOX_MATERIAL_NAME = "SkyPostprocess";
 
+
     class OgreManager;
 
     /****************************************************************************
@@ -158,7 +159,7 @@ namespace Magus
             virtual void mousePressEvent(QMouseEvent* e);
             virtual void mouseReleaseEvent(QMouseEvent* e);
             virtual void mouseDoubleClickEvent(QMouseEvent *event);
-            HGLRC getCurrentGlContext(void);
+            GL_CONTEXT getCurrentGlContext(void);
             void rotateLight(Ogre::Vector2 relativeMouseMove);
             const Ogre::ColourValue& calculateIndexToColour(int index);
             int calculateColourToIndex(const Ogre::ColourValue& colourValue);

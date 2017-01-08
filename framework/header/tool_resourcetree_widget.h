@@ -259,7 +259,7 @@ namespace Magus
             int getFirstInParent (int parentId);
 
             // Return true if the given resourceId is the first of a parentId
-            bool QtResourceTreeWidget::isFirstInParent (int resourceId, int parentId);
+            bool isFirstInParent (int resourceId, int parentId);
 
             // Return the last resource of a parent.
             int getLastInParent (int parentId);

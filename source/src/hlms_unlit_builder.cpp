@@ -347,7 +347,7 @@ void HlmsUnlitBuilder::createSamplerNodes (Magus::OgreManager* ogreManager,
                                            Ogre::HlmsUnlitDatablock* datablock,
                                            const HlmsUtilsManager::DatablockStruct& datablockStruct)
 {
-    Ogre::uint8 max = Ogre::UnlitTextureTypes::NUM_UNLIT_TEXTURE_TYPES;
+    Ogre::uint8 max = Ogre::NUM_UNLIT_TEXTURE_TYPES;
     Ogre::uint8 i;
     const Ogre::HlmsSamplerblock* samplerblock;
     HlmsNodeSamplerblock* samplernode;

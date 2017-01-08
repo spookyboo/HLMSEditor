@@ -19,6 +19,7 @@
 ****************************************************************************/
 
 // Include
+#include <float.h>
 #include <QMessageBox>
 #include <QSettings>
 #include "constants.h"

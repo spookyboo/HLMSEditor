@@ -535,7 +535,7 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
     setCurrentDatablockNames (datablockStruct.datablockId, datablockStruct.datablockFullName);
 
     // Create the pbs node structure
-    if (datablockStruct.type == EditorHlmsTypes::HLMS_PBS)
+    if (datablockStruct.type == HLMS_PBS)
     {
         HlmsNodePbsDatablock* node = mNodeEditorDockWidget->createPbsNodeStructure(datablockStruct);
         if (node)
@@ -546,7 +546,7 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
         mPropertiesDockWidget->setTextureTypePropertyVisible(true);
         mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
     }
-    else if (datablockStruct.type == EditorHlmsTypes::HLMS_UNLIT)
+    else if (datablockStruct.type == HLMS_UNLIT)
     {
         // Create the unlit node structure
         HlmsNodeUnlitDatablock* node = mNodeEditorDockWidget->createUnlitNodeStructure(datablockStruct);
@@ -884,12 +884,12 @@ void MainWindow::saveDatablock(void)
     mHlmsUtilsManager->destroyDatablocks(false, true, mCurrentDatablockFullName);
 
     Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
-    if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_PBS)
+    if (getCurrentDatablockType() == HLMS_PBS)
     {
         hlmsManager->saveMaterials (Ogre::HLMS_PBS, fname);
         appendRecentHlms(mHlmsName);
     }
-    else if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_UNLIT)
+    else if (getCurrentDatablockType() == HLMS_UNLIT)
     {
         hlmsManager->saveMaterials (Ogre::HLMS_UNLIT, fname);
         appendRecentHlms(mHlmsName);
@@ -1025,9 +1025,9 @@ void MainWindow::doMaterialBrowserAddMenuAction(void)
         QString thumb = baseNameJson + ".png";
         mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->saveToFile(THUMBS_PATH + thumb.toStdString());
 
-        if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_PBS)
+        if (getCurrentDatablockType() == HLMS_PBS)
             mMaterialBrowser->addMaterial(baseNameJson, mHlmsName, thumb, HLMS_PBS);
-        else if (getCurrentDatablockType() == EditorHlmsTypes::HLMS_UNLIT)
+        else if (getCurrentDatablockType() == HLMS_UNLIT)
             mMaterialBrowser->addMaterial(baseNameJson, mHlmsName, thumb, HLMS_UNLIT);
 
         saveMaterialBrowserCfg();
@@ -1861,7 +1861,7 @@ void MainWindow::setDatablocksFromMaterialBrowserInItem(void)
         datablockStruct = mHlmsUtilsManager->getDatablockStructOfFullName(fullName);
 
         // Only set the datablock in the item if it exists
-        if (datablockStruct.type != EditorHlmsTypes::HLMS_NONE)
+        if (datablockStruct.type != HLMS_NONE)
         {
             name = datablockStruct.datablockId;
             ogreWidget->setDatablockInSubItem(index, name);

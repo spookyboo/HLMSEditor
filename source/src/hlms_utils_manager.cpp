@@ -35,14 +35,14 @@ HlmsUtilsManager::HlmsUtilsManager(void)
     mLoadedDatablockStruct.datablockFullName = "";
     mLoadedDatablockStruct.datablockId = "";
     mLoadedDatablockStruct.jsonFileName = "";
-    mLoadedDatablockStruct.type = EditorHlmsTypes::HLMS_NONE;
+    mLoadedDatablockStruct.type = HLMS_NONE;
     mLoadedDatablockStruct.textureMap.clear();
 
     helperDatablockStruct.datablock = 0;
     helperDatablockStruct.datablockFullName = "";
     helperDatablockStruct.datablockId = "";
     helperDatablockStruct.jsonFileName = "";
-    helperDatablockStruct.type = EditorHlmsTypes::HLMS_NONE;
+    helperDatablockStruct.type = HLMS_NONE;
     helperDatablockStruct.textureMap.clear();
     mSnapshot.clear();
 }
@@ -60,7 +60,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::loadDatablock(const QString&
     mLoadedDatablockStruct.datablockFullName = "";
     mLoadedDatablockStruct.datablockId = "";
     mLoadedDatablockStruct.jsonFileName = jsonFileName.toStdString();
-    mLoadedDatablockStruct.type = EditorHlmsTypes::HLMS_NONE;
+    mLoadedDatablockStruct.type = HLMS_NONE;
     mLoadedDatablockStruct.textureMap.clear();
 
     if (jsonFileName.isEmpty())
@@ -135,7 +135,7 @@ void HlmsUtilsManager::makeSnapshotDatablocks(void)
         helperDatablockStruct.datablockFullName = *pbsDatablock->getFullName();
         helperDatablockStruct.datablockId = pbsDatablock->getName();
         helperDatablockStruct.jsonFileName = "";
-        helperDatablockStruct.type = EditorHlmsTypes::HLMS_PBS;
+        helperDatablockStruct.type = HLMS_PBS;
         helperDatablockStruct.textureMap.clear();   // It is not a problem that the texture names are empty, because
                                                     // the names are not required in the snapshot. The snapshot is
                                                     // only for comparing an actual situation (the actual datablocks)
@@ -155,7 +155,7 @@ void HlmsUtilsManager::makeSnapshotDatablocks(void)
         helperDatablockStruct.datablockFullName = *unlitDatablock->getFullName();
         helperDatablockStruct.datablockId = unlitDatablock->getName();
         helperDatablockStruct.jsonFileName = "";
-        helperDatablockStruct.type = EditorHlmsTypes::HLMS_UNLIT;
+        helperDatablockStruct.type = HLMS_UNLIT;
         helperDatablockStruct.textureMap.clear();
         mSnapshot.append(helperDatablockStruct);
         ++itorUnlit;
@@ -199,7 +199,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithLoadedDat
         ogreDatablockStruct.datablockFullName = *pbsDatablock->getFullName();
         ogreDatablockStruct.datablockId = pbsDatablock->getName();
         ogreDatablockStruct.jsonFileName = "";
-        ogreDatablockStruct.type = EditorHlmsTypes::HLMS_PBS;
+        ogreDatablockStruct.type = HLMS_PBS;
         ogreDatablockStruct.textureMap.clear();
 
         // Check whether it is available in the snapshot
@@ -237,7 +237,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithLoadedDat
         ogreDatablockStruct.datablockFullName = *unlitDatablock->getFullName();
         ogreDatablockStruct.datablockId = unlitDatablock->getName();
         ogreDatablockStruct.jsonFileName = "";
-        ogreDatablockStruct.type = EditorHlmsTypes::HLMS_UNLIT;
+        ogreDatablockStruct.type = HLMS_UNLIT;
 
         // Check whether it is available in the snapshot
         QVectorIterator<DatablockStruct> itSnapshot(mSnapshot);
@@ -290,7 +290,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithLoadedDat
         helperDatablockStruct.datablockFullName = "";
         helperDatablockStruct.datablockId = "";
         helperDatablockStruct.jsonFileName = jsonFileName.toStdString();
-        helperDatablockStruct.type = EditorHlmsTypes::HLMS_NONE;
+        helperDatablockStruct.type = HLMS_NONE;
         helperDatablockStruct.textureMap.clear();
         return helperDatablockStruct;
     }
@@ -325,7 +325,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithLoadedDat
             if (hlmsManager->getDatablock(diffStruct.datablockId))
             {
                 // Destroy the datablock
-                if (    diffStruct.type == EditorHlmsTypes::HLMS_PBS &&
+                if (    diffStruct.type == HLMS_PBS &&
                         diffStruct.datablock != 0 &&
                         diffStruct.datablock->getLinkedRenderables().size() == 0)
                 {
@@ -335,7 +335,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithLoadedDat
                     }
                     catch (Ogre::Exception e) {}
                 }
-                else if (   diffStruct.type == EditorHlmsTypes::HLMS_UNLIT &&
+                else if (   diffStruct.type == HLMS_UNLIT &&
                             diffStruct.datablock != 0 &&
                             diffStruct.datablock->getLinkedRenderables().size() == 0)
                 {
@@ -373,7 +373,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
     excludeDatablockFullNameStruct.datablockFullName = "";
     excludeDatablockFullNameStruct.datablockId = "";
     excludeDatablockFullNameStruct.jsonFileName = "";
-    excludeDatablockFullNameStruct.type = EditorHlmsTypes::HLMS_NONE;
+    excludeDatablockFullNameStruct.type = HLMS_NONE;
     QString numericString;
     Ogre::String fullName;
     int value;
@@ -408,7 +408,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
                 excludeDatablockFullNameStruct.datablockFullName = excludeDatablockFullName;
                 excludeDatablockFullNameStruct.datablockId = pbsDatablock->getName();
                 excludeDatablockFullNameStruct.jsonFileName = "";
-                excludeDatablockFullNameStruct.type = EditorHlmsTypes::HLMS_PBS;
+                excludeDatablockFullNameStruct.type = HLMS_PBS;
             }
         }
 
@@ -458,7 +458,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
                 excludeDatablockFullNameStruct.datablockFullName = excludeDatablockFullName;
                 excludeDatablockFullNameStruct.datablockId = unlitDatablock->getName();
                 excludeDatablockFullNameStruct.jsonFileName = "";
-                excludeDatablockFullNameStruct.type = EditorHlmsTypes::HLMS_UNLIT;
+                excludeDatablockFullNameStruct.type = HLMS_UNLIT;
             }
         }
 
@@ -574,7 +574,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablockStructOfFullName
     helperDatablockStruct.datablockFullName = "";
     helperDatablockStruct.datablockId = "";
     helperDatablockStruct.jsonFileName = "";
-    helperDatablockStruct.type = EditorHlmsTypes::HLMS_NONE;
+    helperDatablockStruct.type = HLMS_NONE;
 
     QVectorIterator<DatablockStruct> itLoadedDatablocks(mLoadedDatablocks);
     DatablockStruct datablockStruct;
@@ -669,7 +669,7 @@ void HlmsUtilsManager::parseUnlitTexture (HlmsUtilsManager::DatablockStruct* dat
                                          const rapidjson::Value& textureJson)
 {
     Ogre::String diffuseMap;
-    for (unsigned short index = 0; index < Ogre::UnlitTextureTypes::NUM_UNLIT_TEXTURE_TYPES; ++index)
+    for (unsigned short index = 0; index < Ogre::NUM_UNLIT_TEXTURE_TYPES; ++index)
     {
         diffuseMap = "diffuse_map" + Ogre::StringConverter::toString(index);
         rapidjson::Value::ConstMemberIterator itorTextureType = textureJson.FindMember(diffuseMap.c_str());
@@ -696,7 +696,7 @@ void HlmsUtilsManager::getTexturesFromLoadedPbsDatablocks(std::vector<Ogre::Stri
     {
         // If the type is pbs, append the texturenames to the vector
         helperDatablockStruct = itLoadedDatablocks.next();
-        if (helperDatablockStruct.type == EditorHlmsTypes::HLMS_PBS)
+        if (helperDatablockStruct.type == HLMS_PBS)
         {
             QMap <unsigned short, Ogre::String>::iterator itTextures = helperDatablockStruct.textureMap.begin();
             QMap <unsigned short, Ogre::String>::iterator itTexturesEnd = helperDatablockStruct.textureMap.end();
@@ -723,7 +723,7 @@ void HlmsUtilsManager::getTexturesFromLoadedUnlitDatablocks(std::vector<Ogre::St
     {
         // If the type is unlit, append the texturenames to the vector
         helperDatablockStruct = itLoadedDatablocks.next();
-        if (helperDatablockStruct.type == EditorHlmsTypes::HLMS_UNLIT)
+        if (helperDatablockStruct.type == HLMS_UNLIT)
         {
             QMap <unsigned short, Ogre::String>::iterator itTextures = helperDatablockStruct.textureMap.begin();
             QMap <unsigned short, Ogre::String>::iterator itTexturesEnd = helperDatablockStruct.textureMap.end();

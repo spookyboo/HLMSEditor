@@ -111,12 +111,12 @@ static const QString& getResourcesCfg (void)
     #endif
 }
 
-enum EditorHlmsTypes
+typedef enum
 {
     HLMS_PBS,       /// Physically Based Shader Generator
     HLMS_UNLIT,     /// Made for GUIs, overlays, particle FXs, self-iluminating billboards
     HLMS_NONE
-};
+} EditorHlmsTypes;
 
 /****************************************************************************
 Struct for source info

@@ -183,7 +183,7 @@ namespace Magus
     }
 
     //****************************************************************************/
-    HGLRC QOgreWidget::getCurrentGlContext(void)
+    GL_CONTEXT QOgreWidget::getCurrentGlContext(void)
     {
         #if defined(Q_OS_WIN)
             return wglGetCurrentContext(); // Windows
@@ -209,7 +209,7 @@ namespace Magus
         Ogre::NameValuePairList parameters;
 
         // Reuse the glContext if available
-        HGLRC glContext = 0;
+        GL_CONTEXT glContext = 0;
         if (ogreManager->isRenderSystemGL())
         {
             parameters["currentGLContext"] = Ogre::String("false");
