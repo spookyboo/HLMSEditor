@@ -19,6 +19,8 @@ struct Light
 @end
 };
 
+@insertpiece( DeclCubemapProbeStruct )
+
 //Uniforms that change per pass
 cbuffer PassBuffer : register(b0)
 {
@@ -45,6 +47,11 @@ cbuffer PassBuffer : register(b0)
 	float4 ambientLowerHemi;
 	float4 ambientHemisphereDir;
 @end
+@property( irradiance_volumes )
+	float4 irradianceOrigin;	//.w = maxPower
+	float4 irradianceSize;		//.w = 1.0f / irradianceTexture->getHeight()
+	float4x4 invView;
+@end
 @property( hlms_pssm_splits )@foreach( hlms_pssm_splits, n )
 	float pssmSplitPoints@n;@end @end
 	@property( hlms_lights_spot )Light lights[@value(hlms_lights_spot)];@end
@@ -53,14 +60,31 @@ cbuffer PassBuffer : register(b0)
 	float2 depthRange;
 @end
 
-@property( hlms_forward3d )
+@property( hlms_forwardplus )
+	//Forward3D
 	//f3dData.x = minDistance;
 	//f3dData.y = invMaxDistance;
 	//f3dData.z = f3dNumSlicesSub1;
 	//f3dData.w = uint cellsPerTableOnGrid0 (floatBitsToUint);
+
+	//Clustered Forward:
+	//f3dData.x = minDistance;
+	//f3dData.y = invExponentK;
+	//f3dData.z = f3dNumSlicesSub1;
+	//f3dData.w = renderWindow->getHeight();
 	float4 f3dData;
-	float4 f3dGridHWW[@value( hlms_forward3d )];
+	@property( hlms_forwardplus == forward3d )
+		float4 f3dGridHWW[@value( forward3d_num_slices )];
+	@end
+	@property( hlms_forwardplus != forward3d )
+		float4 fwdScreenToGrid;
+	@end
 @end
+
+@property( parallax_correct_cubemaps )
+	CubemapProbe autoProbe;
+@end
+
 	@insertpiece( custom_passBuffer )
 	} passBuf;
 };
@@ -113,6 +137,15 @@ cbuffer InstanceBuffer : register(b2)
     //Must be loaded with uintBitsToFloat
 	uint4 worldMaterialIdx[4096];
 };
+@end
+
+@property( envprobe_map && envprobe_map != target_envprobe_map && use_parallax_correct_cubemaps )
+@piece( PccManualProbeDecl )
+cbuffer ManualProbe : register(b3)
+{
+	CubemapProbe manualProbe;
+};
+@end
 @end
 
 //Reset texcoord to 0 for every shader stage (since values are preserved).

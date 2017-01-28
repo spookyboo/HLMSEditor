@@ -53,13 +53,13 @@ void main()
 	@end
 
 @property( !hlms_dual_paraboloid_mapping )
-	gl_Position = @insertpiece( worldViewProj ) * vertex;
+	gl_Position = vertex * @insertpiece( worldViewProj );
 @end
 
 @property( hlms_dual_paraboloid_mapping )
 	//Dual Paraboloid Mapping
 	gl_Position.w	= 1.0f;
-	gl_Position.xyz	= (@insertpiece( worldViewProj ) * vertex).xyz;
+	gl_Position.xyz	= (vertex * @insertpiece( worldViewProj )).xyz;
 	float L = length( gl_Position.xyz );
 	gl_Position.z	+= 1.0f;
 	gl_Position.xy	/= gl_Position.z;
@@ -72,8 +72,12 @@ void main()
 @property( texture_matrix )	mat4 textureMatrix;@end
 
 @foreach( out_uv_count, n )
-	@property( out_uv@_texture_matrix )textureMatrix = UNPACK_MAT4( animationMatrixBuf, (instance.materialIdx[drawId].x << 4u) + @value( out_uv@n_tex_unit ) );@end
-	outVs.uv@value( out_uv@n_out_uv ).@insertpiece( out_uv@n_swizzle ) = uv@value( out_uv@n_source_uv ).xy @property( out_uv@_texture_matrix ) * textureMatrix@end ;@end
+	@property( out_uv@n_texture_matrix )
+		textureMatrix = UNPACK_MAT4( animationMatrixBuf, (instance.materialIdx[drawId].x << 4u) + @value( out_uv@n_tex_unit )u );
+		outVs.uv@value( out_uv@n_out_uv ).@insertpiece( out_uv@n_swizzle ) = (vec4( uv@value( out_uv@n_source_uv ).xy, 0, 1 ) * textureMatrix).xy;
+	@end @property( !out_uv@n_texture_matrix )
+		outVs.uv@value( out_uv@n_out_uv ).@insertpiece( out_uv@n_swizzle ) = uv@value( out_uv@n_source_uv ).xy;
+	@end @end
 
 	outVs.drawId = drawId;
 

@@ -100,8 +100,12 @@ namespace Magus
     //****************************************************************************/
     OgreManager::~OgreManager(void)
     {
-        // Delete the dummy CompositorPassProvider
+        // Added removeAllWorkspaces after Ogre 2.1 upgrade (commit 2783a361c0b8)
+        // In debug mode, the application crashed in deleting mRoot
         Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
+        compositorManager->removeAllWorkspaces();
+
+        // Delete the dummy CompositorPassProvider
         compositorManager->setCompositorPassProvider(0);
         OGRE_DELETE mCompositorPassProvider;
 

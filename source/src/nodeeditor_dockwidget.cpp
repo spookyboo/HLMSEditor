@@ -26,6 +26,7 @@
 #include "OgreHlmsPbsDatablock.h"
 #include "hlms_pbs_builder.h"
 #include "hlms_unlit_builder.h"
+#include "hlms_utils_manager.h"
 
 //****************************************************************************/
 NodeEditorDockWidget::NodeEditorDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags) : 
@@ -315,6 +316,7 @@ void NodeEditorDockWidget::doNewMacroblockAction(void)
 void NodeEditorDockWidget::doCogHToolbarAction(void)
 {
     Ogre::IdString name;
+    HlmsUtilsManager* hlmsUtilsManager = mParent->getHlmsUtilsManager();
 
     // Construct a datablock and set it to the current item in the renderwindow
     if (mHlmsPbsDatablockNode)
@@ -326,12 +328,14 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
 
         QVector<int> indices = mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
-        mParent->destroyDatablock(name);
+        Ogre::String jsonFileName = hlmsUtilsManager->searchJsonFileName (name); // The datablock may still refer to a loaded material in the material browser
+        hlmsUtilsManager->destroyDatablock(name);
         Ogre::HlmsPbsDatablock* datablock = mHlmsPbsBuilder->createPbsDatablock(ogreManager, mHlmsPbsDatablockNode);
         if (datablock)
         {
             mParent->replaceCurrentDatablock(indices, datablock->getName());
             mParent->setCurrentDatablockNames(datablock->getName(), *datablock->getFullName());
+            hlmsUtilsManager->addNewDatablockToRegisteredDatablocks(name, jsonFileName);
         }
     }
     else if (mHlmsUnlitDatablockNode)
@@ -343,12 +347,14 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
 
         QVector<int> indices = mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
-        mParent->destroyDatablock(name);
+        Ogre::String jsonFileName = hlmsUtilsManager->searchJsonFileName (name); // The datablock may still refer to a loaded material in the material browser
+        hlmsUtilsManager->destroyDatablock(name);
         Ogre::HlmsUnlitDatablock* datablock = mHlmsUnlitBuilder->createUnlitDatablock(ogreManager, mHlmsUnlitDatablockNode);
         if (datablock)
         {
             mParent->replaceCurrentDatablock(indices, datablock->getName());
             mParent->setCurrentDatablockNames(datablock->getName(), *datablock->getFullName());
+            hlmsUtilsManager->addNewDatablockToRegisteredDatablocks(name, jsonFileName);
         }
     }
 }
@@ -371,9 +377,9 @@ void NodeEditorDockWidget::nodeToBeDeleted(QtNode* node)
 //****************************************************************************/
 void NodeEditorDockWidget::deleteHlmsPbsDatablockNode(void)
 {
+    // When the node is deleted from the node-editor, do not destroy the datablock itself
+    // It may be still be applied to one of the items.
     Ogre::IdString name = mHlmsPbsDatablockNode->getName().toStdString();
-    //mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
-    //mParent->destroyDatablock(name);
     mHlmsPbsDatablockNode = 0;
     mParent->initCurrentDatablockFileName();
 
@@ -383,9 +389,9 @@ void NodeEditorDockWidget::deleteHlmsPbsDatablockNode(void)
 //****************************************************************************/
 void NodeEditorDockWidget::deleteHlmsUnlitDatablockNode(void)
 {
+    // When the node is deleted from the node-editor, do not destroy the datablock itself
+    // It may be still be applied to one of the items.
     Ogre::IdString name = mHlmsUnlitDatablockNode->getName().toStdString();
-    //mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
-    //mParent->destroyDatablock(name);
     mHlmsUnlitDatablockNode = 0;
     mParent->initCurrentDatablockFileName();
 }
@@ -469,9 +475,9 @@ void NodeEditorDockWidget::nodeConnected(QtNode* baseNode, QtNode* targetNode)
 {
     // One of the nodes must be a sampler node; otherwise. don't bother
     HlmsNodeSamplerblock* hlmsNodeSamplerblock = 0;
-    if (baseNode->getType() == NODE_TYPE_SAMPLERBLOCK)
+    if (baseNode  && baseNode->getType() == NODE_TYPE_SAMPLERBLOCK)
         hlmsNodeSamplerblock = static_cast<HlmsNodeSamplerblock*>(baseNode);
-    else if (targetNode->getType() == NODE_TYPE_SAMPLERBLOCK)
+    else if (targetNode && targetNode->getType() == NODE_TYPE_SAMPLERBLOCK)
         hlmsNodeSamplerblock = static_cast<HlmsNodeSamplerblock*>(targetNode);
     if (!hlmsNodeSamplerblock)
         return;

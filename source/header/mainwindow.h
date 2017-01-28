@@ -71,6 +71,7 @@ class MainWindow : public QMainWindow
         const Ogre::IdString& getCurrentDatablockName (void) {return mCurrentDatablockName;}
         void destroyDatablock(const Ogre::IdString& datablockName);
         void notifyHlmsChanged (void); // To be called if the properties of a datablock are changed (which result in rebuilding the material)
+        HlmsUtilsManager* getHlmsUtilsManager (void) {return mHlmsUtilsManager;};
 
     protected:
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources); // Save the content of a resource vector

@@ -1,6 +1,6 @@
 QT += widgets opengl multimedia
 
-OGREHOME = "C:/Users/Henry/Documents/Visual Studio 2015/Projects/ogre2.1git"
+OGREHOME = "C:/Users/Henry/Documents/Visual Studio 2015/Projects/ogre2.1"
 win32:RC_ICONS += "common/icons/HLMSEditor.ico"
 
 HEADERS       = \
@@ -148,6 +148,7 @@ INCLUDEPATH += "$$OGREHOME/Components/Hlms/Pbs/include"
 INCLUDEPATH += "$$OGREHOME/Components/Hlms/Unlit/include"
 INCLUDEPATH += "$$OGREHOME/VCBuild/include"
 INCLUDEPATH += "$$OGREHOME/Dependencies"
+INCLUDEPATH += "$$OGREHOME/Dependencies/src/rapidjson"
 INCLUDEPATH += .
 
 Debug:LIBS += -L"$$OGREHOME/VCBuild/lib/Debug"

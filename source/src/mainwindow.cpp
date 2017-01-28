@@ -1460,8 +1460,8 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
         // Get the texture basenames from the datablocks
         std::vector<Ogre::String> vPbs;
         std::vector<Ogre::String> vUnlit;
-        mHlmsUtilsManager->getTexturesFromLoadedPbsDatablocks(&vPbs);
-        mHlmsUtilsManager->getTexturesFromLoadedUnlitDatablocks(&vUnlit);
+        mHlmsUtilsManager->getTexturesFromRegisteredPbsDatablocks(&vPbs);
+        mHlmsUtilsManager->getTexturesFromRegisteredUnlitDatablocks(&vUnlit);
 
         // Add all textures from Pbs
         std::vector<Ogre::String>::iterator itPbs = vPbs.begin();
@@ -1874,6 +1874,7 @@ void MainWindow::setDatablocksFromMaterialBrowserInItem(void)
 //****************************************************************************/
 QVector<int> MainWindow::getSubItemIndicesWithDatablockAndReplaceWithDefault(const Ogre::IdString& datablockName)
 {
+    // Returns a list of subItem indices from the main Item
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
     helperIndices = ogreWidget->getSubItemIndicesWithDatablock(datablockName);
     ogreWidget->setDatablockInSubItems(helperIndices, DEFAULT_DATABLOCK_NAME);
