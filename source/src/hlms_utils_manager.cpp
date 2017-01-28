@@ -750,6 +750,7 @@ const Ogre::String& HlmsUtilsManager::searchJsonFileName (const Ogre::IdString& 
     QVectorIterator<DatablockStruct> itRegisteredDatablocks(mRegisteredDatablocks);
     while (itRegisteredDatablocks.hasNext())
     {
+        helperDatablockStruct = itRegisteredDatablocks.next();
         if (helperDatablockStruct.datablockId == datablockId)
         {
             return helperDatablockStruct.jsonFileName;
