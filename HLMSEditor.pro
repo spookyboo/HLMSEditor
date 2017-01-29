@@ -74,7 +74,8 @@ HEADERS       = \
     source/header/recent_file_action.h \
     source/header/config_dialog.h \
     source/header/config_pages.h \
-    source/header/hlms_utils_manager.h
+    source/header/hlms_utils_manager.h \
+    framework/header/asset_propertywidget_slider_decimal.h
 
 
 SOURCES       = \
@@ -137,7 +138,8 @@ SOURCES       = \
     source/src/recent_file_action.cpp \
     source/src/config_dialog.cpp \
     source/src/config_pages.cpp \
-    source/src/hlms_utils_manager.cpp
+    source/src/hlms_utils_manager.cpp \
+    framework/src/asset_propertywidget_slider_decimal.cpp
 
 
 INCLUDEPATH += "../HLMSEditor/source/header/"
