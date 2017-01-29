@@ -544,7 +544,8 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
             mNodeEditorDockWidget->nodeSelected(node);
         }
         mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-        mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
+        mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(true);
+        mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
     }
     else if (datablockStruct.type == EditorHlmsTypes::HLMS_UNLIT)
     {
@@ -556,7 +557,8 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
             mNodeEditorDockWidget->nodeSelected(node);
         }
         mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-        mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
+        mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(false);
+        mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(true);
     }
 }
 

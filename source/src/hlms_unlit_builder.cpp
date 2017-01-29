@@ -379,7 +379,35 @@ void HlmsUnlitBuilder::enrichSamplerblock (Ogre::HlmsUnlitDatablock* datablock,
     datablock->setBlendMode(samplernode->getTextureIndex(), blendMode);
 
     // ******** Animation Matrix ********
-    // TODO: Not yet implemented
+    Ogre::Matrix4 mat4;
+
+    // ******** Animation Matrix - Enabled ********
+    bool animationEnabled = samplernode->getAnimationEnabled();
+
+    // ******** Animation Matrix - Scale ********
+    QVector3D v2 = samplernode->getAnimationScale();
+    Ogre::Vector3 animationScale;
+    animationScale.x = v2.x();
+    animationScale.y = v2.y();
+
+    // ******** Animation Matrix - Rotation ********
+    QQuaternion q = samplernode->getAnimationOrientation();
+    Ogre::Quaternion animationOrientation;
+    animationOrientation.x = q.x();
+    animationOrientation.y = q.y();
+    animationOrientation.z = q.z();
+    animationOrientation.w = q.scalar();
+
+    // ******** Animation Matrix - Translate ********
+    v2 = samplernode->getAnimationTranslate();
+    Ogre::Vector3 animationTranslate;
+    animationTranslate.x = v2.x();
+    animationTranslate.y = v2.y();
+
+    // Set the matrix4
+    mat4.makeTransform(animationTranslate, animationScale, animationOrientation);
+    datablock->setAnimationMatrix(samplernode->getTextureIndex(), mat4);
+    datablock->setEnableAnimationMatrix(samplernode->getTextureIndex(), animationEnabled);
 
     // ******** Map weight ********
     // Not applicable; unlit does not use this
@@ -444,7 +472,37 @@ void HlmsUnlitBuilder::enrichSamplerNode (HlmsNodeSamplerblock* samplernode,
     samplernode->setBlendMode(index);
 
     // ******** Animation Matrix ********
-    // TODO: Not yet implemented
+    Ogre::Matrix4 mat4 = datablock->getAnimationMatrix(textureType);
+    Ogre::Vector3 v3;
+
+    // ******** Animation Matrix - Enabled ********
+    bool animationEnabled = datablock->getEnableAnimationMatrix(textureType);
+    samplernode->setAnimationEnabled(animationEnabled);
+
+    // ******** Animation Matrix - Scale ********
+    v3.x = mat4[0][0];
+    v3.y = mat4[1][1];
+    v3.z = mat4[2][2];
+    QVector2D animationScale;
+    animationScale.setX(v3.x);
+    animationScale.setY(v3.y);
+    samplernode->setAnimationScale(animationScale);
+
+    // ******** Animation Matrix - Rotation ********
+    Ogre::Quaternion q = mat4.extractQuaternion();
+    QQuaternion animationOrientation;
+    animationOrientation.setX(q.x);
+    animationOrientation.setY(q.y);
+    animationOrientation.setZ(q.z);
+    animationOrientation.setScalar(q.w);
+    samplernode->setAnimationOrientation(animationOrientation);
+
+    // ******** Animation Matrix - Translate ********
+    v3 = mat4.getTrans();
+    QVector2D animationTranslate;
+    animationTranslate.setX(v3.x);
+    animationTranslate.setY(v3.y);
+    samplernode->setAnimationScale(animationScale);
 
     // ******** Map weight ********
     // Not applicable; unlit does not use this

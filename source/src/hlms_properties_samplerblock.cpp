@@ -27,6 +27,7 @@
 #include "asset_propertywidget_slider_decimal.h"
 #include "asset_propertywidget_checkbox.h"
 #include "asset_propertywidget_xy.h"
+#include "asset_propertywidget_quaternion.h"
 #include "hlms_properties_samplerblock.h"
 #include "properties_dockwidget.h"
 #include "hlms_node_samplerblock.h"
@@ -264,7 +265,39 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
     xyProperty->setLabelY("V");
 
     // ******** Animation Matrix (unlit only) ********
-    // TODO: Not implemented yet
+    // Decompose in Scale, Rotate and Transform
+    Magus::QtCheckBoxProperty* checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
+                                          PROPERTY_SAMPLERBLOCK_ANIM_ENABLED,
+                                          QString("Scale/Rotate/Transform enabled"),
+                                          Magus::QtProperty::CHECKBOX));
+    checkboxProperty->setVisible(false); // Make invisible by default
+    checkboxProperty->setValue(false);
+
+    xyProperty = static_cast<Magus::QtXYProperty*>
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
+                                 PROPERTY_SAMPLERBLOCK_ANIM_SCALE,
+                                 QString("Scale"),
+                                 Magus::QtProperty::XY));
+    xyProperty->setLabelX("U");
+    xyProperty->setLabelY("V");
+    xyProperty->setVisible(false); // Make invisible by default
+
+    Magus::QtQuaternionProperty* quaternionProperty = static_cast<Magus::QtQuaternionProperty*>
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
+                                 PROPERTY_SAMPLERBLOCK_ANIM_ROTATE,
+                                 QString("Rotate"),
+                                 Magus::QtProperty::QUATERNION));
+    quaternionProperty->setVisible(false); // Make invisible by default
+
+    xyProperty = static_cast<Magus::QtXYProperty*>
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
+                                 PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE,
+                                 QString("Translate"),
+                                 Magus::QtProperty::XY));
+    xyProperty->setLabelX("U");
+    xyProperty->setLabelY("V");
+    xyProperty->setVisible(false); // Make invisible by default
 
     // Layout
     mainLayout->addWidget(mAssetWidget);
@@ -284,7 +317,7 @@ void HlmsPropertiesSamplerblock::setTextureTypePropertyVisible (bool visible)
 }
 
 //****************************************************************************/
-void HlmsPropertiesSamplerblock::setDetailMapPropertiesVisible (bool visible)
+void HlmsPropertiesSamplerblock::setDetailMapWOSPropertiesVisible (bool visible)
 {
     // Enable specific detail map properties, except for blend properties
     Magus::QtSliderDecimalProperty* sliderDecimalProperty;
@@ -295,6 +328,36 @@ void HlmsPropertiesSamplerblock::setDetailMapPropertiesVisible (bool visible)
     xyProperty->setVisible(visible);
     xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_SCALE));
     xyProperty->setVisible(visible);
+}
+
+//****************************************************************************/
+void HlmsPropertiesSamplerblock::setDetailMapAnimationPropertiesVisible (bool visible)
+{
+    Magus::QtCheckBoxProperty* checkBoxProperty;
+    Magus::QtXYProperty* xyProperty;
+    Magus::QtQuaternionProperty* quaternionProperty;
+    checkBoxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ENABLED));
+    checkBoxProperty->setVisible(visible);
+
+    // If not checked, keep the other properties invisible
+    if (!checkBoxProperty->getValue())
+    {
+        xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_SCALE));
+        xyProperty->setVisible(false);
+        quaternionProperty = static_cast<Magus::QtQuaternionProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ROTATE));
+        quaternionProperty->setVisible(false);
+        xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE));
+        xyProperty->setVisible(false);
+    }
+    else
+    {
+        xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_SCALE));
+        xyProperty->setVisible(visible);
+        quaternionProperty = static_cast<Magus::QtQuaternionProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ROTATE));
+        quaternionProperty->setVisible(visible);
+        xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE));
+        xyProperty->setVisible(visible);
+    }
 }
 
 //****************************************************************************/
@@ -311,6 +374,7 @@ void HlmsPropertiesSamplerblock::setObject (HlmsNodeSamplerblock* hlmsNodeSample
     Magus::QtSliderProperty* sliderProperty;
     Magus::QtCheckBoxProperty* checkboxProperty;
     Magus::QtXYProperty* xyProperty;
+    Magus::QtQuaternionProperty* quaternionProperty;
 
     // ******** Texture ********
     textureProperty = static_cast<Magus::QtTextureProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_TEXTURE));
@@ -396,6 +460,23 @@ void HlmsPropertiesSamplerblock::setObject (HlmsNodeSamplerblock* hlmsNodeSample
     xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_SCALE));
     v2 = mHlmsNodeSamplerblock->getScale();
     xyProperty->setXY(v2.x(), v2.y());
+
+    // ******** Animation Matrix (unlit only) ********
+    // Decompose in Scale, Rotate and Transform
+    checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ENABLED));
+    checkboxProperty->setValue(mHlmsNodeSamplerblock->getAnimationEnabled());
+
+    xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_SCALE));
+    v2 = mHlmsNodeSamplerblock->getAnimationScale();
+    xyProperty->setXY(v2.x(), v2.y());
+
+    quaternionProperty = static_cast<Magus::QtQuaternionProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ROTATE));
+    QQuaternion q = mHlmsNodeSamplerblock->getAnimationOrientation();
+    quaternionProperty->setQuaternion(q);
+
+    xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE));
+    v2 = mHlmsNodeSamplerblock->getAnimationTranslate();
+    xyProperty->setXY(v2.x(), v2.y());
 }
 
 //****************************************************************************/
@@ -411,6 +492,7 @@ void HlmsPropertiesSamplerblock::propertyValueChanged(QtProperty* property)
     Magus::QtSliderProperty* sliderProperty;
     Magus::QtCheckBoxProperty* checkboxProperty;
     Magus::QtXYProperty* xyProperty;
+    Magus::QtQuaternionProperty* quaternionProperty;
 
     switch (property->mPropertyId)
     {
@@ -561,7 +643,52 @@ void HlmsPropertiesSamplerblock::propertyValueChanged(QtProperty* property)
             mHlmsNodeSamplerblock->setScale(v2);
         }
         break;
-    }
+
+        case PROPERTY_SAMPLERBLOCK_ANIM_ENABLED:
+        {
+            checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(property);
+            mHlmsNodeSamplerblock->setAnimationEnabled(checkboxProperty->getValue());
+            xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS, PROPERTY_SAMPLERBLOCK_ANIM_SCALE));
+            xyProperty->setVisible(checkboxProperty->getValue());
+            quaternionProperty = static_cast<Magus::QtQuaternionProperty*>(mAssetWidget->getPropertyWidget(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS, PROPERTY_SAMPLERBLOCK_ANIM_ROTATE));
+            quaternionProperty->setVisible(checkboxProperty->getValue());
+            xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS, PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE));
+            xyProperty->setVisible(checkboxProperty->getValue());
+        }
+        break;
+
+        case PROPERTY_SAMPLERBLOCK_ANIM_SCALE:
+        {
+            xyProperty = static_cast<Magus::QtXYProperty*>(property);
+            QVector2D v2;
+            v2.setX(xyProperty->getX());
+            v2.setY(xyProperty->getY());
+            mHlmsNodeSamplerblock->setAnimationScale(v2);
+        }
+        break;
+
+        case PROPERTY_SAMPLERBLOCK_ANIM_ROTATE:
+        {
+            quaternionProperty = static_cast<Magus::QtQuaternionProperty*>(property);
+            QQuaternion q;
+            q.setX(quaternionProperty->getX());
+            q.setY(quaternionProperty->getY());
+            q.setZ(quaternionProperty->getZ());
+            q.setScalar(quaternionProperty->getW());
+            mHlmsNodeSamplerblock->setAnimationOrientation(q);
+        }
+        break;
+
+        case PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE:
+        {
+            xyProperty = static_cast<Magus::QtXYProperty*>(property);
+            QVector2D v2;
+            v2.setX(xyProperty->getX());
+            v2.setY(xyProperty->getY());
+            mHlmsNodeSamplerblock->setAnimationTranslate(v2);
+        }
+        break;
+}
 
     // Inform the propertiesDockWidget that a property is changed, so the material is rebuild
     mPropertiesDockWidget->notifyHlmsChanged();

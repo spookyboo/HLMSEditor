@@ -47,13 +47,16 @@ HlmsNodeSamplerblock::HlmsNodeSamplerblock(QString title, QGraphicsItem* parent)
     mBorderColourBlue(255.0f),
     mUvSet(0),
     mBlendMode(0),
-    mMapWeight(1.0f)
+    mMapWeight(1.0f),
+    mAnimationEnabled(false)
 {
     mFileNameTexture = QString("");
     mBaseNameTexture = QString("");
     mPathTexture = QString("");
     mOffset = QVector2D(0.0f, 0.0f);
     mScale = QVector2D(1.0f, 1.0f);
+    mAnimationScale = QVector2D(1.0f, 1.0f);
+    mAnimationTranslate = QVector2D(0.0f, 0.0f);
 
     // Define the connection policy
     HlmsPbsDatablockSamplerblockPortType hlmsPbsDatablockSamplerblockPortType;
