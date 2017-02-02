@@ -99,6 +99,7 @@ class MainWindow : public QMainWindow
         void loadDatablockAndSet(const QString jsonFileName);
         void loadMesh(const QString meshFileName);
         void loadProject(const QString& fileName);
+        void saveDatablock_old(void); // Deprecated; this version deletes all datablocks execpt the one-to-be-saved
         void saveDatablock(void);
         void loadMaterialBrowserCfg(void);
         void saveMaterialBrowserCfg(void);

@@ -880,7 +880,9 @@ void MainWindow::doSaveDatablockMenuAction(void)
     if (mHlmsName.isEmpty())
         doSaveAsDatablockMenuAction();
     else
+    {
         saveDatablock();
+    }
 }
 
 //****************************************************************************/
@@ -905,7 +907,7 @@ void MainWindow::doSaveAsDatablockMenuAction(void)
 }
 
 //****************************************************************************/
-void MainWindow::saveDatablock(void)
+void MainWindow::saveDatablock_old(void)
 {
     Ogre::String fname = mHlmsName.toStdString();
     QString baseNameJson = mHlmsName;
@@ -944,6 +946,26 @@ void MainWindow::saveDatablock(void)
     mHlmsUtilsManager->reloadNonSpecialDatablocks(); // Reloades (and re-creates) the non-special datablocks
     createSpecialDatablocks(); // Create special-datablocks and set them in the right (sub)Item (if needed)
     restoreMaterialsOfItem(); // Set one or more of the reloaded datablocks back to the subitem in which it was
+}
+
+//****************************************************************************/
+void MainWindow::saveDatablock(void)
+{
+    // This is the new version of save datablock. With the introduction of HlmsManager::saveMaterial
+    // it isn't needed anymore to delete all datablocks except the one-to-be-saved.
+    Ogre::String fname = mHlmsName.toStdString();
+    QString baseNameJson = mHlmsName;
+    baseNameJson = getBaseFileName(baseNameJson);
+    QString thumb = baseNameJson + ".png";
+
+    // Update the thumb image in the material browser
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->saveToFile(THUMBS_PATH + thumb.toStdString());
+    loadMaterialBrowserCfg();
+
+    Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
+    Ogre::HlmsDatablock* datablock = hlmsManager->getDatablock(mCurrentDatablockName);
+    hlmsManager->saveMaterial (datablock, fname);
+    appendRecentHlms(mHlmsName);
 }
 
 //****************************************************************************/
