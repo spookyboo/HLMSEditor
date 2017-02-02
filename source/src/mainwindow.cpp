@@ -48,6 +48,7 @@
 #include "hlms_editor_plugin.h"
 #include "hlms_editor_plugin_action.h"
 #include "config_dialog.h"
+#include <fstream>
 
 //****************************************************************************/
 MainWindow::MainWindow(void) :
@@ -668,6 +669,9 @@ void MainWindow::saveV2Mesh(Ogre::MeshPtr v2MeshPtr, QString meshFileName)
 //****************************************************************************/
 bool MainWindow::isMeshV1(const QString meshFileName)
 {
+    return (getMeshVersion(meshFileName) == 1);
+
+    /*
     Ogre::SceneManager* sceneManager = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getSceneManager();
     if (!sceneManager)
         return false;
@@ -687,12 +691,16 @@ bool MainWindow::isMeshV1(const QString meshFileName)
         return false;
     }
 
+    */
     return true;
 }
 
 //****************************************************************************/
 bool MainWindow::isMeshV2(const QString meshFileName)
 {
+    return (getMeshVersion(meshFileName) == 2);
+
+    /*
     Ogre::SceneManager* sceneManager = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getSceneManager();
     if (!sceneManager)
         return false;
@@ -720,26 +728,51 @@ bool MainWindow::isMeshV2(const QString meshFileName)
     }
 
     return true;
+    */
+}
+
+//****************************************************************************/
+unsigned int MainWindow::getMeshVersion(const QString meshFileName)
+{
+    /* Use different method compared to earlier versions of HLMSEditor. Easier is to read the mesh file itself and determine the version.
+     * Ogre V1 meshes bytes 02.. 19 are filled with "[MeshSerializer_v1", while V2 meshes are filled with "[MeshSerializer_v2".
+     */
+    std::ifstream ifs(meshFileName.toStdString(), std::ios::binary|std::ios::ate);
+    std::vector<char>result(19);
+    result[18] = 0;
+    ifs.seekg(2, std::ios::beg); // Offset is 2nd byte
+    ifs.read(&result[0], 18); // Read 18 chars
+    ifs.close();
+    QString versionText = QString::fromLatin1( &result[0]);
+    if (versionText == MESH_VERSION_1)
+        return 1;
+    if (versionText == MESH_VERSION_2)
+        return 2;
+
+    return 0;
 }
 
 //****************************************************************************/
 Ogre::MeshPtr MainWindow::convertMeshV1ToV2(const QString baseNameMeshV1)
 {
-    Ogre::v1::MeshPtr v1MeshPtr;
+    // If the resource exist, it can only be a V2 mesh (V1 meshes are not supported in the editor); just return it
     Ogre::MeshPtr v2MeshPtr;
+    if (Ogre::MeshManager::getSingleton().resourceExists(baseNameMeshV1.toStdString()))
+        v2MeshPtr = Ogre::MeshManager::getSingleton().getByName(baseNameMeshV1.toStdString(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
+    return v2MeshPtr;
+
+    Ogre::v1::MeshPtr v1MeshPtr;
 
     // Create V1 mesh
     v1MeshPtr = Ogre::v1::MeshManager::getSingleton().load(
                 baseNameMeshV1.toStdString(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                 Ogre::v1::HardwareBuffer::HBU_STATIC, Ogre::v1::HardwareBuffer::HBU_STATIC);
 
-    // Create V2 mesh
     v2MeshPtr = Ogre::MeshManager::getSingleton().createManual(baseNameMeshV1.toStdString(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
     v2MeshPtr->importV1 (v1MeshPtr.get(), true, true, true);
     v1MeshPtr->unload();
     return v2MeshPtr;
 }
-
 
 //****************************************************************************/
 Ogre::DataStreamPtr MainWindow::openFile(Ogre::String source)

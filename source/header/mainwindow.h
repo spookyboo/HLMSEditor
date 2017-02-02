@@ -81,6 +81,7 @@ class MainWindow : public QMainWindow
         void appendRecentProject(const QString fileName); // Used for recent Project files in menu
         bool isMeshV1(const QString meshFileName);
         bool isMeshV2(const QString meshFileName);
+        unsigned int getMeshVersion(const QString meshFileName);
         Ogre::MeshPtr convertMeshV1ToV2(const QString fileNameMeshV1);
         void saveV2Mesh(Ogre::MeshPtr v2MeshPtr, QString meshFileName);
         void detachMaterialsFromItem (void);

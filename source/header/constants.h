@@ -100,6 +100,8 @@ static const QString SETTINGS_SAMPLERBLOCK_FILTER_INDEX = "samplerblockFilterInd
 static const QString SETTINGS_NUMBER_OF_SKYBOXES = "numberOfSkyboxes";
 static const QString SETTINGS_PREFIX_SKYBOX = "skybox";
 static const QString NO_SKYBOX = "None";
+static const QString MESH_VERSION_1 = QString("[MeshSerializer_v1");
+static const QString MESH_VERSION_2 = QString("[MeshSerializer_v2");
 
 // Static function to determine the 'resources' file
 static const QString& getResourcesCfg (void)
