@@ -620,12 +620,20 @@ void MainWindow::loadMesh(const QString meshFileName)
             Ogre::MeshPtr v2MeshPtr = convertMeshV1ToV2(baseName);
 
             // Create (by the ogre widget) the V2 mesh, the item and the rtt item
-            ogreWidget->createItem(v2MeshPtr.getPointer()->getName(), Ogre::Vector3::UNIT_SCALE);
+            if (v2MeshPtr.isNull())
+            {
+                 QMessageBox::information(0, QString("Error"), QString("Failed to load ") + meshFileName);
+                loaded = false;
+            }
+            else
+            {
+                ogreWidget->createItem(v2MeshPtr.getPointer()->getName(), Ogre::Vector3::UNIT_SCALE);
 
-            // Add to mesh map
-            mRenderwindowDockWidget->addToMeshMap(baseName, baseName, QVector3D(1.0f, 1.0f, 1.0f));
+                // Add to mesh map
+                mRenderwindowDockWidget->addToMeshMap(baseName, baseName, QVector3D(1.0f, 1.0f, 1.0f));
 
-            loaded = true;
+                loaded = true;
+            }
         }
         catch (Ogre::Exception e)
         {
@@ -758,8 +766,10 @@ Ogre::MeshPtr MainWindow::convertMeshV1ToV2(const QString baseNameMeshV1)
     // If the resource exist, it can only be a V2 mesh (V1 meshes are not supported in the editor); just return it
     Ogre::MeshPtr v2MeshPtr;
     if (Ogre::MeshManager::getSingleton().resourceExists(baseNameMeshV1.toStdString()))
+    {
         v2MeshPtr = Ogre::MeshManager::getSingleton().getByName(baseNameMeshV1.toStdString(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
-    return v2MeshPtr;
+        return v2MeshPtr;
+    }
 
     Ogre::v1::MeshPtr v1MeshPtr;
 
