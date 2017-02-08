@@ -34,6 +34,7 @@ NodeEditorDockWidget::NodeEditorDockWidget(QString title, MainWindow* parent, Qt
 	mParent(parent)
 {
     mInnerMain = new QMainWindow();
+    mInnerMain->setMinimumSize(100,100);
     setWidget(mInnerMain);
 
     // Perform standard functions

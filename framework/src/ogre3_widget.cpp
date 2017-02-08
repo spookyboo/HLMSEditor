@@ -70,8 +70,11 @@ namespace Magus
         mMouseDown(false),
         mLatestSubItemIndexHighlighted(-1),
         mLatestSubItemDatablock(0),
-        mHoover(false)
+        mHoover(false),
+        mPaintMode(false),
+        mPaintLayers(0)
     {
+        setMinimumSize(100,100);
         mCurrentDatablockName = "";
         setAttribute(Qt::WA_OpaquePaintEvent);
         setAttribute(Qt::WA_PaintOnScreen);
@@ -884,22 +887,39 @@ namespace Magus
         resetHighlight();
     }
 
+
+    //****************************************************************************/
+    void QOgreWidget::setPaintMode(bool enabled)
+    {
+        mPaintMode = enabled;
+    }
+
     //****************************************************************************/
     void QOgreWidget::mouseMoveEvent( QMouseEvent* e )
     {
         if(mSystemInitialized)
         {
-            Ogre::Vector2 oldPos = mAbsolute;
-            mAbsolute = Ogre::Vector2(e->pos().x(), e->pos().y());
-            mRelative = mAbsolute - oldPos;
-            if (mRotateCameraMode)
-                mCameraManager->injectMouseMove(mRelative);
+            if (mPaintMode)
+            {
+                if (mMouseDown)
+                {
+                    doPaintLayer(e->pos().x(), e->pos().y());
+                }
+            }
             else
-                rotateLight(mRelative);
+            {
+                Ogre::Vector2 oldPos = mAbsolute;
+                mAbsolute = Ogre::Vector2(e->pos().x(), e->pos().y());
+                mRelative = mAbsolute - oldPos;
+                if (mRotateCameraMode)
+                    mCameraManager->injectMouseMove(mRelative);
+                else
+                    rotateLight(mRelative);
 
-            // Determine over which subItem the mouse hoovers
-            if (mHoover)
-                highlightSubItem(mAbsolute);
+                // Determine over which subItem the mouse hoovers
+                if (mHoover)
+                    highlightSubItem(mAbsolute);
+            }
         }
     }
 
@@ -930,10 +950,20 @@ namespace Magus
         if(mSystemInitialized)
         {
             mCameraManager->injectMouseDown(e);
+
             if (e->button() == Qt::MiddleButton || e->button() == Qt::LeftButton)
+            {
+
                 mMouseDown = true;
+                if (mPaintMode && e->button() == Qt::LeftButton)
+                {
+                    Ogre::Vector2 pos = Ogre::Vector2::ZERO;
+                    doPaintLayer(e->pos().x(), e->pos().y());
+                }
+            }
             else if (e->button() == Qt::RightButton)
             {
+
                 // Forward it to the render window dockwidget
                 // (note the cast; this is needed, because everything points to each other)
                 static_cast<RenderwindowDockWidget*>(mRenderwindowDockWidget)->mousePressEventPublic(e);
@@ -1147,7 +1177,6 @@ namespace Magus
                         datablockFullName != Magus::HIGHLIGHT_MATERIAL_NAME)
                 {
                     mSnapshotDatablocks[i] = datablockFullName;
-                    //Ogre::LogManager::getSingleton().logMessage("make snaphot: " +  datablockFullName); // DEBUG
                 }
             }
         }
@@ -1310,4 +1339,25 @@ namespace Magus
         mRenderwindowDockWidget = renderwindowDockWidget;
     }
 
+    //****************************************************************************/
+    void QOgreWidget::setPaintLayers(PaintLayers* paintLayers)
+    {
+        mPaintLayers = paintLayers;
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::doPaintLayer(int mouseX, int mouseY)
+    {
+        if (!mPaintLayers)
+            return;
+
+        // Iterate through the PaintLayer vector and apply the paint effect
+        PaintLayers::iterator it;
+        PaintLayers::iterator itStart = mPaintLayers->begin();
+        PaintLayers::iterator itEnd = mPaintLayers->end();
+        for (it = itStart; it != itEnd; ++it)
+        {
+            (*it)->paint(mouseX, mouseY);
+        }
+    }
 }

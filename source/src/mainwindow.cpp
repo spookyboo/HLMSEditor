@@ -56,6 +56,7 @@ MainWindow::MainWindow(void) :
     mFirst(true),
     mSaveTextureBrowserTimerActive(false)
 {
+    setMinimumSize(100,100);
     installEventFilter(this);
 
     // Create the Ogre Manager

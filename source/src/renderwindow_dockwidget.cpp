@@ -29,16 +29,22 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
 	QDockWidget (title, parent, flags), 
     mParent(parent),
     mButtonToggleModelAndLight(0),
+    mButtonTogglePaint(0),
+    mTogglePaintMode(false),
     mButtonMarker(0),
     mButtonToggleHoover(0),
     mButtonModelActive(true),
     mToggleHooverOn(false),
     mLightIcon(0),
+    mPaintOnIcon(0),
+    mPaintOffIcon(0),
     mModelIcon(0),
     mMarkerIcon(0),
     mHooverOnIcon(0),
     mHooverOffIcon(0)
 {
+    setMinimumSize(100,100);
+
     // Create a context menu
     installEventFilter(this);
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -113,6 +119,7 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     }
 
     mInnerMain = new QMainWindow();
+    mInnerMain->setMinimumSize(100,100);
     setWidget(mInnerMain);
 
     // Perform standard functions
@@ -234,17 +241,22 @@ void RenderwindowDockWidget::createToolBars(void)
 
     // Button to switch between model and light movement/rotation
     mButtonToggleModelAndLight = new QPushButton();
+    mButtonTogglePaint = new QPushButton();
     mButtonMarker = new QPushButton();
     mButtonToggleHoover = new QPushButton();
     mModelIcon = new QIcon(ICON_MODEL);
     mLightIcon = new QIcon(ICON_LIGHT);
+    mPaintOnIcon = new QIcon(ICON_PAINT_ON);
+    mPaintOffIcon = new QIcon(ICON_PAINT_OFF);
     mMarkerIcon = new QIcon(ICON_MARKER);
     mHooverOnIcon = new QIcon(ICON_HOOVER_ON);
     mHooverOffIcon = new QIcon(ICON_HOOVER_OFF);
     mButtonToggleModelAndLight->setIcon(*mModelIcon);
+    mButtonTogglePaint->setIcon(*mPaintOffIcon);
     mButtonMarker->setIcon(*mMarkerIcon);
     mButtonToggleHoover->setIcon(*mHooverOffIcon);
     connect(mButtonToggleModelAndLight, SIGNAL(clicked(bool)), this, SLOT(handleToggleModelAndLight()));
+    connect(mButtonTogglePaint, SIGNAL(clicked(bool)), this, SLOT(handleTogglePaintMode()));
     connect(mButtonMarker, SIGNAL(clicked(bool)), this, SLOT(handleMarker()));
     connect(mButtonToggleHoover, SIGNAL(clicked(bool)), this, SLOT(handleToggleHoover()));
 
@@ -262,6 +274,7 @@ void RenderwindowDockWidget::createToolBars(void)
     // Add widgets
     mHToolBar->addWidget(mTransformationWidget);
     mHToolBar->addWidget(mButtonToggleModelAndLight);
+    mHToolBar->addWidget(mButtonTogglePaint);
     mHToolBar->addWidget(mButtonMarker);
     mHToolBar->addWidget(mButtonToggleHoover);
     mHToolBar->addWidget(spacer);
@@ -296,19 +309,52 @@ void RenderwindowDockWidget::doChangeMeshAction(QAction* action)
 //****************************************************************************/
 void RenderwindowDockWidget::handleToggleModelAndLight(void)
 {
+    setModelAndLight(!mButtonModelActive);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::setModelAndLight(bool enabled)
+{
+    mButtonModelActive = enabled;
     if (mButtonModelActive)
-    {
-        // Enable Light axis
-        mButtonToggleModelAndLight->setIcon(*mLightIcon);
-        mOgreWidget->enableLightItem(true);
-    }
-    else
     {
         // Disable Light axis
         mButtonToggleModelAndLight->setIcon(*mModelIcon);
         mOgreWidget->enableLightItem(false);
     }
-    mButtonModelActive = !mButtonModelActive;
+    else
+    {
+        // Enable Light axis and painting is off
+        mButtonToggleModelAndLight->setIcon(*mLightIcon);
+        mOgreWidget->enableLightItem(true);
+        setPaintMode(false);
+    }
+    mOgreWidget->setFocus();
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::handleTogglePaintMode(void)
+{
+    setPaintMode(!mTogglePaintMode);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::setPaintMode(bool enabled)
+{
+    mTogglePaintMode = enabled;
+    if (mTogglePaintMode)
+    {
+        // Painting is on, light axis is disabled and hoover is off
+        mButtonTogglePaint->setIcon(*mPaintOnIcon);
+        setModelAndLight(true);
+        setHoover(false);
+    }
+    else
+    {
+        mButtonTogglePaint->setIcon(*mPaintOffIcon);
+    }
+    mOgreWidget->setFocus();
+    mOgreWidget->setPaintMode(mTogglePaintMode);
 }
 
 //****************************************************************************/
@@ -317,16 +363,29 @@ void RenderwindowDockWidget::handleMarker(void)
     mOgreWidget->resetCamera();
 }
 
+
+//****************************************************************************/
+void RenderwindowDockWidget::setHoover(bool enabled)
+{
+    mToggleHooverOn = enabled;
+    if (mToggleHooverOn)
+    {
+        // If hoover is on, painting is off
+        mButtonToggleHoover->setIcon(*mHooverOnIcon);
+        setPaintMode(false);
+    }
+    else
+    {
+        mButtonToggleHoover->setIcon(*mHooverOffIcon);
+    }
+    mOgreWidget->setHoover(mToggleHooverOn);
+    mOgreWidget->setFocus();
+}
+
 //****************************************************************************/
 void RenderwindowDockWidget::handleToggleHoover(void)
 {
-    if (mToggleHooverOn)
-        mButtonToggleHoover->setIcon(*mHooverOffIcon);
-    else
-        mButtonToggleHoover->setIcon(*mHooverOnIcon);
-    mToggleHooverOn = !mToggleHooverOn;
-    mOgreWidget->setHoover(mToggleHooverOn);
-    mOgreWidget->setFocus();
+    setHoover(!mToggleHooverOn);
 }
 
 //****************************************************************************/
@@ -441,6 +500,16 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
 {
     if (action->text() == ACTION_SET_CURRENT_MATERIAL)
     {
+        // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
+        PaintLayer* paintLayer = new PaintLayer();
+        paintLayer->setDatablockNameAndTexture(mOgreWidget->getCurrentDatablockName(),
+                                               Ogre::PbsTextureTypes::PBSM_DIFFUSE,
+                                               "../common/brushes/floor_diffuse_brush.PNG");
+        paintLayer->setBrush("../common/brushes/brush_001.png");
+        mPaintLayers.push_back(paintLayer);
+        mOgreWidget->setPaintLayers(&mPaintLayers);
+        // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
+
         mOgreWidget->assignCurrentDatablock();
         return;
     }

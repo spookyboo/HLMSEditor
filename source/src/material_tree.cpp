@@ -61,6 +61,7 @@ MaterialTreeDockWidget::MaterialTreeDockWidget(const QString& iconDir, const QSt
     connect(mResourceTreeWidget, SIGNAL(assetDuplicated(int)), this, SLOT(handleResourceDuplicated(int)));
     connect(mResourceTreeWidget, SIGNAL(customContextMenuItemSelected(QString,int)), this, SLOT(handleCustomContextMenuItemSelected(QString, int)));
     mInnerMain = new QMainWindow();
+    mInnerMain->setMinimumSize(100,100);
     mInnerMain->setCentralWidget(mResourceTreeWidget);
     setWidget(mInnerMain);
     QWidget* oldTitleBar = titleBarWidget();

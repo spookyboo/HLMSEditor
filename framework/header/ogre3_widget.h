@@ -32,6 +32,7 @@
 #include "ogre3_cameraman.h"
 #include "ogre_prereqs.h"
 #include <QDockWidget>
+#include "paintlayer.h"
 
 namespace Magus
 {
@@ -39,6 +40,7 @@ namespace Magus
     static const Ogre::String HIGHLIGHT_MATERIAL_NAME = "HLM1234567890";
     static const Ogre::String SKYBOX_WORKSPACE = "SkyPostprocessWorkspace";
     static const Ogre::String SKYBOX_MATERIAL_NAME = "SkyPostprocess";
+    static const int MAX_SCREEN_SIZE_INT = 10000; // Arbritrary value, but screen size is usually not larger than this, right?
 
     class OgreManager;
 
@@ -86,7 +88,9 @@ namespace Magus
             void resetHighlight(void); // Undo highlight of mItem (preserving its datablocks)
             void resetCamera(void); // Set position/orientation to default
             void setHoover(bool hoover); // Determines whether the subItems are highlighted when the mousecursor hoovers over them
+            void setPaintMode(bool enabled); // Determines whether paint mode is on or off
             void setCurrentDatablockName(const Ogre::IdString& datablockName); // Only set the new datablock name; the new datablock is not set in an item/subitem
+            const Ogre::IdString& getCurrentDatablockName(void) const {return mCurrentDatablockName;}
             const QVector<int>& getSubItemIndicesWithDatablock(const Ogre::IdString& datablockName); // Get the list of indices of subItems that have 'datablockName'
             void makeSnapshotOfItemMaterials(void); // Keep a map of all materials per subItem
             void restoreSnapshotOfItemMaterials(void); // Assign the material to each subItem
@@ -100,6 +104,7 @@ namespace Magus
             void assignCurrentDatablock(void); // Set the current datablock in the item or subItem
             bool isSkyBoxVisible (void);
             void setSkyBoxVisible (bool visible);
+            void setPaintLayers(PaintLayers* paintLayers); // Set pointer to vector with PaintLayers
 
         protected:
             Ogre::Root* mRoot;
@@ -141,6 +146,7 @@ namespace Magus
             QMap <int, QVector3D> mColourMap;
             QMap <size_t, Ogre::String> mSnapshotDatablocks;
             bool mHoover;
+            bool mPaintMode;
             QMap<unsigned short, Ogre::String> helperIndicesAndNames;
             QVector<int> helperIndices;
             QDockWidget* mRenderwindowDockWidget;
@@ -163,6 +169,7 @@ namespace Magus
             const Ogre::ColourValue& calculateIndexToColour(int index);
             int calculateColourToIndex(const Ogre::ColourValue& colourValue);
             const Ogre::ColourValue& getColourAtRenderToTexture(size_t x, size_t y);
+            void doPaintLayer(int mouseX, int mouseY); // Apply the paint effect to the layers
 
             /* To highlight a subitem in on the screen, the following steps are performed
              * - Create a render texture and an additional workspace (createCompositorRenderToTexture)
@@ -182,6 +189,7 @@ namespace Magus
             const Ogre::ColourValue& getColourOfDatablockOfSubItem(int index);
 
             Ogre::HlmsDatablock* getDatablockByFullName(const Ogre::String& fullName);
+            PaintLayers* mPaintLayers; // Pointer to vector of PaintLayer objects
     };
 }
 

@@ -75,7 +75,8 @@ HEADERS       = \
     source/header/config_dialog.h \
     source/header/config_pages.h \
     source/header/hlms_utils_manager.h \
-    framework/header/asset_propertywidget_slider_decimal.h
+    framework/header/asset_propertywidget_slider_decimal.h \
+    source/header/paintlayer.h
 
 
 SOURCES       = \
@@ -139,7 +140,8 @@ SOURCES       = \
     source/src/config_dialog.cpp \
     source/src/config_pages.cpp \
     source/src/hlms_utils_manager.cpp \
-    framework/src/asset_propertywidget_slider_decimal.cpp
+    framework/src/asset_propertywidget_slider_decimal.cpp \
+    source/src/paintlayer.cpp
 
 
 INCLUDEPATH += "../HLMSEditor/source/header/"

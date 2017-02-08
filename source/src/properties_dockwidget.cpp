@@ -41,6 +41,7 @@ PropertiesDockWidget::PropertiesDockWidget(QString title, MainWindow* parent, Qt
     mTextViewer->setFont(font);
 
     mInnerMain = new QMainWindow();
+    mInnerMain->setMinimumSize(100,100);
     setWidget(mInnerMain);
 
     // Perform standard functions

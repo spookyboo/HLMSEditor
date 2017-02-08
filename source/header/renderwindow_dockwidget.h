@@ -29,6 +29,7 @@
 #include <QTabWidget>
 #include "ogre3_renderman.h"
 #include "tb_transformationwidget.h"
+#include "paintlayer.h"
 
 QT_BEGIN_NAMESPACE
 class QDockWidget;
@@ -64,6 +65,7 @@ class RenderwindowDockWidget : public QDockWidget
 	private slots:
         void doChangeMeshAction(QAction* action);
         void handleToggleModelAndLight(void);
+        void handleTogglePaintMode(void);
         void handleMarker(void);
         void handleToggleHoover(void);
         void doTransformationWidgetValueChanged(void);
@@ -84,6 +86,9 @@ class RenderwindowDockWidget : public QDockWidget
         void addSkyBoxNameToContextMenu (const QString& skyBoxName, bool checked);
         void setCheckedMeshNameInContextMenu (const QString& meshName);
         void setCheckedSkyBoxNameInContextMenu (const QString& skyBoxName);
+        void setModelAndLight(bool enabled);
+        void setPaintMode(bool enabled);
+        void setHoover(bool enabled);
 
 	private:
 		MainWindow* mParent;
@@ -92,6 +97,7 @@ class RenderwindowDockWidget : public QDockWidget
         QAction* mChangeBackgroundAction;
         QToolBar* mHToolBar;
         QPushButton* mButtonToggleModelAndLight;
+        QPushButton* mButtonTogglePaint;
         QPushButton* mButtonMarker;
         QPushButton* mButtonToggleHoover;
         QMap<QString, MeshStruct> mMeshMap;
@@ -99,7 +105,10 @@ class RenderwindowDockWidget : public QDockWidget
         QMenu* mMeshMenu;
         bool mButtonModelActive;
         bool mToggleHooverOn; // If true, use mouseover to highlight the subItems
+        bool mTogglePaintMode; // If true, painting mode is active
         QIcon* mLightIcon;
+        QIcon* mPaintOnIcon;
+        QIcon* mPaintOffIcon;
         QIcon* mModelIcon;
         QIcon* mMarkerIcon;
         QIcon* mHooverOnIcon;
@@ -109,6 +118,8 @@ class RenderwindowDockWidget : public QDockWidget
         QActionGroup* mActionGroupMeshes;
         QMenu* mSkyBoxSubMenu;
         QActionGroup* mActionGroupSkyBox;
+
+        PaintLayers mPaintLayers; // TEST
 };
 
 #endif
