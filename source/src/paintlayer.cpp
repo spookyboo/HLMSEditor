@@ -121,6 +121,7 @@ void PaintLayer::setDatablockNameAndTexture (const Ogre::IdString& datablockName
             // Texture on GPU; store the buffers in a vector
             mTexture = mDatablockPbs->getTexture(textureType); // TextureType MUST exist, otherwise the application crashes
             mNumMipMaps = mTexture->getNumMipmaps();
+            mBuffers.clear();
             for (Ogre::uint8 i = 0; i < mNumMipMaps; ++i)
                 mBuffers.push_back(mTexture->getBuffer(0, i).getPointer());
 
