@@ -813,6 +813,9 @@ namespace Magus
             if (toggleBackgroundColour)
                 setBackgroundColour(c);
         }
+
+        //const Ogre::FrameStats* framestats = Ogre::Root::getSingletonPtr()->getFrameStats(); // DEBUG
+        //Ogre::LogManager::getSingleton().logMessage("Current FPS = " + Ogre::StringConverter::toString(framestats->getAvgFps())); // DEBUG
     }
 
     //-------------------------------------------------------------------------------------
@@ -1351,13 +1354,18 @@ namespace Magus
         if (!mPaintLayers)
             return;
 
+        // Calculate uv of the texture position pointed by the mouse
+        // TODO
+        float u = 0.5f;
+        float v = 0.5f;
+
         // Iterate through the PaintLayer vector and apply the paint effect
         PaintLayers::iterator it;
         PaintLayers::iterator itStart = mPaintLayers->begin();
         PaintLayers::iterator itEnd = mPaintLayers->end();
         for (it = itStart; it != itEnd; ++it)
         {
-            (*it)->paint(mouseX, mouseY);
+            (*it)->paint(u, v);
         }
     }
 }

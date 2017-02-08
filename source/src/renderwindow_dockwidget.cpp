@@ -504,8 +504,8 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
         PaintLayer* paintLayer = new PaintLayer();
         paintLayer->setDatablockNameAndTexture(mOgreWidget->getCurrentDatablockName(),
                                                Ogre::PbsTextureTypes::PBSM_DIFFUSE,
-                                               "../common/brushes/floor_diffuse_brush.PNG");
-        paintLayer->setBrush("../common/brushes/brush_001.png");
+                                               "../examples/floor_diffuse.PNG");
+        paintLayer->setBrush("../common/brushes/brush_002.png");
         mPaintLayers.push_back(paintLayer);
         mOgreWidget->setPaintLayers(&mPaintLayers);
         // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
