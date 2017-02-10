@@ -76,7 +76,10 @@ HEADERS       = \
     source/header/config_pages.h \
     source/header/hlms_utils_manager.h \
     framework/header/asset_propertywidget_slider_decimal.h \
-    source/header/paintlayer.h
+    source/header/paintlayer.h \
+    source/header/texturelayer.h \
+    source/header/paintlayer_manager.h \
+    source/header/texturelayer_manager.h
 
 
 SOURCES       = \
@@ -141,7 +144,10 @@ SOURCES       = \
     source/src/config_pages.cpp \
     source/src/hlms_utils_manager.cpp \
     framework/src/asset_propertywidget_slider_decimal.cpp \
-    source/src/paintlayer.cpp
+    source/src/paintlayer.cpp \
+    source/src/texturelayer.cpp \
+    source/src/paintlayer_manager.cpp \
+    source/src/texturelayer_manager.cpp
 
 
 INCLUDEPATH += "../HLMSEditor/source/header/"

@@ -18,8 +18,8 @@
 **
 ****************************************************************************/
 
-#ifndef PAINTER_UTILS_H
-#define PAINTER_UTILS_H
+#ifndef PAINT_LAYER_H
+#define PAINT_LAYER_H
 
 #include "OgreRoot.h"
 #include "OgreImage.h"
@@ -33,6 +33,7 @@
 #include "OgreHlmsPbsDatablock.h"
 #include "OgreHlmsDatablock.h"
 #include "OgreHardwarePixelBuffer.h"
+#include "texturelayer.h"
 
 /****************************************************************************
  This class contains functions used by the Hlms editor painter window. A
@@ -47,76 +48,81 @@
 
 class PaintLayer
 {
-    enum PaintEffects
-    {
-        PAINT_EFFECT_COLOR, /// Paint with color
-        PAINT_EFFECT_ALPHA, /// Paint with alpha
-        PAINT_EFFECT_NORMAL_RAISED, /// Paint on a normal map and apply a raising effect; only used for normal maps
-        PAINT_EFFECT_NORMAL_LOWERED /// Paint on a normal map and apply a lowering effect; only used for normal maps
-    };
-    enum PaintOverflowTypes
-    {
-        PAINT_OVERFLOW_IGNORE, /// If the brush exceeds the texture areas on which is painted, the overflow is ignored
-        PAINT_OVERFLOW_TO_OPPOSITE_UV, /// If the brush exceeds the texture areas on which is painted, the overflow is continued on the opposite side
-        PAINT_OVERFLOW_TO_OPPOSITE_CORNER  /// If the brush exceeds the texture areas on which is painted, the overflow is continued on the opposite corner
-    };
-
 	public:
+        enum PaintEffects
+        {
+            PAINT_EFFECT_COLOR, /// Paint with color
+            PAINT_EFFECT_ALPHA, /// Paint with alpha
+            PAINT_EFFECT_NORMAL_RAISED, /// Paint on a normal map and apply a raising effect; only used for normal maps
+            PAINT_EFFECT_NORMAL_LOWERED /// Paint on a normal map and apply a lowering effect; only used for normal maps
+        };
+
+        enum PaintOverflowTypes
+        {
+            PAINT_OVERFLOW_IGNORE, /// If the brush exceeds the texture areas on which is painted, the overflow is ignored
+            PAINT_OVERFLOW_TO_OPPOSITE_UV, /// If the brush exceeds the texture areas on which is painted, the overflow is continued on the opposite side
+            PAINT_OVERFLOW_TO_OPPOSITE_CORNER  /// If the brush exceeds the texture areas on which is painted, the overflow is continued on the opposite corner
+        };
+
         PaintLayer(void);
         ~PaintLayer(void);
+
+        /* Enable or disable the layer for painting
+         */
+        void enable(bool enabled);
 
         /* Apply the paint effect.
          */
         void paint(float u, float v);
 
-        /* Set the name of the (current) datablock. This is the datablock internally used for painting.
-         * In addition, the textureType must be set.
-         * textureFileName
-         * Set full qualified filename of the texture, on which is painted
+        /* Set the reference to the texture.
          */
-        void setDatablockNameAndTexture (const Ogre::IdString& datablockName,
-                                         Ogre::PbsTextureTypes textureType,
-                                         const Ogre::String& textureFileName);
+        void setTextureLayer (TextureLayer* textureLayer);
 
         /* Set the name of the brush used for painting.
          */
         void setBrush (const Ogre::String& brushFileName);
 
+        /* Set scale of the brush.
+         */
+        void setBrushScale ( float brushScale);
+
+        /* Set the paint effect.
+         */
+        void setPaintEffect (PaintEffects paintEffect);
+
+        /* Set colour used for painting.
+         */
+        void setPaintColour (const Ogre::ColourValue& colourValue);
+
         private:
-            Ogre::HlmsDatablock* mDatablock;                // The datablock used to paint on
-            Ogre::HlmsPbsDatablock* mDatablockPbs;          // If the datablock is a Pbs, it is casted to a HlmsPbsDatablock*
-            Ogre::TexturePtr mTexture;                      // The texture layer on which is painted
-            Ogre::uint8 mNumMipMaps;                        // Number of mipmaps of mTexture (on the GPU)
-            std::vector<Ogre::v1::HardwarePixelBuffer*> mBuffers; // Texture buffers; depends on number of mipmaps
-            Ogre::Image mTextureOnWhichIsPainted;           // Contains a texture Image; this image is uploaded to the texture layer of the Hlms (on GPU), every time
-                                                            // the applyPaintEffect() function is called. This basically updates the texture layer in the Pbs.
-                                                            // Initially, textureOnWhichIsPainted is the same image from disk, also loaded in the Pbs.
-                                                            // mTextureOnWhichIsPainted is changed while painting. Intermediate versions of mTextureOnWhichIsPainted
-                                                            // are stored (example: texturename.png, texturename_01.png, texturename_02.png. texturename_03.png, ...)
-                                                            // and can be used for 'undo'.
+            bool mEnabled;                                  // If enabled, the layer is painted, otherwise it is skipped
             Ogre::Image mTextureOnWhichIsPaintedScaled;     // The same image, but scaled for applying to mipmaps
-            Ogre::String mTextureFileName;                  // Full qualified name of the texture file
-            Ogre::PixelBox mPixelboxTextureOnWhichIsPainted;// Pixelbox of mTextureOnWhichIsPainted; for speed purposes, it is created when the texture is set
-            Ogre::uint32 mTextureOnWhichIsPaintedWidth;     // Width of mTextureOnWhichIsPainted; must be the same as the width of mTexture
-            Ogre::uint32 mTextureOnWhichIsPaintedHeight;    // Height of mTextureOnWhichIsPainted; must be the same as the height of mTexture
-            bool mTextureOnWhichIsPaintedHasAlpha;          // Painting effect depends on the fact whether the texture has alpha enabled
             Ogre::Image mBrush;                             // Image of the brush
             Ogre::String mBrushFileName;                    // Full qualified name of the brush file
             Ogre::PixelBox mPixelboxBrush;                  // Pixelbox of mBrush; for speed purposes, it is created when the brush is set
             size_t mBrushWidth;                             // Width of mBrush
             size_t mBrushHeight;                            // Height of mBrush
-            unsigned float mBrushForce;                     // Factor that determines how must pressure is put on the brush; value between [0.0f, 1.0f].
+            int mHalfBrushWidth;                            // For efficient calculation
+            int mHalfBrushWidthScaled;                      // For efficient calculation
+            int mHalfBrushHeight;                           // For efficient calculation
+            int mHalfBrushHeightScaled;                     // For efficient calculation
+            float mBrushForce;                              // Factor that determines how must pressure is put on the brush; value between [0.0f, 1.0f].
+            float mBrushScale;                              // Factor that scales the brush; value between [0.0f, 1.0f].
             Ogre::ColourValue mPaintColour;                 // The colour used for painting. Red, Green and Blue values are used when PAINT_EFFECT_COLOR is passed.
                                                             // Alpha value is used if PAINT_EFFECT_ALPHA is used.
             Ogre::ColourValue mFinalColour;                 // The calculated colour, based on mPaintColour and the brush, applied to the texture.
             PaintEffects mPaintEffect;                      // Type of paint effect.
             PaintOverflowTypes mPaintOverflow;              // Determine what happens if the brush exceeds the texture areas on which is painted.
-            float mFractionTextureBrushWidth;               // Width texture / width brush
-            float mFractionTextureBrushHeight;              // Height texture / height brush
+            TextureLayer* mTextureLayer;                    // Reference to the texture (can be shared by other PaintLayers)
+            size_t calculatedTexturePositionX;
+            size_t calculatedTexturePositionY;
+            float mAlpha;
 
             // Private functions
             size_t calculateTexturePositionX (float u, size_t brushPositionX);
             size_t calculateTexturePositionY (float v, size_t brushPositionY);
+            void calculateFraction (void);
 };
 
 typedef std::vector<PaintLayer*> PaintLayers;

@@ -501,13 +501,22 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
     if (action->text() == ACTION_SET_CURRENT_MATERIAL)
     {
         // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
-        PaintLayer* paintLayer = new PaintLayer();
-        paintLayer->setDatablockNameAndTexture(mOgreWidget->getCurrentDatablockName(),
-                                               Ogre::PbsTextureTypes::PBSM_DIFFUSE,
-                                               "../examples/floor_diffuse.PNG");
+        PaintLayer* paintLayer = mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
+                                                                     Ogre::PbsTextureTypes::PBSM_DIFFUSE,
+                                                                     "../examples/floor_diffuse.PNG");
+        paintLayer->setBrush("../common/brushes/brush_001.png");
+        paintLayer->setBrushScale(1.0);
+        paintLayer->setPaintColour(Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
+
+        paintLayer = mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
+                                                         Ogre::PbsTextureTypes::PBSM_DIFFUSE,
+                                                         "../examples/floor_diffuse.PNG");
         paintLayer->setBrush("../common/brushes/brush_002.png");
-        mPaintLayers.push_back(paintLayer);
-        mOgreWidget->setPaintLayers(&mPaintLayers);
+        paintLayer->setBrushScale(0.8f);
+        paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_ALPHA);
+        paintLayer->setPaintColour(Ogre::ColourValue(1.0f, 0.0f, 0.0f, 1.0f));
+
+        mOgreWidget->setPaintLayers(mPaintLayerManager.getPaintLayers());
         // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
 
         mOgreWidget->assignCurrentDatablock();

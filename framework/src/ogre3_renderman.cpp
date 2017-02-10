@@ -26,6 +26,8 @@
 #include "OgreHlmsPbs.h"
 #include "OgreHlmsManager.h"
 #include "OgreHlmsCommon.h"
+#include "OgreLogManager.h"
+#include "OgreFrameStats.h"
 
 namespace Magus
 {
@@ -285,6 +287,9 @@ namespace Magus
             }
             catch (Ogre::Exception e) {}
         }
+
+        //const Ogre::FrameStats* framestats = Ogre::Root::getSingletonPtr()->getFrameStats(); // DEBUG
+        //Ogre::LogManager::getSingleton().logMessage("Current FPS = " + Ogre::StringConverter::toString(framestats->getAvgFps())); // DEBUG
     }
 
     //****************************************************************************/
