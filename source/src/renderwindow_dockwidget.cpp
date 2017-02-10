@@ -505,7 +505,7 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
                                                                      Ogre::PbsTextureTypes::PBSM_DIFFUSE,
                                                                      "../examples/floor_diffuse.PNG");
         paintLayer->setBrush("../common/brushes/brush_001.png");
-        paintLayer->setBrushScale(1.0);
+        paintLayer->setBrushScale(0.5);
         paintLayer->setPaintColour(Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
 
         paintLayer = mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),

@@ -86,7 +86,7 @@ void PaintLayer::paint(float u, float v)
                 mAlpha = mPixelboxBrush.getColourAt(x, y, 0).a;
                 mFinalColour = mAlpha * mPaintColour;
                 mFinalColour = (1.0f - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
-                                                                                                            calculatedTexturePositionY,
+                                                                                                             calculatedTexturePositionY,
                                                                                                              0) + mFinalColour;
                 mTextureLayer->mPixelboxTextureOnWhichIsPainted.setColourAt(mFinalColour,
                                                                             calculatedTexturePositionX,
@@ -96,13 +96,15 @@ void PaintLayer::paint(float u, float v)
             else if (mPaintEffect == PAINT_EFFECT_ALPHA)
             {
                 // Paint with alpha
+                // TODO: DOES NOT WORK WITH ALPHA????
                 calculatedTexturePositionX = calculateTexturePositionX(u, x);
                 calculatedTexturePositionY = calculateTexturePositionY(v, y);
                 mAlpha = mPixelboxBrush.getColourAt(x, y, 0).a;
                 mFinalColour = mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                            calculatedTexturePositionY,
                                                                                            0);
-                mFinalColour.a = mAlpha;
+
+                mFinalColour.a = 1.0f - mAlpha;
                 mTextureLayer->mPixelboxTextureOnWhichIsPainted.setColourAt(mFinalColour,
                                                                             calculatedTexturePositionX,
                                                                             calculatedTexturePositionY,
@@ -200,8 +202,8 @@ size_t PaintLayer::calculateTexturePositionY (float v, size_t brushPositionY)
     int pos = (v * mTextureLayer->mTextureOnWhichIsPaintedHeight) - mHalfBrushHeightScaled + mBrushScale * brushPositionY;
     if (mPaintOverflow == PAINT_OVERFLOW_IGNORE)
     {
-        if (pos < 0)
-            pos = 0;
+        if (pos < 0.0f)
+            pos = 0.0f;
         else if (pos > mTextureLayer->mTextureOnWhichIsPaintedHeight)
             pos = mTextureLayer->mTextureOnWhichIsPaintedHeight;
     }

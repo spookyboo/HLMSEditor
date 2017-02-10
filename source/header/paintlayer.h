@@ -103,10 +103,10 @@ class PaintLayer
             Ogre::PixelBox mPixelboxBrush;                  // Pixelbox of mBrush; for speed purposes, it is created when the brush is set
             size_t mBrushWidth;                             // Width of mBrush
             size_t mBrushHeight;                            // Height of mBrush
-            int mHalfBrushWidth;                            // For efficient calculation
-            int mHalfBrushWidthScaled;                      // For efficient calculation
-            int mHalfBrushHeight;                           // For efficient calculation
-            int mHalfBrushHeightScaled;                     // For efficient calculation
+            size_t mHalfBrushWidth;                         // For efficient calculation
+            size_t mHalfBrushWidthScaled;                   // For efficient calculation
+            size_t mHalfBrushHeight;                        // For efficient calculation
+            size_t mHalfBrushHeightScaled;                  // For efficient calculation
             float mBrushForce;                              // Factor that determines how must pressure is put on the brush; value between [0.0f, 1.0f].
             float mBrushScale;                              // Factor that scales the brush; value between [0.0f, 1.0f].
             Ogre::ColourValue mPaintColour;                 // The colour used for painting. Red, Green and Blue values are used when PAINT_EFFECT_COLOR is passed.
@@ -122,7 +122,6 @@ class PaintLayer
             // Private functions
             size_t calculateTexturePositionX (float u, size_t brushPositionX);
             size_t calculateTexturePositionY (float v, size_t brushPositionY);
-            void calculateFraction (void);
 };
 
 typedef std::vector<PaintLayer*> PaintLayers;
