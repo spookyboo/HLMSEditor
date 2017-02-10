@@ -21,8 +21,8 @@
 #include "texturelayer.h"
 #include "OgreHlmsPbs.h"
 #include "OgreHlmsManager.h"
-//#include "OgreLogManager.h"
-//#include "OgreStringConverter.h"
+#include "OgreLogManager.h"
+#include "OgreStringConverter.h"
 
 //****************************************************************************/
 TextureLayer::TextureLayer(void) :

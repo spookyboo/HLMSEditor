@@ -36,7 +36,7 @@ PaintLayer::PaintLayer(void) :
     mHalfBrushWidthScaled(0),
     mHalfBrushHeightScaled(0),
     mPaintEffect(PAINT_EFFECT_COLOR),
-    mPaintOverflow(PAINT_OVERFLOW_IGNORE),
+    mPaintOverflow(PAINT_OVERFLOW_TO_OPPOSITE_CORNER),
     mTextureLayer(0),
     calculatedTexturePositionX(0),
     calculatedTexturePositionY(0),
@@ -61,6 +61,7 @@ void PaintLayer::enable(bool enabled)
 //****************************************************************************/
 void PaintLayer::paint(float u, float v)
 {
+    Ogre::LogManager::getSingleton().logMessage("Paint"); // DEBUG
     // Apply paint effect if there is a texture
     if (!mEnabled || !mTextureLayer || mTextureLayer->mTexture.isNull())
         return;
@@ -73,17 +74,12 @@ void PaintLayer::paint(float u, float v)
     {
         for (size_t x = 0; x < mBrushWidth; x++)
         {
+            calculatedTexturePositionX = calculateTexturePositionX(u, x);
+            calculatedTexturePositionY = calculateTexturePositionY(v, y);
             if (mPaintEffect == PAINT_EFFECT_COLOR)
             {
                 // Paint with colour
-                // If PAINT_EFFECT_COLOR, per pixel:
-                // - get alpha from brush
-                // - res1 = multiply alpha with paintcolour (mPaintColour)
-                // - res2 = multiply (1 - alpha) with colour of the texture
-                // - New texture colour is res1 + res2
-                calculatedTexturePositionX = calculateTexturePositionX(u, x);
-                calculatedTexturePositionY = calculateTexturePositionY(v, y);
-                mAlpha = mPixelboxBrush.getColourAt(x, y, 0).a;
+                mAlpha = mBrushForce * mPixelboxBrush.getColourAt(x, y, 0).a;
                 mFinalColour = mAlpha * mPaintColour;
                 mFinalColour = (1.0f - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                                              calculatedTexturePositionY,
@@ -95,16 +91,27 @@ void PaintLayer::paint(float u, float v)
             }
             else if (mPaintEffect == PAINT_EFFECT_ALPHA)
             {
-                // Paint with alpha
-                // TODO: DOES NOT WORK WITH ALPHA????
-                calculatedTexturePositionX = calculateTexturePositionX(u, x);
-                calculatedTexturePositionY = calculateTexturePositionY(v, y);
-                mAlpha = mPixelboxBrush.getColourAt(x, y, 0).a;
+                // Paint with alpha value of the brush
+                mAlpha = mBrushForce * mPixelboxBrush.getColourAt(x, y, 0).a;
                 mFinalColour = mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                            calculatedTexturePositionY,
                                                                                            0);
 
-                mFinalColour.a = 1.0f - mAlpha;
+                mFinalColour.a -= mAlpha;
+                mTextureLayer->mPixelboxTextureOnWhichIsPainted.setColourAt(mFinalColour,
+                                                                            calculatedTexturePositionX,
+                                                                            calculatedTexturePositionY,
+                                                                            0);
+            }
+            else if (mPaintEffect == PAINT_EFFECT_TEXTURE)
+            {
+                // Paint with coloured brush
+                Ogre::ColourValue brushColour = mPixelboxBrush.getColourAt(x, y, 0);
+                mAlpha = mBrushForce * brushColour.a;
+                mFinalColour = (1.0 - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
+                                                                                                            calculatedTexturePositionY,
+                                                                                                            0) + mAlpha * brushColour;
+
                 mTextureLayer->mPixelboxTextureOnWhichIsPainted.setColourAt(mFinalColour,
                                                                             calculatedTexturePositionX,
                                                                             calculatedTexturePositionY,
@@ -112,6 +119,8 @@ void PaintLayer::paint(float u, float v)
             }
         }
     }
+    Ogre::LogManager::getSingleton().logMessage("Painted colour"); // DEBUG
+
 
     /* Copy the changed texture to the GPU; beware to also update the mipmaps.
      * The texture on the GPU (mTexture) may contain more mipmaps (or less) than the
@@ -120,14 +129,20 @@ void PaintLayer::paint(float u, float v)
      */
     size_t w = mTextureLayer->mTextureOnWhichIsPaintedWidth;
     size_t h = mTextureLayer->mTextureOnWhichIsPaintedHeight;
-    mTextureOnWhichIsPaintedScaled = mTextureLayer->mTextureOnWhichIsPainted;
+    Ogre::LogManager::getSingleton().logMessage("Before image"); // DEBUG
+    Ogre::Image textureOnWhichIsPaintedScaled = mTextureLayer->mTextureOnWhichIsPainted; // Define textureOnWhichIsPaintedScaled each time; reusing results in exception
+    Ogre::LogManager::getSingleton().logMessage("After image"); // DEBUG
     for (Ogre::uint8 i = 0; i < mTextureLayer->mNumMipMaps; ++i)
     {
-        mTextureLayer->mBuffers.at(i)->blitFromMemory(mTextureOnWhichIsPaintedScaled.getPixelBox(0,0), Ogre::Box(0, 0, 0, w, h, 1));
+        Ogre::LogManager::getSingleton().logMessage("Mipmap: " + Ogre::StringConverter::toString(i)); // DEBUG
+        //mTextureLayer->mBuffers.at(i)->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD);
+        mTextureLayer->mBuffers.at(i)->blitFromMemory(textureOnWhichIsPaintedScaled.getPixelBox(0,0), Ogre::Box(0, 0, 0, w, h, 1));
+        //mTextureLayer->mBuffers.at(i)->unlock();
         w*=0.5f; // Mipmaps always are half of the previous one
         h*=0.5f;
-        mTextureOnWhichIsPaintedScaled.resize(w, h);
+        textureOnWhichIsPaintedScaled.resize(w, h);
     }
+    textureOnWhichIsPaintedScaled.freeMemory();
 }
 
 //****************************************************************************/
@@ -168,6 +183,12 @@ void PaintLayer::setPaintColour (const Ogre::ColourValue& colourValue)
 }
 
 //****************************************************************************/
+void PaintLayer::setBrushForce (float brushForce)
+{
+    mBrushForce = brushForce;
+}
+
+//****************************************************************************/
 void PaintLayer::setBrushScale (float brushScale)
 {
     mBrushScale = brushScale;
@@ -181,13 +202,23 @@ size_t PaintLayer::calculateTexturePositionX (float u, size_t brushPositionX)
     if (!mTextureLayer)
         return 0;
 
-    int pos = (u * mTextureLayer->mTextureOnWhichIsPaintedWidth) - mHalfBrushWidthScaled + mBrushScale * brushPositionX;
+    int w = mTextureLayer->mTextureOnWhichIsPaintedWidth;
+    int pos = (u * w) - mHalfBrushWidthScaled + mBrushScale * brushPositionX;
     if (mPaintOverflow == PAINT_OVERFLOW_IGNORE)
     {
         if (pos < 0)
             pos = 0;
-        else if (pos > mTextureLayer->mTextureOnWhichIsPaintedWidth)
-            pos = mTextureLayer->mTextureOnWhichIsPaintedWidth;
+        else if (pos > w)
+            pos = w;
+        return pos;
+    }
+    else if (mPaintOverflow == PAINT_OVERFLOW_TO_OPPOSITE_CORNER)
+    {
+        if (pos < 0)
+            pos += w;
+        else if (pos >= w)
+            pos -= w;
+        return pos;
     }
 
     return pos;
@@ -199,13 +230,23 @@ size_t PaintLayer::calculateTexturePositionY (float v, size_t brushPositionY)
     if (!mTextureLayer)
         return 0;
 
-    int pos = (v * mTextureLayer->mTextureOnWhichIsPaintedHeight) - mHalfBrushHeightScaled + mBrushScale * brushPositionY;
+    int h = mTextureLayer->mTextureOnWhichIsPaintedHeight;
+    int pos = (v * h) - mHalfBrushHeightScaled + mBrushScale * brushPositionY;
     if (mPaintOverflow == PAINT_OVERFLOW_IGNORE)
     {
-        if (pos < 0.0f)
-            pos = 0.0f;
-        else if (pos > mTextureLayer->mTextureOnWhichIsPaintedHeight)
-            pos = mTextureLayer->mTextureOnWhichIsPaintedHeight;
+        if (pos < 0)
+            pos = 0;
+        else if (pos > h)
+            pos = h;
+        return pos;
+    }
+    else if (mPaintOverflow == PAINT_OVERFLOW_TO_OPPOSITE_CORNER)
+    {
+        if (pos < 0)
+            pos += h;
+        else if (pos >= h)
+            pos -= h;
+        return pos;
     }
 
     return pos;

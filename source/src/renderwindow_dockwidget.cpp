@@ -501,20 +501,23 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
     if (action->text() == ACTION_SET_CURRENT_MATERIAL)
     {
         // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
-        PaintLayer* paintLayer = mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
-                                                                     Ogre::PbsTextureTypes::PBSM_DIFFUSE,
-                                                                     "../examples/floor_diffuse.PNG");
+        PaintLayer* paintLayer;
+        paintLayer = mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
+                                                         Ogre::PbsTextureTypes::PBSM_DETAIL0,
+                                                         "../examples/10points.png");
         paintLayer->setBrush("../common/brushes/brush_001.png");
         paintLayer->setBrushScale(0.5);
+        paintLayer->setBrushForce(0.2);
         paintLayer->setPaintColour(Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
+        paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_COLOR);
 
         paintLayer = mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
-                                                         Ogre::PbsTextureTypes::PBSM_DIFFUSE,
-                                                         "../examples/floor_diffuse.PNG");
+                                                         Ogre::PbsTextureTypes::PBSM_DETAIL0,
+                                                         "../examples/10points.png");
         paintLayer->setBrush("../common/brushes/brush_002.png");
-        paintLayer->setBrushScale(0.8f);
-        paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_ALPHA);
-        paintLayer->setPaintColour(Ogre::ColourValue(1.0f, 0.0f, 0.0f, 1.0f));
+        paintLayer->setBrushScale(0.5f);
+        paintLayer->setBrushForce(0.2);
+        paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_TEXTURE);
 
         mOgreWidget->setPaintLayers(mPaintLayerManager.getPaintLayers());
         // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST

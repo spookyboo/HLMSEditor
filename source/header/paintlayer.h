@@ -53,6 +53,7 @@ class PaintLayer
         {
             PAINT_EFFECT_COLOR, /// Paint with color
             PAINT_EFFECT_ALPHA, /// Paint with alpha
+            PAINT_EFFECT_TEXTURE, /// Use the colours of the brush
             PAINT_EFFECT_NORMAL_RAISED, /// Paint on a normal map and apply a raising effect; only used for normal maps
             PAINT_EFFECT_NORMAL_LOWERED /// Paint on a normal map and apply a lowering effect; only used for normal maps
         };
@@ -60,7 +61,6 @@ class PaintLayer
         enum PaintOverflowTypes
         {
             PAINT_OVERFLOW_IGNORE, /// If the brush exceeds the texture areas on which is painted, the overflow is ignored
-            PAINT_OVERFLOW_TO_OPPOSITE_UV, /// If the brush exceeds the texture areas on which is painted, the overflow is continued on the opposite side
             PAINT_OVERFLOW_TO_OPPOSITE_CORNER  /// If the brush exceeds the texture areas on which is painted, the overflow is continued on the opposite corner
         };
 
@@ -87,6 +87,10 @@ class PaintLayer
          */
         void setBrushScale ( float brushScale);
 
+        /* Determine how much pressure is put on the brush. Value [0..1]
+         */
+        void setBrushForce (float brushForce);
+
         /* Set the paint effect.
          */
         void setPaintEffect (PaintEffects paintEffect);
@@ -97,7 +101,6 @@ class PaintLayer
 
         private:
             bool mEnabled;                                  // If enabled, the layer is painted, otherwise it is skipped
-            Ogre::Image mTextureOnWhichIsPaintedScaled;     // The same image, but scaled for applying to mipmaps
             Ogre::Image mBrush;                             // Image of the brush
             Ogre::String mBrushFileName;                    // Full qualified name of the brush file
             Ogre::PixelBox mPixelboxBrush;                  // Pixelbox of mBrush; for speed purposes, it is created when the brush is set
