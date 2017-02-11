@@ -34,6 +34,7 @@
 #include "OgreHlmsDatablock.h"
 #include "OgreHardwarePixelBuffer.h"
 #include "texturelayer.h"
+#include <ctime>
 
 /****************************************************************************
  This class contains functions used by the Hlms editor painter window. A
@@ -47,6 +48,7 @@
  (a mouse paint stroke involves multiple PaintLayer objects).
  ***************************************************************************/
 
+class PaintLayerManager;
 class PaintLayer
 {
 	public:
@@ -65,7 +67,7 @@ class PaintLayer
             PAINT_OVERFLOW_TO_OPPOSITE_CORNER  /// If the brush exceeds the texture areas on which is painted, the overflow is continued on the opposite corner
         };
 
-        PaintLayer(void);
+        PaintLayer(PaintLayerManager* paintLayerManager);
         ~PaintLayer(void);
 
         /* Enable or disable the layer for painting
@@ -93,7 +95,11 @@ class PaintLayer
          */
         void setJitterScale (float jitterScaleMin, float jitterScaleMax);
 
-        /* Exclude scale of the brush.
+        /* Determines the frequency of the jitter effect. The interval is set to seconds.
+         */
+        void setJitterScaleInterval (float interval);
+
+        /* Exclude scaling the brush image
          * This also stops scale jitter.
          */
         void resetScale (void);
@@ -106,6 +112,10 @@ class PaintLayer
          * This setting creates a jittering effect in which the brush force changes between two values
          */
         void setJitterForce (float jitterForceMin, float jitterForceMax);
+
+        /* Determines the frequency of the jitter effect. The interval is set to seconds.
+         */
+        void setJitterForceInterval (float interval);
 
         /* Stop with force jitter
          */
@@ -120,7 +130,11 @@ class PaintLayer
          */
         void setJitterRotationAngle (float rotationAngleMin, float rotationAngleMax);
 
-        /* Exclude rotation of the brush
+        /* Determines the frequency of the jitter effect. The interval is set to seconds.
+         */
+        void setJitterRotationAngleInterval (float interval);
+
+        /* Exclude rotating the brush image
          * This also stops rotation jitter
          */
         void resetRotation (void);
@@ -137,7 +151,11 @@ class PaintLayer
                                    float jitterTranslationFactorYmin,
                                    float jitterTranslationFactorYmax);
 
-        /* Exclude translation of the brush
+        /* Determines the frequency of the jitter effect. The interval is set to seconds.
+         */
+        void setJitterTranslationInterval (float interval);
+
+        /* Exclude translating the brush image
          * This also stops translation jitter.
          */
         void resetTranslation (void);
@@ -155,6 +173,10 @@ class PaintLayer
          */
         void setJitterPaintColour (const Ogre::ColourValue& paintColourMin, const Ogre::ColourValue& paintColourMax);
 
+        /* Determines the frequency of the jitter effect. The interval is set to seconds.
+         */
+        void setJitterPaintColourInterval (float interval);
+
         /* Stop with paint colour jitter
          */
         void resetPaintColour (void);
@@ -167,6 +189,10 @@ class PaintLayer
          * This setting creates an alternating mirror (horizontally) effect of the brush
          */
         void setJitterMirrorHorizontal (void);
+
+        /* Determines the frequency of the jitter effect. The interval is set to seconds.
+         */
+        void setJitterMirrorHorizontalInterval (float interval);
 
         /* Exclude the mirror (horizontally) effect.
          * Stop the jittering effect
@@ -182,12 +208,18 @@ class PaintLayer
          */
         void setJitterMirrorVertical (void);
 
+        /* Determines the frequency of the jitter effect. The interval is set to seconds.
+         */
+        void setJitterMirrorVerticalInterval (float interval);
+
         /* Exclude the mirror (vertical) effect.
          * Stop the jittering effect
          */
         void resetMirrorVertical (void);
 
     private:
+            clock_t mStartTime;
+            clock_t mEndTime;
             bool mEnabled;                                  // If enabled, the layer is painted, otherwise it is skipped
             Ogre::Image mBrush;                             // Image of the brush
             Ogre::String mBrushFileName;                    // Full qualified name of the brush file
@@ -235,6 +267,21 @@ class PaintLayer
             bool mJitterPaintColour;                        // If true, a brush with jittering colours is applied
             bool mJitterMirrorHorizontal;                   // If true, the brush is randomly mirrored horizontally
             bool mJitterMirrorVertical;                     // If true, the brush is randomly mirrored vertically
+            float mJitterRotateInterval;                    // Interval of the jitter in seconds
+            float mJitterTranslationInterval;               // ,,
+            float mJitterScaleInterval;                     // ,,
+            float mJitterForceInterval;                     // ,,
+            float mJitterPaintColourInterval;               // ,,
+            float mJitterMirrorHorizontalInterval;          // ,,
+            float mJitterMirrorVerticalInterval;            // ,,
+            float mJitterElapsedTime;                       // Latest time probe
+            float mJitterRotateElapsedTime;                 // Latest time probe for this specific effect
+            float mJitterTranslationElapsedTime;              // ,,
+            float mJitterScaleElapsedTime;                  // ,,
+            float mJitterForceElapsedTime;                  // ,,
+            float mJitterPaintColourElapsedTime;            // ,,
+            float mJitterMirrorHorizontalElapsedTime;       // ,,
+            float mJitterMirrorVerticalElapsedTime;         // ,,
             float mJitterRotationAngleMin;                  // Min. value used for jittering rotation
             float mJitterRotationAngleMax;                  // Max. value used for jittering rotation
             float mJitterTranslationFactorXmin;             // Min. value used for jittering translation X factor
@@ -247,6 +294,7 @@ class PaintLayer
             float mJitterForceMax;                          // Max. value used for jittering force
             Ogre::ColourValue mJitterPaintColourMin;        // Min. value used for jittering paint colour
             Ogre::ColourValue mJitterPaintColourMax;        // Max. value used for jittering paint colour
+            PaintLayerManager* mPaintLayerManager;
 
             // Private functions
             size_t calculateTexturePositionX (float u, size_t brushPositionX);

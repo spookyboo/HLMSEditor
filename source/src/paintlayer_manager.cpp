@@ -36,7 +36,7 @@ PaintLayer* PaintLayerManager::createPaintLayer (const Ogre::IdString& datablock
                                                   Ogre::PbsTextureTypes textureType,
                                                   const Ogre::String& textureFileName)
 {
-    PaintLayer* paintLayer = new PaintLayer();
+    PaintLayer* paintLayer = new PaintLayer(this);
     TextureLayer* textureLayer = mTextureLayerManager.createOrRetrieveTextureLayer(datablockName, textureType, textureFileName);
     paintLayer->setTextureLayer(textureLayer);
     mPaintLayers.push_back(paintLayer);

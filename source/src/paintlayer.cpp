@@ -19,6 +19,7 @@
 ****************************************************************************/
 
 #include "paintlayer.h"
+#include "paintlayer_manager.h"
 #include "OgreHlmsPbs.h"
 #include "OgreHlmsManager.h"
 #include "OgreLogManager.h"
@@ -27,18 +28,19 @@
 #include "math.h"
 
 //****************************************************************************/
-PaintLayer::PaintLayer(void) :
+PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager) :
+    mPaintLayerManager(paintLayerManager),
     mEnabled(true),
-    mForce(1.0f),
-    mScale(1.0f),
     mBrushWidth(0),
     mBrushHeight(0),
     mHalfBrushWidth(0),
-    mHalfBrushHeight(0),
     mHalfBrushWidthScaled(0),
+    mHalfBrushHeight(0),
     mHalfBrushHeightScaled(0),
     mBrushWidthMinusOne(0),
     mBrushHeightMinusOne(0),
+    mForce(1.0f),
+    mScale(1.0f),
     mPaintEffect(PAINT_EFFECT_COLOR),
     mPaintOverflow(PAINT_OVERFLOW_IGNORE),
     mTextureLayer(0),
@@ -67,6 +69,21 @@ PaintLayer::PaintLayer(void) :
     mJitterPaintColour(false),
     mJitterMirrorHorizontal(false),
     mJitterMirrorVertical(false),
+    mJitterRotateInterval(0.0f),
+    mJitterTranslationInterval(0.0f),
+    mJitterScaleInterval(0.0f),
+    mJitterForceInterval(0.0f),
+    mJitterPaintColourInterval(0.0f),
+    mJitterMirrorHorizontalInterval(0.0f),
+    mJitterMirrorVerticalInterval(0.0f),
+    mJitterElapsedTime(0.0f),
+    mJitterRotateElapsedTime(0.0f),
+    mJitterTranslationElapsedTime(0.0f),
+    mJitterScaleElapsedTime(0.0f),
+    mJitterForceElapsedTime(0.0f),
+    mJitterPaintColourElapsedTime(0.0f),
+    mJitterMirrorHorizontalElapsedTime(0.0f),
+    mJitterMirrorVerticalElapsedTime(0.0f),
     mJitterRotationAngleMin(0.0f),
     mJitterRotationAngleMax(0.0f),
     mJitterTranslationFactorXmin(0),
@@ -83,6 +100,7 @@ PaintLayer::PaintLayer(void) :
     mJitterPaintColourMin = Ogre::ColourValue::Black;
     mJitterPaintColourMax = Ogre::ColourValue::White;
     mBrushFileName = "";
+    mStartTime = clock();
 }
 
 //****************************************************************************/
@@ -103,32 +121,83 @@ void PaintLayer::paint(float u, float v)
     if (!mEnabled || !mTextureLayer || mTextureLayer->mTexture.isNull())
         return;
 
+    // Get the elapsed time
+    mEndTime = clock();
+    mJitterElapsedTime = (float)(mEndTime - mStartTime) / CLOCKS_PER_SEC;
+    mStartTime = mEndTime;
+
     // Determine whether there are jitter effects
     if (mJitterRotate)
-        setRotationAngle (randomBetweenTwoFloats(mJitterRotationAngleMin, mJitterRotationAngleMax));
+    {
+        mJitterRotateElapsedTime += mJitterElapsedTime;
+        if (mJitterRotateElapsedTime > mJitterRotateInterval)
+        {
+            setRotationAngle (randomBetweenTwoFloats(mJitterRotationAngleMin, mJitterRotationAngleMax));
+            mJitterRotateElapsedTime = 0.0f;
+        }
+    }
 
     if (mJitterTranslate)
-        setTranslation (randomBetweenTwoFloats(mJitterTranslationFactorXmin, mJitterTranslationFactorXmax),
-                        randomBetweenTwoFloats(mJitterTranslationFactorYmin, mJitterTranslationFactorYmax));
+    {
+        mJitterTranslationElapsedTime += mJitterElapsedTime;
+        if (mJitterTranslationElapsedTime > mJitterTranslationInterval)
+        {
+            setTranslation (randomBetweenTwoFloats(mJitterTranslationFactorXmin, mJitterTranslationFactorXmax),
+                            randomBetweenTwoFloats(mJitterTranslationFactorYmin, mJitterTranslationFactorYmax));
+            mJitterTranslationElapsedTime = 0.0f;
+        }
+    }
+
     if (mJitterScale)
-        setScale(randomBetweenTwoFloats(mJitterScaleMin, mJitterScaleMax));
+    {
+        mJitterScaleElapsedTime += mJitterElapsedTime;
+        if (mJitterScaleElapsedTime > mJitterScaleInterval)
+        {
+            setScale(randomBetweenTwoFloats(mJitterScaleMin, mJitterScaleMax));
+            mJitterScaleElapsedTime = 0.0f;
+        }
+    }
 
     if (mJitterForce)
-        setForce(randomBetweenTwoFloats(mJitterForceMin, mJitterForceMax));
+    {
+        mJitterForceElapsedTime += mJitterElapsedTime;
+        if (mJitterForceElapsedTime > mJitterForceInterval)
+        {
+            setForce(randomBetweenTwoFloats(mJitterForceMin, mJitterForceMax));
+            mJitterForceElapsedTime = 0.0f;
+        }
+    }
 
     if (mJitterPaintColour)
-        setPaintColour(randomBetweenTwoColours(mJitterPaintColourMin, mJitterPaintColourMax));
+    {
+        mJitterPaintColourElapsedTime += mJitterElapsedTime;
+        if (mJitterPaintColourElapsedTime > mJitterPaintColourInterval)
+        {
+            setPaintColour(randomBetweenTwoColours(mJitterPaintColourMin, mJitterPaintColourMax));
+            mJitterPaintColourElapsedTime = 0.0f;
+        }
+    }
 
     if (mJitterMirrorHorizontal)
     {
-        setJitterMirrorHorizontal();
-        mMirrorHorizontal = randomBool();
+        mJitterMirrorHorizontalElapsedTime += mJitterElapsedTime;
+        if (mJitterMirrorHorizontalElapsedTime > mJitterMirrorHorizontalInterval)
+        {
+            setJitterMirrorHorizontal();
+            mMirrorHorizontal = randomBool();
+            mJitterMirrorHorizontalElapsedTime = 0.0f;
+        }
     }
 
     if (mJitterMirrorVertical)
     {
-        setJitterMirrorVertical();
-        mMirrorVertical = randomBool();
+        mJitterMirrorVerticalElapsedTime += mJitterElapsedTime;
+        if (mJitterMirrorVerticalElapsedTime > mJitterMirrorVerticalInterval)
+        {
+            setJitterMirrorVertical();
+            mMirrorVertical = randomBool();
+            mJitterMirrorVerticalElapsedTime = 0.0f;
+        }
     }
 
     /* Loop through the pixelbox of the brush and apply the paint effect to the pixelbox of the texture
@@ -295,6 +364,12 @@ void PaintLayer::setJitterPaintColour (const Ogre::ColourValue& paintColourMin, 
 }
 
 //****************************************************************************/
+void PaintLayer::setJitterPaintColourInterval (float interval)
+{
+    mJitterPaintColourInterval = interval;
+}
+
+//****************************************************************************/
 void PaintLayer::resetPaintColour (void)
 {
     mJitterPaintColour = false;
@@ -313,6 +388,12 @@ void PaintLayer::setJitterForce (float jitterForceMin, float jitterForceMax)
     mJitterForce = true;
     mJitterForceMin = jitterForceMin;
     mJitterForceMax = jitterForceMax;
+}
+
+//****************************************************************************/
+void PaintLayer::setJitterForceInterval (float interval)
+{
+    mJitterForceInterval = interval;
 }
 
 //****************************************************************************/
@@ -337,6 +418,12 @@ void PaintLayer::setJitterRotationAngle (float rotationAngleMin, float rotationA
     mJitterRotate = true;
     mJitterRotationAngleMin = rotationAngleMin;
     mJitterRotationAngleMax = rotationAngleMax;
+}
+
+//****************************************************************************/
+void PaintLayer::setJitterRotationAngleInterval (float interval)
+{
+    mJitterRotateInterval = interval;
 }
 
 //****************************************************************************/
@@ -371,6 +458,12 @@ void PaintLayer::setJitterTranslation (float jitterTranslationFactorXmin,
 }
 
 //****************************************************************************/
+void PaintLayer::setJitterTranslationInterval (float interval)
+{
+    mJitterTranslationInterval = interval;
+}
+
+//****************************************************************************/
 void PaintLayer::resetTranslation (void)
 {
     mTranslate = false;
@@ -394,9 +487,65 @@ void PaintLayer::setJitterScale (float jitterScaleMin, float jitterScaleMax)
 }
 
 //****************************************************************************/
+void PaintLayer::setJitterScaleInterval (float interval)
+{
+    mJitterScaleInterval = interval;
+}
+
+//****************************************************************************/
 void PaintLayer::resetScale (void)
 {
     mJitterScale = false;
+}
+
+//****************************************************************************/
+void PaintLayer::setMirrorHorizontal (bool mirrored)
+{
+    mMirrorHorizontal = mirrored;
+}
+
+//****************************************************************************/
+void PaintLayer::setJitterMirrorHorizontal (void)
+{
+    mJitterMirrorHorizontal = true;
+}
+
+//****************************************************************************/
+void PaintLayer::setJitterMirrorHorizontalInterval (float interval)
+{
+    mJitterMirrorHorizontalInterval = interval;
+}
+
+//****************************************************************************/
+void PaintLayer::resetMirrorHorizontal (void)
+{
+    mMirrorHorizontal = false;
+    mJitterMirrorHorizontal = false;
+}
+
+//****************************************************************************/
+void PaintLayer::setMirrorVertical (bool mirrored)
+{
+    mMirrorVertical = mirrored;
+}
+
+//****************************************************************************/
+void PaintLayer::setJitterMirrorVertical (void)
+{
+    mJitterMirrorVertical = true;
+}
+
+//****************************************************************************/
+void PaintLayer::setJitterMirrorVerticalInterval (float interval)
+{
+    mJitterMirrorVerticalInterval = interval;
+}
+
+//****************************************************************************/
+void PaintLayer::resetMirrorVertical (void)
+{
+    mMirrorVertical = false;
+    mJitterMirrorVertical = false;
 }
 
 //****************************************************************************/
@@ -455,42 +604,4 @@ size_t PaintLayer::calculateTexturePositionY (float v, size_t brushPositionY)
     }
 
     return pos;
-}
-
-//****************************************************************************/
-void PaintLayer::setMirrorHorizontal (bool mirrored)
-{
-    mMirrorHorizontal = mirrored;
-}
-
-//****************************************************************************/
-void PaintLayer::setJitterMirrorHorizontal (void)
-{
-    mJitterMirrorHorizontal = true;
-}
-
-//****************************************************************************/
-void PaintLayer::resetMirrorHorizontal (void)
-{
-    mMirrorHorizontal = false;
-    mJitterMirrorHorizontal = false;
-}
-
-//****************************************************************************/
-void PaintLayer::setMirrorVertical (bool mirrored)
-{
-    mMirrorVertical = mirrored;
-}
-
-//****************************************************************************/
-void PaintLayer::setJitterMirrorVertical (void)
-{
-    mJitterMirrorVertical = true;
-}
-
-//****************************************************************************/
-void PaintLayer::resetMirrorVertical (void)
-{
-    mMirrorVertical = false;
-    mJitterMirrorVertical = false;
 }
