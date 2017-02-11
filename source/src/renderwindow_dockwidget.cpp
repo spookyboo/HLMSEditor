@@ -23,6 +23,7 @@
 #include "mainwindow.h"
 #include "OgreMeshManager2.h"
 #include "Renderwindow_dockwidget.h"
+#include "paintlayer_manager.h"
 
 //****************************************************************************/
 RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags) : 
@@ -502,24 +503,26 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
     {
         // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
         PaintLayer* paintLayer;
-        paintLayer = mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
+        paintLayer = mParent->mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
                                                          Ogre::PbsTextureTypes::PBSM_DETAIL0,
                                                          "../examples/10points.png");
         paintLayer->setBrush("../common/brushes/brush_001.png");
         paintLayer->setBrushScale(0.5);
-        paintLayer->setBrushForce(0.2);
+        paintLayer->setBrushForce(1.0);
         paintLayer->setPaintColour(Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
+        paintLayer->setRotationAngle(-45);
         paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_COLOR);
 
-        paintLayer = mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
+        paintLayer = mParent->mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
                                                          Ogre::PbsTextureTypes::PBSM_DETAIL0,
                                                          "../examples/10points.png");
         paintLayer->setBrush("../common/brushes/brush_002.png");
         paintLayer->setBrushScale(0.5f);
         paintLayer->setBrushForce(0.2);
+        paintLayer->setRotationAngle(45);
         paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_TEXTURE);
 
-        mOgreWidget->setPaintLayers(mPaintLayerManager.getPaintLayers());
+        mOgreWidget->setPaintLayers(mParent->mPaintLayerManager.getPaintLayers());
         // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
 
         mOgreWidget->assignCurrentDatablock();

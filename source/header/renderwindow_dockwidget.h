@@ -29,8 +29,6 @@
 #include <QTabWidget>
 #include "ogre3_renderman.h"
 #include "tb_transformationwidget.h"
-#include "paintlayer.h"
-#include "paintlayer_manager.h"
 
 QT_BEGIN_NAMESPACE
 class QDockWidget;
@@ -119,9 +117,6 @@ class RenderwindowDockWidget : public QDockWidget
         QActionGroup* mActionGroupMeshes;
         QMenu* mSkyBoxSubMenu;
         QActionGroup* mActionGroupSkyBox;
-
-        PaintLayers mPaintLayers; // TEST
-        PaintLayerManager mPaintLayerManager; // TEST
 };
 
 #endif

@@ -128,6 +128,7 @@ MainWindow::MainWindow(void) :
 //****************************************************************************/
 MainWindow::~MainWindow(void)
 {
+    mPaintLayerManager.removeAndDeleteAllPaintLayers();
     delete mHlmsUtilsManager;
     delete mOgreManager;
 }

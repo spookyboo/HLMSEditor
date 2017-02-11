@@ -1353,8 +1353,8 @@ namespace Magus
 
         // Calculate uv of the texture position pointed by the mouse
         // TODO
-        float u = 0.8f;
-        float v = 0.8f;
+        float u = 0.5f;
+        float v = 0.5f;
 
         // Iterate through the PaintLayer vector and apply the paint effect
         PaintLayers::iterator it;

@@ -91,6 +91,10 @@ class PaintLayer
          */
         void setBrushForce (float brushForce);
 
+        /* Determine the rotation of the angle in degrees [0..360]
+         */
+        void setRotationAngle (float rotationAngle);
+
         /* Set the paint effect.
          */
         void setPaintEffect (PaintEffects paintEffect);
@@ -121,6 +125,14 @@ class PaintLayer
             size_t calculatedTexturePositionX;
             size_t calculatedTexturePositionY;
             float mAlpha;
+            bool mRotate;                                   // If true, the brush is rotated
+            float mRotationAngle;                           // The angle of rotating the brush
+            float mSinRotationAngle;                        // Sin of the angle of rotating
+            float mCosRotationAngle;                        // Cos of the angle of rotating
+            int mPosX;
+            int mPosY;
+            int mPosXrotated;
+            int mPosYrotated;
 
             // Private functions
             size_t calculateTexturePositionX (float u, size_t brushPositionX);

@@ -23,6 +23,7 @@
 #include "OgreHlmsManager.h"
 #include "OgreLogManager.h"
 #include "OgreStringConverter.h"
+#include "math.h"
 
 //****************************************************************************/
 PaintLayer::PaintLayer(void) :
@@ -36,11 +37,19 @@ PaintLayer::PaintLayer(void) :
     mHalfBrushWidthScaled(0),
     mHalfBrushHeightScaled(0),
     mPaintEffect(PAINT_EFFECT_COLOR),
-    mPaintOverflow(PAINT_OVERFLOW_TO_OPPOSITE_CORNER),
+    mPaintOverflow(PAINT_OVERFLOW_IGNORE),
     mTextureLayer(0),
     calculatedTexturePositionX(0),
     calculatedTexturePositionY(0),
-    mAlpha(1.0f)
+    mAlpha(1.0f),
+    mRotate(false),
+    mRotationAngle(0.2f),
+    mSinRotationAngle(0.0f),
+    mCosRotationAngle(0.0f),
+    mPosX(0),
+    mPosY(0),
+    mPosXrotated(0),
+    mPosYrotated(0)
 {
     mPaintColour = Ogre::ColourValue::White;
     mFinalColour = Ogre::ColourValue::White;
@@ -61,7 +70,6 @@ void PaintLayer::enable(bool enabled)
 //****************************************************************************/
 void PaintLayer::paint(float u, float v)
 {
-    Ogre::LogManager::getSingleton().logMessage("Paint"); // DEBUG
     // Apply paint effect if there is a texture
     if (!mEnabled || !mTextureLayer || mTextureLayer->mTexture.isNull())
         return;
@@ -74,12 +82,32 @@ void PaintLayer::paint(float u, float v)
     {
         for (size_t x = 0; x < mBrushWidth; x++)
         {
+            // If rotation is enabled, calculate the rotated pixel position
+            mPosX = x;
+            mPosY = y;
+            if (mRotate)
+            {
+                // Calculate the rotated pixel position
+                mPosX -= mHalfBrushWidth;
+                mPosY -= mHalfBrushHeight;
+                mPosXrotated = mPosX * mCosRotationAngle - mPosY * mSinRotationAngle;
+                mPosYrotated = mPosX * mSinRotationAngle + mPosY * mCosRotationAngle;
+                mPosX = mPosXrotated + mHalfBrushWidth;
+                mPosY = mPosYrotated + mHalfBrushHeight;
+
+                // Determine whether the pixel position still fits within the brush dimensions
+                if (mPosX < 0 || mPosX >= mBrushWidth || mPosY < 0 || mPosY >= mBrushHeight)
+                    continue;
+            }
+
+            // Calculate the position of the brush pixel to a texture position
             calculatedTexturePositionX = calculateTexturePositionX(u, x);
             calculatedTexturePositionY = calculateTexturePositionY(v, y);
+
             if (mPaintEffect == PAINT_EFFECT_COLOR)
             {
                 // Paint with colour
-                mAlpha = mBrushForce * mPixelboxBrush.getColourAt(x, y, 0).a;
+                mAlpha = mBrushForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
                 mFinalColour = mAlpha * mPaintColour;
                 mFinalColour = (1.0f - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                                              calculatedTexturePositionY,
@@ -92,7 +120,7 @@ void PaintLayer::paint(float u, float v)
             else if (mPaintEffect == PAINT_EFFECT_ALPHA)
             {
                 // Paint with alpha value of the brush
-                mAlpha = mBrushForce * mPixelboxBrush.getColourAt(x, y, 0).a;
+                mAlpha = mBrushForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
                 mFinalColour = mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                            calculatedTexturePositionY,
                                                                                            0);
@@ -106,7 +134,7 @@ void PaintLayer::paint(float u, float v)
             else if (mPaintEffect == PAINT_EFFECT_TEXTURE)
             {
                 // Paint with coloured brush
-                Ogre::ColourValue brushColour = mPixelboxBrush.getColourAt(x, y, 0);
+                Ogre::ColourValue brushColour = mPixelboxBrush.getColourAt(mPosX, mPosY, 0);
                 mAlpha = mBrushForce * brushColour.a;
                 mFinalColour = (1.0 - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                                             calculatedTexturePositionY,
@@ -119,8 +147,6 @@ void PaintLayer::paint(float u, float v)
             }
         }
     }
-    Ogre::LogManager::getSingleton().logMessage("Painted colour"); // DEBUG
-
 
     /* Copy the changed texture to the GPU; beware to also update the mipmaps.
      * The texture on the GPU (mTexture) may contain more mipmaps (or less) than the
@@ -129,12 +155,9 @@ void PaintLayer::paint(float u, float v)
      */
     size_t w = mTextureLayer->mTextureOnWhichIsPaintedWidth;
     size_t h = mTextureLayer->mTextureOnWhichIsPaintedHeight;
-    Ogre::LogManager::getSingleton().logMessage("Before image"); // DEBUG
     Ogre::Image textureOnWhichIsPaintedScaled = mTextureLayer->mTextureOnWhichIsPainted; // Define textureOnWhichIsPaintedScaled each time; reusing results in exception
-    Ogre::LogManager::getSingleton().logMessage("After image"); // DEBUG
     for (Ogre::uint8 i = 0; i < mTextureLayer->mNumMipMaps; ++i)
     {
-        Ogre::LogManager::getSingleton().logMessage("Mipmap: " + Ogre::StringConverter::toString(i)); // DEBUG
         //mTextureLayer->mBuffers.at(i)->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD);
         mTextureLayer->mBuffers.at(i)->blitFromMemory(textureOnWhichIsPaintedScaled.getPixelBox(0,0), Ogre::Box(0, 0, 0, w, h, 1));
         //mTextureLayer->mBuffers.at(i)->unlock();
@@ -189,6 +212,16 @@ void PaintLayer::setBrushForce (float brushForce)
 }
 
 //****************************************************************************/
+void PaintLayer::setRotationAngle (float rotationAngle)
+{
+    mRotationAngle = rotationAngle;
+    mRotate = true;
+    mSinRotationAngle = sin(rotationAngle * Ogre::Math::PI / 180);
+    mCosRotationAngle = cos(rotationAngle * Ogre::Math::PI / 180);
+}
+
+
+//****************************************************************************/
 void PaintLayer::setBrushScale (float brushScale)
 {
     mBrushScale = brushScale;
@@ -204,12 +237,13 @@ size_t PaintLayer::calculateTexturePositionX (float u, size_t brushPositionX)
 
     int w = mTextureLayer->mTextureOnWhichIsPaintedWidth;
     int pos = (u * w) - mHalfBrushWidthScaled + mBrushScale * brushPositionX;
+
     if (mPaintOverflow == PAINT_OVERFLOW_IGNORE)
     {
         if (pos < 0)
             pos = 0;
-        else if (pos > w)
-            pos = w;
+        else if (pos >= w)
+            pos = w - 1;
         return pos;
     }
     else if (mPaintOverflow == PAINT_OVERFLOW_TO_OPPOSITE_CORNER)
@@ -232,12 +266,13 @@ size_t PaintLayer::calculateTexturePositionY (float v, size_t brushPositionY)
 
     int h = mTextureLayer->mTextureOnWhichIsPaintedHeight;
     int pos = (v * h) - mHalfBrushHeightScaled + mBrushScale * brushPositionY;
+
     if (mPaintOverflow == PAINT_OVERFLOW_IGNORE)
     {
         if (pos < 0)
             pos = 0;
-        else if (pos > h)
-            pos = h;
+        else if (pos >= h)
+            pos = h - 1;
         return pos;
     }
     else if (mPaintOverflow == PAINT_OVERFLOW_TO_OPPOSITE_CORNER)

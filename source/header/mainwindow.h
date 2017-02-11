@@ -39,6 +39,7 @@
 #include "hlms_editor_plugin.h"
 #include "recent_file_action.h"
 #include "hlms_utils_manager.h"
+#include "paintlayer_manager.h"
 #include "constants.h"
 
 QT_BEGIN_NAMESPACE
@@ -57,6 +58,8 @@ class MainWindow : public QMainWindow
         bool eventFilter(QObject* object, QEvent* event);
 		void update(void);
 		bool mIsClosing;
+        PaintLayerManager mPaintLayerManager;
+
         Magus::OgreManager* getOgreManager(void) const {return mOgreManager;}
         PropertiesDockWidget* mPropertiesDockWidget; // Make is public for easy access
         TextureDockWidget* mTextureDockWidget; // Make is public for easy access
@@ -71,7 +74,7 @@ class MainWindow : public QMainWindow
         const Ogre::IdString& getCurrentDatablockName (void) {return mCurrentDatablockName;}
         void destroyDatablock(const Ogre::IdString& datablockName);
         void notifyHlmsChanged (void); // To be called if the properties of a datablock are changed (which result in rebuilding the material)
-        HlmsUtilsManager* getHlmsUtilsManager (void) {return mHlmsUtilsManager;};
+        HlmsUtilsManager* getHlmsUtilsManager (void) {return mHlmsUtilsManager;}
 
     protected:
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources); // Save the content of a resource vector
