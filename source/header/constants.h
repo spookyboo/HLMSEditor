@@ -24,6 +24,8 @@
 #include <QString>
 #include <QMessageBox>
 #include "OgreString.h"
+#include "OgreColourValue.h"
+#include "OgreMath.h"
 #include "ogre3_widget.h"
 
 //****************************************************************************/
@@ -157,6 +159,33 @@ static QString getBaseFileName(QString& fileName)
         return mTempString.right(fileName.length() - index - 1);
 
     return mTempString;
+}
+
+//****************************************************************************/
+static float randomBetweenTwoFloats(float min, float max)
+{
+    return Ogre::Math::RangeRandom(min, max);
+}
+
+//****************************************************************************/
+static int randomBetweenTwoInts(int min, int max)
+{
+    return Ogre::Math::RangeRandom(min, max);
+}
+
+//****************************************************************************/
+static Ogre::ColourValue randomBetweenTwoColours (const Ogre::ColourValue& paintColourMin, const Ogre::ColourValue& paintColourMax)
+{
+    return Ogre::ColourValue (randomBetweenTwoFloats (paintColourMin.r, paintColourMax.r),
+                              randomBetweenTwoFloats (paintColourMin.g, paintColourMax.g),
+                              randomBetweenTwoFloats (paintColourMin.b, paintColourMax.b),
+                              randomBetweenTwoFloats (paintColourMin.a, paintColourMax.a));
+}
+
+//****************************************************************************/
+static bool randomBool(void)
+{
+    return randomBetweenTwoInts (0, 2) - 1;
 }
 
 //****************************************************************************/

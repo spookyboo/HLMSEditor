@@ -23,19 +23,22 @@
 #include "OgreHlmsManager.h"
 #include "OgreLogManager.h"
 #include "OgreStringConverter.h"
+#include "constants.h"
 #include "math.h"
 
 //****************************************************************************/
 PaintLayer::PaintLayer(void) :
     mEnabled(true),
-    mBrushForce(1.0f),
-    mBrushScale(1.0f),
+    mForce(1.0f),
+    mScale(1.0f),
     mBrushWidth(0),
     mBrushHeight(0),
     mHalfBrushWidth(0),
     mHalfBrushHeight(0),
     mHalfBrushWidthScaled(0),
     mHalfBrushHeightScaled(0),
+    mBrushWidthMinusOne(0),
+    mBrushHeightMinusOne(0),
     mPaintEffect(PAINT_EFFECT_COLOR),
     mPaintOverflow(PAINT_OVERFLOW_IGNORE),
     mTextureLayer(0),
@@ -43,16 +46,42 @@ PaintLayer::PaintLayer(void) :
     calculatedTexturePositionY(0),
     mAlpha(1.0f),
     mRotate(false),
-    mRotationAngle(0.2f),
+    mRotationAngle(0.0f),
     mSinRotationAngle(0.0f),
     mCosRotationAngle(0.0f),
     mPosX(0),
     mPosY(0),
     mPosXrotated(0),
-    mPosYrotated(0)
+    mPosYrotated(0),
+    mTranslate(false),
+    mTranslationFactorX(0.0f),
+    mTranslationFactorY(0.0f),
+    mTranslationX(0),
+    mTranslationY(0),
+    mMirrorHorizontal(false),
+    mMirrorVertical(false),
+    mJitterRotate(false),
+    mJitterTranslate(false),
+    mJitterScale(false),
+    mJitterForce(false),
+    mJitterPaintColour(false),
+    mJitterMirrorHorizontal(false),
+    mJitterMirrorVertical(false),
+    mJitterRotationAngleMin(0.0f),
+    mJitterRotationAngleMax(0.0f),
+    mJitterTranslationFactorXmin(0),
+    mJitterTranslationFactorXmax(0),
+    mJitterTranslationFactorYmin(0),
+    mJitterTranslationFactorYmax(0),
+    mJitterScaleMin(1.0f),
+    mJitterScaleMax(1.0f),
+    mJitterForceMin(1.0f),
+    mJitterForceMax(1.0f)
 {
     mPaintColour = Ogre::ColourValue::White;
     mFinalColour = Ogre::ColourValue::White;
+    mJitterPaintColourMin = Ogre::ColourValue::Black;
+    mJitterPaintColourMax = Ogre::ColourValue::White;
     mBrushFileName = "";
 }
 
@@ -74,6 +103,34 @@ void PaintLayer::paint(float u, float v)
     if (!mEnabled || !mTextureLayer || mTextureLayer->mTexture.isNull())
         return;
 
+    // Determine whether there are jitter effects
+    if (mJitterRotate)
+        setRotationAngle (randomBetweenTwoFloats(mJitterRotationAngleMin, mJitterRotationAngleMax));
+
+    if (mJitterTranslate)
+        setTranslation (randomBetweenTwoFloats(mJitterTranslationFactorXmin, mJitterTranslationFactorXmax),
+                        randomBetweenTwoFloats(mJitterTranslationFactorYmin, mJitterTranslationFactorYmax));
+    if (mJitterScale)
+        setScale(randomBetweenTwoFloats(mJitterScaleMin, mJitterScaleMax));
+
+    if (mJitterForce)
+        setForce(randomBetweenTwoFloats(mJitterForceMin, mJitterForceMax));
+
+    if (mJitterPaintColour)
+        setPaintColour(randomBetweenTwoColours(mJitterPaintColourMin, mJitterPaintColourMax));
+
+    if (mJitterMirrorHorizontal)
+    {
+        setJitterMirrorHorizontal();
+        mMirrorHorizontal = randomBool();
+    }
+
+    if (mJitterMirrorVertical)
+    {
+        setJitterMirrorVertical();
+        mMirrorVertical = randomBool();
+    }
+
     /* Loop through the pixelbox of the brush and apply the paint effect to the pixelbox of the texture
      * Note, that only mipmap 0 of the texture image is painted, so prevent textures with mipmaps.
      * The texture on the GPU may contain mipmaps; these ARE painted.
@@ -82,9 +139,17 @@ void PaintLayer::paint(float u, float v)
     {
         for (size_t x = 0; x < mBrushWidth; x++)
         {
-            // If rotation is enabled, calculate the rotated pixel position
+            // If mirroring, rotation and/or translation are enabled, calculate the new pixel position of the brush
             mPosX = x;
             mPosY = y;
+            if (mMirrorHorizontal)
+            {
+                mPosX = mBrushWidthMinusOne - mPosX;
+            }
+            if (mMirrorVertical)
+            {
+                mPosY = mBrushHeightMinusOne - mPosY;
+            }
             if (mRotate)
             {
                 // Calculate the rotated pixel position
@@ -99,6 +164,16 @@ void PaintLayer::paint(float u, float v)
                 if (mPosX < 0 || mPosX >= mBrushWidth || mPosY < 0 || mPosY >= mBrushHeight)
                     continue;
             }
+            if (mTranslate)
+            {
+                // Calculate the translated pixel position
+                mPosX += mTranslationX;
+                mPosY += mTranslationY;
+
+                // Determine whether the pixel position still fits within the brush dimensions
+                if (mPosX < 0 || mPosX >= mBrushWidth || mPosY < 0 || mPosY >= mBrushHeight)
+                    continue;
+            }
 
             // Calculate the position of the brush pixel to a texture position
             calculatedTexturePositionX = calculateTexturePositionX(u, x);
@@ -107,7 +182,7 @@ void PaintLayer::paint(float u, float v)
             if (mPaintEffect == PAINT_EFFECT_COLOR)
             {
                 // Paint with colour
-                mAlpha = mBrushForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
+                mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
                 mFinalColour = mAlpha * mPaintColour;
                 mFinalColour = (1.0f - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                                              calculatedTexturePositionY,
@@ -120,7 +195,7 @@ void PaintLayer::paint(float u, float v)
             else if (mPaintEffect == PAINT_EFFECT_ALPHA)
             {
                 // Paint with alpha value of the brush
-                mAlpha = mBrushForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
+                mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
                 mFinalColour = mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                            calculatedTexturePositionY,
                                                                                            0);
@@ -135,7 +210,7 @@ void PaintLayer::paint(float u, float v)
             {
                 // Paint with coloured brush
                 Ogre::ColourValue brushColour = mPixelboxBrush.getColourAt(mPosX, mPosY, 0);
-                mAlpha = mBrushForce * brushColour.a;
+                mAlpha = mForce * brushColour.a;
                 mFinalColour = (1.0 - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                                             calculatedTexturePositionY,
                                                                                                             0) + mAlpha * brushColour;
@@ -185,10 +260,16 @@ void PaintLayer::setBrush (const Ogre::String& brushFileName)
         mPixelboxBrush = mBrush.getPixelBox(0, 0);
         mBrushWidth = mBrush.getWidth();
         mHalfBrushWidth = 0.5f * mBrushWidth;
-        mHalfBrushWidthScaled = mBrushScale * mHalfBrushWidth;
+        mHalfBrushWidthScaled = mScale * mHalfBrushWidth;
+        mBrushWidthMinusOne = mBrushWidth - 1;
         mBrushHeight = mBrush.getHeight();
         mHalfBrushHeight = 0.5f * mBrushHeight;
-        mHalfBrushHeightScaled = mBrushScale * mHalfBrushHeight;
+        mHalfBrushHeightScaled = mScale * mHalfBrushHeight;
+        mBrushHeightMinusOne = mBrushHeight - 1;
+
+        mTranslationX = mTranslationFactorX * mBrushWidth;
+        mTranslationY = mTranslationFactorY * mBrushHeight;
+
     }
     catch (Ogre::Exception e) {}
 }
@@ -206,9 +287,38 @@ void PaintLayer::setPaintColour (const Ogre::ColourValue& colourValue)
 }
 
 //****************************************************************************/
-void PaintLayer::setBrushForce (float brushForce)
+void PaintLayer::setJitterPaintColour (const Ogre::ColourValue& paintColourMin, const Ogre::ColourValue& paintColourMax)
 {
-    mBrushForce = brushForce;
+    mJitterPaintColour = true;
+    mJitterPaintColourMin = paintColourMin;
+    mJitterPaintColourMax = paintColourMax;
+}
+
+//****************************************************************************/
+void PaintLayer::resetPaintColour (void)
+{
+    mJitterPaintColour = false;
+}
+
+
+//****************************************************************************/
+void PaintLayer::setForce (float force)
+{
+    mForce = force;
+}
+
+//****************************************************************************/
+void PaintLayer::setJitterForce (float jitterForceMin, float jitterForceMax)
+{
+    mJitterForce = true;
+    mJitterForceMin = jitterForceMin;
+    mJitterForceMax = jitterForceMax;
+}
+
+//****************************************************************************/
+void PaintLayer::resetForce (void)
+{
+    mJitterForce = false;
 }
 
 //****************************************************************************/
@@ -220,13 +330,73 @@ void PaintLayer::setRotationAngle (float rotationAngle)
     mCosRotationAngle = cos(rotationAngle * Ogre::Math::PI / 180);
 }
 
+//****************************************************************************/
+void PaintLayer::setJitterRotationAngle (float rotationAngleMin, float rotationAngleMax)
+{
+    mRotate = true;
+    mJitterRotate = true;
+    mJitterRotationAngleMin = rotationAngleMin;
+    mJitterRotationAngleMax = rotationAngleMax;
+}
 
 //****************************************************************************/
-void PaintLayer::setBrushScale (float brushScale)
+void PaintLayer::resetRotation (void)
 {
-    mBrushScale = brushScale;
-    mHalfBrushWidthScaled = mBrushScale * mHalfBrushWidth;
-    mHalfBrushHeightScaled = mBrushScale * mHalfBrushHeight;
+    mRotate = false;
+    mJitterRotate = false;
+}
+
+//****************************************************************************/
+void PaintLayer::setTranslation (float translationFactorX, float translationFactorY)
+{
+    mTranslate = true;
+    mTranslationFactorX = translationFactorX;
+    mTranslationFactorY = translationFactorY;
+    mTranslationX = translationFactorX * mBrushWidth;
+    mTranslationY = translationFactorY * mBrushHeight;
+}
+
+//****************************************************************************/
+void PaintLayer::setJitterTranslation (float jitterTranslationFactorXmin,
+                                       float jitterTranslationFactorXmax,
+                                       float jitterTranslationFactorYmin,
+                                       float jitterTranslationFactorYmax)
+{
+    mTranslate = true;
+    mJitterTranslate = true;
+    mJitterTranslationFactorXmin = jitterTranslationFactorXmin;
+    mJitterTranslationFactorXmax = jitterTranslationFactorXmax;
+    mJitterTranslationFactorYmin = jitterTranslationFactorYmin;
+    mJitterTranslationFactorYmax = jitterTranslationFactorYmax;
+}
+
+//****************************************************************************/
+void PaintLayer::resetTranslation (void)
+{
+    mTranslate = false;
+    mJitterTranslate = false;
+}
+
+//****************************************************************************/
+void PaintLayer::setScale (float scale)
+{
+    mScale = scale;
+    mHalfBrushWidthScaled = mScale * mHalfBrushWidth;
+    mHalfBrushHeightScaled = mScale * mHalfBrushHeight;
+}
+
+//****************************************************************************/
+void PaintLayer::setJitterScale (float jitterScaleMin, float jitterScaleMax)
+{
+    mJitterScale = true;
+    mJitterScaleMax = jitterScaleMax;
+    mJitterScaleMin = jitterScaleMin;
+}
+
+//****************************************************************************/
+void PaintLayer::resetScale (void)
+{
+    mJitterScale = false;
 }
 
 //****************************************************************************/
@@ -236,7 +406,7 @@ size_t PaintLayer::calculateTexturePositionX (float u, size_t brushPositionX)
         return 0;
 
     int w = mTextureLayer->mTextureOnWhichIsPaintedWidth;
-    int pos = (u * w) - mHalfBrushWidthScaled + mBrushScale * brushPositionX;
+    int pos = (u * w) - mHalfBrushWidthScaled + mScale * brushPositionX;
 
     if (mPaintOverflow == PAINT_OVERFLOW_IGNORE)
     {
@@ -265,7 +435,7 @@ size_t PaintLayer::calculateTexturePositionY (float v, size_t brushPositionY)
         return 0;
 
     int h = mTextureLayer->mTextureOnWhichIsPaintedHeight;
-    int pos = (v * h) - mHalfBrushHeightScaled + mBrushScale * brushPositionY;
+    int pos = (v * h) - mHalfBrushHeightScaled + mScale * brushPositionY;
 
     if (mPaintOverflow == PAINT_OVERFLOW_IGNORE)
     {
@@ -285,4 +455,42 @@ size_t PaintLayer::calculateTexturePositionY (float v, size_t brushPositionY)
     }
 
     return pos;
+}
+
+//****************************************************************************/
+void PaintLayer::setMirrorHorizontal (bool mirrored)
+{
+    mMirrorHorizontal = mirrored;
+}
+
+//****************************************************************************/
+void PaintLayer::setJitterMirrorHorizontal (void)
+{
+    mJitterMirrorHorizontal = true;
+}
+
+//****************************************************************************/
+void PaintLayer::resetMirrorHorizontal (void)
+{
+    mMirrorHorizontal = false;
+    mJitterMirrorHorizontal = false;
+}
+
+//****************************************************************************/
+void PaintLayer::setMirrorVertical (bool mirrored)
+{
+    mMirrorVertical = mirrored;
+}
+
+//****************************************************************************/
+void PaintLayer::setJitterMirrorVertical (void)
+{
+    mJitterMirrorVertical = true;
+}
+
+//****************************************************************************/
+void PaintLayer::resetMirrorVertical (void)
+{
+    mMirrorVertical = false;
+    mJitterMirrorVertical = false;
 }

@@ -506,21 +506,30 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
         paintLayer = mParent->mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
                                                          Ogre::PbsTextureTypes::PBSM_DETAIL0,
                                                          "../examples/10points.png");
-        paintLayer->setBrush("../common/brushes/brush_001.png");
-        paintLayer->setBrushScale(0.5);
-        paintLayer->setBrushForce(1.0);
-        paintLayer->setPaintColour(Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
-        paintLayer->setRotationAngle(-45);
-        paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_COLOR);
-
-        paintLayer = mParent->mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
-                                                         Ogre::PbsTextureTypes::PBSM_DETAIL0,
-                                                         "../examples/10points.png");
-        paintLayer->setBrush("../common/brushes/brush_002.png");
-        paintLayer->setBrushScale(0.5f);
-        paintLayer->setBrushForce(0.2);
-        paintLayer->setRotationAngle(45);
+        paintLayer->setBrush("../common/brushes/brush_grass_01.png");
+        //paintLayer->setScale(0.5);
+        paintLayer->setJitterScale(0.4, 1.0);
+        //paintLayer->setTranslation(-0.2, -0.2f);
+        paintLayer->setJitterTranslation(-0.2, 0.2, 0.0, 0.0);
+        //paintLayer->setPaintColour(Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
+        //paintLayer->setJitterPaintColour(Ogre::ColourValue(0.4f, 0.1f, 0.4f, 1.0f), Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
+        //paintLayer->setRotationAngle(-45);
+        paintLayer->setJitterRotationAngle(-20, 20);
+        paintLayer->setJitterForce(0.5, 1);
+        paintLayer->setJitterMirrorHorizontal();
         paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_TEXTURE);
+
+        //paintLayer = mParent->mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
+          //                                               Ogre::PbsTextureTypes::PBSM_DETAIL0,
+            //                                             "../examples/10points.png");
+        //paintLayer->setBrush("../common/brushes/brush_002.png");
+        //paintLayer->setScale(0.3f);
+        //paintLayer->setForce(0.2);
+        //paintLayer->setRotationAngle(45);
+        //paintLayer->setJitterRotationAngle(-20, 20);
+        //paintLayer->setJitterTranslation(-0.1, 0.1, 0.0, 0.0);
+        //paintLayer->setTranslation(0.2f, 0.0f);
+        //paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_TEXTURE);
 
         mOgreWidget->setPaintLayers(mParent->mPaintLayerManager.getPaintLayers());
         // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
