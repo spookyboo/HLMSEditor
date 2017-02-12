@@ -19,6 +19,7 @@
 ****************************************************************************/
 
 // Include
+#include <float.h>
 #include <QGraphicsTextItem>
 #include <QMessageBox>
 #include <QtGlobal>

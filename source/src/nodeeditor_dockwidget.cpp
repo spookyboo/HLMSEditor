@@ -22,7 +22,7 @@
 #include "constants.h"
 #include "magus_core.h"
 #include "mainwindow.h"
-#include "NodeEditor_dockwidget.h"
+#include "nodeeditor_dockwidget.h"
 #include "OgreHlmsPbsDatablock.h"
 #include "hlms_pbs_builder.h"
 #include "hlms_unlit_builder.h"
@@ -503,11 +503,11 @@ void NodeEditorDockWidget::nodeConnected(QtNode* baseNode, QtNode* targetNode)
 EditorHlmsTypes NodeEditorDockWidget::getCurrentDatablockType(void)
 {
     if (mHlmsPbsDatablockNode)
-        return EditorHlmsTypes::HLMS_PBS;
+        return HLMS_PBS;
     else if (mHlmsUnlitDatablockNode)
-        return EditorHlmsTypes::HLMS_UNLIT;
+        return HLMS_UNLIT;
 
-    return EditorHlmsTypes::HLMS_NONE;
+    return HLMS_NONE;
 }
 
 //****************************************************************************/

@@ -67,7 +67,7 @@ include_directories( "${CMAKE_CURRENT_SOURCE_DIR}/source/header/" )
 include_directories( "${CMAKE_CURRENT_SOURCE_DIR}/framework/header" )
 
 set(CMAKE_AUTOMOC ON)
-find_package(Qt5 REQUIRED COMPONENTS widgets opengl multimedia)
+find_package(Qt5 REQUIRED COMPONENTS Widgets OpenGL Multimedia)
 find_package(OpenGL REQUIRED)
 
 set (HEADER_FILES
@@ -139,6 +139,9 @@ set (HEADER_FILES
     source/header/hlms_editor_plugin.h
     source/header/hlms_editor_plugin_action.h
     source/header/recent_file_action.h
+    source/header/hlms_utils_manager.h
+    source/header/config_dialog.h
+    source/header/config_pages.h
 )
 
 set (SOURCE_FILES
@@ -199,6 +202,9 @@ set (SOURCE_FILES
     source/src/texture_tree.cpp
     source/src/hlms_editor_plugin_action.cpp
     source/src/recent_file_action.cpp
+    source/src/hlms_utils_manager.cpp
+    source/src/config_dialog.cpp
+    source/src/config_pages.cpp
 )
 
 if(Boost_FOUND)
