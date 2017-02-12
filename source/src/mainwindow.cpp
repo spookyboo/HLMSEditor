@@ -365,11 +365,18 @@ void MainWindow::createDockWindows(void)
     addDockWidget(Qt::LeftDockWidgetArea, mRenderwindowDockWidget);
     mPropertiesDockWidget = new PropertiesDockWidget("Properties", this);
     addDockWidget(Qt::LeftDockWidgetArea, mPropertiesDockWidget);
-
     mTextureDockWidget = new TextureDockWidget("Textures", this);
-    addDockWidget(Qt::RightDockWidgetArea, mTextureDockWidget);
+    //addDockWidget(Qt::RightDockWidgetArea, mTextureDockWidget);
     mNodeEditorDockWidget = new NodeEditorDockWidget("NodeEditor", this);
-    addDockWidget(Qt::RightDockWidgetArea, mNodeEditorDockWidget);
+    //addDockWidget(Qt::RightDockWidgetArea, mNodeEditorDockWidget);
+    mPaintDockWidget = new PaintDockWidget("Paint", this);
+    addDockWidget(Qt::RightDockWidgetArea, mPaintDockWidget);
+
+    mCentralDockWidget = new CentralDockWidget("", this);
+    setCentralWidget(mCentralDockWidget);
+    mCentralDockWidget->addDockWidget(Qt::RightDockWidgetArea, mTextureDockWidget);
+    mCentralDockWidget->addDockWidget(Qt::RightDockWidgetArea, mNodeEditorDockWidget);
+
     connect(mTextureDockWidget, SIGNAL(textureDoubleClicked(QString,QString)), this, SLOT(handleTextureDoubleClicked(QString,QString)));
     connect(mTextureDockWidget, SIGNAL(customContextMenuItemSelected(QString)), this, SLOT(handleCustomContextMenuItemSelected(QString)));
     connect(mTextureDockWidget, SIGNAL(textureMutationOccured()), this, SLOT(handleTextureMutationOccured()));
@@ -630,6 +637,7 @@ void MainWindow::loadMesh(const QString meshFileName)
             else
             {
                 ogreWidget->createItem(v2MeshPtr.getPointer()->getName(), Ogre::Vector3::UNIT_SCALE);
+                v2MeshPtr.setNull();
 
                 // Add to mesh map
                 mRenderwindowDockWidget->addToMeshMap(baseName, baseName, QVector3D(1.0f, 1.0f, 1.0f));
@@ -680,65 +688,12 @@ void MainWindow::saveV2Mesh(Ogre::MeshPtr v2MeshPtr, QString meshFileName)
 bool MainWindow::isMeshV1(const QString meshFileName)
 {
     return (getMeshVersion(meshFileName) == 1);
-
-    /*
-    Ogre::SceneManager* sceneManager = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getSceneManager();
-    if (!sceneManager)
-        return false;
-
-    Ogre::v1::MeshPtr v1MeshPtr;
-    try
-    {
-        Ogre::v1::MeshSerializer meshSerializer;
-        Ogre::DataStreamPtr stream(openFile(meshFileName.toStdString()));
-        Ogre::String name = Ogre::StringConverter::toString(mOgreManager->getOgreRoot()->getTimer()->getMicroseconds());
-        v1MeshPtr = Ogre::v1::MeshManager::getSingleton().createManual(name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
-        meshSerializer.importMesh(stream, v1MeshPtr.get());
-        v1MeshPtr->unload();
-    }
-    catch (Ogre::Exception e)
-    {
-        return false;
-    }
-
-    */
-    return true;
 }
 
 //****************************************************************************/
 bool MainWindow::isMeshV2(const QString meshFileName)
 {
     return (getMeshVersion(meshFileName) == 2);
-
-    /*
-    Ogre::SceneManager* sceneManager = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getSceneManager();
-    if (!sceneManager)
-        return false;
-
-    Ogre::MeshPtr v2MeshPtr;
-    try
-    {
-        Ogre::RenderSystem* renderSystem = mOgreManager->getOgreRoot()->getRenderSystem();
-        Ogre::VaoManager* vaoManager = renderSystem->getVaoManager();
-        Ogre::MeshSerializer meshSerializer(vaoManager);
-        Ogre::DataStreamPtr stream(openFile(meshFileName.toStdString()));
-        Ogre::String name = Ogre::StringConverter::toString(mOgreManager->getOgreRoot()->getTimer()->getMicroseconds());
-        v2MeshPtr = Ogre::MeshManager::getSingleton().createManual(name, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
-        meshSerializer.importMesh(stream, v2MeshPtr.get());
-        v2MeshPtr->unload();
-    }
-    catch (Ogre::Exception e)
-    {
-        return false;
-    }
-
-    catch (int e)
-    {
-        return false;
-    }
-
-    return true;
-    */
 }
 
 //****************************************************************************/
@@ -783,6 +738,7 @@ Ogre::MeshPtr MainWindow::convertMeshV1ToV2(const QString baseNameMeshV1)
     v2MeshPtr = Ogre::MeshManager::getSingleton().createManual(baseNameMeshV1.toStdString(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
     v2MeshPtr->importV1 (v1MeshPtr.get(), true, true, true);
     v1MeshPtr->unload();
+    v1MeshPtr.setNull();
     return v2MeshPtr;
 }
 
@@ -1175,11 +1131,15 @@ void MainWindow::doResetWindowLayoutMenuAction(void)
     mRenderwindowDockWidget->show();
     addDockWidget(Qt::LeftDockWidgetArea, mRenderwindowDockWidget);
     addDockWidget(Qt::LeftDockWidgetArea, mPropertiesDockWidget);
-
     mTextureDockWidget->show();
-    addDockWidget(Qt::RightDockWidgetArea, mTextureDockWidget);
+    //addDockWidget(Qt::RightDockWidgetArea, mTextureDockWidget);
     mNodeEditorDockWidget->show();
-    addDockWidget(Qt::RightDockWidgetArea, mNodeEditorDockWidget);
+    //addDockWidget(Qt::RightDockWidgetArea, mNodeEditorDockWidget);
+    mPaintDockWidget->show();
+    addDockWidget(Qt::RightDockWidgetArea, mPaintDockWidget);
+
+    mCentralDockWidget->show();
+    setCentralWidget(mCentralDockWidget);
 }
 
 //****************************************************************************/

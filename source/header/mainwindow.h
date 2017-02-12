@@ -34,6 +34,8 @@
 #include "properties_dockwidget.h"
 #include "texture_dockwidget.h"
 #include "nodeeditor_dockwidget.h"
+#include "paint_dockwidget.h"
+#include "central_dockwidget.h"
 #include "material_browser_dialog.h"
 #include "ogre3_renderman.h"
 #include "hlms_editor_plugin.h"
@@ -63,6 +65,7 @@ class MainWindow : public QMainWindow
         Magus::OgreManager* getOgreManager(void) const {return mOgreManager;}
         PropertiesDockWidget* mPropertiesDockWidget; // Make is public for easy access
         TextureDockWidget* mTextureDockWidget; // Make is public for easy access
+        PaintDockWidget* mPaintDockWidget; // Make is public for easy access
         void initCurrentDatablockFileName(void); // Set the name of the current json file to ""
         void getListOfResources(void); // Function to test which resources are loaded
         EditorHlmsTypes getCurrentDatablockType(void); // Returns the current hlms type
@@ -177,6 +180,7 @@ class MainWindow : public QMainWindow
         QAction* mResetWindowLayoutMenuAction;
         RenderwindowDockWidget* mRenderwindowDockWidget;
         NodeEditorDockWidget* mNodeEditorDockWidget;
+        CentralDockWidget* mCentralDockWidget;
         Magus::OgreManager* mOgreManager;
         QString mProjectName;
         QString mProjectPath;

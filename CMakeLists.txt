@@ -71,10 +71,6 @@ find_package(Qt5 REQUIRED COMPONENTS Widgets OpenGL Multimedia)
 find_package(OpenGL REQUIRED)
 
 set (HEADER_FILES
-    source/header/mainwindow.h
-    source/header/renderwindow_dockwidget.h
-    source/header/properties_dockwidget.h
-    source/header/nodeeditor_dockwidget.h
     framework/header/asset_assetconstants.h
     framework/header/asset_assetwidget.h
     framework/header/asset_clickableframe.h
@@ -106,6 +102,17 @@ set (HEADER_FILES
     framework/header/ogre3_renderman.h
     framework/header/ogre3_widget.h
     framework/header/ogre_prereqs.h
+    framework/header/node_view.h
+    framework/header/tb_transformationwidget.h
+    framework/header/magus_treewidget.h
+    framework/header/node_scene.h
+    framework/header/tool_default_texturewidget.h
+    framework/header/tool_resourcetree_widget.h
+    framework/header/asset_propertywidget_slider_decimal.h
+    source/header/mainwindow.h
+    source/header/renderwindow_dockwidget.h
+    source/header/properties_dockwidget.h
+    source/header/nodeeditor_dockwidget.h
     source/header/hlms_node_pbs_datablock.h
     source/header/hlms_node_porttypes.h
     source/header/constants.h
@@ -121,11 +128,6 @@ set (HEADER_FILES
     source/header/hlms_properties_unlit_datablock.h
     source/header/hlms_node_unlit_datablock.h
     source/header/hlms_unlit_builder.h
-    framework/header/tb_transformationwidget.h
-    framework/header/magus_treewidget.h
-    framework/header/node_scene.h
-    framework/header/tool_default_texturewidget.h
-    framework/header/tool_resourcetree_widget.h
     source/header/material_browser.h
     source/header/material_tree.h
     source/header/material_main.h
@@ -135,21 +137,19 @@ set (HEADER_FILES
     source/header/texture_main.h
     source/header/texture_thumbs.h
     source/header/texture_tree.h
-    framework/header/node_view.h
     source/header/hlms_editor_plugin.h
     source/header/hlms_editor_plugin_action.h
     source/header/recent_file_action.h
     source/header/hlms_utils_manager.h
     source/header/config_dialog.h
     source/header/config_pages.h
+    source/header/texturelayer.h
+    source/header/texturelayer_manager.h
+    source/header/paintlayer.h
+    source/header/paintlayer_manager.h
 )
 
 set (SOURCE_FILES
-    source/src/main.cpp
-    source/src/mainwindow.cpp
-    source/src/renderwindow_dockwidget.cpp 
-    source/src/properties_dockwidget.cpp 
-    source/src/nodeeditor_dockwidget.cpp 
     framework/src/asset_assetwidget.cpp
     framework/src/asset_containerwidget.cpp
     framework/src/asset_curve_dialog.cpp
@@ -161,10 +161,12 @@ set (SOURCE_FILES
     framework/src/asset_propertywidget_quaternion.cpp
     framework/src/asset_propertywidget_select.cpp
     framework/src/asset_propertywidget_slider.cpp
+    framework/src/asset_propertywidget_slider_decimal.cpp
     framework/src/asset_propertywidget_string.cpp
     framework/src/asset_propertywidget_texture.cpp
     framework/src/asset_propertywidget_xy.cpp
     framework/src/asset_propertywidget_xyz.cpp
+    framework/src/magus_treewidget.cpp
     framework/src/node_compound.cpp
     framework/src/node_connection.cpp
     framework/src/node_editorwidget.cpp
@@ -173,6 +175,15 @@ set (SOURCE_FILES
     framework/src/node_porttype.cpp
     framework/src/ogre3_renderman.cpp
     framework/src/ogre3_widget.cpp
+    framework/src/tb_transformationwidget.cpp
+    framework/src/magus_treewidget.cpp
+    framework/src/tool_resourcetree_widget.cpp
+    framework/src/tool_default_texturewidget.cpp
+    source/src/main.cpp
+    source/src/mainwindow.cpp
+    source/src/renderwindow_dockwidget.cpp 
+    source/src/properties_dockwidget.cpp 
+    source/src/nodeeditor_dockwidget.cpp 
     source/src/hlms_node_pbs_datablock.cpp
     source/src/hlms_node_porttypes.cpp
     source/src/hlms_node_samplerblock.cpp
@@ -187,10 +198,6 @@ set (SOURCE_FILES
     source/src/hlms_properties_unlit_datablock.cpp
     source/src/hlms_node_unlit_datablock.cpp
     source/src/hlms_unlit_builder.cpp
-    framework/src/tb_transformationwidget.cpp
-    framework/src/magus_treewidget.cpp
-    framework/src/tool_default_texturewidget.cpp
-    framework/src/tool_resourcetree_widget.cpp
     source/src/material_browser.cpp
     source/src/material_main.cpp
     source/src/material_tree.cpp
@@ -205,6 +212,10 @@ set (SOURCE_FILES
     source/src/hlms_utils_manager.cpp
     source/src/config_dialog.cpp
     source/src/config_pages.cpp
+    source/src/texturelayer.cpp
+    source/src/texturelayer_manager.cpp
+    source/src/paintlayer.cpp
+    source/src/paintlayer_manager.cpp
 )
 
 if(Boost_FOUND)

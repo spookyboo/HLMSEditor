@@ -502,13 +502,12 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
     if (action->text() == ACTION_SET_CURRENT_MATERIAL)
     {
         // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
-        /*
         PaintLayer* paintLayer;
 
         // First layer
         paintLayer = mParent->mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
                                                                   Ogre::PbsTextureTypes::PBSM_DETAIL0,
-                                                                  "../examples/10points.png");
+                                                                  "../examples/10points.png"); // Can only be tested with 10points.png
         paintLayer->setBrush("../common/brushes/leaf.png");
         paintLayer->setJitterScale(0.1, 1.0);
         paintLayer->setJitterScaleInterval(0.1);
@@ -539,7 +538,6 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
 
         mOgreWidget->setPaintLayers(mParent->mPaintLayerManager.getPaintLayers());
         // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
-        */
 
         mOgreWidget->assignCurrentDatablock();
         return;

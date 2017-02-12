@@ -79,7 +79,10 @@ HEADERS       = \
     source/header/paintlayer.h \
     source/header/texturelayer.h \
     source/header/paintlayer_manager.h \
-    source/header/texturelayer_manager.h
+    source/header/texturelayer_manager.h \
+    source/header/paint_dockwidget.h \
+    source/header/central_dockwidget.h \
+    source/header/paintlayer_widget.h
 
 
 SOURCES       = \
@@ -147,7 +150,10 @@ SOURCES       = \
     source/src/paintlayer.cpp \
     source/src/texturelayer.cpp \
     source/src/paintlayer_manager.cpp \
-    source/src/texturelayer_manager.cpp
+    source/src/texturelayer_manager.cpp \
+    source/src/paint_dockwidget.cpp \
+    source/src/central_dockwidget.cpp \
+    source/src/paintlayer_widget.cpp
 
 
 INCLUDEPATH += "../HLMSEditor/source/header/"
