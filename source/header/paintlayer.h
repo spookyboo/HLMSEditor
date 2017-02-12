@@ -51,7 +51,7 @@
 class PaintLayerManager;
 class PaintLayer
 {
-	public:
+    public:
         enum PaintEffects
         {
             PAINT_EFFECT_COLOR, /// Paint with color
@@ -73,6 +73,7 @@ class PaintLayer
         /* Enable or disable the layer for painting
          */
         void enable(bool enabled);
+        bool isEnabled (void) {return mEnabled;}
 
         /* Apply the paint effect.
          */
@@ -242,6 +243,10 @@ class PaintLayer
          */
         void resetMirrorVertical (void);
 
+        /* Returns the datablock name (IdString) of the datablock used by this PaintLayer
+         */
+        Ogre::IdString getDatablockName (void);
+
     private:
             clock_t mStartTime;
             clock_t mEndTime;
@@ -320,10 +325,12 @@ class PaintLayer
             Ogre::ColourValue mJitterPaintColourMin;        // Min. value used for jittering paint colour
             Ogre::ColourValue mJitterPaintColourMax;        // Max. value used for jittering paint colour
             PaintLayerManager* mPaintLayerManager;
+            Ogre::IdString dummyDatablockId;
 
             // Private functions
             size_t calculateTexturePositionX (float u, size_t brushPositionX);
             size_t calculateTexturePositionY (float v, size_t brushPositionY);
+            void determineJitterEffects (void);
 };
 
 typedef std::vector<PaintLayer*> PaintLayers;

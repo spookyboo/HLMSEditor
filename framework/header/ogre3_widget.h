@@ -105,6 +105,7 @@ namespace Magus
             bool isSkyBoxVisible (void);
             void setSkyBoxVisible (bool visible);
             void setPaintLayers(PaintLayers* paintLayers); // Set pointer to vector with PaintLayers
+            int getSubItemIndexWithMouseOver(int mouseX, int mouseY); // Returns the subitem index of the subitem where the mouse hoovers over
 
         protected:
             Ogre::Root* mRoot;

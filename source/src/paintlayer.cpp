@@ -100,6 +100,7 @@ PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager) :
     mJitterPaintColourMin = Ogre::ColourValue::Black;
     mJitterPaintColourMax = Ogre::ColourValue::White;
     mBrushFileName = "";
+    dummyDatablockId = "";
     mStartTime = clock();
 }
 
@@ -121,82 +122,10 @@ void PaintLayer::paint(float u, float v)
     if (!mEnabled || !mTextureLayer || mTextureLayer->mTexture.isNull())
         return;
 
-    // Get the elapsed time
-    mEndTime = clock();
-    mJitterElapsedTime = (float)(mEndTime - mStartTime) / CLOCKS_PER_SEC;
-    mStartTime = mEndTime;
-
-    // Determine whether there are jitter effects
-    if (mJitterRotate)
-    {
-        mJitterRotateElapsedTime += mJitterElapsedTime;
-        if (mJitterRotateElapsedTime > mJitterRotationAngleInterval)
-        {
-            setRotationAngle (randomBetweenTwoFloats(mJitterRotationAngleMin, mJitterRotationAngleMax));
-            mJitterRotateElapsedTime = 0.0f;
-        }
-    }
-
-    if (mJitterTranslate)
-    {
-        mJitterTranslationElapsedTime += mJitterElapsedTime;
-        if (mJitterTranslationElapsedTime > mJitterTranslationInterval)
-        {
-            setTranslationFactor(randomBetweenTwoFloats(mJitterTranslationFactorXmin, mJitterTranslationFactorXmax),
-                                 randomBetweenTwoFloats(mJitterTranslationFactorYmin, mJitterTranslationFactorYmax));
-            mJitterTranslationElapsedTime = 0.0f;
-        }
-    }
-
-    if (mJitterScale)
-    {
-        mJitterScaleElapsedTime += mJitterElapsedTime;
-        if (mJitterScaleElapsedTime > mJitterScaleInterval)
-        {
-            setScale(randomBetweenTwoFloats(mJitterScaleMin, mJitterScaleMax));
-            mJitterScaleElapsedTime = 0.0f;
-        }
-    }
-
-    if (mJitterForce)
-    {
-        mJitterForceElapsedTime += mJitterElapsedTime;
-        if (mJitterForceElapsedTime > mJitterForceInterval)
-        {
-            setForce(randomBetweenTwoFloats(mJitterForceMin, mJitterForceMax));
-            mJitterForceElapsedTime = 0.0f;
-        }
-    }
-
-    if (mJitterPaintColour)
-    {
-        mJitterPaintColourElapsedTime += mJitterElapsedTime;
-        if (mJitterPaintColourElapsedTime > mJitterPaintColourInterval)
-        {
-            setPaintColour(randomBetweenTwoColours(mJitterPaintColourMin, mJitterPaintColourMax));
-            mJitterPaintColourElapsedTime = 0.0f;
-        }
-    }
-
-    if (mJitterMirrorHorizontal)
-    {
-        mJitterMirrorHorizontalElapsedTime += mJitterElapsedTime;
-        if (mJitterMirrorHorizontalElapsedTime > mJitterMirrorHorizontalInterval)
-        {
-            mMirrorHorizontal = randomBool();
-            mJitterMirrorHorizontalElapsedTime = 0.0f;
-        }
-    }
-
-    if (mJitterMirrorVertical)
-    {
-        mJitterMirrorVerticalElapsedTime += mJitterElapsedTime;
-        if (mJitterMirrorVerticalElapsedTime > mJitterMirrorVerticalInterval)
-        {
-            mMirrorVertical = randomBool();
-            mJitterMirrorVerticalElapsedTime = 0.0f;
-        }
-    }
+    /* If there are jitter effects, they are applied first. This means that certain jitter attributes are set
+     * to s specific value, so the brush image is applied to the texture according to these jitter attributes.
+     */
+    determineJitterEffects();
 
     /* Loop through the pixelbox of the brush and apply the paint effect to the pixelbox of the texture
      * Note, that only mipmap 0 of the texture image is painted, so prevent textures with mipmaps.
@@ -602,4 +531,94 @@ size_t PaintLayer::calculateTexturePositionY (float v, size_t brushPositionY)
     }
 
     return pos;
+}
+
+//****************************************************************************/
+void PaintLayer::determineJitterEffects (void)
+{
+    // Get the elapsed time
+    mEndTime = clock();
+    mJitterElapsedTime = (float)(mEndTime - mStartTime) / CLOCKS_PER_SEC;
+    mStartTime = mEndTime;
+
+    // Determine whether there are jitter effects
+    if (mJitterRotate)
+    {
+        mJitterRotateElapsedTime += mJitterElapsedTime;
+        if (mJitterRotateElapsedTime > mJitterRotationAngleInterval)
+        {
+            setRotationAngle (randomBetweenTwoFloats(mJitterRotationAngleMin, mJitterRotationAngleMax));
+            mJitterRotateElapsedTime = 0.0f;
+        }
+    }
+
+    if (mJitterTranslate)
+    {
+        mJitterTranslationElapsedTime += mJitterElapsedTime;
+        if (mJitterTranslationElapsedTime > mJitterTranslationInterval)
+        {
+            setTranslationFactor(randomBetweenTwoFloats(mJitterTranslationFactorXmin, mJitterTranslationFactorXmax),
+                                 randomBetweenTwoFloats(mJitterTranslationFactorYmin, mJitterTranslationFactorYmax));
+            mJitterTranslationElapsedTime = 0.0f;
+        }
+    }
+
+    if (mJitterScale)
+    {
+        mJitterScaleElapsedTime += mJitterElapsedTime;
+        if (mJitterScaleElapsedTime > mJitterScaleInterval)
+        {
+            setScale(randomBetweenTwoFloats(mJitterScaleMin, mJitterScaleMax));
+            mJitterScaleElapsedTime = 0.0f;
+        }
+    }
+
+    if (mJitterForce)
+    {
+        mJitterForceElapsedTime += mJitterElapsedTime;
+        if (mJitterForceElapsedTime > mJitterForceInterval)
+        {
+            setForce(randomBetweenTwoFloats(mJitterForceMin, mJitterForceMax));
+            mJitterForceElapsedTime = 0.0f;
+        }
+    }
+
+    if (mJitterPaintColour)
+    {
+        mJitterPaintColourElapsedTime += mJitterElapsedTime;
+        if (mJitterPaintColourElapsedTime > mJitterPaintColourInterval)
+        {
+            setPaintColour(randomBetweenTwoColours(mJitterPaintColourMin, mJitterPaintColourMax));
+            mJitterPaintColourElapsedTime = 0.0f;
+        }
+    }
+
+    if (mJitterMirrorHorizontal)
+    {
+        mJitterMirrorHorizontalElapsedTime += mJitterElapsedTime;
+        if (mJitterMirrorHorizontalElapsedTime > mJitterMirrorHorizontalInterval)
+        {
+            mMirrorHorizontal = randomBool();
+            mJitterMirrorHorizontalElapsedTime = 0.0f;
+        }
+    }
+
+    if (mJitterMirrorVertical)
+    {
+        mJitterMirrorVerticalElapsedTime += mJitterElapsedTime;
+        if (mJitterMirrorVerticalElapsedTime > mJitterMirrorVerticalInterval)
+        {
+            mMirrorVertical = randomBool();
+            mJitterMirrorVerticalElapsedTime = 0.0f;
+        }
+    }
+}
+
+//****************************************************************************/
+Ogre::IdString PaintLayer::getDatablockName (void)
+{
+    if (!mTextureLayer)
+        return dummyDatablockId;
+
+    return mTextureLayer->mDatablockName;
 }
