@@ -213,9 +213,9 @@ void MaterialMain::handleResourceCloned(int toplevelId, int parentId, int resour
         // Clone the filename
         EditorHlmsTypes type;
         if (toplevelId == TOOL_SOURCES_LEVEL_X000_PBS)
-            type = EditorHlmsTypes::HLMS_PBS;
+            type = HLMS_PBS;
         else if (toplevelId == TOOL_SOURCES_LEVEL_X000_UNLIT)
-            type = EditorHlmsTypes::HLMS_UNLIT;
+            type = HLMS_UNLIT;
 
         // TODO: Open the copied file in the editor and rename the Hlms name in the editor and generate the material
 
@@ -227,8 +227,8 @@ void MaterialMain::handleResourceCloned(int toplevelId, int parentId, int resour
         QString clonedBaseNameThumb = QString ("CloneOf") + baseNameThumb;
 
         // Copy the json file
-        std::ifstream  srcJson(name.toStdString(), std::ios::binary);
-        std::ofstream  dstJson(clonedName.toStdString(), std::ios::binary);
+        std::ifstream  srcJson(name.toStdString().c_str(), std::ios::binary);
+        std::ofstream  dstJson(clonedName.toStdString().c_str(), std::ios::binary);
         dstJson << srcJson.rdbuf();
         srcJson.close();
         dstJson.close();
@@ -237,8 +237,8 @@ void MaterialMain::handleResourceCloned(int toplevelId, int parentId, int resour
         // TODO
 
         // Copy the thumb file
-        std::ifstream  srcThumb((THUMBS_PATH.c_str() + baseNameThumb).toStdString(), std::ios::binary);
-        std::ofstream  dstThumb((THUMBS_PATH.c_str() + clonedBaseNameThumb).toStdString(), std::ios::binary);
+        std::ifstream  srcThumb((THUMBS_PATH.c_str() + baseNameThumb).toStdString().c_str(), std::ios::binary);
+        std::ofstream  dstThumb((THUMBS_PATH.c_str() + clonedBaseNameThumb).toStdString().c_str(), std::ios::binary);
         dstThumb << srcThumb.rdbuf();
         srcThumb.close();
         dstThumb.close();

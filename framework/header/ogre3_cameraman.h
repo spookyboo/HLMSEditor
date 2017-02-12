@@ -29,6 +29,7 @@ namespace Magus
 {
     enum CameraMode   // enumerator values for different styles of camera movement
     {
+   CM_NONE = -1,
 	CM_BLENDER,
 	CM_FLY,	    // WIP
 	CM_ORBIT    // WIP
@@ -76,6 +77,7 @@ namespace Magus
 		, mGoingRight(false)
 		, mGoingUp(false)
 		, mGoingDown(false)
+      , mMode(CM_NONE)
 		{
 			setCamera(cam);
 			setMode(CM_BLENDER);

@@ -42,6 +42,7 @@ namespace Magus
     static const Ogre::String SKYBOX_MATERIAL_NAME = "SkyPostprocess";
     static const int MAX_SCREEN_SIZE_INT = 10000; // Arbritrary value, but screen size is usually not larger than this, right?
 
+
     class OgreManager;
 
     /****************************************************************************
@@ -165,7 +166,7 @@ namespace Magus
             virtual void mousePressEvent(QMouseEvent* e);
             virtual void mouseReleaseEvent(QMouseEvent* e);
             virtual void mouseDoubleClickEvent(QMouseEvent *event);
-            HGLRC getCurrentGlContext(void);
+            GL_CONTEXT getCurrentGlContext(void);
             void rotateLight(Ogre::Vector2 relativeMouseMove);
             const Ogre::ColourValue& calculateIndexToColour(int index);
             int calculateColourToIndex(const Ogre::ColourValue& colourValue);
