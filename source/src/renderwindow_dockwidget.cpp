@@ -505,6 +505,7 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
         PaintLayer* paintLayer;
 
         // First layer
+        /*
         paintLayer = mParent->mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
                                                                   Ogre::PbsTextureTypes::PBSM_DETAIL0,
                                                                   "../examples/10points.png");
@@ -513,8 +514,10 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
         paintLayer->setJitterScaleInterval(0.1);
         paintLayer->setJitterRotationAngle(0, 360);
         paintLayer->setJitterRotationAngleInterval(0.5);
+        paintLayer->setJitterForce(0.0f, 1.0f);
         paintLayer->setJitterPaintColour(Ogre::ColourValue(0.4f, 0.1f, 0.4f, 1.0f), Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
         paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_COLOR);
+        */
 
         // Second layer
         paintLayer = mParent->mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
@@ -522,17 +525,17 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
                                                          "../examples/10points.png");
         paintLayer->setBrush("../common/brushes/brush_grass_01.png");
         //paintLayer->setScale(0.5);
-        //paintLayer->setJitterScale(0.4, 1.0);
+        paintLayer->setJitterScale(0.0, 0.5);
         //paintLayer->setTranslation(-0.2, -0.2f);
-        paintLayer->setJitterTranslation(-0.2, 0.2, 0.0, 0.0);
+        paintLayer->setJitterTranslationFactor(-0.2, 0.2, 0.0, 0.0);
         paintLayer->setJitterTranslationInterval(0.7);
         //paintLayer->setPaintColour(Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
         //paintLayer->setJitterPaintColour(Ogre::ColourValue(0.4f, 0.1f, 0.4f, 1.0f), Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
         //paintLayer->setRotationAngle(-45);
-        paintLayer->setJitterRotationAngle(-10, 10);
+        paintLayer->setJitterRotationAngle(-30, 30);
         paintLayer->setJitterRotationAngleInterval(0.2);
         //paintLayer->setJitterForce(0.5, 1);
-        //paintLayer->setJitterMirrorHorizontal();
+        paintLayer->setJitterMirrorHorizontal(true);
         paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_TEXTURE);
 
         mOgreWidget->setPaintLayers(mParent->mPaintLayerManager.getPaintLayers());

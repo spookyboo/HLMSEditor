@@ -69,7 +69,7 @@ PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager) :
     mJitterPaintColour(false),
     mJitterMirrorHorizontal(false),
     mJitterMirrorVertical(false),
-    mJitterRotateInterval(0.0f),
+    mJitterRotationAngleInterval(0.0f),
     mJitterTranslationInterval(0.0f),
     mJitterScaleInterval(0.0f),
     mJitterForceInterval(0.0f),
@@ -130,7 +130,7 @@ void PaintLayer::paint(float u, float v)
     if (mJitterRotate)
     {
         mJitterRotateElapsedTime += mJitterElapsedTime;
-        if (mJitterRotateElapsedTime > mJitterRotateInterval)
+        if (mJitterRotateElapsedTime > mJitterRotationAngleInterval)
         {
             setRotationAngle (randomBetweenTwoFloats(mJitterRotationAngleMin, mJitterRotationAngleMax));
             mJitterRotateElapsedTime = 0.0f;
@@ -142,8 +142,8 @@ void PaintLayer::paint(float u, float v)
         mJitterTranslationElapsedTime += mJitterElapsedTime;
         if (mJitterTranslationElapsedTime > mJitterTranslationInterval)
         {
-            setTranslation (randomBetweenTwoFloats(mJitterTranslationFactorXmin, mJitterTranslationFactorXmax),
-                            randomBetweenTwoFloats(mJitterTranslationFactorYmin, mJitterTranslationFactorYmax));
+            setTranslationFactor(randomBetweenTwoFloats(mJitterTranslationFactorXmin, mJitterTranslationFactorXmax),
+                                 randomBetweenTwoFloats(mJitterTranslationFactorYmin, mJitterTranslationFactorYmax));
             mJitterTranslationElapsedTime = 0.0f;
         }
     }
@@ -183,7 +183,6 @@ void PaintLayer::paint(float u, float v)
         mJitterMirrorHorizontalElapsedTime += mJitterElapsedTime;
         if (mJitterMirrorHorizontalElapsedTime > mJitterMirrorHorizontalInterval)
         {
-            setJitterMirrorHorizontal();
             mMirrorHorizontal = randomBool();
             mJitterMirrorHorizontalElapsedTime = 0.0f;
         }
@@ -194,7 +193,6 @@ void PaintLayer::paint(float u, float v)
         mJitterMirrorVerticalElapsedTime += mJitterElapsedTime;
         if (mJitterMirrorVerticalElapsedTime > mJitterMirrorVerticalInterval)
         {
-            setJitterMirrorVertical();
             mMirrorVertical = randomBool();
             mJitterMirrorVerticalElapsedTime = 0.0f;
         }
@@ -423,7 +421,7 @@ void PaintLayer::setJitterRotationAngle (float rotationAngleMin, float rotationA
 //****************************************************************************/
 void PaintLayer::setJitterRotationAngleInterval (float interval)
 {
-    mJitterRotateInterval = interval;
+    mJitterRotationAngleInterval = interval;
 }
 
 //****************************************************************************/
@@ -434,7 +432,7 @@ void PaintLayer::resetRotation (void)
 }
 
 //****************************************************************************/
-void PaintLayer::setTranslation (float translationFactorX, float translationFactorY)
+void PaintLayer::setTranslationFactor (float translationFactorX, float translationFactorY)
 {
     mTranslate = true;
     mTranslationFactorX = translationFactorX;
@@ -444,10 +442,10 @@ void PaintLayer::setTranslation (float translationFactorX, float translationFact
 }
 
 //****************************************************************************/
-void PaintLayer::setJitterTranslation (float jitterTranslationFactorXmin,
-                                       float jitterTranslationFactorXmax,
-                                       float jitterTranslationFactorYmin,
-                                       float jitterTranslationFactorYmax)
+void PaintLayer::setJitterTranslationFactor (float jitterTranslationFactorXmin,
+                                             float jitterTranslationFactorXmax,
+                                             float jitterTranslationFactorYmin,
+                                             float jitterTranslationFactorYmax)
 {
     mTranslate = true;
     mJitterTranslate = true;
@@ -505,9 +503,9 @@ void PaintLayer::setMirrorHorizontal (bool mirrored)
 }
 
 //****************************************************************************/
-void PaintLayer::setJitterMirrorHorizontal (void)
+void PaintLayer::setJitterMirrorHorizontal (bool enabled)
 {
-    mJitterMirrorHorizontal = true;
+    mJitterMirrorHorizontal = enabled;
 }
 
 //****************************************************************************/
@@ -530,9 +528,9 @@ void PaintLayer::setMirrorVertical (bool mirrored)
 }
 
 //****************************************************************************/
-void PaintLayer::setJitterMirrorVertical (void)
+void PaintLayer::setJitterMirrorVertical (bool enabled)
 {
-    mJitterMirrorVertical = true;
+    mJitterMirrorVertical = enabled;
 }
 
 //****************************************************************************/
