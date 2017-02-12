@@ -24,6 +24,8 @@
 #include <QString>
 #include <QMessageBox>
 #include "OgreString.h"
+#include "OgreColourValue.h"
+#include "OgreMath.h"
 #include "ogre3_widget.h"
 
 //****************************************************************************/
@@ -60,6 +62,8 @@ static const QString ICON_COLOUR = QString("../common/icons/colour.png");
 static const QString ICON_INFO = QString("../common/icons/info.png");
 static const QString ICON_MODEL = QString("../common/icons/model.png");
 static const QString ICON_LIGHT = QString("../common/icons/lightbulb.png");
+static const QString ICON_PAINT_ON = QString("../common/icons/paint_on.png");
+static const QString ICON_PAINT_OFF = QString("../common/icons/paint_off.png");
 static const QString ICON_MARKER = QString("../common/icons/marker.png");
 static const QString ICON_HOOVER_ON = QString("../common/icons/hoover_on.png");
 static const QString ICON_HOOVER_OFF = QString("../common/icons/hoover_off.png");
@@ -100,6 +104,8 @@ static const QString SETTINGS_SAMPLERBLOCK_FILTER_INDEX = "samplerblockFilterInd
 static const QString SETTINGS_NUMBER_OF_SKYBOXES = "numberOfSkyboxes";
 static const QString SETTINGS_PREFIX_SKYBOX = "skybox";
 static const QString NO_SKYBOX = "None";
+static const QString MESH_VERSION_1 = QString("[MeshSerializer_v1");
+static const QString MESH_VERSION_2 = QString("[MeshSerializer_v2");
 
 // Static function to determine the 'resources' file
 static const QString& getResourcesCfg (void)
@@ -156,6 +162,33 @@ static QString getBaseFileName(QString& fileName)
 }
 
 //****************************************************************************/
+static float randomBetweenTwoFloats(float min, float max)
+{
+    return Ogre::Math::RangeRandom(min, max);
+}
+
+//****************************************************************************/
+static int randomBetweenTwoInts(int min, int max)
+{
+    return Ogre::Math::RangeRandom(min, max);
+}
+
+//****************************************************************************/
+static Ogre::ColourValue randomBetweenTwoColours (const Ogre::ColourValue& paintColourMin, const Ogre::ColourValue& paintColourMax)
+{
+    return Ogre::ColourValue (randomBetweenTwoFloats (paintColourMin.r, paintColourMax.r),
+                              randomBetweenTwoFloats (paintColourMin.g, paintColourMax.g),
+                              randomBetweenTwoFloats (paintColourMin.b, paintColourMax.b),
+                              randomBetweenTwoFloats (paintColourMin.a, paintColourMax.a));
+}
+
+//****************************************************************************/
+static bool randomBool(void)
+{
+    return randomBetweenTwoInts (0, 2) - 1;
+}
+
+//****************************************************************************/
 // Contextmenu action
 static const QString ACTION_SET_CURRENT_MATERIAL = QString("Set current material");
 static const QString ACTION_TOGGLE_LIGHT_DIRECTION = QString("Light direction");
@@ -196,14 +229,16 @@ static const int PROPERTY_PBS_DATABLOCK_ROUGHNESS = 15;
 static const int PROPERTY_PBS_DATABLOCK_WORKFLOW = 16;
 static const int PROPERTY_PBS_DATABLOCK_METALNESS = 17;
 static const int PROPERTY_PBS_DATABLOCK_SEPARATE_FRESNEL = 18;
-static const int PROPERTY_PBS_DATABLOCK_FRESNEL = 19;
-static const int PROPERTY_PBS_DATABLOCK_TRANPARENCEY_VALUE = 20;
-static const int PROPERTY_PBS_DATABLOCK_TRANPARENCY_MODE = 21;
-static const int PROPERTY_PBS_DATABLOCK_TWO_SIDED_LIGHTING = 22;
-static const int PROPERTY_PBS_DATABLOCK_USE_ALPHA_FROM_TEXTURES = 23;
-static const int PROPERTY_PBS_DATABLOCK_BRDF = 24;
-static const int PROPERTY_PBS_DATABLOCK_ALPHATEST = 25;
-static const int PROPERTY_PBS_DATABLOCK_ALPHATEST_THRESHOLD = 26;
+static const int PROPERTY_PBS_DATABLOCK_FRESNEL_R = 19;
+static const int PROPERTY_PBS_DATABLOCK_FRESNEL_G = 20;
+static const int PROPERTY_PBS_DATABLOCK_FRESNEL_B = 21;
+static const int PROPERTY_PBS_DATABLOCK_TRANPARENCEY_VALUE = 22;
+static const int PROPERTY_PBS_DATABLOCK_TRANPARENCY_MODE = 23;
+static const int PROPERTY_PBS_DATABLOCK_TWO_SIDED_LIGHTING = 24;
+static const int PROPERTY_PBS_DATABLOCK_USE_ALPHA_FROM_TEXTURES = 25;
+static const int PROPERTY_PBS_DATABLOCK_BRDF = 26;
+static const int PROPERTY_PBS_DATABLOCK_ALPHATEST = 27;
+static const int PROPERTY_PBS_DATABLOCK_ALPHATEST_THRESHOLD = 28;
 
 // Unlit Datablock properties
 static const QString DEFAULT_UNLIT_DATABLOCK_NAME = QString("HlmsUnlit");
@@ -233,6 +268,10 @@ static const int PROPERTY_SAMPLERBLOCK_BLEND_MODE = 56;
 static const int PROPERTY_SAMPLERBLOCK_MAP_WEIGTH = 57;
 static const int PROPERTY_SAMPLERBLOCK_OFFSET = 58;
 static const int PROPERTY_SAMPLERBLOCK_SCALE = 59;
+static const int PROPERTY_SAMPLERBLOCK_ANIM_ENABLED = 60;
+static const int PROPERTY_SAMPLERBLOCK_ANIM_SCALE = 61;
+static const int PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE = 62;
+static const int PROPERTY_SAMPLERBLOCK_ANIM_ROTATE = 63;
 
 // Macroblock properties
 static const int PROPERTY_MACROBLOCK_ENABLED = 70;

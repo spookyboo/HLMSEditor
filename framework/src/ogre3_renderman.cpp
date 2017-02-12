@@ -26,6 +26,8 @@
 #include "OgreHlmsPbs.h"
 #include "OgreHlmsManager.h"
 #include "OgreHlmsCommon.h"
+#include "OgreLogManager.h"
+#include "OgreFrameStats.h"
 
 namespace Magus
 {
@@ -100,8 +102,12 @@ namespace Magus
     //****************************************************************************/
     OgreManager::~OgreManager(void)
     {
-        // Delete the dummy CompositorPassProvider
+        // Added removeAllWorkspaces after Ogre 2.1 upgrade (commit 2783a361c0b8)
+        // In debug mode, the application crashed in deleting mRoot
         Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
+        compositorManager->removeAllWorkspaces();
+
+        // Delete the dummy CompositorPassProvider
         compositorManager->setCompositorPassProvider(0);
         OGRE_DELETE mCompositorPassProvider;
 
@@ -281,6 +287,9 @@ namespace Magus
             }
             catch (Ogre::Exception e) {}
         }
+
+        //const Ogre::FrameStats* framestats = Ogre::Root::getSingletonPtr()->getFrameStats(); // DEBUG
+        //Ogre::LogManager::getSingleton().logMessage("Current FPS = " + Ogre::StringConverter::toString(framestats->getAvgFps())); // DEBUG
     }
 
     //****************************************************************************/

@@ -1,6 +1,6 @@
 QT += widgets opengl multimedia
 
-OGREHOME = "C:/Users/Henry/Documents/Visual Studio 2015/Projects/ogre2.1git"
+OGREHOME = "C:/Users/Henry/Documents/Visual Studio 2015/Projects/ogre2.1"
 win32:RC_ICONS += "common/icons/HLMSEditor.ico"
 
 HEADERS       = \
@@ -74,7 +74,12 @@ HEADERS       = \
     source/header/recent_file_action.h \
     source/header/config_dialog.h \
     source/header/config_pages.h \
-    source/header/hlms_utils_manager.h
+    source/header/hlms_utils_manager.h \
+    framework/header/asset_propertywidget_slider_decimal.h \
+    source/header/paintlayer.h \
+    source/header/texturelayer.h \
+    source/header/paintlayer_manager.h \
+    source/header/texturelayer_manager.h
 
 
 SOURCES       = \
@@ -137,7 +142,12 @@ SOURCES       = \
     source/src/recent_file_action.cpp \
     source/src/config_dialog.cpp \
     source/src/config_pages.cpp \
-    source/src/hlms_utils_manager.cpp
+    source/src/hlms_utils_manager.cpp \
+    framework/src/asset_propertywidget_slider_decimal.cpp \
+    source/src/paintlayer.cpp \
+    source/src/texturelayer.cpp \
+    source/src/paintlayer_manager.cpp \
+    source/src/texturelayer_manager.cpp
 
 
 INCLUDEPATH += "../HLMSEditor/source/header/"
@@ -148,6 +158,7 @@ INCLUDEPATH += "$$OGREHOME/Components/Hlms/Pbs/include"
 INCLUDEPATH += "$$OGREHOME/Components/Hlms/Unlit/include"
 INCLUDEPATH += "$$OGREHOME/VCBuild/include"
 INCLUDEPATH += "$$OGREHOME/Dependencies"
+INCLUDEPATH += "$$OGREHOME/Dependencies/src/rapidjson"
 INCLUDEPATH += .
 
 Debug:LIBS += -L"$$OGREHOME/VCBuild/lib/Debug"

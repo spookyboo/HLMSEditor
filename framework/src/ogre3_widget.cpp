@@ -70,8 +70,11 @@ namespace Magus
         mMouseDown(false),
         mLatestSubItemIndexHighlighted(-1),
         mLatestSubItemDatablock(0),
-        mHoover(false)
+        mHoover(false),
+        mPaintMode(false),
+        mPaintLayers(0)
     {
+        setMinimumSize(100,100);
         mCurrentDatablockName = "";
         setAttribute(Qt::WA_OpaquePaintEvent);
         setAttribute(Qt::WA_PaintOnScreen);
@@ -884,22 +887,39 @@ namespace Magus
         resetHighlight();
     }
 
+
+    //****************************************************************************/
+    void QOgreWidget::setPaintMode(bool enabled)
+    {
+        mPaintMode = enabled;
+    }
+
     //****************************************************************************/
     void QOgreWidget::mouseMoveEvent( QMouseEvent* e )
     {
         if(mSystemInitialized)
         {
-            Ogre::Vector2 oldPos = mAbsolute;
-            mAbsolute = Ogre::Vector2(e->pos().x(), e->pos().y());
-            mRelative = mAbsolute - oldPos;
-            if (mRotateCameraMode)
-                mCameraManager->injectMouseMove(mRelative);
+            if (mPaintMode)
+            {
+                if (mMouseDown)
+                {
+                    //doPaintLayer(e->pos().x(), e->pos().y());
+                }
+            }
             else
-                rotateLight(mRelative);
+            {
+                Ogre::Vector2 oldPos = mAbsolute;
+                mAbsolute = Ogre::Vector2(e->pos().x(), e->pos().y());
+                mRelative = mAbsolute - oldPos;
+                if (mRotateCameraMode)
+                    mCameraManager->injectMouseMove(mRelative);
+                else
+                    rotateLight(mRelative);
 
-            // Determine over which subItem the mouse hoovers
-            if (mHoover)
-                highlightSubItem(mAbsolute);
+                // Determine over which subItem the mouse hoovers
+                if (mHoover)
+                    highlightSubItem(mAbsolute);
+            }
         }
     }
 
@@ -930,10 +950,20 @@ namespace Magus
         if(mSystemInitialized)
         {
             mCameraManager->injectMouseDown(e);
+
             if (e->button() == Qt::MiddleButton || e->button() == Qt::LeftButton)
+            {
+
                 mMouseDown = true;
+                if (mPaintMode && e->button() == Qt::LeftButton)
+                {
+                    Ogre::Vector2 pos = Ogre::Vector2::ZERO;
+                    //doPaintLayer(e->pos().x(), e->pos().y());
+                }
+            }
             else if (e->button() == Qt::RightButton)
             {
+
                 // Forward it to the render window dockwidget
                 // (note the cast; this is needed, because everything points to each other)
                 static_cast<RenderwindowDockWidget*>(mRenderwindowDockWidget)->mousePressEventPublic(e);
@@ -1060,6 +1090,21 @@ namespace Magus
     }
 
     //****************************************************************************/
+    int QOgreWidget::getSubItemIndexWithMouseOver(int mouseX, int mouseY)
+    {
+        size_t x = (mouseX / (float)mSize.width()) * RTT_SIZE_X;
+        size_t y = ((mouseY) / (float)mSize.height()) * RTT_SIZE_Y;
+        Ogre::ColourValue colour = getColourAtRenderToTexture (x, y); // Get the colour of the mouse position (from the render texture)
+        int index = calculateColourToIndex (colour); // Get the index of the subitem, based on the colour at the mouse position
+
+        // Determine whether index is out of bounds
+        if (index >= 0 && index >= mItem->getNumSubItems())
+            return -1;
+
+        return index;
+    }
+
+    //****************************************************************************/
     void QOgreWidget::setHighlightDatablockToSubItem(int index)
     {
         mLatestSubItemDatablock = mItem->getSubItem(index)->getDatablock();
@@ -1147,7 +1192,6 @@ namespace Magus
                         datablockFullName != Magus::HIGHLIGHT_MATERIAL_NAME)
                 {
                     mSnapshotDatablocks[i] = datablockFullName;
-                    //Ogre::LogManager::getSingleton().logMessage("make snaphot: " +  datablockFullName); // DEBUG
                 }
             }
         }
@@ -1310,4 +1354,72 @@ namespace Magus
         mRenderwindowDockWidget = renderwindowDockWidget;
     }
 
+    //****************************************************************************/
+    void QOgreWidget::setPaintLayers(PaintLayers* paintLayers)
+    {
+        mPaintLayers = paintLayers;
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::doPaintLayer(int mouseX, int mouseY)
+    {
+        if (!mPaintLayers || !mItem)
+            return;
+
+        // If the mouse didn't hoover over a submesh, don't paint (this can be done quickly by using the RTT mechanism that is already used for mouse hoovering)
+        int index = getSubItemIndexWithMouseOver(mouseX, mouseY);
+        if (index < 0)
+            return;
+
+        // The subitem must have a valid datablock; otherwise don't paint
+        Ogre::HlmsDatablock* datablock = mItem->getSubItem(index)->getDatablock();
+        if (!datablock)
+            return;
+
+        // Calculate uv of the texture position pointed by the mouse:
+        // TODO
+        // 1. DONE! Determine the subItem on which the mouse hoovers by means of getSubItemIndexWithMouseOver()
+        // 2. DONE! Determine whether the subitem index is valid ==> otherwise return (don't paint)
+        // 3. DONE! Determine wether the subitem has a datablock name (IdString) equal to the one used by the paintlayer; use (*it)->getDatablockName()
+        //    DONE! If they differ ==> return (don't paint)
+        // 4. Perform a rayscene query
+        // 5. Determine barycentric coordinates where the ray intersets with the mesh (use a buffer of the values for reuse)
+        //    - calculate barycentric coordinate of point inside triangle
+        //    - get uv coordinate of point with this = Ogre::Vector2 uv = mUVs[mIndices[i]] * bary.x + mUVs[mIndices[i+1]] * bary.y + mUVs[->mIndices[i+2]] * bary.z;
+        // OR
+        // 1. Create an RTT, similar as to the one used to select the subItem.
+        // 2. The RTT renders the item. Each renderer pixels contains the calculated uv positions.
+        // 3. Pick with the mouse the value of the pixel.
+        // Note, that this method is probably not accurate enough!
+        float u = 0.5f;
+        float v = 0.5f;
+        bool uvCalculated = false;
+
+        // Iterate through the PaintLayer vector and apply the paint effect
+        PaintLayers::iterator it;
+        PaintLayers::iterator itStart = mPaintLayers->begin();
+        PaintLayers::iterator itEnd = mPaintLayers->end();
+        PaintLayer* paintLayer;
+        for (it = itStart; it != itEnd; ++it)
+        {
+            // Only paint in case:
+            // - The paint layer is enabled
+            // - The datablock of the submesh is equal to datablock of the paint layer
+            paintLayer = *it;
+            if (paintLayer->isEnabled())
+            {
+                if (paintLayer->getDatablockName() == datablock->getName())
+                {
+                    // Calculate the uv; we do it here, because it should only be calculated when needed (as late as possible)
+                    if (!uvCalculated)
+                    {
+                        // TODO: Calculate the uv
+                        uvCalculated = true;
+                    }
+
+                    paintLayer->paint(u, v);
+                }
+            }
+        }
+    }
 }

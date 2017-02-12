@@ -24,6 +24,7 @@
 #include "constants.h"
 #include "OgreRoot.h"
 #include "OgreHlmsManager.h"
+#include "OgreHlmsPbsDatablock.h"
 #include "rapidjson/document.h"
 
 /****************************************************************************
@@ -53,10 +54,10 @@ class HlmsUtilsManager
 
         /* Load a datablock
          * - If the jsonFile is loaded, the first datablock found in the json file is returned
-         * - If the datablock was already loaded, the loaded datablock is returned
+         * - If the datablock was already loaded (registered), the loaded datablock is returned
          * - If the json file could not be loaded, a 0 is returned
          * When makeSnaphot == true, the HlmsUtilsManager keeps track of every loaded datablock and
-         * stores the name of the datablock, the type of the datablock and the reference to
+         * registers the name of the datablock, the type of the datablock and the reference to
          * the jsonFileName.
          */
         DatablockStruct loadDatablock(const QString& jsonFileName,
@@ -64,24 +65,30 @@ class HlmsUtilsManager
 
         /* Returns the latest loaded datablock
          */
-        DatablockStruct getLoadedDatablock(void) {return mLoadedDatablockStruct;}
+        DatablockStruct getLatestRegisteredDatablock(void) {return mRegisteredDatablockStruct;}
+
+        /* Returns a datablock
+         * This function first searches in the registered datablocks. If nothing is found, it searches
+         * real datablocks (in Ogre)
+         */
+        DatablockStruct getDatablock(const Ogre::IdString& datablockId);
 
         /* A snapshot is made of the datablocks managed by Ogre::HlmsManager
          */
         void makeSnapshotDatablocks(void);
 
-        /* All datablocks from mLoadedDatablocks are reloaded
+        /* All datablocks from mRegisteredDatablocks are reloaded
          * This function is used when all datablocks are destroyed temporarily and have to be reloaded
          * again. This is the case for export or saving datablocks.
          */
         void reloadNonSpecialDatablocks(void);
 
         /* The snapshot (taken from the Ogre::HlmsManager) is compared with the datablocks from Ogre::HlmsManager
-         * The first difference that is encountered is used to compare with mLoadedDatablocks
-         * mLoadedDatablocks is used, because Ogre doesn't administer the json files and we want to
+         * The first difference that is encountered is used to compare with mRegisteredDatablocks
+         * mRegisteredDatablocks is used, because Ogre doesn't administer the json files and we want to
          * keep the relation between datablocks, textures and the json file.
          */
-        DatablockStruct compareSnapshotWithLoadedDatablocksAndAdminister(const QString& jsonFileName, const char* jsonChar);
+        DatablockStruct compareSnapshotWithRegisteredDatablocksAndAdminister(const QString& jsonFileName, const char* jsonChar);
 
         /* Destroy datablocks, depending on the arguments.
          * excludeSpecialDatablocks == true and excludeDatablockFullName == ""
@@ -102,13 +109,13 @@ class HlmsUtilsManager
          * - Exclude the datablock with the same name as 'excludeDatablockFullName' from destroying
          */
         void destroyDatablocks(bool excludeSpecialDatablocks = true,
-                               bool keepVecLoadedDatablock = false,
+                               bool keepVecRegisteredDatablock = false,
                                const Ogre::String& excludeDatablockFullName = "");
 
 
         /* Delete a particular datablock
          */
-        void destroyDatablock(const Ogre::IdString& datablockName);
+        void destroyDatablock(const Ogre::IdString& datablockId);
 
         /* Returns the datablock info of a given full name (datablockFullName)
          * If there is no datablock with this name, a default DatablockStruct is returned
@@ -117,12 +124,21 @@ class HlmsUtilsManager
 
         /* Returns a vector with all texturenames from the loaded Pbs/Unlit datablocks
          */
-        void getTexturesFromLoadedPbsDatablocks(std::vector<Ogre::String>* v);
-        void getTexturesFromLoadedUnlitDatablocks(std::vector<Ogre::String>* v);
+        void getTexturesFromRegisteredPbsDatablocks(std::vector<Ogre::String>* v);
+        void getTexturesFromRegisteredUnlitDatablocks(std::vector<Ogre::String>* v);
 
+        /* Returns the json file name of a datablock.
+         * The name is only filled with a proper value in case the datablock was loaded/saved through a json file
+         */
+         const Ogre::String& searchJsonFileName (const Ogre::IdString& datablockId);
+
+        /* Add a datablock to the registered datablocks registry (mRegisteredDatablocks). This is needed in cases where a datablock's properties are changed and
+         * the name still refers to an item in the material browser
+         */
+         void addNewDatablockToRegisteredDatablocks (const Ogre::IdString& datablockId, const Ogre::String jsonFileName);
 
     protected:
-        bool isInLoadedDatablocksVec (const Ogre::String& datablockFullName);
+        bool isInRegisteredDatablocksVec (const Ogre::String& datablockFullName);
 
         /* Parse a json string and get the details (texture names) from the string. This function was
          * added because it is easier to retrieve texture names from the json file instead of  using
@@ -130,22 +146,28 @@ class HlmsUtilsManager
          * Unfortunalty, the json file gets parsed twice (first time by Ogre and second time by the
          * editor, but this is only as part of loading from disk, which is slow already.
          */
-        bool parseJsonAndRetrieveDetails (HlmsUtilsManager::DatablockStruct* datablockStruct, const char* jsonChar);
+        bool parseJsonAndRetrieveDetails (DatablockStruct* datablockStruct, const char* jsonChar);
 
         // Parse a texturetype fragment of a pbs datablock
-        void parsePbsTextureType (HlmsUtilsManager::DatablockStruct* datablockStruct,
+        void parsePbsTextureType (DatablockStruct* datablockStruct,
                                   const rapidjson::Value& textureTypeJson,
                                   const char* textureType,
                                   unsigned short index);
 
         // Parse a texture fragment of an unlit datablock
-        void parseUnlitTexture (HlmsUtilsManager::DatablockStruct* datablockStruct, const rapidjson::Value& textureJson);
+        void parseUnlitTexture (DatablockStruct* datablockStruct, const rapidjson::Value& textureJson);
+
+        /* Enrich the textureMap in the datablockStruct (from the datablock)
+         */
+        void enrichTextureMapFromPbs(DatablockStruct* datablockStruct);
+        void enrichTextureMapFromUnlit(DatablockStruct* datablockStruct);
 
     private:
         DatablockStruct helperDatablockStruct;
         QVector<DatablockStruct> mSnapshot;
-        QVector<DatablockStruct> mLoadedDatablocks;
-        DatablockStruct mLoadedDatablockStruct;
+        QVector<DatablockStruct> mRegisteredDatablocks;
+        DatablockStruct mRegisteredDatablockStruct;
+        Ogre::String helperString;
 };
 
 #endif

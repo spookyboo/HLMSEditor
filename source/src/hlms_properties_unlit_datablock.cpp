@@ -23,8 +23,8 @@
 #include "asset_containerwidget.h"
 #include "asset_propertywidget.h"
 #include "asset_propertywidget_color.h"
-#include "asset_propertywidget_decimal.h"
 #include "asset_propertywidget_select.h"
+#include "asset_propertywidget_slider_decimal.h"
 #include "asset_propertywidget_string.h"
 #include "hlms_properties_unlit_datablock.h"
 #include "properties_dockwidget.h"
@@ -93,10 +93,12 @@ HlmsPropertiesUnlitDatablock::HlmsPropertiesUnlitDatablock(const QString& fileNa
     selectAlphaTestProperty->addValues(stringListCompareFunction);
 
     // ******** Alpha test threshold ********
-    mAssetWidget->createProperty(CONTAINER_UNLIT_DATABLOCK_GENERAL,
-                                 PROPERTY_UNLIT_DATABLOCK_ALPHATEST_THRESHOLD,
-                                 QString("Alpha test threshold"),
-                                 Magus::QtProperty::DECIMAL);
+    Magus::QtSliderDecimalProperty* sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+        (mAssetWidget->createProperty(CONTAINER_UNLIT_DATABLOCK_GENERAL,
+                                      PROPERTY_UNLIT_DATABLOCK_ALPHATEST_THRESHOLD,
+                                      QString("Alpha test threshold"),
+                                      Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
 
     // Layout
     mainLayout->addWidget(mAssetWidget);
@@ -116,7 +118,7 @@ void HlmsPropertiesUnlitDatablock::setObject (HlmsNodeUnlitDatablock* hlmsNodeUn
         return;
 
     mHlmsNodeUnlitDatablock = hlmsNodeUnlitDatablock;
-    Magus::QtDecimalProperty* decimalProperty;
+    Magus::QtSliderDecimalProperty* sliderDecimalProperty;
     Magus::QtColorProperty* colorProperty;
     Magus::QtSelectProperty* selectProperty;
     Magus::QtStringProperty* stringProperty;
@@ -134,8 +136,8 @@ void HlmsPropertiesUnlitDatablock::setObject (HlmsNodeUnlitDatablock* hlmsNodeUn
     selectProperty->setCurentIndex(mHlmsNodeUnlitDatablock->getAlphaTest());
 
     // ******** Alpha test threshold ********
-    decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_UNLIT_DATABLOCK_ALPHATEST_THRESHOLD));
-    decimalProperty->setValue(mHlmsNodeUnlitDatablock->getAlphaTestThreshold());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_UNLIT_DATABLOCK_ALPHATEST_THRESHOLD));
+    sliderDecimalProperty->setValue(mHlmsNodeUnlitDatablock->getAlphaTestThreshold());
 }
 
 //****************************************************************************/
@@ -144,7 +146,7 @@ void HlmsPropertiesUnlitDatablock::propertyValueChanged(QtProperty* property)
     if (!mHlmsNodeUnlitDatablock || !property)
         return;
 
-    Magus::QtDecimalProperty* decimalProperty;
+    Magus::QtSliderDecimalProperty* sliderDecimalProperty;
     Magus::QtColorProperty* colorProperty;
     Magus::QtSelectProperty* selectProperty;
     Magus::QtStringProperty* stringProperty;
@@ -174,8 +176,8 @@ void HlmsPropertiesUnlitDatablock::propertyValueChanged(QtProperty* property)
 
         case PROPERTY_UNLIT_DATABLOCK_ALPHATEST_THRESHOLD:
         {
-            decimalProperty = static_cast<Magus::QtDecimalProperty*>(property);
-            mHlmsNodeUnlitDatablock->setAlphaTestThreshold(decimalProperty->getValue());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodeUnlitDatablock->setAlphaTestThreshold(sliderDecimalProperty->getValue());
         }
         break;
     }

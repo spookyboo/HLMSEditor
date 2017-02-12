@@ -31,6 +31,7 @@
 #include "asset_propertywidget_string.h"
 #include "asset_propertywidget_select.h"
 #include "asset_propertywidget_slider.h"
+#include "asset_propertywidget_slider_decimal.h"
 #include "asset_propertywidget_decimal.h"
 #include "asset_propertywidget_color.h"
 #include "asset_propertywidget_texture.h"
@@ -355,6 +356,10 @@ namespace Magus
 
             case QtProperty::SLIDER:
                 property = new QtSliderProperty(title);
+            break;
+
+            case QtProperty::SLIDER_DECIMAL:
+                property = new QtSliderDecimalProperty(title);
             break;
 
             case QtProperty::COLOR:

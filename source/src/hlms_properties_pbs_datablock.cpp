@@ -23,10 +23,9 @@
 #include "asset_containerwidget.h"
 #include "asset_propertywidget.h"
 #include "asset_propertywidget_color.h"
-#include "asset_propertywidget_decimal.h"
+#include "asset_propertywidget_slider_decimal.h"
 #include "asset_propertywidget_select.h"
 #include "asset_propertywidget_checkbox.h"
-#include "asset_propertywidget_xyz.h"
 #include "asset_propertywidget_string.h"
 #include "hlms_properties_pbs_datablock.h"
 #include "properties_dockwidget.h"
@@ -76,34 +75,59 @@ HlmsPropertiesPbsDatablock::HlmsPropertiesPbsDatablock(const QString& fileNameIc
     selectProperty->addValues(stringListWorkflow);
 
     // ******** Roughness ********
-    mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
-                                 PROPERTY_PBS_DATABLOCK_ROUGHNESS,
-                                 QString("Roughness [0..inf]"),
-                                 Magus::QtProperty::DECIMAL);
+    Magus::QtSliderDecimalProperty* sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+        (mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
+                                      PROPERTY_PBS_DATABLOCK_ROUGHNESS,
+                                      QString("Roughness [0..inf]"),
+                                      Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 3.0f, 0.01f);
 
     // ******** Metalness ********
-    mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
-                                 PROPERTY_PBS_DATABLOCK_METALNESS,
-                                 QString("Metalness [0..1]"),
-                                 Magus::QtProperty::DECIMAL);
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
+                                          PROPERTY_PBS_DATABLOCK_METALNESS,
+                                          QString("Metalness [0..1]"),
+                                          Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
 
     // ******** Separate fresnel ********
-    mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
-                                 PROPERTY_PBS_DATABLOCK_SEPARATE_FRESNEL,
-                                 QString("Separate Fresnel"),
-                                 Magus::QtProperty::CHECKBOX);
+    Magus::QtCheckBoxProperty* checkBoxProperty = static_cast<Magus::QtCheckBoxProperty*>
+            (mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
+                                          PROPERTY_PBS_DATABLOCK_SEPARATE_FRESNEL,
+                                          QString("Separate Fresnel"),
+                                          Magus::QtProperty::CHECKBOX));
+    checkBoxProperty->setValue(false);
 
     // ******** Fresnel ********
-    mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
-                                 PROPERTY_PBS_DATABLOCK_FRESNEL,
-                                 QString("Fresnel [0..1]"),
-                                 Magus::QtProperty::XYZ);
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
+                                          PROPERTY_PBS_DATABLOCK_FRESNEL_R,
+                                          QString("Fresnel [0..1]"),
+                                          Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
+                                          PROPERTY_PBS_DATABLOCK_FRESNEL_G,
+                                          QString("Fresnel green [0..1]"),
+                                          Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
+    sliderDecimalProperty->setVisible(false); // No separate fresnel by default
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
+                                          PROPERTY_PBS_DATABLOCK_FRESNEL_B,
+                                          QString("Fresnel blue  [0..1]"),
+                                          Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
+    sliderDecimalProperty->setVisible(false); // No separate fresnel by default
 
     // ******** Amount of transparency ********
-    mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
-                                 PROPERTY_PBS_DATABLOCK_TRANPARENCEY_VALUE,
-                                 QString("Transparency value [0..1]"),
-                                 Magus::QtProperty::DECIMAL);
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
+                                          PROPERTY_PBS_DATABLOCK_TRANPARENCEY_VALUE,
+                                          QString("Transparency value [0..1]"),
+                                          Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
+
 
     // ******** Transparency mode ********
     QStringList stringListTransparencyMode;
@@ -170,10 +194,13 @@ HlmsPropertiesPbsDatablock::HlmsPropertiesPbsDatablock(const QString& fileNameIc
     selectAlphaTestProperty->addValues(stringListCompareFunction);
 
     // ******** Alpha test threshold ********
-    mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
-                                 PROPERTY_PBS_DATABLOCK_ALPHATEST_THRESHOLD,
-                                 QString("Alpha test threshold"),
-                                 Magus::QtProperty::DECIMAL);
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
+                                          PROPERTY_PBS_DATABLOCK_ALPHATEST_THRESHOLD,
+                                          QString("Alpha test threshold"),
+                                          Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
+
 
     // ******** Diffuse ********
     mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_COLOUR,
@@ -213,9 +240,8 @@ void HlmsPropertiesPbsDatablock::setObject (HlmsNodePbsDatablock* hlmsNodePbsDat
     mHlmsNodePbsDatablock = hlmsNodePbsDatablock;
     Magus::QtCheckBoxProperty* checkBoxProperty;
     Magus::QtColorProperty* colorProperty;
-    Magus::QtDecimalProperty* decimalProperty;
+    Magus::QtSliderDecimalProperty* sliderDecimalProperty;
     Magus::QtSelectProperty* selectProperty;
-    Magus::QtXYZProperty* xyzProperty;
     Magus::QtStringProperty* stringProperty;
 
     // ******** Name ********
@@ -244,30 +270,32 @@ void HlmsPropertiesPbsDatablock::setObject (HlmsNodePbsDatablock* hlmsNodePbsDat
                             255.0f);
 
     // ******** Roughness ********
-    decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_ROUGHNESS));
-    decimalProperty->setValue(mHlmsNodePbsDatablock->getRoughness());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_ROUGHNESS));
+    sliderDecimalProperty->setValue(mHlmsNodePbsDatablock->getRoughness());
 
     // ******** Workflow ********
     selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_WORKFLOW));
     selectProperty->setCurentIndex(mHlmsNodePbsDatablock->getWorkflow());
 
     // ******** Metalness ********
-    decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_METALNESS));
-    decimalProperty->setValue(mHlmsNodePbsDatablock->getMetalness());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_METALNESS));
+    sliderDecimalProperty->setValue(mHlmsNodePbsDatablock->getMetalness());
 
     // ******** Separate fresnel ********
     checkBoxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_SEPARATE_FRESNEL));
     checkBoxProperty->setValue(mHlmsNodePbsDatablock->isSeparateFresnel());
 
     // ******** Fresnel ********
-    xyzProperty = static_cast<Magus::QtXYZProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_FRESNEL));
-    xyzProperty->setXYZ(mHlmsNodePbsDatablock->getFresnelRed(),
-                        mHlmsNodePbsDatablock->getFresnelGreen(),
-                        mHlmsNodePbsDatablock->getFresnelBlue());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_FRESNEL_R));
+    sliderDecimalProperty->setValue(mHlmsNodePbsDatablock->getFresnelRed());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_FRESNEL_G));
+    sliderDecimalProperty->setValue(mHlmsNodePbsDatablock->getFresnelGreen());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_FRESNEL_B));
+    sliderDecimalProperty->setValue(mHlmsNodePbsDatablock->getFresnelBlue());
 
     // ******** Amount of transparency ********
-    decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_TRANPARENCEY_VALUE));
-    decimalProperty->setValue(mHlmsNodePbsDatablock->getTransparencyValue());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_TRANPARENCEY_VALUE));
+    sliderDecimalProperty->setValue(mHlmsNodePbsDatablock->getTransparencyValue());
 
     // ******** Transparency mode ********
     selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_TRANPARENCY_MODE));
@@ -290,8 +318,8 @@ void HlmsPropertiesPbsDatablock::setObject (HlmsNodePbsDatablock* hlmsNodePbsDat
     selectProperty->setCurentIndex(mHlmsNodePbsDatablock->getAlphaTest());
 
     // ******** Alpha test threshold ********
-    decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_ALPHATEST_THRESHOLD));
-    decimalProperty->setValue(mHlmsNodePbsDatablock->getAlphaTestThreshold());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_ALPHATEST_THRESHOLD));
+    sliderDecimalProperty->setValue(mHlmsNodePbsDatablock->getAlphaTestThreshold());
 }
 
 //****************************************************************************/
@@ -302,9 +330,8 @@ void HlmsPropertiesPbsDatablock::propertyValueChanged(QtProperty* property)
 
     Magus::QtCheckBoxProperty* checkBoxProperty;
     Magus::QtColorProperty* colorProperty;
-    Magus::QtDecimalProperty* decimalProperty;
+    Magus::QtSliderDecimalProperty* sliderDecimalProperty;
     Magus::QtSelectProperty* selectProperty;
-    Magus::QtXYZProperty* xyzProperty;
     Magus::QtStringProperty* stringProperty;
 
     switch (property->mPropertyId)
@@ -345,8 +372,8 @@ void HlmsPropertiesPbsDatablock::propertyValueChanged(QtProperty* property)
 
         case PROPERTY_PBS_DATABLOCK_ROUGHNESS:
         {
-            decimalProperty = static_cast<Magus::QtDecimalProperty*>(property);
-            mHlmsNodePbsDatablock->setRoughness(decimalProperty->getValue());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodePbsDatablock->setRoughness(sliderDecimalProperty->getValue());
         }
         break;
 
@@ -359,8 +386,8 @@ void HlmsPropertiesPbsDatablock::propertyValueChanged(QtProperty* property)
 
         case PROPERTY_PBS_DATABLOCK_METALNESS:
         {
-            decimalProperty = static_cast<Magus::QtDecimalProperty*>(property);
-            mHlmsNodePbsDatablock->setMetalness(decimalProperty->getValue());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodePbsDatablock->setMetalness(sliderDecimalProperty->getValue());
         }
         break;
 
@@ -368,25 +395,44 @@ void HlmsPropertiesPbsDatablock::propertyValueChanged(QtProperty* property)
         {
             checkBoxProperty = static_cast<Magus::QtCheckBoxProperty*>(property);
             mHlmsNodePbsDatablock->setSeparateFresnel(checkBoxProperty->getValue());
-            xyzProperty = static_cast<Magus::QtXYZProperty*>(mAssetWidget->getPropertyWidget(CONTAINER_PBS_DATABLOCK_GENERAL, PROPERTY_PBS_DATABLOCK_FRESNEL));
-            xyzProperty->enableY(checkBoxProperty->getValue());
-            xyzProperty->enableZ(checkBoxProperty->getValue());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(CONTAINER_PBS_DATABLOCK_GENERAL, PROPERTY_PBS_DATABLOCK_FRESNEL_R));
+            if (checkBoxProperty->getValue())
+                sliderDecimalProperty->setTitle("Fresnel red [0..1]");
+            else
+                sliderDecimalProperty->setTitle("Fresnel [0..1]");
+
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(CONTAINER_PBS_DATABLOCK_GENERAL, PROPERTY_PBS_DATABLOCK_FRESNEL_G));
+            sliderDecimalProperty->setVisible(checkBoxProperty->getValue());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(CONTAINER_PBS_DATABLOCK_GENERAL, PROPERTY_PBS_DATABLOCK_FRESNEL_B));
+            sliderDecimalProperty->setVisible(checkBoxProperty->getValue());
         }
         break;
 
-        case PROPERTY_PBS_DATABLOCK_FRESNEL:
+        case PROPERTY_PBS_DATABLOCK_FRESNEL_R:
         {
-            xyzProperty = static_cast<Magus::QtXYZProperty*>(property);
-            mHlmsNodePbsDatablock->setFresnelRed(xyzProperty->getX());
-            mHlmsNodePbsDatablock->setFresnelGreen(xyzProperty->getY());
-            mHlmsNodePbsDatablock->setFresnelBlue(xyzProperty->getZ());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodePbsDatablock->setFresnelRed(sliderDecimalProperty->getValue());
+        }
+        break;
+
+        case PROPERTY_PBS_DATABLOCK_FRESNEL_G:
+        {
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodePbsDatablock->setFresnelGreen(sliderDecimalProperty->getValue());
+        }
+        break;
+
+        case PROPERTY_PBS_DATABLOCK_FRESNEL_B:
+        {
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodePbsDatablock->setFresnelBlue(sliderDecimalProperty->getValue());
         }
         break;
 
         case PROPERTY_PBS_DATABLOCK_TRANPARENCEY_VALUE:
         {
-            decimalProperty = static_cast<Magus::QtDecimalProperty*>(property);
-            mHlmsNodePbsDatablock->setTransparencyValue(decimalProperty->getValue());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodePbsDatablock->setTransparencyValue(sliderDecimalProperty->getValue());
         }
         break;
 
@@ -427,8 +473,8 @@ void HlmsPropertiesPbsDatablock::propertyValueChanged(QtProperty* property)
 
         case PROPERTY_PBS_DATABLOCK_ALPHATEST_THRESHOLD:
         {
-            decimalProperty = static_cast<Magus::QtDecimalProperty*>(property);
-            mHlmsNodePbsDatablock->setAlphaTestThreshold(decimalProperty->getValue());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodePbsDatablock->setAlphaTestThreshold(sliderDecimalProperty->getValue());
         }
         break;
     }

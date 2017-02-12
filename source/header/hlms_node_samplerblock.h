@@ -23,6 +23,8 @@
 
 #include <QWidget>
 #include <QVector2D>
+#include <QVector3D>
+#include <QQuaternion>
 #include "node_node.h"
 #include "node_port.h"
 
@@ -67,6 +69,10 @@ class HlmsNodeSamplerblock : public Magus::QtNode
         float getMapWeight (void) const {return mMapWeight;}
         QVector2D getOffset (void) const {return mOffset;}
         QVector2D getScale (void) const {return mScale;}
+        bool getAnimationEnabled (void) const {return mAnimationEnabled;} // Unlit only
+        QVector2D getAnimationScale (void) const {return mAnimationScale;} // Unlit only
+        QQuaternion getAnimationOrientation (void) const {return mAnimationOrientation;} // Unlit only
+        QVector2D getAnimationTranslate (void) const {return mAnimationTranslate;} // Unlit only
 
         // Setters
         void setFileNameTexture(const QString fileNameTexture);
@@ -94,6 +100,10 @@ class HlmsNodeSamplerblock : public Magus::QtNode
         void setMapWeight (float mapWeight) {mMapWeight = mapWeight;}
         void setOffset (QVector2D offset) {mOffset = offset;}
         void setScale (QVector2D scale) {mScale = scale;}
+        void setAnimationEnabled (bool animationEnabled) {mAnimationEnabled = animationEnabled;} // Unlit only
+        void setAnimationScale (QVector2D animationScale) {mAnimationScale = animationScale;} // Unlit only
+        void setAnimationOrientation (QQuaternion animationOrientation) {mAnimationOrientation = animationOrientation;} // Unlit only
+        void setAnimationTranslate (QVector2D animationTransform) {mAnimationTranslate = animationTransform;} // Unlit only
 
         // Executed when this node is connected
         void nodeConnected(QtPort* port, QtConnection* connection);
@@ -123,6 +133,10 @@ class HlmsNodeSamplerblock : public Magus::QtNode
         float mMapWeight; // For normal map and detail maps
         QVector2D mOffset;
         QVector2D mScale;
+        bool mAnimationEnabled;
+        QVector2D mAnimationScale; // Unlit only
+        QQuaternion mAnimationOrientation; // Unlit only
+        QVector2D mAnimationTranslate; // Unlit only
         bool mSamplerblockEnabled; // Enable / disable the samplerblock, to check the difference when rendering with/without the texture
         Magus::QtPort* mPort;
 };

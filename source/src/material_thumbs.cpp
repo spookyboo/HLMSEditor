@@ -30,8 +30,8 @@ MaterialThumbsDockWidget::MaterialThumbsDockWidget(const QString& iconDir, const
 {
     mIconDir = iconDir;
     mInnerMain = new QMainWindow();
-    setWidget(mInnerMain);
-    mTabWidget = new QTabWidget(mInnerMain);
+    mInnerMain->setMinimumSize(100,100);
+    setWidget(mInnerMain);    mTabWidget = new QTabWidget(mInnerMain);
     mInnerMain->setCentralWidget(mTabWidget);
     mTabWidget->show();
     QWidget* oldTitleBar = titleBarWidget();

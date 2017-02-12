@@ -48,6 +48,7 @@
 #include "hlms_editor_plugin.h"
 #include "hlms_editor_plugin_action.h"
 #include "config_dialog.h"
+#include <fstream>
 
 //****************************************************************************/
 MainWindow::MainWindow(void) :
@@ -55,6 +56,7 @@ MainWindow::MainWindow(void) :
     mFirst(true),
     mSaveTextureBrowserTimerActive(false)
 {
+    setMinimumSize(100,100);
     installEventFilter(this);
 
     // Create the Ogre Manager
@@ -126,6 +128,7 @@ MainWindow::MainWindow(void) :
 //****************************************************************************/
 MainWindow::~MainWindow(void)
 {
+    mPaintLayerManager.removeAndDeleteAllPaintLayers();
     delete mHlmsUtilsManager;
     delete mOgreManager;
 }
@@ -544,7 +547,8 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
             mNodeEditorDockWidget->nodeSelected(node);
         }
         mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-        mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
+        mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(true);
+        mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
     }
     else if (datablockStruct.type == HLMS_UNLIT)
     {
@@ -556,7 +560,8 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
             mNodeEditorDockWidget->nodeSelected(node);
         }
         mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-        mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
+        mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(false);
+        mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(true);
     }
 }
 
@@ -617,12 +622,20 @@ void MainWindow::loadMesh(const QString meshFileName)
             Ogre::MeshPtr v2MeshPtr = convertMeshV1ToV2(baseName);
 
             // Create (by the ogre widget) the V2 mesh, the item and the rtt item
-            ogreWidget->createItem(v2MeshPtr.getPointer()->getName(), Ogre::Vector3::UNIT_SCALE);
+            if (v2MeshPtr.isNull())
+            {
+                 QMessageBox::information(0, QString("Error"), QString("Failed to load ") + meshFileName);
+                loaded = false;
+            }
+            else
+            {
+                ogreWidget->createItem(v2MeshPtr.getPointer()->getName(), Ogre::Vector3::UNIT_SCALE);
 
-            // Add to mesh map
-            mRenderwindowDockWidget->addToMeshMap(baseName, baseName, QVector3D(1.0f, 1.0f, 1.0f));
+                // Add to mesh map
+                mRenderwindowDockWidget->addToMeshMap(baseName, baseName, QVector3D(1.0f, 1.0f, 1.0f));
 
-            loaded = true;
+                loaded = true;
+            }
         }
         catch (Ogre::Exception e)
         {
@@ -666,6 +679,9 @@ void MainWindow::saveV2Mesh(Ogre::MeshPtr v2MeshPtr, QString meshFileName)
 //****************************************************************************/
 bool MainWindow::isMeshV1(const QString meshFileName)
 {
+    return (getMeshVersion(meshFileName) == 1);
+
+    /*
     Ogre::SceneManager* sceneManager = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getSceneManager();
     if (!sceneManager)
         return false;
@@ -685,12 +701,16 @@ bool MainWindow::isMeshV1(const QString meshFileName)
         return false;
     }
 
+    */
     return true;
 }
 
 //****************************************************************************/
 bool MainWindow::isMeshV2(const QString meshFileName)
 {
+    return (getMeshVersion(meshFileName) == 2);
+
+    /*
     Ogre::SceneManager* sceneManager = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getSceneManager();
     if (!sceneManager)
         return false;
@@ -718,26 +738,53 @@ bool MainWindow::isMeshV2(const QString meshFileName)
     }
 
     return true;
+    */
+}
+
+//****************************************************************************/
+unsigned int MainWindow::getMeshVersion(const QString meshFileName)
+{
+    /* Use different method compared to earlier versions of HLMSEditor. Easier is to read the mesh file itself and determine the version.
+     * Ogre V1 meshes bytes 02.. 19 are filled with "[MeshSerializer_v1", while V2 meshes are filled with "[MeshSerializer_v2".
+     */
+    std::ifstream ifs(meshFileName.toStdString(), std::ios::binary|std::ios::ate);
+    std::vector<char>result(19);
+    result[18] = 0;
+    ifs.seekg(2, std::ios::beg); // Offset is 2nd byte
+    ifs.read(&result[0], 18); // Read 18 chars
+    ifs.close();
+    QString versionText = QString::fromLatin1( &result[0]);
+    if (versionText == MESH_VERSION_1)
+        return 1;
+    if (versionText == MESH_VERSION_2)
+        return 2;
+
+    return 0;
 }
 
 //****************************************************************************/
 Ogre::MeshPtr MainWindow::convertMeshV1ToV2(const QString baseNameMeshV1)
 {
-    Ogre::v1::MeshPtr v1MeshPtr;
+    // If the resource exist, it can only be a V2 mesh (V1 meshes are not supported in the editor); just return it
     Ogre::MeshPtr v2MeshPtr;
+    if (Ogre::MeshManager::getSingleton().resourceExists(baseNameMeshV1.toStdString()))
+    {
+        v2MeshPtr = Ogre::MeshManager::getSingleton().getByName(baseNameMeshV1.toStdString(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
+        return v2MeshPtr;
+    }
+
+    Ogre::v1::MeshPtr v1MeshPtr;
 
     // Create V1 mesh
     v1MeshPtr = Ogre::v1::MeshManager::getSingleton().load(
                 baseNameMeshV1.toStdString(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                 Ogre::v1::HardwareBuffer::HBU_STATIC, Ogre::v1::HardwareBuffer::HBU_STATIC);
 
-    // Create V2 mesh
     v2MeshPtr = Ogre::MeshManager::getSingleton().createManual(baseNameMeshV1.toStdString(), Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
     v2MeshPtr->importV1 (v1MeshPtr.get(), true, true, true);
     v1MeshPtr->unload();
     return v2MeshPtr;
 }
-
 
 //****************************************************************************/
 Ogre::DataStreamPtr MainWindow::openFile(Ogre::String source)
@@ -835,7 +882,9 @@ void MainWindow::doSaveDatablockMenuAction(void)
     if (mHlmsName.isEmpty())
         doSaveAsDatablockMenuAction();
     else
+    {
         saveDatablock();
+    }
 }
 
 //****************************************************************************/
@@ -860,7 +909,7 @@ void MainWindow::doSaveAsDatablockMenuAction(void)
 }
 
 //****************************************************************************/
-void MainWindow::saveDatablock(void)
+void MainWindow::saveDatablock_old(void)
 {
     Ogre::String fname = mHlmsName.toStdString();
     QString baseNameJson = mHlmsName;
@@ -899,6 +948,26 @@ void MainWindow::saveDatablock(void)
     mHlmsUtilsManager->reloadNonSpecialDatablocks(); // Reloades (and re-creates) the non-special datablocks
     createSpecialDatablocks(); // Create special-datablocks and set them in the right (sub)Item (if needed)
     restoreMaterialsOfItem(); // Set one or more of the reloaded datablocks back to the subitem in which it was
+}
+
+//****************************************************************************/
+void MainWindow::saveDatablock(void)
+{
+    // This is the new version of save datablock. With the introduction of HlmsManager::saveMaterial
+    // it isn't needed anymore to delete all datablocks except the one-to-be-saved.
+    Ogre::String fname = mHlmsName.toStdString();
+    QString baseNameJson = mHlmsName;
+    baseNameJson = getBaseFileName(baseNameJson);
+    QString thumb = baseNameJson + ".png";
+
+    // Update the thumb image in the material browser
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->saveToFile(THUMBS_PATH + thumb.toStdString());
+    loadMaterialBrowserCfg();
+
+    Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
+    Ogre::HlmsDatablock* datablock = hlmsManager->getDatablock(mCurrentDatablockName);
+    hlmsManager->saveMaterial (datablock, fname);
+    appendRecentHlms(mHlmsName);
 }
 
 //****************************************************************************/
@@ -1460,8 +1529,8 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
         // Get the texture basenames from the datablocks
         std::vector<Ogre::String> vPbs;
         std::vector<Ogre::String> vUnlit;
-        mHlmsUtilsManager->getTexturesFromLoadedPbsDatablocks(&vPbs);
-        mHlmsUtilsManager->getTexturesFromLoadedUnlitDatablocks(&vUnlit);
+        mHlmsUtilsManager->getTexturesFromRegisteredPbsDatablocks(&vPbs);
+        mHlmsUtilsManager->getTexturesFromRegisteredUnlitDatablocks(&vUnlit);
 
         // Add all textures from Pbs
         std::vector<Ogre::String>::iterator itPbs = vPbs.begin();
@@ -1874,6 +1943,7 @@ void MainWindow::setDatablocksFromMaterialBrowserInItem(void)
 //****************************************************************************/
 QVector<int> MainWindow::getSubItemIndicesWithDatablockAndReplaceWithDefault(const Ogre::IdString& datablockName)
 {
+    // Returns a list of subItem indices from the main Item
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
     helperIndices = ogreWidget->getSubItemIndicesWithDatablock(datablockName);
     ogreWidget->setDatablockInSubItems(helperIndices, DEFAULT_DATABLOCK_NAME);

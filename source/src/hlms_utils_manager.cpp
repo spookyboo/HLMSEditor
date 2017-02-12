@@ -31,12 +31,12 @@
 //****************************************************************************/
 HlmsUtilsManager::HlmsUtilsManager(void)
 {
-    mLoadedDatablockStruct.datablock = 0;
-    mLoadedDatablockStruct.datablockFullName = "";
-    mLoadedDatablockStruct.datablockId = "";
-    mLoadedDatablockStruct.jsonFileName = "";
-    mLoadedDatablockStruct.type = HLMS_NONE;
-    mLoadedDatablockStruct.textureMap.clear();
+    mRegisteredDatablockStruct.datablock = 0;
+    mRegisteredDatablockStruct.datablockFullName = "";
+    mRegisteredDatablockStruct.datablockId = "";
+    mRegisteredDatablockStruct.jsonFileName = "";
+    mRegisteredDatablockStruct.type = HLMS_NONE;
+    mRegisteredDatablockStruct.textureMap.clear();
 
     helperDatablockStruct.datablock = 0;
     helperDatablockStruct.datablockFullName = "";
@@ -45,6 +45,8 @@ HlmsUtilsManager::HlmsUtilsManager(void)
     helperDatablockStruct.type = HLMS_NONE;
     helperDatablockStruct.textureMap.clear();
     mSnapshot.clear();
+    mRegisteredDatablocks.clear();
+    helperString = "";
 }
 
 //****************************************************************************/
@@ -56,12 +58,12 @@ HlmsUtilsManager::~HlmsUtilsManager(void)
 HlmsUtilsManager::DatablockStruct HlmsUtilsManager::loadDatablock(const QString& jsonFileName,
                                                                   bool makeSnaphot)
 {
-    mLoadedDatablockStruct.datablock = 0;
-    mLoadedDatablockStruct.datablockFullName = "";
-    mLoadedDatablockStruct.datablockId = "";
-    mLoadedDatablockStruct.jsonFileName = jsonFileName.toStdString();
-    mLoadedDatablockStruct.type = HLMS_NONE;
-    mLoadedDatablockStruct.textureMap.clear();
+    mRegisteredDatablockStruct.datablock = 0;
+    mRegisteredDatablockStruct.datablockFullName = "";
+    mRegisteredDatablockStruct.datablockId = "";
+    mRegisteredDatablockStruct.jsonFileName = jsonFileName.toStdString();
+    mRegisteredDatablockStruct.type = HLMS_NONE;
+    mRegisteredDatablockStruct.textureMap.clear();
 
     if (jsonFileName.isEmpty())
     {
@@ -84,12 +86,12 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::loadDatablock(const QString&
         {
             if (makeSnaphot)
             {
-                // Make snapshot of the already loaded datablocks
+                // Make snapshot of the already registered datablocks
                 makeSnapshotDatablocks();
             }
 
             // Load the json file and create the datablock(s)
-            hlmsJson.loadMaterials(fname, jsonChar);
+            hlmsJson.loadMaterials(fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, jsonChar);
         }
 
         catch (Ogre::Exception e)
@@ -100,12 +102,12 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::loadDatablock(const QString&
 
         if (makeSnaphot)
         {
-            // Compare the snapshot with the loaded datablocks vector that is managed by 'this'  object
+            // Compare the snapshot with the registered datablocks vector that is managed by 'this'  object
             // The returned datablock is the newly created one (no exception) or the one that
-            // was already loaded (catched exception)
-            mLoadedDatablockStruct = compareSnapshotWithLoadedDatablocksAndAdminister(jsonFileName, jsonChar);
+            // was already registered (catched exception)
+            mRegisteredDatablockStruct = compareSnapshotWithRegisteredDatablocksAndAdminister(jsonFileName, jsonChar);
 
-            if (!mLoadedDatablockStruct.datablock)
+            if (!mRegisteredDatablockStruct.datablock)
             {
                 Ogre::LogManager::getSingleton().logMessage("HlmsUtilsManager::loadDatablock -> Could not load the materialfile\n");
             }
@@ -113,7 +115,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::loadDatablock(const QString&
 
     }
 
-    return mLoadedDatablockStruct;
+    return mRegisteredDatablockStruct;
 }
 
 //****************************************************************************/
@@ -165,21 +167,21 @@ void HlmsUtilsManager::makeSnapshotDatablocks(void)
 //****************************************************************************/
 void HlmsUtilsManager::reloadNonSpecialDatablocks(void)
 {
-    // Although mLoadedDatablocks suggest that it concerns loaded datablocks this is not
-    // always true. In some cases mLoadedDatablocks contains a list of previously loaded
-    // datablocks, but these datablocks are not actually in memory.
-    // mLoadedDatablocks also refers to datablocks that were loaded before a certain
+    // Although mRegisteredDatablocks suggests that it concerns loaded datablocks this is not
+    // always true. In some cases mRegisteredDatablocks contains a list of previously loaded
+    // datablocks, but these datablocks are not actually in (Ogre) memory.
+    // mRegisteredDatablocks also refers to datablocks that were loaded before a certain
     // action took place.
-    QVectorIterator<DatablockStruct> itLoadedDatablocks(mLoadedDatablocks);
-    while (itLoadedDatablocks.hasNext())
+    QVectorIterator<DatablockStruct> itRegisteredDatablocks(mRegisteredDatablocks);
+    while (itRegisteredDatablocks.hasNext())
     {
-        helperDatablockStruct = itLoadedDatablocks.next();
+        helperDatablockStruct = itRegisteredDatablocks.next();
         loadDatablock(helperDatablockStruct.jsonFileName.c_str(), false);
     }
 }
 
 //****************************************************************************/
-HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithLoadedDatablocksAndAdminister(const QString& jsonFileName, const char* jsonChar)
+HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithRegisteredDatablocksAndAdminister(const QString& jsonFileName, const char* jsonChar)
 {
     Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
     Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
@@ -208,7 +210,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithLoadedDat
         while (itSnapshot.hasNext())
         {
             helperDatablockStruct = itSnapshot.next();
-            if (helperDatablockStruct.datablock == ogreDatablockStruct.datablock)
+            if (helperDatablockStruct.datablockId == ogreDatablockStruct.datablockId)
             {
                 found = true;
                 //Ogre::LogManager::getSingleton().logMessage("HlmsUtilsManager::loadDatablock: " + helperDatablockStruct.datablockFullName + " available in snapshot"); //DEBUG
@@ -245,7 +247,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithLoadedDat
         while (itSnapshot.hasNext())
         {
             helperDatablockStruct = itSnapshot.next();
-            if (helperDatablockStruct.datablock == ogreDatablockStruct.datablock)
+            if (helperDatablockStruct.datablockId == ogreDatablockStruct.datablockId)
             {
                 found = true;
                 break;
@@ -260,23 +262,23 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithLoadedDat
     }
 
     // So, 'diff'  contains the differences
-    // - If 'diff' is empty, the datablock was already loaded, so the only way to get that datablock is to
-    //   search for jsonFileName in mLoadedDatablocks.
-    // - If 'diff' contains one entry, use it and add it to mLoadedDatablocks, because that is the one that is loaded.
-    // - If 'diff' contains more than one entry, take the first, add it to mLoadedDatablocks and delete the other datablocks
+    // - If 'diff' is empty, the datablock was already registered, so the only way to get that datablock is to
+    //   search for jsonFileName in mRegisteredDatablocks.
+    // - If 'diff' contains one entry, use it and add it to mRegisteredDatablocks, because that is the one that is newly loaded.
+    // - If 'diff' contains more than one entry, take the first, add it to mRegisteredDatablocks and delete the other datablocks
     //   from Ogres' HlmsManager. Why?
-    //       That is because we only allow to have one datablock per json file. Ogre allowed multiple datablocks in one json file,
+    //       That is because we only allow to have one datablock per json file. Ogre allows multiple datablocks in one json file,
     //       but that way it becomes difficult to track the relation between datablock and json file (not impossible, but then we
     //       must parse the json file in the HLMS Editor and interpret it).
     if (diff.isEmpty())
     {
-        // There is no new loaded datablock; search the json filename in mLoadedDatablocks
-        QVectorIterator<DatablockStruct> itLoadedDatablocks(mLoadedDatablocks);
-        while (itLoadedDatablocks.hasNext())
+        // There is no new loaded datablock; search the json filename in mRegisteredDatablocks
+        QVectorIterator<DatablockStruct> itRegisteredDatablocks(mRegisteredDatablocks);
+        while (itRegisteredDatablocks.hasNext())
         {
             // If the filename of the datablock is the same as the filename argument, return the datablock info
             // After it has been enriched with the texture names
-            helperDatablockStruct = itLoadedDatablocks.next();
+            helperDatablockStruct = itRegisteredDatablocks.next();
             if (helperDatablockStruct.jsonFileName == jsonFileName.toStdString())
             {
                 // Enrich the helperDatablockStruct with texture names
@@ -294,62 +296,64 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithLoadedDat
         helperDatablockStruct.textureMap.clear();
         return helperDatablockStruct;
     }
-
-    // There is at least one entry in 'diff'
-    helperDatablockStruct.datablock = diff[0].datablock;
-    helperDatablockStruct.datablockFullName = diff[0].datablockFullName;
-    helperDatablockStruct.datablockId = diff[0].datablockId;
-    helperDatablockStruct.jsonFileName = jsonFileName.toStdString();
-    helperDatablockStruct.type = diff[0].type;
-    helperDatablockStruct.textureMap.clear();
-
-    if (!isInLoadedDatablocksVec(helperDatablockStruct.datablockFullName))
+    else
     {
-        // Enrich the helperDatablockStruct with texture names
-        parseJsonAndRetrieveDetails(&helperDatablockStruct, jsonChar);
+        // There is at least one entry in 'diff'
+        helperDatablockStruct.datablock = diff[0].datablock;
+        helperDatablockStruct.datablockFullName = diff[0].datablockFullName;
+        helperDatablockStruct.datablockId = diff[0].datablockId;
+        helperDatablockStruct.jsonFileName = jsonFileName.toStdString();
+        helperDatablockStruct.type = diff[0].type;
+        helperDatablockStruct.textureMap.clear();
 
-        // Add it to the vector with loaded datablocks
-        mLoadedDatablocks.append(helperDatablockStruct); // Add it to the vector
-        //Ogre::LogManager::getSingleton().logMessage("HlmsUtilsManager::loadDatablock: " + helperDatablockStruct.datablockFullName + " added to snapshot"); // DEBUG
-    }
-
-    // Destroy any datablock when there is more than one entry in 'diff'
-    QVectorIterator<DatablockStruct> itDiff(diff);
-    bool first = true;
-    DatablockStruct diffStruct;
-    while (itDiff.hasNext())
-    {
-        diffStruct = itDiff.next();
-        if (!true)
+        if (!isInRegisteredDatablocksVec(helperDatablockStruct.datablockFullName))
         {
-            if (hlmsManager->getDatablock(diffStruct.datablockId))
-            {
-                // Destroy the datablock
-                if (    diffStruct.type == HLMS_PBS &&
-                        diffStruct.datablock != 0 &&
-                        diffStruct.datablock->getLinkedRenderables().size() == 0)
-                {
-                    try
-                    {
-                        hlmsPbs->destroyDatablock(diffStruct.datablockId);
-                    }
-                    catch (Ogre::Exception e) {}
-                }
-                else if (   diffStruct.type == HLMS_UNLIT &&
-                            diffStruct.datablock != 0 &&
-                            diffStruct.datablock->getLinkedRenderables().size() == 0)
-                {
-                    try
-                    {
-                        hlmsUnlit->destroyDatablock(diffStruct.datablockId);
-                    }
-                    catch (Ogre::Exception e) {}
-                }
-            }
+            // Enrich the helperDatablockStruct with texture names
+            parseJsonAndRetrieveDetails(&helperDatablockStruct, jsonChar);
+
+            // Add it to the vector with registered datablocks
+            mRegisteredDatablocks.append(helperDatablockStruct); // Add it to the vector
+            Ogre::LogManager::getSingleton().logMessage("HlmsUtilsManager::loadDatablock: " + helperDatablockStruct.datablockFullName + " added to snapshot"); // DEBUG
         }
 
-        // The first one is skipped, but all subsequent datablocks are destroyed
-        first = false;
+        // Destroy any datablock when there is more than one entry in 'diff'
+        QVectorIterator<DatablockStruct> itDiff(diff);
+        bool first = true;
+        DatablockStruct diffStruct;
+        while (itDiff.hasNext())
+        {
+            diffStruct = itDiff.next();
+            if (!true)
+            {
+                if (hlmsManager->getDatablock(diffStruct.datablockId))
+                {
+                    // Destroy the datablock
+                    if (    diffStruct.type == HLMS_PBS &&
+                            diffStruct.datablock != 0 &&
+                            diffStruct.datablock->getLinkedRenderables().size() == 0)
+                    {
+                        try
+                        {
+                            hlmsPbs->destroyDatablock(diffStruct.datablockId);
+                        }
+                        catch (Ogre::Exception e) {}
+                    }
+                    else if (   diffStruct.type == HLMS_UNLIT &&
+                                diffStruct.datablock != 0 &&
+                                diffStruct.datablock->getLinkedRenderables().size() == 0)
+                    {
+                        try
+                        {
+                            hlmsUnlit->destroyDatablock(diffStruct.datablockId);
+                        }
+                        catch (Ogre::Exception e) {}
+                    }
+                }
+            }
+
+            // The first one is skipped, but all subsequent datablocks are destroyed
+            first = false;
+        }
     }
 
     return helperDatablockStruct;
@@ -357,7 +361,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithLoadedDat
 
 //****************************************************************************/
 void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
-                                         bool keepVecLoadedDatablock,
+                                         bool keepVecRegisteredDatablock,
                                          const Ogre::String& excludeDatablockFullName)
 {
     // If excludeSpecialDatablocks == true
@@ -496,20 +500,20 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
         }
     }
 
-    // Do not forget to clear the vector with loaded datablocks
-    // Note: Do not clear mLoadedDatablocks completely in case excludeDatablockFullName has a value and is available in mLoadedDatablocks
+    // Do not forget to clear the vector with registered datablocks
+    // Note: Do not clear mRegisteredDatablocks completely in case excludeDatablockFullName has a value and is available in mRegisteredDatablocks
     bool available =    excludeDatablockFullNameStruct.datablock &&
-                        isInLoadedDatablocksVec(excludeDatablockFullNameStruct.datablockFullName);
-    if (!keepVecLoadedDatablock)
+                        isInRegisteredDatablocksVec(excludeDatablockFullNameStruct.datablockFullName);
+    if (!keepVecRegisteredDatablock)
     {
-        mLoadedDatablocks.clear();
+        mRegisteredDatablocks.clear();
         if (available)
-            mLoadedDatablocks.append(excludeDatablockFullNameStruct);
+            mRegisteredDatablocks.append(excludeDatablockFullNameStruct);
     }
 }
 
 //****************************************************************************/
-void HlmsUtilsManager::destroyDatablock(const Ogre::IdString& datablockName)
+void HlmsUtilsManager::destroyDatablock(const Ogre::IdString& datablockId)
 {
     Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
     Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
@@ -520,10 +524,10 @@ void HlmsUtilsManager::destroyDatablock(const Ogre::IdString& datablockName)
     // Try to delete the datablock when it is a pbs
     try
     {
-        datablock = hlmsPbs->getDatablock(datablockName);
+        datablock = hlmsPbs->getDatablock(datablockId);
         if (datablock)
         {
-            hlmsPbs->destroyDatablock(datablockName);
+            hlmsPbs->destroyDatablock(datablockId);
             destroyed = true;
         }
     }
@@ -532,36 +536,36 @@ void HlmsUtilsManager::destroyDatablock(const Ogre::IdString& datablockName)
     // Try to delete the datablock when it is an unlit
     try
     {
-        datablock = hlmsUnlit->getDatablock(datablockName);
+        datablock = hlmsUnlit->getDatablock(datablockId);
         if (datablock)
         {
-            hlmsUnlit->destroyDatablock(datablockName);
+            hlmsUnlit->destroyDatablock(datablockId);
             destroyed = true;
         }
     }
     catch (Ogre::Exception e) {}
 
-    // Also delete it from mLoadedDatablocks (if present)
-    QVector<DatablockStruct>::iterator itLoadedDatablocks = mLoadedDatablocks.begin();
-    QVector<DatablockStruct>::iterator itLoadedDatablocksEnd = mLoadedDatablocks.end();
+    // Also delete it from mRegisteredDatablocks (if present)
+    QVector<DatablockStruct>::iterator itRegisteredDatablocks = mRegisteredDatablocks.begin();
+    QVector<DatablockStruct>::iterator itRegisteredDatablocksEnd = mRegisteredDatablocks.end();
     DatablockStruct datablockStruct;
-    while (itLoadedDatablocks != itLoadedDatablocksEnd)
+    while (itRegisteredDatablocks != itRegisteredDatablocksEnd)
     {
-        datablockStruct = *itLoadedDatablocks;
-        if (datablockStruct.datablockId == datablockName)
-            mLoadedDatablocks.erase(itLoadedDatablocks);
-        ++itLoadedDatablocks;
+        datablockStruct = *itRegisteredDatablocks;
+        if (datablockStruct.datablockId == datablockId)
+            mRegisteredDatablocks.erase(itRegisteredDatablocks);
+        ++itRegisteredDatablocks;
     }
 }
 
 
 //****************************************************************************/
-bool HlmsUtilsManager::isInLoadedDatablocksVec (const Ogre::String& datablockFullName)
+bool HlmsUtilsManager::isInRegisteredDatablocksVec (const Ogre::String& datablockFullName)
 {
-    QVectorIterator<DatablockStruct> itLoadedDatablocks(mLoadedDatablocks);
-    while (itLoadedDatablocks.hasNext())
+    QVectorIterator<DatablockStruct> itRegisteredDatablocks(mRegisteredDatablocks);
+    while (itRegisteredDatablocks.hasNext())
     {
-        if (itLoadedDatablocks.next().datablockFullName == datablockFullName)
+        if (itRegisteredDatablocks.next().datablockFullName == datablockFullName)
             return true;
     }
     return false;
@@ -576,11 +580,11 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablockStructOfFullName
     helperDatablockStruct.jsonFileName = "";
     helperDatablockStruct.type = HLMS_NONE;
 
-    QVectorIterator<DatablockStruct> itLoadedDatablocks(mLoadedDatablocks);
+    QVectorIterator<DatablockStruct> itRegisteredDatablocks(mRegisteredDatablocks);
     DatablockStruct datablockStruct;
-    while (itLoadedDatablocks.hasNext())
+    while (itRegisteredDatablocks.hasNext())
     {
-        datablockStruct = itLoadedDatablocks.next();
+        datablockStruct = itRegisteredDatablocks.next();
         if (datablockStruct.datablockFullName == datablockFullName)
         {
             helperDatablockStruct = datablockStruct;
@@ -669,7 +673,7 @@ void HlmsUtilsManager::parseUnlitTexture (HlmsUtilsManager::DatablockStruct* dat
                                          const rapidjson::Value& textureJson)
 {
     Ogre::String diffuseMap;
-    for (unsigned short index = 0; index < Ogre::NUM_UNLIT_TEXTURE_TYPES; ++index)
+    for (unsigned short index = 0; index < Ogre::UnlitTextureTypes::NUM_UNLIT_TEXTURE_TYPES; ++index)
     {
         diffuseMap = "diffuse_map" + Ogre::StringConverter::toString(index);
         rapidjson::Value::ConstMemberIterator itorTextureType = textureJson.FindMember(diffuseMap.c_str());
@@ -687,15 +691,15 @@ void HlmsUtilsManager::parseUnlitTexture (HlmsUtilsManager::DatablockStruct* dat
 }
 
 //****************************************************************************/
-void HlmsUtilsManager::getTexturesFromLoadedPbsDatablocks(std::vector<Ogre::String>* v)
+void HlmsUtilsManager::getTexturesFromRegisteredPbsDatablocks(std::vector<Ogre::String>* v)
 {
     Ogre::String textureName;
     unsigned short index;
-    QVectorIterator<DatablockStruct> itLoadedDatablocks(mLoadedDatablocks);
-    while (itLoadedDatablocks.hasNext())
+    QVectorIterator<DatablockStruct> itRegisteredDatablocks(mRegisteredDatablocks);
+    while (itRegisteredDatablocks.hasNext())
     {
         // If the type is pbs, append the texturenames to the vector
-        helperDatablockStruct = itLoadedDatablocks.next();
+        helperDatablockStruct = itRegisteredDatablocks.next();
         if (helperDatablockStruct.type == HLMS_PBS)
         {
             QMap <unsigned short, Ogre::String>::iterator itTextures = helperDatablockStruct.textureMap.begin();
@@ -714,15 +718,15 @@ void HlmsUtilsManager::getTexturesFromLoadedPbsDatablocks(std::vector<Ogre::Stri
 }
 
 //****************************************************************************/
-void HlmsUtilsManager::getTexturesFromLoadedUnlitDatablocks(std::vector<Ogre::String>* v)
+void HlmsUtilsManager::getTexturesFromRegisteredUnlitDatablocks(std::vector<Ogre::String>* v)
 {
     Ogre::String textureName;
     unsigned short index;
-    QVectorIterator<DatablockStruct> itLoadedDatablocks(mLoadedDatablocks);
-    while (itLoadedDatablocks.hasNext())
+    QVectorIterator<DatablockStruct> itRegisteredDatablocks(mRegisteredDatablocks);
+    while (itRegisteredDatablocks.hasNext())
     {
         // If the type is unlit, append the texturenames to the vector
-        helperDatablockStruct = itLoadedDatablocks.next();
+        helperDatablockStruct = itRegisteredDatablocks.next();
         if (helperDatablockStruct.type == HLMS_UNLIT)
         {
             QMap <unsigned short, Ogre::String>::iterator itTextures = helperDatablockStruct.textureMap.begin();
@@ -739,3 +743,155 @@ void HlmsUtilsManager::getTexturesFromLoadedUnlitDatablocks(std::vector<Ogre::St
         }
     }
 }
+
+//****************************************************************************/
+const Ogre::String& HlmsUtilsManager::searchJsonFileName (const Ogre::IdString& datablockId)
+{
+    QVectorIterator<DatablockStruct> itRegisteredDatablocks(mRegisteredDatablocks);
+    while (itRegisteredDatablocks.hasNext())
+    {
+        helperDatablockStruct = itRegisteredDatablocks.next();
+        if (helperDatablockStruct.datablockId == datablockId)
+        {
+            return helperDatablockStruct.jsonFileName;
+        }
+    }
+
+    return helperString;
+}
+
+//****************************************************************************/
+void HlmsUtilsManager::addNewDatablockToRegisteredDatablocks (const Ogre::IdString& datablockId, const Ogre::String jsonFileName)
+{
+    helperDatablockStruct = getDatablock(datablockId);
+    helperDatablockStruct.jsonFileName = jsonFileName;
+    mRegisteredDatablocks.append(helperDatablockStruct);
+}
+
+//****************************************************************************/
+HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablock(const Ogre::IdString& datablockId)
+{
+    QVectorIterator<DatablockStruct> itRegisteredDatablocks(mRegisteredDatablocks);
+    while (itRegisteredDatablocks.hasNext())
+    {
+        helperDatablockStruct = itRegisteredDatablocks.next();
+        if (helperDatablockStruct.datablockId == datablockId)
+        {
+            // Found it, return the struct
+            return helperDatablockStruct;
+        }
+    }
+
+    // Not found in the registered datablocks; this is possible in case of a datablock constructed by means of the node editor
+    // So, search it as a real datablock instead (by means of Ogre functions)
+    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
+    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+
+    // Iterate through all pbs datablocks
+    Ogre::Hlms::HlmsDatablockMap::const_iterator itorPbs = hlmsPbs->getDatablockMap().begin();
+    Ogre::Hlms::HlmsDatablockMap::const_iterator endPbs = hlmsPbs->getDatablockMap().end();
+    Ogre::HlmsPbsDatablock* pbsDatablock;
+    while( itorPbs != endPbs)
+    {
+        pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itorPbs->second.datablock);
+        if (pbsDatablock->getName() == datablockId)
+        {
+            helperDatablockStruct.datablock = pbsDatablock;
+            helperDatablockStruct.datablockFullName = *pbsDatablock->getFullName();
+            helperDatablockStruct.datablockId = pbsDatablock->getName();
+            helperDatablockStruct.jsonFileName = "";
+            helperDatablockStruct.type = HLMS_PBS;
+            enrichTextureMapFromPbs(&helperDatablockStruct);
+            return helperDatablockStruct;
+        }
+        ++itorPbs;
+    }
+
+    // Iterate through all unlit datablocks
+    Ogre::Hlms::HlmsDatablockMap::const_iterator itorUnlit = hlmsUnlit->getDatablockMap().begin();
+    Ogre::Hlms::HlmsDatablockMap::const_iterator endUnlit = hlmsUnlit->getDatablockMap().end();
+    Ogre::HlmsUnlitDatablock* unlitDatablock;
+    while( itorUnlit != endUnlit)
+    {
+        unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itorUnlit->second.datablock);
+        if (unlitDatablock->getName() == datablockId)
+        {
+            helperDatablockStruct.datablock = unlitDatablock;
+            helperDatablockStruct.datablockFullName = *unlitDatablock->getFullName();
+            helperDatablockStruct.datablockId = unlitDatablock->getName();
+            helperDatablockStruct.jsonFileName = "";
+            helperDatablockStruct.type = HLMS_UNLIT;
+            enrichTextureMapFromUnlit(&helperDatablockStruct);
+            return helperDatablockStruct;
+        }
+        ++itorUnlit;
+    }
+}
+
+//****************************************************************************/
+void HlmsUtilsManager::enrichTextureMapFromPbs(DatablockStruct* datablockStruct)
+{
+    helperString = "";
+    if (!datablockStruct->datablock)
+        return;
+
+    Ogre::HlmsPbsDatablock* pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(datablockStruct->datablock);
+    datablockStruct->textureMap.clear();
+    for (size_t index = 0; index < Ogre::PbsTextureTypes::NUM_PBSM_TEXTURE_TYPES; ++index)
+    {
+        if (!pbsDatablock->getTexture(index).isNull())
+        {
+            Ogre::HlmsTextureManager::TextureLocation texLocation;
+            Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+            texLocation.texture = pbsDatablock->getTexture(index);
+            if( !texLocation.texture.isNull() )
+            {
+                texLocation.xIdx = pbsDatablock->_getTextureIdx((Ogre::PbsTextureTypes)index);
+                texLocation.yIdx = 0;
+                texLocation.divisor = 1;
+                const Ogre::String *texName = hlmsManager->getTextureManager()->findAliasName(texLocation);
+
+                if(texName)
+                {
+                    helperString = *texName;
+                    datablockStruct->textureMap[index] = helperString;
+                }
+            }
+        }
+    }
+}
+
+//****************************************************************************/
+void HlmsUtilsManager::enrichTextureMapFromUnlit(DatablockStruct* datablockStruct)
+{
+    helperString = "";
+    if (!datablockStruct->datablock)
+        return;
+
+    Ogre::HlmsUnlitDatablock* unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(datablockStruct->datablock);
+    datablockStruct->textureMap.clear();
+    for (size_t index = 0; index < Ogre::UnlitTextureTypes::NUM_UNLIT_TEXTURE_TYPES; ++index)
+    {
+        if (!unlitDatablock->getTexture(index).isNull())
+        {
+            Ogre::HlmsTextureManager::TextureLocation texLocation;
+            Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+            texLocation.texture = unlitDatablock->getTexture(index);
+            if( !texLocation.texture.isNull() )
+            {
+                texLocation.xIdx = unlitDatablock->_getTextureIdx(index);
+                texLocation.yIdx = 0;
+                texLocation.divisor = 1;
+                const Ogre::String *texName = hlmsManager->getTextureManager()->findAliasName(texLocation);
+
+                if(texName)
+                {
+                    helperString = *texName;
+                    datablockStruct->textureMap[index] = helperString;
+                }
+            }
+        }
+    }
+}
+

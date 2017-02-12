@@ -41,6 +41,7 @@ PropertiesDockWidget::PropertiesDockWidget(QString title, MainWindow* parent, Qt
     mTextViewer->setFont(font);
 
     mInnerMain = new QMainWindow();
+    mInnerMain->setMinimumSize(100,100);
     setWidget(mInnerMain);
 
     // Perform standard functions
@@ -145,9 +146,15 @@ void PropertiesDockWidget::setTextureTypePropertyVisible(bool visible)
 }
 
 //****************************************************************************/
-void PropertiesDockWidget::setDetailMapPropertiesVisible(bool visible)
+void PropertiesDockWidget::setDetailMapWOSPropertiesVisible(bool visible)
 {
-    mHlmsPropertiesSamplerblock->setDetailMapPropertiesVisible(visible);
+    mHlmsPropertiesSamplerblock->setDetailMapWOSPropertiesVisible(visible);
+}
+
+//****************************************************************************/
+void PropertiesDockWidget::setDetailMapAnimationPropertiesVisible(bool visible)
+{
+    mHlmsPropertiesSamplerblock->setDetailMapAnimationPropertiesVisible(visible);
 }
 
 //****************************************************************************/

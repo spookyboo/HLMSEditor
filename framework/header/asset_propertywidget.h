@@ -45,6 +45,7 @@ namespace Magus
                                SELECT,
                                SLIDER,
                                DECIMAL,
+                               SLIDER_DECIMAL,
                                COLOR,
                                TEXTURE,
                                CURVE,

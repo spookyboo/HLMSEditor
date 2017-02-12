@@ -22,7 +22,7 @@
 #include "constants.h"
 #include "asset_containerwidget.h"
 #include "asset_propertywidget_select.h"
-#include "asset_propertywidget_decimal.h"
+#include "asset_propertywidget_slider_decimal.h"
 #include "asset_propertywidget_checkbox.h"
 #include "hlms_properties_macroblock.h"
 #include "properties_dockwidget.h"
@@ -103,16 +103,20 @@ HlmsPropertiesMacroblock::HlmsPropertiesMacroblock(const QString& fileNameIcon,
     selectCompareFunctionProperty->addValues(stringListCompareFunction);
 
     // ******** Depth bias constant ********
-    mAssetWidget->createProperty(CONTAINER_MACROBLOCK_GENERAL,
-                                 PROPERTY_MACROBLOCK_DEPTH_BIAS_CONSTANT,
-                                 QString("Depth bias constant"),
-                                 Magus::QtProperty::DECIMAL);
+    Magus::QtSliderDecimalProperty* sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+        (mAssetWidget->createProperty(CONTAINER_MACROBLOCK_GENERAL,
+                                      PROPERTY_MACROBLOCK_DEPTH_BIAS_CONSTANT,
+                                      QString("Depth bias constant"),
+                                      Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
 
     // ******** Depth bias slope scale ********
-    mAssetWidget->createProperty(CONTAINER_MACROBLOCK_GENERAL,
-                                 PROPERTY_MACROBLOCK_DEPTH_BIAS_SLOPE_SCALE,
-                                 QString("Depth bias slope scale"),
-                                 Magus::QtProperty::DECIMAL);
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+        (mAssetWidget->createProperty(CONTAINER_MACROBLOCK_GENERAL,
+                                      PROPERTY_MACROBLOCK_DEPTH_BIAS_SLOPE_SCALE,
+                                      QString("Depth bias slope scale"),
+                                      Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
 
     // ******** Cull mode ********
     // CULL_NONE
@@ -160,7 +164,7 @@ void HlmsPropertiesMacroblock::setObject (HlmsNodeMacroblock* hlmsNodeMacroblock
 {
     mHlmsNodeMacroblock = hlmsNodeMacroblock;
     Magus::QtSelectProperty* selectProperty;
-    Magus::QtDecimalProperty* decimalProperty;
+    Magus::QtSliderDecimalProperty* sliderDecimalProperty;
     Magus::QtCheckBoxProperty* checkboxProperty;
 
     // ******** Enabled ********
@@ -184,12 +188,12 @@ void HlmsPropertiesMacroblock::setObject (HlmsNodeMacroblock* hlmsNodeMacroblock
     selectProperty->setCurentIndex(hlmsNodeMacroblock->getDepthFunc());
 
     // ******** Depth bias constant ********
-    decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_MACROBLOCK_DEPTH_BIAS_CONSTANT));
-    decimalProperty->setValue(hlmsNodeMacroblock->getDepthBiasConstant());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_MACROBLOCK_DEPTH_BIAS_CONSTANT));
+    sliderDecimalProperty->setValue(hlmsNodeMacroblock->getDepthBiasConstant());
 
     // ******** Depth bias slope scale ********
-    decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_MACROBLOCK_DEPTH_BIAS_SLOPE_SCALE));
-    decimalProperty->setValue(hlmsNodeMacroblock->getDepthBiasSlopeScale());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_MACROBLOCK_DEPTH_BIAS_SLOPE_SCALE));
+    sliderDecimalProperty->setValue(hlmsNodeMacroblock->getDepthBiasSlopeScale());
 
     // ******** Cull mode ********
     selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_MACROBLOCK_CULL_MODE));
@@ -207,7 +211,7 @@ void HlmsPropertiesMacroblock::propertyValueChanged(QtProperty* property)
         return;
 
     Magus::QtSelectProperty* selectProperty;
-    Magus::QtDecimalProperty* decimalProperty;
+    Magus::QtSliderDecimalProperty* sliderDecimalProperty;
     Magus::QtCheckBoxProperty* checkboxProperty;
 
     switch (property->mPropertyId)
@@ -244,14 +248,14 @@ void HlmsPropertiesMacroblock::propertyValueChanged(QtProperty* property)
         break;
         case PROPERTY_MACROBLOCK_DEPTH_BIAS_CONSTANT:
         {
-            decimalProperty = static_cast<Magus::QtDecimalProperty*>(property);
-            mHlmsNodeMacroblock->setDepthBiasConstant(decimalProperty->getValue());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodeMacroblock->setDepthBiasConstant(sliderDecimalProperty->getValue());
         }
         break;
         case PROPERTY_MACROBLOCK_DEPTH_BIAS_SLOPE_SCALE:
         {
-            decimalProperty = static_cast<Magus::QtDecimalProperty*>(property);
-            mHlmsNodeMacroblock->setDepthBiasSlopeScale(decimalProperty->getValue());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodeMacroblock->setDepthBiasSlopeScale(sliderDecimalProperty->getValue());
         }
         break;
         case PROPERTY_MACROBLOCK_CULL_MODE:

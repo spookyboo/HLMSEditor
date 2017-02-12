@@ -22,11 +22,12 @@
 #include "constants.h"
 #include "asset_containerwidget.h"
 #include "asset_propertywidget_texture.h"
-#include "asset_propertywidget_decimal.h"
 #include "asset_propertywidget_color.h"
 #include "asset_propertywidget_slider.h"
+#include "asset_propertywidget_slider_decimal.h"
 #include "asset_propertywidget_checkbox.h"
 #include "asset_propertywidget_xy.h"
+#include "asset_propertywidget_quaternion.h"
 #include "hlms_properties_samplerblock.h"
 #include "properties_dockwidget.h"
 #include "hlms_node_samplerblock.h"
@@ -152,16 +153,20 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
     selectProperty->addValues(stringListTextureAddressingMode);
 
     // ******** Mip LOD Bias ********
-    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
-                                 PROPERTY_SAMPLERBLOCK_MIPLOD_BIAS,
-                                 QString("Mip LOD bias"),
-                                 Magus::QtProperty::DECIMAL);
+    Magus::QtSliderDecimalProperty* sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+        (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
+                                      PROPERTY_SAMPLERBLOCK_MIPLOD_BIAS,
+                                      QString("Mip LOD bias"),
+                                      Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
 
     // ******** Max Anisotropy ********
-    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
-                                 PROPERTY_SAMPLERBLOCK_MAX_ANISOTROPY,
-                                 QString("Max anisotropy"),
-                                 Magus::QtProperty::DECIMAL);
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+        (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
+                                      PROPERTY_SAMPLERBLOCK_MAX_ANISOTROPY,
+                                      QString("Max anisotropy"),
+                                      Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
 
     // ******** Compare Function ********
     QStringList stringListCompareFunction;
@@ -182,16 +187,20 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
     selectCompareFunctionProperty->addValues(stringListCompareFunction);
 
     // ******** Min LOD ********
-    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
-                                 PROPERTY_SAMPLERBLOCK_MIN_LOD,
-                                 QString("Min LOD"),
-                                 Magus::QtProperty::DECIMAL);
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+        (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
+                                      PROPERTY_SAMPLERBLOCK_MIN_LOD,
+                                      QString("Min LOD"),
+                                      Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
 
     // ******** Max LOD ********
-    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
-                                 PROPERTY_SAMPLERBLOCK_MAX_LOD,
-                                 QString("Max LOD"),
-                                 Magus::QtProperty::DECIMAL);
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+        (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
+                                      PROPERTY_SAMPLERBLOCK_MAX_LOD,
+                                      QString("Max LOD"),
+                                      Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
 
     // ******** Border colour ********
     mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
@@ -200,12 +209,12 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
                                  Magus::QtProperty::COLOR);
 
     // ******** UV set ********
-    Magus::QtSliderProperty* silderProperty = static_cast<Magus::QtSliderProperty*>
+    Magus::QtSliderProperty* sliderProperty = static_cast<Magus::QtSliderProperty*>
         (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAILS,
                                       PROPERTY_SAMPLERBLOCK_UV_SET,
                                       QString("UV set [0..7]"),
                                       Magus::QtProperty::SLIDER));
-    silderProperty->setSliderRange (0, 7, 1);
+    sliderProperty->setSliderRange (0, 7, 1);
 
     // ******** Detail: Blend mode ********
     QStringList stringListBlendMode;
@@ -230,11 +239,12 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
     selectProperty->addValues(stringListBlendMode);
 
     // ******** Detail: Map weight (pbs only) ********
-    mMapWeightSelectProperty = static_cast<Magus::QtDecimalProperty*>
-            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
-                                          PROPERTY_SAMPLERBLOCK_MAP_WEIGTH,
-                                          QString("Map weight"),
-                                          Magus::QtProperty::DECIMAL));
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+        (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
+                                      PROPERTY_SAMPLERBLOCK_MAP_WEIGTH,
+                                      QString("Map weight"),
+                                      Magus::QtProperty::SLIDER_DECIMAL));
+    sliderDecimalProperty->setSliderRange (0.0f, 3.0f, 0.01f);
 
     // ******** Detail: Offset ********
     Magus::QtXYProperty* xyProperty = static_cast<Magus::QtXYProperty*>
@@ -255,7 +265,39 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
     xyProperty->setLabelY("V");
 
     // ******** Animation Matrix (unlit only) ********
-    // TODO: Not implemented yet
+    // Decompose in Scale, Rotate and Transform
+    Magus::QtCheckBoxProperty* checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
+                                          PROPERTY_SAMPLERBLOCK_ANIM_ENABLED,
+                                          QString("Scale/Rotate/Transform enabled"),
+                                          Magus::QtProperty::CHECKBOX));
+    checkboxProperty->setVisible(false); // Make invisible by default
+    checkboxProperty->setValue(false);
+
+    xyProperty = static_cast<Magus::QtXYProperty*>
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
+                                 PROPERTY_SAMPLERBLOCK_ANIM_SCALE,
+                                 QString("Scale"),
+                                 Magus::QtProperty::XY));
+    xyProperty->setLabelX("U");
+    xyProperty->setLabelY("V");
+    xyProperty->setVisible(false); // Make invisible by default
+
+    Magus::QtQuaternionProperty* quaternionProperty = static_cast<Magus::QtQuaternionProperty*>
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
+                                 PROPERTY_SAMPLERBLOCK_ANIM_ROTATE,
+                                 QString("Rotate"),
+                                 Magus::QtProperty::QUATERNION));
+    quaternionProperty->setVisible(false); // Make invisible by default
+
+    xyProperty = static_cast<Magus::QtXYProperty*>
+            (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
+                                 PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE,
+                                 QString("Translate"),
+                                 Magus::QtProperty::XY));
+    xyProperty->setLabelX("U");
+    xyProperty->setLabelY("V");
+    xyProperty->setVisible(false); // Make invisible by default
 
     // Layout
     mainLayout->addWidget(mAssetWidget);
@@ -275,17 +317,47 @@ void HlmsPropertiesSamplerblock::setTextureTypePropertyVisible (bool visible)
 }
 
 //****************************************************************************/
-void HlmsPropertiesSamplerblock::setDetailMapPropertiesVisible (bool visible)
+void HlmsPropertiesSamplerblock::setDetailMapWOSPropertiesVisible (bool visible)
 {
     // Enable specific detail map properties, except for blend properties
-    Magus::QtDecimalProperty* decimalProperty;
-    decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MAP_WEIGTH));
-    decimalProperty->setVisible(visible);
+    Magus::QtSliderDecimalProperty* sliderDecimalProperty;
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MAP_WEIGTH));
+    sliderDecimalProperty->setVisible(visible);
     Magus::QtXYProperty* xyProperty;
     xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_OFFSET));
     xyProperty->setVisible(visible);
     xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_SCALE));
     xyProperty->setVisible(visible);
+}
+
+//****************************************************************************/
+void HlmsPropertiesSamplerblock::setDetailMapAnimationPropertiesVisible (bool visible)
+{
+    Magus::QtCheckBoxProperty* checkBoxProperty;
+    Magus::QtXYProperty* xyProperty;
+    Magus::QtQuaternionProperty* quaternionProperty;
+    checkBoxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ENABLED));
+    checkBoxProperty->setVisible(visible);
+
+    // If not checked, keep the other properties invisible
+    if (!checkBoxProperty->getValue())
+    {
+        xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_SCALE));
+        xyProperty->setVisible(false);
+        quaternionProperty = static_cast<Magus::QtQuaternionProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ROTATE));
+        quaternionProperty->setVisible(false);
+        xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE));
+        xyProperty->setVisible(false);
+    }
+    else
+    {
+        xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_SCALE));
+        xyProperty->setVisible(visible);
+        quaternionProperty = static_cast<Magus::QtQuaternionProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ROTATE));
+        quaternionProperty->setVisible(visible);
+        xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE));
+        xyProperty->setVisible(visible);
+    }
 }
 
 //****************************************************************************/
@@ -297,11 +369,12 @@ void HlmsPropertiesSamplerblock::setObject (HlmsNodeSamplerblock* hlmsNodeSample
     mHlmsNodeSamplerblock = hlmsNodeSamplerblock;
     Magus::QtSelectProperty* selectProperty;
     Magus::QtTextureProperty* textureProperty;
-    Magus::QtDecimalProperty* decimalProperty;
+    Magus::QtSliderDecimalProperty* sliderDecimalProperty;
     Magus::QtColorProperty* colorProperty;
     Magus::QtSliderProperty* sliderProperty;
     Magus::QtCheckBoxProperty* checkboxProperty;
     Magus::QtXYProperty* xyProperty;
+    Magus::QtQuaternionProperty* quaternionProperty;
 
     // ******** Texture ********
     textureProperty = static_cast<Magus::QtTextureProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_TEXTURE));
@@ -340,24 +413,24 @@ void HlmsPropertiesSamplerblock::setObject (HlmsNodeSamplerblock* hlmsNodeSample
     selectProperty->setCurentIndex(mHlmsNodeSamplerblock->getTextureAddressingModeW());
 
     // ******** Mip LOD Bias ********
-    decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MIPLOD_BIAS));
-    decimalProperty->setValue(mHlmsNodeSamplerblock->getMipLodBias());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MIPLOD_BIAS));
+    sliderDecimalProperty->setValue(mHlmsNodeSamplerblock->getMipLodBias());
 
     // ******** Max Anisotropy ********
-    decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MAX_ANISOTROPY));
-    decimalProperty->setValue(mHlmsNodeSamplerblock->getMaxAnisotropy());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MAX_ANISOTROPY));
+    sliderDecimalProperty->setValue(mHlmsNodeSamplerblock->getMaxAnisotropy());
 
      // ******** Compare Function ********
     selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_COMPARE_FUNCTION));
     selectProperty->setCurentIndex(mHlmsNodeSamplerblock->getCompareFunction());
 
     // ******** Min LOD ********
-    decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MIN_LOD));
-    decimalProperty->setValue(mHlmsNodeSamplerblock->getMinLod());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MIN_LOD));
+    sliderDecimalProperty->setValue(mHlmsNodeSamplerblock->getMinLod());
 
     // ******** Max LOD ********
-    decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MAX_LOD));
-    decimalProperty->setValue(mHlmsNodeSamplerblock->getMaxLod());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MAX_LOD));
+    sliderDecimalProperty->setValue(mHlmsNodeSamplerblock->getMaxLod());
 
     // ******** Border colour ********
     colorProperty = static_cast<Magus::QtColorProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_BORDER_COLOUR));
@@ -375,8 +448,8 @@ void HlmsPropertiesSamplerblock::setObject (HlmsNodeSamplerblock* hlmsNodeSample
     selectProperty->setCurentIndex(mHlmsNodeSamplerblock->getBlendMode());
 
     // ******** Detail: Map weight ********
-    decimalProperty = static_cast<Magus::QtDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MAP_WEIGTH));
-    decimalProperty->setValue(mHlmsNodeSamplerblock->getMapWeight());
+    sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MAP_WEIGTH));
+    sliderDecimalProperty->setValue(mHlmsNodeSamplerblock->getMapWeight());
 
     // ******** Detail: Offset ********
     xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_OFFSET));
@@ -386,6 +459,23 @@ void HlmsPropertiesSamplerblock::setObject (HlmsNodeSamplerblock* hlmsNodeSample
     // ******** Detail: Scale ********
     xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_SCALE));
     v2 = mHlmsNodeSamplerblock->getScale();
+    xyProperty->setXY(v2.x(), v2.y());
+
+    // ******** Animation Matrix (unlit only) ********
+    // Decompose in Scale, Rotate and Transform
+    checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ENABLED));
+    checkboxProperty->setValue(mHlmsNodeSamplerblock->getAnimationEnabled());
+
+    xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_SCALE));
+    v2 = mHlmsNodeSamplerblock->getAnimationScale();
+    xyProperty->setXY(v2.x(), v2.y());
+
+    quaternionProperty = static_cast<Magus::QtQuaternionProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ROTATE));
+    QQuaternion q = mHlmsNodeSamplerblock->getAnimationOrientation();
+    quaternionProperty->setQuaternion(q);
+
+    xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE));
+    v2 = mHlmsNodeSamplerblock->getAnimationTranslate();
     xyProperty->setXY(v2.x(), v2.y());
 }
 
@@ -397,11 +487,12 @@ void HlmsPropertiesSamplerblock::propertyValueChanged(QtProperty* property)
 
     Magus::QtSelectProperty* selectProperty;
     Magus::QtTextureProperty* textureProperty;
-    Magus::QtDecimalProperty* decimalProperty;
+    Magus::QtSliderDecimalProperty* sliderDecimalProperty;
     Magus::QtColorProperty* colorProperty;
     Magus::QtSliderProperty* sliderProperty;
     Magus::QtCheckBoxProperty* checkboxProperty;
     Magus::QtXYProperty* xyProperty;
+    Magus::QtQuaternionProperty* quaternionProperty;
 
     switch (property->mPropertyId)
     {
@@ -472,15 +563,15 @@ void HlmsPropertiesSamplerblock::propertyValueChanged(QtProperty* property)
 
         case PROPERTY_SAMPLERBLOCK_MIPLOD_BIAS:
         {
-            decimalProperty = static_cast<Magus::QtDecimalProperty*>(property);
-            mHlmsNodeSamplerblock->setMipLodBias(decimalProperty->getValue());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodeSamplerblock->setMipLodBias(sliderDecimalProperty->getValue());
         }
         break;
 
         case PROPERTY_SAMPLERBLOCK_MAX_ANISOTROPY:
         {
-            decimalProperty = static_cast<Magus::QtDecimalProperty*>(property);
-            mHlmsNodeSamplerblock->setMaxAnisotropy(decimalProperty->getValue());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodeSamplerblock->setMaxAnisotropy(sliderDecimalProperty->getValue());
         }
         break;
 
@@ -491,15 +582,15 @@ void HlmsPropertiesSamplerblock::propertyValueChanged(QtProperty* property)
 
         case PROPERTY_SAMPLERBLOCK_MIN_LOD:
         {
-            decimalProperty = static_cast<Magus::QtDecimalProperty*>(property);
-            mHlmsNodeSamplerblock->setMinLod(decimalProperty->getValue());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodeSamplerblock->setMinLod(sliderDecimalProperty->getValue());
         }
         break;
 
         case PROPERTY_SAMPLERBLOCK_MAX_LOD:
         {
-            decimalProperty = static_cast<Magus::QtDecimalProperty*>(property);
-            mHlmsNodeSamplerblock->setMaxLod(decimalProperty->getValue());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodeSamplerblock->setMaxLod(sliderDecimalProperty->getValue());
         }
         break;
 
@@ -528,8 +619,8 @@ void HlmsPropertiesSamplerblock::propertyValueChanged(QtProperty* property)
 
         case PROPERTY_SAMPLERBLOCK_MAP_WEIGTH:
         {
-            decimalProperty = static_cast<Magus::QtDecimalProperty*>(property);
-            mHlmsNodeSamplerblock->setMapWeight(decimalProperty->getValue());
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(property);
+            mHlmsNodeSamplerblock->setMapWeight(sliderDecimalProperty->getValue());
         }
         break;
 
@@ -552,7 +643,52 @@ void HlmsPropertiesSamplerblock::propertyValueChanged(QtProperty* property)
             mHlmsNodeSamplerblock->setScale(v2);
         }
         break;
-    }
+
+        case PROPERTY_SAMPLERBLOCK_ANIM_ENABLED:
+        {
+            checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(property);
+            mHlmsNodeSamplerblock->setAnimationEnabled(checkboxProperty->getValue());
+            xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS, PROPERTY_SAMPLERBLOCK_ANIM_SCALE));
+            xyProperty->setVisible(checkboxProperty->getValue());
+            quaternionProperty = static_cast<Magus::QtQuaternionProperty*>(mAssetWidget->getPropertyWidget(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS, PROPERTY_SAMPLERBLOCK_ANIM_ROTATE));
+            quaternionProperty->setVisible(checkboxProperty->getValue());
+            xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS, PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE));
+            xyProperty->setVisible(checkboxProperty->getValue());
+        }
+        break;
+
+        case PROPERTY_SAMPLERBLOCK_ANIM_SCALE:
+        {
+            xyProperty = static_cast<Magus::QtXYProperty*>(property);
+            QVector2D v2;
+            v2.setX(xyProperty->getX());
+            v2.setY(xyProperty->getY());
+            mHlmsNodeSamplerblock->setAnimationScale(v2);
+        }
+        break;
+
+        case PROPERTY_SAMPLERBLOCK_ANIM_ROTATE:
+        {
+            quaternionProperty = static_cast<Magus::QtQuaternionProperty*>(property);
+            QQuaternion q;
+            q.setX(quaternionProperty->getX());
+            q.setY(quaternionProperty->getY());
+            q.setZ(quaternionProperty->getZ());
+            q.setScalar(quaternionProperty->getW());
+            mHlmsNodeSamplerblock->setAnimationOrientation(q);
+        }
+        break;
+
+        case PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE:
+        {
+            xyProperty = static_cast<Magus::QtXYProperty*>(property);
+            QVector2D v2;
+            v2.setX(xyProperty->getX());
+            v2.setY(xyProperty->getY());
+            mHlmsNodeSamplerblock->setAnimationTranslate(v2);
+        }
+        break;
+}
 
     // Inform the propertiesDockWidget that a property is changed, so the material is rebuild
     mPropertiesDockWidget->notifyHlmsChanged();

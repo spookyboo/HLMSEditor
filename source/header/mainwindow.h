@@ -39,6 +39,7 @@
 #include "hlms_editor_plugin.h"
 #include "recent_file_action.h"
 #include "hlms_utils_manager.h"
+#include "paintlayer_manager.h"
 #include "constants.h"
 
 QT_BEGIN_NAMESPACE
@@ -57,6 +58,8 @@ class MainWindow : public QMainWindow
         bool eventFilter(QObject* object, QEvent* event);
 		void update(void);
 		bool mIsClosing;
+        PaintLayerManager mPaintLayerManager;
+
         Magus::OgreManager* getOgreManager(void) const {return mOgreManager;}
         PropertiesDockWidget* mPropertiesDockWidget; // Make is public for easy access
         TextureDockWidget* mTextureDockWidget; // Make is public for easy access
@@ -71,6 +74,7 @@ class MainWindow : public QMainWindow
         const Ogre::IdString& getCurrentDatablockName (void) {return mCurrentDatablockName;}
         void destroyDatablock(const Ogre::IdString& datablockName);
         void notifyHlmsChanged (void); // To be called if the properties of a datablock are changed (which result in rebuilding the material)
+        HlmsUtilsManager* getHlmsUtilsManager (void) {return mHlmsUtilsManager;}
 
     protected:
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources); // Save the content of a resource vector
@@ -80,6 +84,7 @@ class MainWindow : public QMainWindow
         void appendRecentProject(const QString fileName); // Used for recent Project files in menu
         bool isMeshV1(const QString meshFileName);
         bool isMeshV2(const QString meshFileName);
+        unsigned int getMeshVersion(const QString meshFileName);
         Ogre::MeshPtr convertMeshV1ToV2(const QString fileNameMeshV1);
         void saveV2Mesh(Ogre::MeshPtr v2MeshPtr, QString meshFileName);
         void detachMaterialsFromItem (void);
@@ -97,6 +102,7 @@ class MainWindow : public QMainWindow
         void loadDatablockAndSet(const QString jsonFileName);
         void loadMesh(const QString meshFileName);
         void loadProject(const QString& fileName);
+        void saveDatablock_old(void); // Deprecated; this version deletes all datablocks execpt the one-to-be-saved
         void saveDatablock(void);
         void loadMaterialBrowserCfg(void);
         void saveMaterialBrowserCfg(void);

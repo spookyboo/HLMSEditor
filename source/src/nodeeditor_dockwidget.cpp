@@ -26,6 +26,7 @@
 #include "OgreHlmsPbsDatablock.h"
 #include "hlms_pbs_builder.h"
 #include "hlms_unlit_builder.h"
+#include "hlms_utils_manager.h"
 
 //****************************************************************************/
 NodeEditorDockWidget::NodeEditorDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags) : 
@@ -33,6 +34,7 @@ NodeEditorDockWidget::NodeEditorDockWidget(QString title, MainWindow* parent, Qt
 	mParent(parent)
 {
     mInnerMain = new QMainWindow();
+    mInnerMain->setMinimumSize(100,100);
     setWidget(mInnerMain);
 
     // Perform standard functions
@@ -211,7 +213,8 @@ HlmsNodePbsDatablock* NodeEditorDockWidget::doNewHlmsPbsDatablockAction(void)
     if (mHlmsUnlitDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(true);
         return mHlmsPbsDatablockNode;
     }
 
@@ -220,7 +223,8 @@ HlmsNodePbsDatablock* NodeEditorDockWidget::doNewHlmsPbsDatablockAction(void)
     {
         mHlmsPbsDatablockNode = mHlmsPbsBuilder->createPbsNode();
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
         mParent->initCurrentDatablockFileName(); // Don't destroy all other datablocks
         if (mHlmsPbsDatablockNode)
             mHlmsPbsDatablockNode->setSelected(true);
@@ -237,7 +241,8 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::doNewHlmsUnlitDatablockAction(void
     if (mHlmsPbsDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
         return mHlmsUnlitDatablockNode;
     }
 
@@ -246,7 +251,8 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::doNewHlmsUnlitDatablockAction(void
     {
         mHlmsUnlitDatablockNode = mHlmsUnlitBuilder->createUnlitNode();
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(true);
         mParent->initCurrentDatablockFileName(); // Don't destroy all other datablocks
         if (mHlmsUnlitDatablockNode)
             mHlmsUnlitDatablockNode->setSelected(true);
@@ -266,14 +272,16 @@ HlmsNodeSamplerblock* NodeEditorDockWidget::doNewSamplerblockAction(void)
     if (mHlmsPbsDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
         mHlmsPbsBuilder->connectNodes(mHlmsPbsDatablockNode, sampler);
         nodeConnected(mHlmsPbsDatablockNode, sampler);
     }
     else if (mHlmsUnlitDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(true);
         mHlmsUnlitBuilder->connectNodes(mHlmsUnlitDatablockNode, sampler);
         nodeConnected(mHlmsPbsDatablockNode, sampler);
     }
@@ -315,40 +323,47 @@ void NodeEditorDockWidget::doNewMacroblockAction(void)
 void NodeEditorDockWidget::doCogHToolbarAction(void)
 {
     Ogre::IdString name;
+    HlmsUtilsManager* hlmsUtilsManager = mParent->getHlmsUtilsManager();
 
     // Construct a datablock and set it to the current item in the renderwindow
     if (mHlmsPbsDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
-        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(true);
+        mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
         mCurrentDatablockName = mHlmsPbsDatablockNode->getName();
         name = mCurrentDatablockName.toStdString();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
 
         QVector<int> indices = mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
-        mParent->destroyDatablock(name);
+        Ogre::String jsonFileName = hlmsUtilsManager->searchJsonFileName (name); // The datablock may still refer to a loaded material in the material browser
+        hlmsUtilsManager->destroyDatablock(name);
         Ogre::HlmsPbsDatablock* datablock = mHlmsPbsBuilder->createPbsDatablock(ogreManager, mHlmsPbsDatablockNode);
         if (datablock)
         {
             mParent->replaceCurrentDatablock(indices, datablock->getName());
             mParent->setCurrentDatablockNames(datablock->getName(), *datablock->getFullName());
+            hlmsUtilsManager->addNewDatablockToRegisteredDatablocks(name, jsonFileName);
         }
     }
     else if (mHlmsUnlitDatablockNode)
     {
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
-        mParent->mPropertiesDockWidget->setDetailMapPropertiesVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(false);
+        mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(true);
         mCurrentDatablockName = mHlmsUnlitDatablockNode->getName();
         name = mCurrentDatablockName.toStdString();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
 
         QVector<int> indices = mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
-        mParent->destroyDatablock(name);
+        Ogre::String jsonFileName = hlmsUtilsManager->searchJsonFileName (name); // The datablock may still refer to a loaded material in the material browser
+        hlmsUtilsManager->destroyDatablock(name);
         Ogre::HlmsUnlitDatablock* datablock = mHlmsUnlitBuilder->createUnlitDatablock(ogreManager, mHlmsUnlitDatablockNode);
         if (datablock)
         {
             mParent->replaceCurrentDatablock(indices, datablock->getName());
             mParent->setCurrentDatablockNames(datablock->getName(), *datablock->getFullName());
+            hlmsUtilsManager->addNewDatablockToRegisteredDatablocks(name, jsonFileName);
         }
     }
 }
@@ -371,9 +386,9 @@ void NodeEditorDockWidget::nodeToBeDeleted(QtNode* node)
 //****************************************************************************/
 void NodeEditorDockWidget::deleteHlmsPbsDatablockNode(void)
 {
+    // When the node is deleted from the node-editor, do not destroy the datablock itself
+    // It may be still be applied to one of the items.
     Ogre::IdString name = mHlmsPbsDatablockNode->getName().toStdString();
-    //mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
-    //mParent->destroyDatablock(name);
     mHlmsPbsDatablockNode = 0;
     mParent->initCurrentDatablockFileName();
 
@@ -383,9 +398,9 @@ void NodeEditorDockWidget::deleteHlmsPbsDatablockNode(void)
 //****************************************************************************/
 void NodeEditorDockWidget::deleteHlmsUnlitDatablockNode(void)
 {
+    // When the node is deleted from the node-editor, do not destroy the datablock itself
+    // It may be still be applied to one of the items.
     Ogre::IdString name = mHlmsUnlitDatablockNode->getName().toStdString();
-    //mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
-    //mParent->destroyDatablock(name);
     mHlmsUnlitDatablockNode = 0;
     mParent->initCurrentDatablockFileName();
 }
@@ -469,9 +484,9 @@ void NodeEditorDockWidget::nodeConnected(QtNode* baseNode, QtNode* targetNode)
 {
     // One of the nodes must be a sampler node; otherwise. don't bother
     HlmsNodeSamplerblock* hlmsNodeSamplerblock = 0;
-    if (baseNode->getType() == NODE_TYPE_SAMPLERBLOCK)
+    if (baseNode  && baseNode->getType() == NODE_TYPE_SAMPLERBLOCK)
         hlmsNodeSamplerblock = static_cast<HlmsNodeSamplerblock*>(baseNode);
-    else if (targetNode->getType() == NODE_TYPE_SAMPLERBLOCK)
+    else if (targetNode && targetNode->getType() == NODE_TYPE_SAMPLERBLOCK)
         hlmsNodeSamplerblock = static_cast<HlmsNodeSamplerblock*>(targetNode);
     if (!hlmsNodeSamplerblock)
         return;
