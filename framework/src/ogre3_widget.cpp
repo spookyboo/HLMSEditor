@@ -903,7 +903,7 @@ namespace Magus
             {
                 if (mMouseDown)
                 {
-                    doPaintLayer(e->pos().x(), e->pos().y());
+                    //doPaintLayer(e->pos().x(), e->pos().y());
                 }
             }
             else
@@ -958,7 +958,7 @@ namespace Magus
                 if (mPaintMode && e->button() == Qt::LeftButton)
                 {
                     Ogre::Vector2 pos = Ogre::Vector2::ZERO;
-                    doPaintLayer(e->pos().x(), e->pos().y());
+                    //doPaintLayer(e->pos().x(), e->pos().y());
                 }
             }
             else if (e->button() == Qt::RightButton)

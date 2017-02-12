@@ -502,10 +502,10 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
     if (action->text() == ACTION_SET_CURRENT_MATERIAL)
     {
         // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
+        /*
         PaintLayer* paintLayer;
 
         // First layer
-        /*
         paintLayer = mParent->mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
                                                                   Ogre::PbsTextureTypes::PBSM_DETAIL0,
                                                                   "../examples/10points.png");
@@ -517,7 +517,6 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
         paintLayer->setJitterForce(0.0f, 1.0f);
         paintLayer->setJitterPaintColour(Ogre::ColourValue(0.4f, 0.1f, 0.4f, 1.0f), Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
         paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_COLOR);
-        */
 
         // Second layer
         paintLayer = mParent->mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
@@ -540,6 +539,7 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
 
         mOgreWidget->setPaintLayers(mParent->mPaintLayerManager.getPaintLayers());
         // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
+        */
 
         mOgreWidget->assignCurrentDatablock();
         return;
