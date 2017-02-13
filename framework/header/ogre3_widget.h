@@ -172,6 +172,14 @@ namespace Magus
             int calculateColourToIndex(const Ogre::ColourValue& colourValue);
             const Ogre::ColourValue& getColourAtRenderToTexture(size_t x, size_t y);
             void doPaintLayer(int mouseX, int mouseY); // Apply the paint effect to the layers
+            void getMeshInformation (const Ogre::MeshPtr mesh,
+                                     size_t &vertex_count,
+                                     Ogre::Vector3* &vertices,
+                                     size_t &index_count,
+                                     Ogre::uint32* &indices,
+                                     const Ogre::Vector3 &position,
+                                     const Ogre::Quaternion &orient,
+                                     const Ogre::Vector3 &scale); // Used for for 3D picking and determine uv coordinates
 
             /* To highlight a subitem in on the screen, the following steps are performed
              * - Create a render texture and an additional workspace (createCompositorRenderToTexture)

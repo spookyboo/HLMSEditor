@@ -38,6 +38,8 @@
 #include "OgreHlmsUnlitDatablock.h"
 #include "OgreMesh2.h"
 #include "OgreSubMesh2.h"
+#include "OgreBitwise.h"
+#include "Vao/OgreAsyncTicket.h"
 #include "constants.h"
 #include "renderwindow_dockwidget.h"
 
@@ -1422,4 +1424,144 @@ namespace Magus
             }
         }
     }
+
+
+
+
+    /*
+     * Get the mesh information for the given mesh in v2 Ogre3D format. This is a really useful function that can be used by many
+     * different systems. e.g. physics mesh, navmesh, occlusion geometry etc...
+     * Original Code - Code found on this forum link: http://www.ogre3d.org/wiki/index.php/RetrieveVertexData
+     * Most Code courtesy of al2950( thanks m8 :)), but then edited by Jayce Young & Hannah Young at Aurasoft UK (Skyline Game Engine)
+     * to work with Items in the scene.
+     */
+    void QOgreWidget::getMeshInformation (const Ogre::MeshPtr mesh,
+                                          size_t &vertex_count,
+                                          Ogre::Vector3* &vertices,
+                                          size_t &index_count,
+                                          Ogre::uint32* &indices,
+                                          const Ogre::Vector3 &position,
+                                          const Ogre::Quaternion &orient,
+                                          const Ogre::Vector3 &scale)
+    {
+        //First, we compute the total number of vertices and indices and init the buffers.
+        unsigned int numVertices = 0;
+        unsigned int numIndices = 0;
+
+        Ogre::Mesh::SubMeshVec::const_iterator subMeshIterator = mesh->getSubMeshes().begin();
+
+        while (subMeshIterator != mesh->getSubMeshes().end())
+        {
+          Ogre::SubMesh *subMesh = *subMeshIterator;
+          numVertices += subMesh->mVao[0][0]->getVertexBuffers()[0]->getNumElements();
+          numIndices += subMesh->mVao[0][0]->getIndexBuffer()->getNumElements();
+
+          subMeshIterator++;
+        }
+
+        vertices = new Ogre::Vector3[numVertices];
+        indices = new Ogre::uint32[numIndices];
+
+        vertex_count = numVertices;
+        index_count = numIndices;
+
+        unsigned int addedVertices = 0;
+        unsigned int addedIndices = 0;
+
+        unsigned int index_offset = 0;
+        unsigned int subMeshOffset = 0;
+
+        // Read Submeshes
+        subMeshIterator = mesh->getSubMeshes().begin();
+        while (subMeshIterator != mesh->getSubMeshes().end())
+        {
+          Ogre::SubMesh *subMesh = *subMeshIterator;
+          Ogre::VertexArrayObjectArray vaos = subMesh->mVao[0];
+
+          if (!vaos.empty())
+          {
+             //Get the first LOD level
+             Ogre::VertexArrayObject *vao = vaos[0];
+             bool indices32 = (vao->getIndexBuffer()->getIndexType() == Ogre::IndexBufferPacked::IT_32BIT);
+
+             const Ogre::VertexBufferPackedVec &vertexBuffers = vao->getVertexBuffers();
+             Ogre::IndexBufferPacked *indexBuffer = vao->getIndexBuffer();
+
+             //request async read from buffer
+             Ogre::VertexArrayObject::ReadRequestsArray requests;
+             requests.push_back(Ogre::VertexArrayObject::ReadRequests(Ogre::VES_POSITION));
+
+             vao->readRequests(requests);
+             vao->mapAsyncTickets(requests);
+             unsigned int subMeshVerticiesNum = requests[0].vertexBuffer->getNumElements();
+             if (requests[0].type == Ogre::VET_HALF4)
+             {
+                for (size_t i = 0; i < subMeshVerticiesNum; ++i)
+                {
+                   const Ogre::uint16* pos = reinterpret_cast<const Ogre::uint16*>(requests[0].data);
+                   Ogre::Vector3 vec;
+                   vec.x = Ogre::Bitwise::halfToFloat(pos[0]);
+                   vec.y = Ogre::Bitwise::halfToFloat(pos[1]);
+                   vec.z = Ogre::Bitwise::halfToFloat(pos[2]);
+                   requests[0].data += requests[0].vertexBuffer->getBytesPerElement();
+                   vertices[i + subMeshOffset] = (orient * (vec * scale)) + position;
+                }
+             }
+             else if (requests[0].type == Ogre::VET_FLOAT3)
+             {
+                for (size_t i = 0; i < subMeshVerticiesNum; ++i)
+                {
+                   const float* pos = reinterpret_cast<const float*>(requests[0].data);
+                   Ogre::Vector3 vec;
+                   vec.x = *pos++;
+                   vec.y = *pos++;
+                   vec.z = *pos++;
+                   requests[0].data += requests[0].vertexBuffer->getBytesPerElement();
+                   vertices[i + subMeshOffset] = (orient * (vec * scale)) + position;
+                }
+             }
+             else
+             {
+                //lprint("Error: Vertex Buffer type not recognised in MeshTools::getMeshInformation");
+             }
+             subMeshOffset += subMeshVerticiesNum;
+             vao->unmapAsyncTickets(requests);
+
+             ////Read index data
+             if (indexBuffer)
+             {
+                Ogre::AsyncTicketPtr asyncTicket = indexBuffer->readRequest(0, indexBuffer->getNumElements());
+
+                unsigned int *pIndices = 0;
+                if (indices32)
+                {
+                   pIndices = (unsigned*)(asyncTicket->map());
+                }
+                else
+                {
+                   unsigned short *pShortIndices = (unsigned short*)(asyncTicket->map());
+                   pIndices = new unsigned int[indexBuffer->getNumElements()];
+                   for (size_t k = 0; k < indexBuffer->getNumElements(); k++) pIndices[k] = static_cast<unsigned int>(pShortIndices[k]);
+                }
+                unsigned int bufferIndex = 0;
+
+                for (size_t i = addedIndices; i < addedIndices + indexBuffer->getNumElements(); i++)
+                {
+                   indices[i] = pIndices[bufferIndex] + index_offset;
+                   bufferIndex++;
+                }
+                addedIndices += indexBuffer->getNumElements();
+
+                if (!indices32) delete[] pIndices;
+
+                asyncTicket->unmap();
+             }
+             index_offset += vertexBuffers[0]->getNumElements();
+          }
+          subMeshIterator++;
+        }
+    }
+
+
+
 }
