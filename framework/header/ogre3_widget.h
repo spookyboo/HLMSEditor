@@ -42,7 +42,6 @@ namespace Magus
     static const Ogre::String SKYBOX_MATERIAL_NAME = "SkyPostprocess";
     static const int MAX_SCREEN_SIZE_INT = 10000; // Arbritrary value, but screen size is usually not larger than this, right?
 
-
     class OgreManager;
 
     /****************************************************************************
@@ -52,6 +51,26 @@ namespace Magus
     {
         Q_OBJECT
 
+        struct PositionAndUv
+        {
+            Ogre::Vector3 position;
+            Ogre::Vector2 uv;
+        };
+
+        struct PositionAndUvArrayMeta
+        {
+            size_t numberOfElements;
+            size_t numberOfIndices;
+            float minU;
+            float maxU;
+            float minV;
+            float maxV;
+            PositionAndUv* arrayOfPositionsAndUvs;
+            Ogre::uint32* arrayOfIndices;
+        };
+
+        typedef std::vector<PositionAndUv> PositionAndUvVector;
+
         public:
             QOgreWidget(QWidget* parent = 0);
             virtual ~QOgreWidget(void);
@@ -60,7 +79,7 @@ namespace Magus
             void createRenderWindow(OgreManager* ogreManager);
             void createScene();
             Ogre::Item* getItem(void) {return mItem;}
-            void setItem(Ogre::Item* item, Ogre::Item* itemRtt, const Ogre::Vector3& scale);
+            //void setItem(Ogre::Item* item, Ogre::Item* itemRtt, const Ogre::Vector3& scale);
             Ogre::RenderWindow* getRenderWindow(void) {return mOgreRenderWindow;}
             Ogre::SceneManager* getSceneManager(void) {return mSceneManager;}
             const Ogre::Vector3& getItemScale(void);
@@ -152,6 +171,14 @@ namespace Magus
             QMap<unsigned short, Ogre::String> helperIndicesAndNames;
             QVector<int> helperIndices;
             QDockWidget* mRenderwindowDockWidget;
+            std::map<int, PositionAndUvArrayMeta> mPositionAndUvMap; // Contains a metaobject with position and uv's per SubMesh
+            Ogre::Vector3* mVertices;
+            Ogre::Vector2* mUVs;
+            Ogre::uint32* mIndices;
+            size_t mVertexCount;
+            size_t mIndexCount;
+            Ogre::Vector2 helperVector2;
+            Ogre::Vector3 helperVector3;
 
             virtual void createCompositor();
             virtual void createCompositorRenderToTexture();
@@ -172,14 +199,20 @@ namespace Magus
             int calculateColourToIndex(const Ogre::ColourValue& colourValue);
             const Ogre::ColourValue& getColourAtRenderToTexture(size_t x, size_t y);
             void doPaintLayer(int mouseX, int mouseY); // Apply the paint effect to the layers
+
+            /* Get the mesh information for the given mesh in v2 Ogre3D format. This is a really useful function that can be used by many
+             * different systems. e.g. physics mesh, navmesh, occlusion geometry etc...
+             * Original Code - Code found on this forum link: http://www.ogre3d.org/wiki/index.php/RetrieveVertexData
+             * Most Code courtesy of al2950( thanks m8 :)), but then edited by Jayce Young & Hannah Young at Aurasoft UK (Skyline Game Engine)
+             * to work with Items in the scene.
+             */
             void getMeshInformation (const Ogre::MeshPtr mesh,
-                                     size_t &vertex_count,
-                                     Ogre::Vector3* &vertices,
-                                     size_t &index_count,
-                                     Ogre::uint32* &indices,
                                      const Ogre::Vector3 &position,
-                                     const Ogre::Quaternion &orient,
-                                     const Ogre::Vector3 &scale); // Used for for 3D picking and determine uv coordinates
+                                     const Ogre::Quaternion &orientation,
+                                     const Ogre::Vector3 &scale); // Used for for 3D picking and determine uv coordinates (for painting)
+            void destroyMeshInformation (void);
+            const Ogre::Vector2& calculateUVFromMousePosition (int mouseX, int mouseY); // Used for painting
+            const Ogre::Vector3& calculateBarycentricCoordinates (const Ogre::Vector3& intersect, const Ogre::Vector3& p1, const Ogre::Vector3& p2, const Ogre::Vector3& p3); // Used for painting
 
             /* To highlight a subitem in on the screen, the following steps are performed
              * - Create a render texture and an additional workspace (createCompositorRenderToTexture)

@@ -39,6 +39,7 @@
 #include "OgreMesh2.h"
 #include "OgreSubMesh2.h"
 #include "OgreBitwise.h"
+#include "OgreRay.h"
 #include "Vao/OgreAsyncTicket.h"
 #include "constants.h"
 #include "renderwindow_dockwidget.h"
@@ -74,7 +75,12 @@ namespace Magus
         mLatestSubItemDatablock(0),
         mHoover(false),
         mPaintMode(false),
-        mPaintLayers(0)
+        mPaintLayers(0),
+        mVertices(0),
+        mUVs(0),
+        mIndices(0),
+        mVertexCount(0),
+        mIndexCount(0)
     {
         setMinimumSize(100,100);
         mCurrentDatablockName = "";
@@ -171,6 +177,7 @@ namespace Magus
     QOgreWidget::~QOgreWidget()
     {
         // Cannot destroy the render texture here, because that would be too late (Ogre root is already deleted)
+        destroyMeshInformation(); // This only contains numbers, so deleting them is ok.
     }
 
     //****************************************************************************/
@@ -471,9 +478,17 @@ namespace Magus
             mItem = mSceneManager->createItem(meshName,
                                               Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                                               Ogre::SCENE_DYNAMIC );
+
             mSceneNode->attachObject(mItem);
             mSceneNode->setScale(scale);
             mItem->setRenderQueueGroup(2);
+
+            // Create the mesh info, which is used for 3d painting
+            getMeshInformation(mItem->getMesh(),
+                               mSceneNode->getPosition(),
+                               mSceneNode->getOrientation(),
+                               scale);
+
 
             // Delete the old itemRtt if available
             if (mItemRtt)
@@ -505,6 +520,7 @@ namespace Magus
     }
 
     //****************************************************************************/
+    /*
     void QOgreWidget::setItem(Ogre::Item* item, Ogre::Item* itemRtt, const Ogre::Vector3& scale)
     {
         Ogre::String datablockName = "";
@@ -538,6 +554,7 @@ namespace Magus
         createUnlitDatablocksRtt();
         mItemRtt->setRenderQueueGroup(2);
     }
+    */
 
     //****************************************************************************/
     void QOgreWidget::setDefaultDatablockItem(void)
@@ -1368,33 +1385,23 @@ namespace Magus
         if (!mPaintLayers || !mItem)
             return;
 
+        // 1. Determine the subItem on which the mouse hoovers by means of getSubItemIndexWithMouseOver()
+        // 2. Determine whether the subitem index is valid ==> otherwise return (don't paint)
+        // 3. Determine wether the subitem has a datablock name (IdString) equal to the one used by the paintlayer; use (*it)->getDatablockName()
+        //    If they differ ==> return (don't paint)
+        // 4. Calculate the uv, based on the mouse position
+
         // If the mouse didn't hoover over a submesh, don't paint (this can be done quickly by using the RTT mechanism that is already used for mouse hoovering)
-        int index = getSubItemIndexWithMouseOver(mouseX, mouseY);
-        if (index < 0)
+        int subItemIndex = getSubItemIndexWithMouseOver(mouseX, mouseY);
+        if (subItemIndex < 0)
             return;
 
         // The subitem must have a valid datablock; otherwise don't paint
-        Ogre::HlmsDatablock* datablock = mItem->getSubItem(index)->getDatablock();
+        Ogre::HlmsDatablock* datablock = mItem->getSubItem(subItemIndex)->getDatablock();
         if (!datablock)
             return;
 
-        // Calculate uv of the texture position pointed by the mouse:
-        // TODO
-        // 1. DONE! Determine the subItem on which the mouse hoovers by means of getSubItemIndexWithMouseOver()
-        // 2. DONE! Determine whether the subitem index is valid ==> otherwise return (don't paint)
-        // 3. DONE! Determine wether the subitem has a datablock name (IdString) equal to the one used by the paintlayer; use (*it)->getDatablockName()
-        //    DONE! If they differ ==> return (don't paint)
-        // 4. Perform a rayscene query
-        // 5. Determine barycentric coordinates where the ray intersets with the mesh (use a buffer of the values for reuse)
-        //    - calculate barycentric coordinate of point inside triangle
-        //    - get uv coordinate of point with this = Ogre::Vector2 uv = mUVs[mIndices[i]] * bary.x + mUVs[mIndices[i+1]] * bary.y + mUVs[->mIndices[i+2]] * bary.z;
-        // OR
-        // 1. Create an RTT, similar as to the one used to select the subItem.
-        // 2. The RTT renders the item. Each renderer pixels contains the calculated uv positions.
-        // 3. Pick with the mouse the value of the pixel.
-        // Note, that this method is probably not accurate enough!
-        float u = 0.5f;
-        float v = 0.5f;
+        Ogre::Vector2 uv;
         bool uvCalculated = false;
 
         // Iterate through the PaintLayer vector and apply the paint effect
@@ -1415,153 +1422,340 @@ namespace Magus
                     // Calculate the uv; we do it here, because it should only be calculated when needed (as late as possible)
                     if (!uvCalculated)
                     {
-                        // TODO: Calculate the uv
+                        uv = calculateUVFromMousePosition (mouseX, mouseY);
                         uvCalculated = true;
                     }
 
-                    paintLayer->paint(u, v);
+                    paintLayer->paint(uv.x, uv.y);
                 }
             }
         }
     }
 
+    //****************************************************************************/
+    const Ogre::Vector2& QOgreWidget::calculateUVFromMousePosition (int mouseX, int mouseY)
+    {
+        // Calculate uv of the texture position pointed by the mouse:
+        // 1. Perform a rayscene query
+        // 2. Determine barycentric coordinates where the ray intersets with the mesh (use a buffer of the values for reuse)
+        //    - calculate barycentric coordinate of point inside triangle
+        //    - get uv coordinate of point with this = Ogre::Vector2 uv = mUVs[mIndices[i]] * bary.x + mUVs[mIndices[i+1]] * bary.y + mUVs[->mIndices[i+2]] * bary.z;
 
+        // All uv's used are normalized, so a value of -1 means that the PaintLayer will not accept negative uv values
+        helperVector2.x = -1.0f; // Initialize default: There is no hit
+        helperVector2.y = -1.0f;
 
+        Ogre::Ray ray = mCamera->getCameraToViewportRay(mouseX/width(), mouseY/height()); // Use normalized values [0..1]
+        Ogre::RaySceneQuery* raySceneQuery = mSceneManager->createRayQuery(ray, Ogre::SceneManager::WORLD_GEOMETRY_TYPE_MASK);
+        raySceneQuery->setSortByDistance(true);
+        Ogre::RaySceneQueryResult raySceneQueryResult = raySceneQuery->execute();
+        if (raySceneQueryResult.size() <= 0)
+            return helperVector2;
 
-    /*
-     * Get the mesh information for the given mesh in v2 Ogre3D format. This is a really useful function that can be used by many
-     * different systems. e.g. physics mesh, navmesh, occlusion geometry etc...
-     * Original Code - Code found on this forum link: http://www.ogre3d.org/wiki/index.php/RetrieveVertexData
-     * Most Code courtesy of al2950( thanks m8 :)), but then edited by Jayce Young & Hannah Young at Aurasoft UK (Skyline Game Engine)
-     * to work with Items in the scene.
-     */
+        Ogre::Real closest_distance = -1.0f;
+        Ogre::Vector3 bary;
+        for (size_t qr_idx = 0; qr_idx < raySceneQueryResult.size(); qr_idx++)
+        {
+            // Only mItem is allowed
+            if (raySceneQueryResult[qr_idx].movable  == mItem)
+            {
+                for (int i = 0; i < static_cast<int>(mIndexCount); i += 3)
+                {
+                    // check for a hit against the triangle
+                    std::pair<bool, Ogre::Real> hit = Ogre::Math::intersects(ray, mVertices[mIndices[i]],
+                        mVertices[mIndices[i+1]], mVertices[mIndices[i+2]], true, false);
+
+                    // if it was a hit check if its the closest
+                    if (hit.first)
+                    {
+                        if ((closest_distance < 0.0f) || (hit.second < closest_distance))
+                        {
+                            // this is the closest so far, save it off
+                            closest_distance = hit.second;
+                            bary = calculateBarycentricCoordinates(ray.getPoint(closest_distance), mVertices[mIndices[i]], mVertices[mIndices[i+1]], mVertices[mIndices[i+2]]);
+                            helperVector2 = mUVs[mIndices[i]] * bary.x + mUVs[mIndices[i+1]] * bary.y + mUVs[mIndices[i+2]] * bary.z;
+                        }
+                    }
+                }
+            }
+        }
+
+        return helperVector2;
+    }
+
+    //****************************************************************************/
     void QOgreWidget::getMeshInformation (const Ogre::MeshPtr mesh,
-                                          size_t &vertex_count,
-                                          Ogre::Vector3* &vertices,
-                                          size_t &index_count,
-                                          Ogre::uint32* &indices,
                                           const Ogre::Vector3 &position,
-                                          const Ogre::Quaternion &orient,
+                                          const Ogre::Quaternion &orientation,
                                           const Ogre::Vector3 &scale)
     {
         //First, we compute the total number of vertices and indices and init the buffers.
+        destroyMeshInformation();
         unsigned int numVertices = 0;
         unsigned int numIndices = 0;
 
         Ogre::Mesh::SubMeshVec::const_iterator subMeshIterator = mesh->getSubMeshes().begin();
 
+        /* This is an alternative version, which also includes a map (mPositionAndUvMap) with positions, uv's and indices in addition to mVertices and mIndices
+         */
+        PositionAndUvArrayMeta positionAndUvArrayMeta;
+        int subMeshIndex = 0;
         while (subMeshIterator != mesh->getSubMeshes().end())
         {
-          Ogre::SubMesh *subMesh = *subMeshIterator;
-          numVertices += subMesh->mVao[0][0]->getVertexBuffers()[0]->getNumElements();
-          numIndices += subMesh->mVao[0][0]->getIndexBuffer()->getNumElements();
-
-          subMeshIterator++;
+            Ogre::SubMesh *subMesh = *subMeshIterator;
+            numVertices += subMesh->mVao[0][0]->getVertexBuffers()[0]->getNumElements();
+            numIndices += subMesh->mVao[0][0]->getIndexBuffer()->getNumElements();
+            positionAndUvArrayMeta.numberOfElements = subMesh->mVao[0][0]->getVertexBuffers()[0]->getNumElements(); // Get number of positions and uv's
+            positionAndUvArrayMeta.numberOfIndices = subMesh->mVao[0][0]->getIndexBuffer()->getNumElements(); // Get number of indices
+            positionAndUvArrayMeta.arrayOfPositionsAndUvs = new PositionAndUv[positionAndUvArrayMeta.numberOfElements]; // Allocate room
+            positionAndUvArrayMeta.arrayOfIndices = new Ogre::uint32[positionAndUvArrayMeta.numberOfIndices]; // Allocate room
+            mPositionAndUvMap[subMeshIndex] = positionAndUvArrayMeta; // Add the meta object to the map
+            subMeshIterator++;
+            subMeshIndex++;
         }
 
-        vertices = new Ogre::Vector3[numVertices];
-        indices = new Ogre::uint32[numIndices];
+        mVertices = new Ogre::Vector3[numVertices];
+        mUVs = new Ogre::Vector2[numVertices];
+        mIndices = new Ogre::uint32[numIndices];
+        mVertexCount = numVertices;
+        mIndexCount = numIndices;
 
-        vertex_count = numVertices;
-        index_count = numIndices;
-
-        unsigned int addedVertices = 0;
         unsigned int addedIndices = 0;
-
         unsigned int index_offset = 0;
         unsigned int subMeshOffset = 0;
 
         // Read Submeshes
         subMeshIterator = mesh->getSubMeshes().begin();
+        subMeshIndex = 0;
         while (subMeshIterator != mesh->getSubMeshes().end())
         {
-          Ogre::SubMesh *subMesh = *subMeshIterator;
-          Ogre::VertexArrayObjectArray vaos = subMesh->mVao[0];
+            float minU = 32000.0f;
+            float maxU = -32000.0f;
+            float minV = 32000.0f;
+            float maxV = -32000.0f;
+            Ogre::SubMesh *subMesh = *subMeshIterator;
+            Ogre::VertexArrayObjectArray vaos = subMesh->mVao[0];
 
-          if (!vaos.empty())
-          {
-             //Get the first LOD level
-             Ogre::VertexArrayObject *vao = vaos[0];
-             bool indices32 = (vao->getIndexBuffer()->getIndexType() == Ogre::IndexBufferPacked::IT_32BIT);
+            if (!vaos.empty())
+            {
+                //Get the first LOD level
+                Ogre::VertexArrayObject *vao = vaos[0];
+                bool indices32 = (vao->getIndexBuffer()->getIndexType() == Ogre::IndexBufferPacked::IT_32BIT);
 
-             const Ogre::VertexBufferPackedVec &vertexBuffers = vao->getVertexBuffers();
-             Ogre::IndexBufferPacked *indexBuffer = vao->getIndexBuffer();
+                const Ogre::VertexBufferPackedVec &vertexBuffers = vao->getVertexBuffers();
+                Ogre::IndexBufferPacked *indexBuffer = vao->getIndexBuffer();
 
-             //request async read from buffer
-             Ogre::VertexArrayObject::ReadRequestsArray requests;
-             requests.push_back(Ogre::VertexArrayObject::ReadRequests(Ogre::VES_POSITION));
+                //request async read from buffer
+                Ogre::VertexArrayObject::ReadRequestsArray requests;
+                requests.push_back(Ogre::VertexArrayObject::ReadRequests(Ogre::VES_POSITION));
 
-             vao->readRequests(requests);
-             vao->mapAsyncTickets(requests);
-             unsigned int subMeshVerticiesNum = requests[0].vertexBuffer->getNumElements();
-             if (requests[0].type == Ogre::VET_HALF4)
-             {
+                // UV's
+                Ogre::VertexElement2VecVec vertexDeclaration = vao->getVertexDeclaration();
+                Ogre::VertexElement2VecVec::const_iterator it0 = vertexDeclaration.begin();
+                Ogre::VertexElement2VecVec::const_iterator en0 = vertexDeclaration.end();
+                while( it0 != en0 )
+                {
+                    Ogre::VertexElement2Vec::const_iterator it1 = it0->begin();
+                    Ogre::VertexElement2Vec::const_iterator en1 = it0->end();
+
+                    while( it1 != en1 )
+                    {
+                        if( *it1 == Ogre::VES_TEXTURE_COORDINATES )
+                            requests.push_back( Ogre::VES_TEXTURE_COORDINATES );
+                        ++it1;
+                    }
+
+                    ++it0;
+                }
+
+                vao->readRequests(requests);
+                vao->mapAsyncTickets(requests);
+                unsigned int subMeshVerticiesNum = requests[0].vertexBuffer->getNumElements();
+                const size_t numVertexElements = requests.size();
+
+                // Get the vertex positions and texture coordinates
                 for (size_t i = 0; i < subMeshVerticiesNum; ++i)
                 {
-                   const Ogre::uint16* pos = reinterpret_cast<const Ogre::uint16*>(requests[0].data);
-                   Ogre::Vector3 vec;
-                   vec.x = Ogre::Bitwise::halfToFloat(pos[0]);
-                   vec.y = Ogre::Bitwise::halfToFloat(pos[1]);
-                   vec.z = Ogre::Bitwise::halfToFloat(pos[2]);
-                   requests[0].data += requests[0].vertexBuffer->getBytesPerElement();
-                   vertices[i + subMeshOffset] = (orient * (vec * scale)) + position;
+                    // Positions
+                    Ogre::Vector3 vec3;
+                    if (requests[0].type == Ogre::VET_HALF4)
+                    {
+                        Ogre::uint16 const * RESTRICT_ALIAS bufferF16 = reinterpret_cast<Ogre::uint16 const * RESTRICT_ALIAS>( requests[0].data );
+                        vec3.x = Ogre::Bitwise::halfToFloat(bufferF16[0]);
+                        vec3.y = Ogre::Bitwise::halfToFloat(bufferF16[1]);
+                        vec3.z = Ogre::Bitwise::halfToFloat(bufferF16[2]);
+                    }
+                    else
+                    {
+                        float const * RESTRICT_ALIAS bufferF32 = reinterpret_cast<float const * RESTRICT_ALIAS>( requests[0].data );
+                        vec3.x = bufferF32[0];
+                        vec3.y = bufferF32[1];
+                        vec3.z = bufferF32[2];
+                    }
+                    requests[0].data += requests[0].vertexBuffer->getBytesPerElement();
+                    mVertices[i + subMeshOffset] = (orientation * (vec3 * scale)) + position;
+                    mPositionAndUvMap[subMeshIndex].arrayOfPositionsAndUvs[i].position = (orientation * (vec3 * scale)) + position;
+
+                    // Get all uv coords
+                    for (size_t j=1; j<numVertexElements; ++j)
+                    {
+                        Ogre::Vector2 vec2;
+                        if (requests[0].type == Ogre::VET_HALF2)
+                        {
+                            Ogre::uint16 const * RESTRICT_ALIAS bufferF16 = reinterpret_cast<Ogre::uint16 const * RESTRICT_ALIAS>( requests[j].data );
+                            vec2.x = Ogre::Bitwise::halfToFloat(bufferF16[0]);
+                            vec2.y = Ogre::Bitwise::halfToFloat(bufferF16[1]);
+                        }
+                        else
+                        {
+                            float const * RESTRICT_ALIAS bufferF32 = reinterpret_cast<float const * RESTRICT_ALIAS>( requests[j].data );
+                            vec2.x = bufferF32[0];
+                            vec2.y = bufferF32[1];
+                        }
+
+                        requests[j].data += requests[j].vertexBuffer->getBytesPerElement();
+
+                        // Although multiple uv sets may exist, only the first one is used (more than 1 uv is not needed for 3d picking)
+                        if (j == 1)
+                        {
+                            // Get the min and max uv to calculate the fit between [0..1]
+                            minU = vec2.x < minU ? vec2.x : minU;
+                            maxU = vec2.x > maxU ? vec2.x : maxU;
+                            minV = vec2.y < minV ? vec2.y : minV;
+                            maxV = vec2.y > maxV ? vec2.y : maxV;
+                            mUVs[i + subMeshOffset] = vec2;
+                            mPositionAndUvMap[subMeshIndex].arrayOfPositionsAndUvs[i].uv = vec2;
+                        }
+                    }
                 }
-             }
-             else if (requests[0].type == Ogre::VET_FLOAT3)
-             {
-                for (size_t i = 0; i < subMeshVerticiesNum; ++i)
+
+                subMeshOffset += subMeshVerticiesNum;
+                vao->unmapAsyncTickets(requests);
+
+                // Read index data
+                if (indexBuffer)
                 {
-                   const float* pos = reinterpret_cast<const float*>(requests[0].data);
-                   Ogre::Vector3 vec;
-                   vec.x = *pos++;
-                   vec.y = *pos++;
-                   vec.z = *pos++;
-                   requests[0].data += requests[0].vertexBuffer->getBytesPerElement();
-                   vertices[i + subMeshOffset] = (orient * (vec * scale)) + position;
+                    Ogre::AsyncTicketPtr asyncTicket = indexBuffer->readRequest(0, indexBuffer->getNumElements());
+
+                    unsigned int *pIndices = 0;
+                    if (indices32)
+                    {
+                        pIndices = (unsigned*)(asyncTicket->map());
+                    }
+                    else
+                    {
+                        unsigned short *pShortIndices = (unsigned short*)(asyncTicket->map());
+                        pIndices = new unsigned int[indexBuffer->getNumElements()];
+                        for (size_t k = 0; k < indexBuffer->getNumElements(); k++) pIndices[k] = static_cast<unsigned int>(pShortIndices[k]);
+                    }
+                    unsigned int bufferIndex = 0;
+
+                    for (size_t i = addedIndices; i < addedIndices + indexBuffer->getNumElements(); i++)
+                    {
+                        mIndices[i] = pIndices[bufferIndex] + index_offset;
+                        mPositionAndUvMap[subMeshIndex].arrayOfIndices[i] = pIndices[bufferIndex];
+                        bufferIndex++;
+                    }
+                    addedIndices += indexBuffer->getNumElements();
+
+                    if (!indices32) delete[] pIndices;
+
+                    asyncTicket->unmap();
                 }
-             }
-             else
-             {
-                //lprint("Error: Vertex Buffer type not recognised in MeshTools::getMeshInformation");
-             }
-             subMeshOffset += subMeshVerticiesNum;
-             vao->unmapAsyncTickets(requests);
 
-             ////Read index data
-             if (indexBuffer)
-             {
-                Ogre::AsyncTicketPtr asyncTicket = indexBuffer->readRequest(0, indexBuffer->getNumElements());
+                index_offset += vertexBuffers[0]->getNumElements();
+            }
 
-                unsigned int *pIndices = 0;
-                if (indices32)
-                {
-                   pIndices = (unsigned*)(asyncTicket->map());
-                }
-                else
-                {
-                   unsigned short *pShortIndices = (unsigned short*)(asyncTicket->map());
-                   pIndices = new unsigned int[indexBuffer->getNumElements()];
-                   for (size_t k = 0; k < indexBuffer->getNumElements(); k++) pIndices[k] = static_cast<unsigned int>(pShortIndices[k]);
-                }
-                unsigned int bufferIndex = 0;
+            mPositionAndUvMap[subMeshIndex].minU = minU;
+            mPositionAndUvMap[subMeshIndex].maxU = maxU;
+            mPositionAndUvMap[subMeshIndex].minV = minV;
+            mPositionAndUvMap[subMeshIndex].maxV = maxV;
+            subMeshIterator++;
+            subMeshIndex++;
+        }
 
-                for (size_t i = addedIndices; i < addedIndices + indexBuffer->getNumElements(); i++)
-                {
-                   indices[i] = pIndices[bufferIndex] + index_offset;
-                   bufferIndex++;
-                }
-                addedIndices += indexBuffer->getNumElements();
+        // Fit uv's into [0..1] for each submesh
+        float uFactor;
+        float vFactor;
+        float minimalU;
+        float minimalV;
+        subMeshIndex = 0;
+        PositionAndUv positionAndUv;
+        size_t numberOfElements;
+        subMeshIterator = mesh->getSubMeshes().begin();
+        while (subMeshIterator != mesh->getSubMeshes().end())
+        {
+            numberOfElements = mPositionAndUvMap[subMeshIndex].numberOfElements;
+            minimalU = mPositionAndUvMap[subMeshIndex].minU;
+            minimalV = mPositionAndUvMap[subMeshIndex].minV;
+            uFactor = mPositionAndUvMap[subMeshIndex].maxU - minimalU;
+            vFactor = mPositionAndUvMap[subMeshIndex].maxV - minimalV;
 
-                if (!indices32) delete[] pIndices;
+            // Run through all elements
+            for (size_t i=0; i < numberOfElements; ++i)
+            {
+                positionAndUv = mPositionAndUvMap[subMeshIndex].arrayOfPositionsAndUvs[i];
+                positionAndUv.uv.x = (positionAndUv.uv.x - minimalU) / uFactor;
+                positionAndUv.uv.y = (positionAndUv.uv.y - minimalV) / vFactor;
+                Ogre::LogManager::getSingleton().logMessage("Position: " + Ogre::StringConverter::toString(positionAndUv.position)); // DEBUG
+                Ogre::LogManager::getSingleton().logMessage("UV: " + Ogre::StringConverter::toString(positionAndUv.uv)); // DEBUG
+            }
 
-                asyncTicket->unmap();
-             }
-             index_offset += vertexBuffers[0]->getNumElements();
-          }
-          subMeshIterator++;
+            subMeshIterator++;
         }
     }
 
+    //****************************************************************************/
+    void QOgreWidget::destroyMeshInformation (void)
+    {
+        std::map<int, PositionAndUvArrayMeta>::iterator it;
+        std::map<int, PositionAndUvArrayMeta>::iterator itStart = mPositionAndUvMap.begin();
+        std::map<int, PositionAndUvArrayMeta>::iterator itEnd = mPositionAndUvMap.end();
+        int subMeshIndex = 0;
+        for (it = itStart; it != itEnd; ++it)
+        {
+            if (mPositionAndUvMap[subMeshIndex].numberOfElements > 0 &&  mPositionAndUvMap[subMeshIndex].arrayOfPositionsAndUvs)
+                delete [] mPositionAndUvMap[subMeshIndex].arrayOfPositionsAndUvs;
+            if (mPositionAndUvMap[subMeshIndex].numberOfIndices > 0 &&  mPositionAndUvMap[subMeshIndex].arrayOfIndices)
+                delete [] mPositionAndUvMap[subMeshIndex].arrayOfIndices;
 
+            subMeshIndex++;
+        }
 
+        mPositionAndUvMap.clear();
+
+        if (mVertices)
+            delete [] mVertices;
+
+        if (mUVs)
+            delete mUVs;
+
+        if (mIndices)
+            delete [] mIndices;
+    }
+
+    //****************************************************************************/
+    const Ogre::Vector3& QOgreWidget::calculateBarycentricCoordinates (const Ogre::Vector3& intersect, const Ogre::Vector3& p1, const Ogre::Vector3& p2, const Ogre::Vector3& p3)
+    {
+        Ogre::Vector3 v = p2 - p1;
+        Ogre::Vector3 w = p3 - p1;
+        Ogre::Vector3 u = v.crossProduct(w);
+        Ogre::Real A = u.length();
+
+        v = p2 - intersect;
+        w = p3 - intersect;
+        u = v.crossProduct(w);
+        Ogre::Real A1 = u.length();
+
+        v = intersect - p1;
+        w = p3 - p1;
+        u = v.crossProduct(w);
+        Ogre::Real A2 = u.length();
+
+        helperVector3.x = A1/A;
+        helperVector3.y = A2/A;
+        helperVector3.z = 1.0f - helperVector3.x - helperVector3.y;
+        return helperVector3;
+    }
 }
+

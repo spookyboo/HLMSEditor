@@ -119,7 +119,7 @@ void PaintLayer::enable(bool enabled)
 void PaintLayer::paint(float u, float v)
 {
     // Apply paint effect if there is a texture
-    if (!mEnabled || !mTextureLayer || mTextureLayer->mTexture.isNull())
+    if (!mEnabled || !mTextureLayer || mTextureLayer->mTexture.isNull() || u < 0 || v < 0)
         return;
 
     /* If there are jitter effects, they are applied first. This means that certain jitter attributes are set
