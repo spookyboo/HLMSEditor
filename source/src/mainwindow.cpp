@@ -1818,7 +1818,7 @@ void MainWindow::destroySpecialDatablocks(void)
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
     ogreWidget->destroyLightAxisMaterial();
     ogreWidget->destroyHighlightMaterial();
-    ogreWidget->destroyUnlitDatablocksRtt();
+    ogreWidget->destroyUnlitDatablocksRttHoover();
 }
 
 //****************************************************************************/
@@ -1839,7 +1839,7 @@ void MainWindow::createSpecialDatablocks (void)
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
     ogreWidget->createLightAxisMaterial();
     ogreWidget->createHighlightMaterial();
-    ogreWidget->createUnlitDatablocksRtt();
+    ogreWidget->createUnlitDatablocksRttHoover();
 }
 
 //****************************************************************************/

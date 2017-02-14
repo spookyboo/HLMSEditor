@@ -60,13 +60,12 @@ namespace Magus
             void createRenderWindow(OgreManager* ogreManager);
             void createScene();
             Ogre::Item* getItem(void) {return mItem;}
-            void setItem(Ogre::Item* item, Ogre::Item* itemRtt, const Ogre::Vector3& scale);
             Ogre::RenderWindow* getRenderWindow(void) {return mOgreRenderWindow;}
             Ogre::SceneManager* getSceneManager(void) {return mSceneManager;}
             const Ogre::Vector3& getItemScale(void);
             void setItemScale(const Ogre::Vector3& scale);
             void setDefaultDatablockItem(void);
-            void setDefaultDatablockItemRtt(void); // Set the mItem to default
+            void setDefaultDatablockItemRttHoover(void); // Set the mItem to default
             void saveToFile(const Ogre::String& fileName);
 
             // Create item and use the current datablock of the previous item (if available)
@@ -84,8 +83,8 @@ namespace Magus
             void updateSkyBoxMaterial(const Ogre::String& cubeMapBaseFileName); // Update the material of the skybox item
             void createHighlightMaterial(void); // Create the datablock used to highlight a subItem of mItem
             void destroyHighlightMaterial(void); // Destroy the datablock used to highlight a subItem of mItem
-            void createUnlitDatablocksRtt(void); // Create datablocks of mItemRtt
-            void destroyUnlitDatablocksRtt(void); // Destroy the datablocks of mItemRtt
+            void createUnlitDatablocksRttHoover(void); // Create datablocks of mItemRttHoover
+            void destroyUnlitDatablocksRttHoover(void); // Destroy the datablocks of mItemRttHoover
             void resetHighlight(void); // Undo highlight of mItem (preserving its datablocks)
             void resetCamera(void); // Set position/orientation to default
             void setHoover(bool hoover); // Determines whether the subItems are highlighted when the mousecursor hoovers over them
@@ -122,29 +121,29 @@ namespace Magus
             Ogre::Vector2 mRelative;
             bool mSystemInitialized;
             Ogre::Item* mItem;
-            Ogre::Item* mItemRtt;
+            Ogre::Item* mItemRttHoover;
             Ogre::Item* mLightAxisItem;
             Ogre::SceneNode* mSceneNode;
-            Ogre::SceneNode* mSceneNodeRtt;
+            Ogre::SceneNode* mSceneNodeRttHoover;
             Ogre::SceneNode* mLightNode;
             Ogre::SceneNode* mLightAxisNode;
             Ogre::CompositorWorkspace* mWorkspace;
-            Ogre::CompositorWorkspace* mWorkspaceRtt;
+            Ogre::CompositorWorkspace* mWorkspaceRttHoover;
             Ogre::CompositorWorkspace* mWorkspaceRttSkyBox;
             bool mRotateCameraMode;
             bool mShiftDown;
             bool mMouseDown;
             Ogre::Light* mLight;
-            Ogre::TexturePtr mCustomRenderTexture;
-            Ogre::RenderTexture* mRtt;
+            Ogre::TexturePtr mCustomRenderTextureHoover;
+            Ogre::RenderTexture* mRttHoover;
             Ogre::ColourValue mHelpColour;
-            Ogre::String mRenderTextureName = "RenderTargetHlmsEditorTexture";
+            Ogre::String mRenderTextureNameHoover;
             int mLatestSubItemIndexHighlighted;
             Ogre::HlmsDatablock* mLatestSubItemDatablock;
             QSize mSize;
             Ogre::IdString mCurrentDatablockName;
-            const size_t RTT_SIZE_X = 256;
-            const size_t RTT_SIZE_Y = 144; // 9/16 x RTT_SIZE_X
+            const size_t RTT_HOOVER_SIZE_X = 256;
+            const size_t RTT_HOOVER_SIZE_Y = 144; // 9/16 x RTT_HOOVER_SIZE_X
             QMap <int, QVector3D> mColourMap;
             QMap <size_t, Ogre::String> mSnapshotDatablocks;
             bool mHoover;
@@ -172,23 +171,15 @@ namespace Magus
             int calculateColourToIndex(const Ogre::ColourValue& colourValue);
             const Ogre::ColourValue& getColourAtRenderToTexture(size_t x, size_t y);
             void doPaintLayer(int mouseX, int mouseY); // Apply the paint effect to the layers
-            void getMeshInformation (const Ogre::MeshPtr mesh,
-                                     size_t &vertex_count,
-                                     Ogre::Vector3* &vertices,
-                                     size_t &index_count,
-                                     Ogre::uint32* &indices,
-                                     const Ogre::Vector3 &position,
-                                     const Ogre::Quaternion &orient,
-                                     const Ogre::Vector3 &scale); // Used for for 3D picking and determine uv coordinates
 
             /* To highlight a subitem in on the screen, the following steps are performed
              * - Create a render texture and an additional workspace (createCompositorRenderToTexture)
-             * - Create an additional Item (mItemRtt), based on the same mesh as the main Item (mItem) that is displayed on the screen
-             * - For each subItem in mItemRtt, a specific colour (unlit material) is assigned, with name 0, 1, 2, 3, ...
+             * - Create an additional Item (mItemRttHoover), based on the same mesh as the main Item (mItem) that is displayed on the screen
+             * - For each subItem in mItemRttHoover, a specific colour (unlit material) is assigned, with name 0, 1, 2, 3, ...
              * - The colour of is associated with the subItem index (using a colourmap (mColourMap))
-             * - mItemRtt is only rendered on the render texture and not on the screen.
+             * - mItemRttHoover is only rendered on the render texture and not on the screen.
              *   0 This is done by manually updating the render-texture workspace in the updateOgre function
-             *   0 The scenenodes to which mItem and mItemRtt are attached are made visible/invisible
+             *   0 The scenenodes to which mItem and mItemRttHoover are attached are made visible/invisible
              * - The colour in the render texture is picked (getColourAtRenderToTexture); this is based on the mouse position on the render window
              * - The colour is translated to the index of the subItem (calculateColourToIndex), using the colourmap
              * - The subItem (based on the calculated index) of the mItem is highlighted with a green material (HIGHLIGHT_MATERIAL_NAME)
