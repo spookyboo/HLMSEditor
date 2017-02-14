@@ -38,8 +38,9 @@
 #include "OgreHlmsUnlitDatablock.h"
 #include "OgreMesh2.h"
 #include "OgreSubMesh2.h"
-#include "OgreBitwise.h"
-#include "Vao/OgreAsyncTicket.h"
+#include "OgreImage.h"
+//#include "OgreBitwise.h"
+//#include "Vao/OgreAsyncTicket.h"
 #include "constants.h"
 #include "renderwindow_dockwidget.h"
 
@@ -301,7 +302,7 @@ namespace Magus
         mSceneNode->setPosition(0.0, 0.0, 0.0);
         mSceneNodeRttHoover = mSceneNode->createChildSceneNode( Ogre::SCENE_DYNAMIC );
         mSceneNodeRttHoover->setPosition(0.0, 0.0, 0.0);
-        mSceneNodeRttPaint = mSceneNode->createChildSceneNode( Ogre::SCENE_DYNAMIC ); // TODO: Does not work independant from mSceneNodeRttHoover
+        mSceneNodeRttPaint = mSceneNode->createChildSceneNode( Ogre::SCENE_DYNAMIC );
         mSceneNodeRttPaint->setPosition(0.0, 0.0, 0.0);
         mCameraManager->setTarget(mSceneNode);
 
@@ -347,6 +348,11 @@ namespace Magus
                                         Ogre::Vector3( 0, 1, 0 ).normalisedCopy());
 
         resetCamera();
+
+
+        // Create the uv mapping colourmap
+        createUnlitDatablockRttPaint();
+
         mSystemInitialized = true;
     }
 
@@ -655,14 +661,94 @@ namespace Magus
     //****************************************************************************/
     void QOgreWidget::createUnlitDatablockRttPaint(void)
     {
-        // TODO: Create the datablock with a custom UV map
+        Ogre::String uvMappingTextureFileName = OGRE3_PATH + UV_MAPPING_TEXTURE;
+        #ifdef CREATE_UV_MAPPING_TEXTURE
+            // Create the custom uv mapping texture if CREATE_UV_TEXTURE exists. This only to generate the texture once.
+            // After that, we don't need this anymore, but the code still remains to recreate the texture if needed.
+            // Creation of the texture could also be done outside the application, but for convenience it is
+            // part of the HLMS editor.
+            // TODO: Create the custom uv texture
+            Ogre::Image uvMap;
+            Ogre::uint32 width = 1024;
+            Ogre::uint32 height = 1024;
+            float u = 0;
+            float v = 0;
+            float f = 0.25f / 2.0f;
+            float val = 0.0f;
+            uchar* data = new uchar[width * height * 4]; // Ogre::PF_A8R8G8B8 = 4 bytes
+            uvMap.loadDynamicImage(data, width, height, Ogre::PF_A8R8G8B8);
+            Ogre::PixelBox pixelbox = uvMap.getPixelBox(0, 0);
+            Ogre::ColourValue col;
+            col.g = 0.0f;
+            for (size_t y = 0; y < height; y++)
+            {
+                v = (float)y / (float)height;
+                col.b = v;
+                for (size_t x = 0; x < width; x++)
+                {
+                    u = (float)x / (float)width;
+                    col.r = u;
+                    pixelbox.setColourAt(col, x, y, 0);
+                }
+            }
+            uvMap.save(uvMappingTextureFileName);
+            delete [] data;
+
+        #endif
+
+        // Create the datablock with a custom UV texture from file
+        // If the file already exist, it is loaded at the start of the application because
+            // it must be in a directory defined in file resources.cfg
+        try
+        {
+            // Create a HLMS Unlit datablock
+            Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+            Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT) );
+            Ogre::HlmsMacroblock macroblock;
+            macroblock.mDepthCheck = true;
+            macroblock.mDepthWrite = true;
+            Ogre::HlmsUnlitDatablock* datablock = static_cast<Ogre::HlmsUnlitDatablock*>(
+                        hlmsUnlit->createDatablock(UV_MAPPING_MATERIAL_NAME,
+                                                   UV_MAPPING_MATERIAL_NAME,
+                                                   macroblock,
+                                                   Ogre::HlmsBlendblock(),
+                                                   Ogre::HlmsParamVec()));
+
+            // Attach samplerblock
+            Ogre::HlmsTextureManager* hlmsTextureManager = hlmsManager->getTextureManager();
+            Ogre::HlmsTextureManager::TextureLocation texLocation = hlmsTextureManager->createOrRetrieveTexture(
+                        uvMappingTextureFileName,
+                        Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE);
+            Ogre::HlmsSamplerblock samplerblock;
+            datablock->setTexture(0, texLocation.xIdx, texLocation.texture);
+            datablock->setSamplerblock(0, samplerblock);
+            setUnlitDatablockRttPaint();
+        }
+        catch (Ogre::Exception e){}
+    }
+
+    //****************************************************************************/
+    const Ogre::Vector2& QOgreWidget::calculateColourToUv (const Ogre::ColourValue& col)
+    {
+        helperVector2.x = col.r;
+        helperVector2.y = col.b;
+        return helperVector2;
     }
 
     //****************************************************************************/
     void QOgreWidget::setUnlitDatablockRttPaint(void)
     {
-        // TODO: Set the custom UV map datablock in all subItems
-        setDefaultDatablockItemRttPaint(); // TEST
+        if (mItemRttPaint)
+        {
+            //mItemRttPaint->setDatablockOrMaterialName(UV_MAPPING_MATERIAL_NAME); // TODO: Sets the datablock in each subItem????
+            size_t numSubItems = mItemRttPaint->getNumSubItems();
+            Ogre::SubItem* subItem;
+            for (size_t i = 0; i < numSubItems; ++i)
+            {
+                subItem = mItemRttPaint->getSubItem(i);
+                subItem->setDatablock(UV_MAPPING_MATERIAL_NAME);
+            }
+        }
     }
 
     //****************************************************************************/
@@ -1097,7 +1183,7 @@ namespace Magus
     }
 
     //****************************************************************************/
-    const Ogre::ColourValue& QOgreWidget::getColourAtRenderToTexture(size_t x, size_t y)
+    const Ogre::ColourValue& QOgreWidget::getColourAtRenderToTextureHoover(size_t x, size_t y)
     {
         // Sometimes the mousecoordinates are beyond the renderwindow. To prevent crashes in
         // pixelbox.getColourAt the maximum values of the mousecoordinates are validated
@@ -1119,7 +1205,7 @@ namespace Magus
     {
         size_t x = (mousePos.x / (float)mSize.width()) * RTT_HOOVER_SIZE_X;
         size_t y = ((mousePos.y) / (float)mSize.height()) * RTT_HOOVER_SIZE_Y;
-        Ogre::ColourValue colour = getColourAtRenderToTexture (x, y); // Get the colour of the mouse position (from the render texture)
+        Ogre::ColourValue colour = getColourAtRenderToTextureHoover (x, y); // Get the colour of the mouse position (from the render texture)
         int index = calculateColourToIndex (colour); // Get the index of the subitem, based on the colour at the mouse position
 
         // Determine whether index is out of bounds (because of the symplistic scalar to colour mapping algorithm)
@@ -1163,7 +1249,7 @@ namespace Magus
     {
         size_t x = (mouseX / (float)mSize.width()) * RTT_HOOVER_SIZE_X;
         size_t y = ((mouseY) / (float)mSize.height()) * RTT_HOOVER_SIZE_Y;
-        Ogre::ColourValue colour = getColourAtRenderToTexture (x, y); // Get the colour of the mouse position (from the render texture)
+        Ogre::ColourValue colour = getColourAtRenderToTextureHoover (x, y); // Get the colour of the mouse position (from the render texture)
         int index = calculateColourToIndex (colour); // Get the index of the subitem, based on the colour at the mouse position
 
         // Determine whether index is out of bounds
@@ -1489,5 +1575,12 @@ namespace Magus
                 }
             }
         }
+    }
+
+    //****************************************************************************/
+    const Ogre::ColourValue& QOgreWidget::getColourAtRenderToTexturePaint(int x, int y)
+    {
+        // TODO
+        return Ogre::ColourValue::White;
     }
 }

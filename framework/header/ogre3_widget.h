@@ -28,20 +28,26 @@
 #include "OgreString.h"
 #include "OgreCamera.h"
 #include "OgreColourValue.h"
+#include "OgreVector2.h"
 #include "OgreItem.h"
 #include "ogre3_cameraman.h"
 #include "ogre_prereqs.h"
 #include <QDockWidget>
 #include "paintlayer.h"
 
+// Set the next line to comment, otherwise the uv mapping texture will be created
+// at runtime, which is not what we need. It is only for convenience to create the
+// uv mapping texture once.
+//#define CREATE_UV_MAPPING_TEXTURE 1
+
 namespace Magus
 {
     static const Ogre::String AXIS_MATERIAL_NAME = "AMN0894587568";
     static const Ogre::String HIGHLIGHT_MATERIAL_NAME = "HLM1234567890";
+    static const Ogre::String UV_MAPPING_MATERIAL_NAME = "UVMM5432123456";
     static const Ogre::String SKYBOX_WORKSPACE = "SkyPostprocessWorkspace";
     static const Ogre::String SKYBOX_MATERIAL_NAME = "SkyPostprocess";
     static const int MAX_SCREEN_SIZE_INT = 10000; // Arbritrary value, but screen size is usually not larger than this, right?
-
 
     class OgreManager;
 
@@ -152,8 +158,8 @@ namespace Magus
             Ogre::IdString mCurrentDatablockName;
             const size_t RTT_HOOVER_SIZE_X = 256;
             const size_t RTT_HOOVER_SIZE_Y = 144; // 9/16 x RTT_HOOVER_SIZE_X
-            const size_t RTT_PAINT_SIZE_X = 256;
-            const size_t RTT_PAINT_SIZE_Y = 144; // 9/16 x RTT_PAINT_SIZE_X
+            const size_t RTT_PAINT_SIZE_X = 1820;
+            const size_t RTT_PAINT_SIZE_Y = 1024; // 9/16 x RTT_PAINT_SIZE_X
             QMap <int, QVector3D> mColourMap;
             QMap <size_t, Ogre::String> mSnapshotDatablocks;
             bool mHoover;
@@ -161,6 +167,7 @@ namespace Magus
             QMap<unsigned short, Ogre::String> helperIndicesAndNames;
             QVector<int> helperIndices;
             QDockWidget* mRenderwindowDockWidget;
+            Ogre::Vector2 helperVector2;
 
             virtual void createCompositor();
             virtual void createCompositorRenderToTexture();
@@ -179,7 +186,7 @@ namespace Magus
             void rotateLight(Ogre::Vector2 relativeMouseMove);
             const Ogre::ColourValue& calculateIndexToColour(int index);
             int calculateColourToIndex(const Ogre::ColourValue& colourValue);
-            const Ogre::ColourValue& getColourAtRenderToTexture(size_t x, size_t y);
+            const Ogre::ColourValue& getColourAtRenderToTextureHoover(size_t x, size_t y);
 
             /* To highlight a subitem in on the screen, the following steps are performed
              * - Create a render texture and an additional workspace (createCompositorRenderToTexture)
@@ -189,7 +196,7 @@ namespace Magus
              * - mItemRttHoover is only rendered on the render texture and not on the screen.
              *   0 This is done by manually updating the render-texture workspace in the updateOgre function
              *   0 The scenenodes to which mItem and mItemRttHoover are attached are made visible/invisible
-             * - The colour in the render texture is picked (getColourAtRenderToTexture); this is based on the mouse position on the render window
+             * - The colour in the render texture is picked (getColourAtRenderToTextureHoover); this is based on the mouse position on the render window
              * - The colour is translated to the index of the subItem (calculateColourToIndex), using the colourmap
              * - The subItem (based on the calculated index) of the mItem is highlighted with a green material (HIGHLIGHT_MATERIAL_NAME)
              */
@@ -202,6 +209,8 @@ namespace Magus
              */
             void setDefaultDatablockItemRttPaint(void); // Set default datablock to the paint item
             void setUnlitDatablockRttPaint(void); // Set the uv colour map datablock to the paint item
+            const Ogre::Vector2& calculateColourToUv (const Ogre::ColourValue& col); // Use a simple mapping algorithm to convert a colourvalue to a uv
+            const Ogre::ColourValue& getColourAtRenderToTexturePaint(int x, int y);
             void doPaintLayer(int mouseX, int mouseY); // Apply the paint effect to the layers
 
             Ogre::HlmsDatablock* getDatablockByFullName(const Ogre::String& fullName);
