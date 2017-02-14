@@ -851,9 +851,8 @@ namespace Magus
             skyBoxVisibility = mWorkspaceRttSkyBox->getEnabled();
             mWorkspaceRttSkyBox->setEnabled(false);
 
-            // Update workspace: begin
+            // Update workspace hoover: begin
             mSceneNodeRttHoover->setVisible(true);
-            //mSceneNodeRttHoover->setScale(mSceneNode->getScale());
             mSceneNodeRttPaint->setVisible(false);
             mSceneManager->updateSceneGraph(); // Items made visible/invisble and if not added, the application crashes
             mWorkspaceRttHoover->_beginUpdate(true);
@@ -861,24 +860,22 @@ namespace Magus
             mWorkspaceRttHoover->_endUpdate(true);
             // Update workspace: end
 
-            // Update workspace: begin
+            // Update workspace paint: begin
             mSceneNodeRttHoover->setVisible(false);
             mSceneNodeRttPaint->setVisible(true);
-            //mSceneNodeRttPaint->setScale(mSceneNode->getScale());
-            mSceneManager->updateSceneGraph(); // Items made visible/invisble and if not added, the application crashes
             mWorkspaceRttPaint->_beginUpdate(true);
             mWorkspaceRttPaint->_update();
             mWorkspaceRttPaint->_endUpdate(true);
-            mSceneNodeRttPaint->setVisible(false);
             // Update workspace: end
 
             // Reset the visibility
             mSceneNode->setVisible(true);
+            mSceneNodeRttHoover->setVisible(false); // Make the hoover and pain nodes invisible AFTER the item node (mSceneNode) itself is set to visible
+                                                    // This order is important to prevent flickering of the renderwindow
+            mSceneNodeRttPaint->setVisible(false);
             if (mLightAxisItem)
                 mLightAxisItem->setVisible(lightVisibility);
             mWorkspaceRttSkyBox->setEnabled(skyBoxVisibility);
-            //mSceneNodeRttHoover->setScale(Ogre::Vector3(0.0001f, 0.0001f, 0.0001f));
-            //mSceneNodeRttPaint->setScale(Ogre::Vector3(0.0001f, 0.0001f, 0.0001f));
 
             if (toggleBackgroundColour)
                 setBackgroundColour(c);
