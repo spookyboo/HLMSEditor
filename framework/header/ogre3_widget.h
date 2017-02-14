@@ -79,13 +79,12 @@ namespace Magus
             void createRenderWindow(OgreManager* ogreManager);
             void createScene();
             Ogre::Item* getItem(void) {return mItem;}
-            //void setItem(Ogre::Item* item, Ogre::Item* itemRtt, const Ogre::Vector3& scale);
             Ogre::RenderWindow* getRenderWindow(void) {return mOgreRenderWindow;}
             Ogre::SceneManager* getSceneManager(void) {return mSceneManager;}
             const Ogre::Vector3& getItemScale(void);
             void setItemScale(const Ogre::Vector3& scale);
             void setDefaultDatablockItem(void);
-            void setDefaultDatablockItemRtt(void); // Set the mItem to default
+            void setDefaultDatablockItemRttSubItemPiciking(void); // Set the mItem to default
             void saveToFile(const Ogre::String& fileName);
 
             // Create item and use the current datablock of the previous item (if available)
@@ -103,8 +102,8 @@ namespace Magus
             void updateSkyBoxMaterial(const Ogre::String& cubeMapBaseFileName); // Update the material of the skybox item
             void createHighlightMaterial(void); // Create the datablock used to highlight a subItem of mItem
             void destroyHighlightMaterial(void); // Destroy the datablock used to highlight a subItem of mItem
-            void createUnlitDatablocksRtt(void); // Create datablocks of mItemRtt
-            void destroyUnlitDatablocksRtt(void); // Destroy the datablocks of mItemRtt
+            void createUnlitDatablocksRttSubItemPiciking(void); // Create datablocks of mItemRttSubItemPiciking
+            void destroyUnlitDatablocksRttSubItemPiciking(void); // Destroy the datablocks of mItemRttSubItemPiciking
             void resetHighlight(void); // Undo highlight of mItem (preserving its datablocks)
             void resetCamera(void); // Set position/orientation to default
             void setHoover(bool hoover); // Determines whether the subItems are highlighted when the mousecursor hoovers over them
@@ -141,29 +140,37 @@ namespace Magus
             Ogre::Vector2 mRelative;
             bool mSystemInitialized;
             Ogre::Item* mItem;
-            Ogre::Item* mItemRtt;
+            Ogre::Item* mItemRttSubItemPiciking;
+            Ogre::Item* mItemRttPainting;
             Ogre::Item* mLightAxisItem;
             Ogre::SceneNode* mSceneNode;
-            Ogre::SceneNode* mSceneNodeRtt;
+            Ogre::SceneNode* mSceneNodeRttSubItemPiciking;
+            Ogre::SceneNode* mSceneNodeRttPainting;
             Ogre::SceneNode* mLightNode;
             Ogre::SceneNode* mLightAxisNode;
             Ogre::CompositorWorkspace* mWorkspace;
-            Ogre::CompositorWorkspace* mWorkspaceRtt;
+            Ogre::CompositorWorkspace* mWorkspaceRttSubItemPiciking;
+            Ogre::CompositorWorkspace* mWorkspaceRttPainting;
             Ogre::CompositorWorkspace* mWorkspaceRttSkyBox;
             bool mRotateCameraMode;
             bool mShiftDown;
             bool mMouseDown;
             Ogre::Light* mLight;
-            Ogre::TexturePtr mCustomRenderTexture;
-            Ogre::RenderTexture* mRtt;
+            Ogre::TexturePtr mCustomRenderTextureSubItemPiciking;
+            Ogre::TexturePtr mCustomRenderTexturePainting;
+            Ogre::RenderTexture* mRttSubItemPiciking;
+            Ogre::RenderTexture* mRttPainting;
             Ogre::ColourValue mHelpColour;
-            Ogre::String mRenderTextureName = "RenderTargetHlmsEditorTexture";
+            Ogre::String mRenderTextureNameSubItemPicking;
+            Ogre::String mRenderTextureNamePainting;
             int mLatestSubItemIndexHighlighted;
             Ogre::HlmsDatablock* mLatestSubItemDatablock;
             QSize mSize;
             Ogre::IdString mCurrentDatablockName;
-            const size_t RTT_SIZE_X = 256;
-            const size_t RTT_SIZE_Y = 144; // 9/16 x RTT_SIZE_X
+            const size_t RTT_SI_SIZE_X = 256; // Used for subitem picking
+            const size_t RTT_SI_SIZE_Y = 144; // Used for subitem picking; 9/16 x RTT_SI_SIZE_X
+            const size_t RTT_P_SIZE_X = 256; // Used for painting
+            const size_t RTT_P_SIZE_Y = 144; // Used for painting; 9/16 x RTT_SI_SIZE_X
             QMap <int, QVector3D> mColourMap;
             QMap <size_t, Ogre::String> mSnapshotDatablocks;
             bool mHoover;
@@ -172,11 +179,6 @@ namespace Magus
             QVector<int> helperIndices;
             QDockWidget* mRenderwindowDockWidget;
             std::map<int, PositionAndUvArrayMeta> mPositionAndUvMap; // Contains a metaobject with position and uv's per SubMesh
-            Ogre::Vector3* mVertices;
-            Ogre::Vector2* mUVs;
-            Ogre::uint32* mIndices;
-            size_t mVertexCount;
-            size_t mIndexCount;
             Ogre::Vector2 helperVector2;
             Ogre::Vector3 helperVector3;
 
@@ -198,30 +200,15 @@ namespace Magus
             const Ogre::ColourValue& calculateIndexToColour(int index);
             int calculateColourToIndex(const Ogre::ColourValue& colourValue);
             const Ogre::ColourValue& getColourAtRenderToTexture(size_t x, size_t y);
-            void doPaintLayer(int mouseX, int mouseY); // Apply the paint effect to the layers
-
-            /* Get the mesh information for the given mesh in v2 Ogre3D format. This is a really useful function that can be used by many
-             * different systems. e.g. physics mesh, navmesh, occlusion geometry etc...
-             * Original Code - Code found on this forum link: http://www.ogre3d.org/wiki/index.php/RetrieveVertexData
-             * Most Code courtesy of al2950( thanks m8 :)), but then edited by Jayce Young & Hannah Young at Aurasoft UK (Skyline Game Engine)
-             * to work with Items in the scene.
-             */
-            void getMeshInformation (const Ogre::MeshPtr mesh,
-                                     const Ogre::Vector3 &position,
-                                     const Ogre::Quaternion &orientation,
-                                     const Ogre::Vector3 &scale); // Used for for 3D picking and determine uv coordinates (for painting)
-            void destroyMeshInformation (void);
-            const Ogre::Vector2& calculateUVFromMousePosition (int mouseX, int mouseY); // Used for painting
-            const Ogre::Vector3& calculateBarycentricCoordinates (const Ogre::Vector3& intersect, const Ogre::Vector3& p1, const Ogre::Vector3& p2, const Ogre::Vector3& p3); // Used for painting
 
             /* To highlight a subitem in on the screen, the following steps are performed
              * - Create a render texture and an additional workspace (createCompositorRenderToTexture)
-             * - Create an additional Item (mItemRtt), based on the same mesh as the main Item (mItem) that is displayed on the screen
-             * - For each subItem in mItemRtt, a specific colour (unlit material) is assigned, with name 0, 1, 2, 3, ...
+             * - Create an additional Item (mItemRttSubItemPiciking), based on the same mesh as the main Item (mItem) that is displayed on the screen
+             * - For each subItem in mItemRttSubItemPiciking, a specific colour (unlit material) is assigned, with name 0, 1, 2, 3, ...
              * - The colour of is associated with the subItem index (using a colourmap (mColourMap))
-             * - mItemRtt is only rendered on the render texture and not on the screen.
+             * - mItemRttSubItemPiciking is only rendered on the render texture and not on the screen.
              *   0 This is done by manually updating the render-texture workspace in the updateOgre function
-             *   0 The scenenodes to which mItem and mItemRtt are attached are made visible/invisible
+             *   0 The scenenodes to which mItem and mItemRttSubItemPiciking are attached are made visible/invisible
              * - The colour in the render texture is picked (getColourAtRenderToTexture); this is based on the mouse position on the render window
              * - The colour is translated to the index of the subItem (calculateColourToIndex), using the colourmap
              * - The subItem (based on the calculated index) of the mItem is highlighted with a green material (HIGHLIGHT_MATERIAL_NAME)
@@ -233,6 +220,34 @@ namespace Magus
 
             Ogre::HlmsDatablock* getDatablockByFullName(const Ogre::String& fullName);
             PaintLayers* mPaintLayers; // Pointer to vector of PaintLayer objects
+
+            /* To paint on a mesh, a copy of the mesh is used with a special material. This unlit material contains colours, which represent
+             * uv values [0..1]. The mouse position is transformed into an uv value and this value is used to paint. This method does not need
+             * all the vertex/index data of the mesh.
+             */
+            void createUnlitDatablocksRttPainting(void);
+            void destroyUnlitDatablocksRttPainting(void);
+            void doPaintLayer(int mouseX, int mouseY); // Apply the paint effect to the layers
+            const Ogre::Vector2& calculateUVFromMousePosition (int mouseX, int mouseY); // Used for painting
+
+            // ---------------------------------------------- UNUSED methods ----------------------------------------------
+            /* Get the mesh information for the given mesh in v2 Ogre3D format. This is a really useful function that can be used by many
+             * different systems. e.g. physics mesh, navmesh, occlusion geometry etc...
+             * Original Code - Code found on this forum link: http://www.ogre3d.org/wiki/index.php/RetrieveVertexData
+             * Most Code courtesy of al2950( thanks m8 :)), but then edited by Jayce Young & Hannah Young at Aurasoft UK (Skyline Game Engine)
+             * to work with Items in the scene.
+             * Important note:
+             * getMeshInformation, destroyMeshInformation, calculateUVFromMousePosition and calculateBarycentricCoordinates are not used for
+             * painting, because the getMeshInformation cannot be used for some meshes. Instead, for painting, another method is used.
+             */
+            void getMeshInformation (const Ogre::MeshPtr mesh,
+                                     const Ogre::Vector3 &position,
+                                     const Ogre::Quaternion &orientation,
+                                     const Ogre::Vector3 &scale); // Used for for 3D picking and determine uv coordinates (for painting)
+            void destroyMeshInformation (void);
+            const Ogre::Vector2& calculateUVFromMousePosition (int mouseX, int mouseY, unsigned int subItemIndex); // Used for painting
+            const Ogre::Vector3& calculateBarycentricCoordinates (const Ogre::Vector3& intersect, const Ogre::Vector3& p1, const Ogre::Vector3& p2, const Ogre::Vector3& p3); // Used for painting
+            // ---------------------------------------------- UNUSED methods ----------------------------------------------
     };
 }
 

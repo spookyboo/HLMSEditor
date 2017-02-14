@@ -1814,11 +1814,11 @@ void MainWindow::detachMaterialsFromItem (void)
 //****************************************************************************/
 void MainWindow::destroySpecialDatablocks(void)
 {
-    // Destroy the axis, highlight and rtt material
+    // Destroy the axis, highlight and rtt materials
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
     ogreWidget->destroyLightAxisMaterial();
     ogreWidget->destroyHighlightMaterial();
-    ogreWidget->destroyUnlitDatablocksRtt();
+    ogreWidget->destroyUnlitDatablocksRttSubItemPiciking();
 }
 
 //****************************************************************************/
@@ -1835,11 +1835,11 @@ void MainWindow::restoreMaterialsOfItem (void)
 //****************************************************************************/
 void MainWindow::createSpecialDatablocks (void)
 {
-    // (Re)create the axis, highlight and rtt material
+    // (Re)create the axis, highlight and rtt materials
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
     ogreWidget->createLightAxisMaterial();
     ogreWidget->createHighlightMaterial();
-    ogreWidget->createUnlitDatablocksRtt();
+    ogreWidget->createUnlitDatablocksRttSubItemPiciking();
 }
 
 //****************************************************************************/

@@ -51,19 +51,22 @@ namespace Magus
         QWidget(parent),
         mRoot(0),
         mWorkspace(0),
-        mWorkspaceRtt(0),
+        mWorkspaceRttSubItemPiciking(0),
+        mWorkspaceRttPainting(0),
         mWorkspaceRttSkyBox(0),
-        mRtt(0),
+        mRttSubItemPiciking(0),
         mOgreRenderWindow(0),
         mCamera(0),
         mCameraManager(0),
         mTimeSinceLastFrame (0.0f),
         mItem(0),
-        mItemRtt(0),
+        mItemRttSubItemPiciking(0),
+        mItemRttPainting(0),
         mLightAxisItem(0),
         mLight(0),
         mSceneNode(0),
-        mSceneNodeRtt(0),
+        mSceneNodeRttSubItemPiciking(0),
+        mSceneNodeRttPainting(0),
         mLightNode(0),
         mLightAxisNode(0),
         mSceneCreated(false),
@@ -75,13 +78,10 @@ namespace Magus
         mLatestSubItemDatablock(0),
         mHoover(false),
         mPaintMode(false),
-        mPaintLayers(0),
-        mVertices(0),
-        mUVs(0),
-        mIndices(0),
-        mVertexCount(0),
-        mIndexCount(0)
+        mPaintLayers(0)
     {
+        mRenderTextureNameSubItemPicking = "RenderTargetHlmsEditorTextureSubItemPicking";
+        mRenderTextureNamePainting = "RenderTargetHlmsEditorTexturePainting";
         setMinimumSize(100,100);
         mCurrentDatablockName = "";
         setAttribute(Qt::WA_OpaquePaintEvent);
@@ -94,11 +94,12 @@ namespace Magus
         mAbsolute = Ogre::Vector2::ZERO;
         mRelative = Ogre::Vector2::ZERO;
         mHelpColour = Ogre::ColourValue::Red;
-        mCustomRenderTexture.setNull();
+        mCustomRenderTextureSubItemPiciking.setNull();
+        mCustomRenderTexturePainting.setNull();
         mSnapshotDatablocks.clear();
         helperIndicesAndNames.clear();
 
-        // Fill the colourmap
+        // Fill the colourmap for subitem picking
 
         // Index 0-9
         mColourMap[0] = QVector3D(0.1f, 0.0f, 0.0f);
@@ -177,7 +178,7 @@ namespace Magus
     QOgreWidget::~QOgreWidget()
     {
         // Cannot destroy the render texture here, because that would be too late (Ogre root is already deleted)
-        destroyMeshInformation(); // This only contains numbers, so deleting them is ok.
+        //destroyMeshInformation(); // This only contains numbers, so deleting them is ok.
     }
 
     //****************************************************************************/
@@ -185,13 +186,18 @@ namespace Magus
     {
         Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
         compositorManager->removeAllWorkspaceDefinitions();
-        mWorkspaceRtt = 0;
+        mWorkspaceRttSubItemPiciking = 0;
+        mWorkspaceRttPainting = 0;
         mWorkspace = 0;
 
-        mCustomRenderTexture->unload();
-        Ogre::TextureManager::getSingleton().unload(mRenderTextureName);
-        Ogre::TextureManager::getSingleton().remove(mRenderTextureName);
-        mCustomRenderTexture.setNull();
+        mCustomRenderTextureSubItemPiciking->unload();
+        mCustomRenderTexturePainting->unload();
+        Ogre::TextureManager::getSingleton().unload(mRenderTextureNameSubItemPicking);
+        Ogre::TextureManager::getSingleton().remove(mRenderTextureNameSubItemPicking);
+        Ogre::TextureManager::getSingleton().unload(mRenderTextureNamePainting);
+        Ogre::TextureManager::getSingleton().remove(mRenderTextureNamePainting);
+        mCustomRenderTextureSubItemPiciking.setNull();
+        mCustomRenderTexturePainting.setNull();
     }
 
     //****************************************************************************/
@@ -291,7 +297,7 @@ namespace Magus
         // Create the compositor
         createCompositor();
 
-        // Create the compositor RTT
+        // Create the compositor RTT for subitem picking and painting
         createCompositorRenderToTexture();
 
         // Create the skybox compositor
@@ -299,9 +305,11 @@ namespace Magus
 
         // Create the node and attach the entity
         mSceneNode = mSceneManager->getRootSceneNode( Ogre::SCENE_DYNAMIC )->createChildSceneNode( Ogre::SCENE_DYNAMIC );
-        mSceneNodeRtt = mSceneNode->createChildSceneNode( Ogre::SCENE_DYNAMIC );
+        mSceneNodeRttSubItemPiciking = mSceneNode->createChildSceneNode( Ogre::SCENE_DYNAMIC );
+        mSceneNodeRttPainting = mSceneNode->createChildSceneNode( Ogre::SCENE_DYNAMIC );
         mSceneNode->setPosition(0.0, 0.0, 0.0);
-        mSceneNodeRtt->setPosition(0.0, 0.0, 0.0);
+        mSceneNodeRttSubItemPiciking->setPosition(0.0, 0.0, 0.0);
+        mSceneNodeRttPainting->setPosition(0.0, 0.0, 0.0);
         mCameraManager->setTarget(mSceneNode);
 
         // Create an item
@@ -483,30 +491,41 @@ namespace Magus
             mSceneNode->setScale(scale);
             mItem->setRenderQueueGroup(2);
 
-            // Create the mesh info, which is used for 3d painting
-            getMeshInformation(mItem->getMesh(),
-                               mSceneNode->getPosition(),
-                               mSceneNode->getOrientation(),
-                               scale);
-
-
-            // Delete the old itemRtt if available
-            if (mItemRtt)
+            // Delete the old mmItemRttPainting if available
+            if (mItemRttSubItemPiciking)
             {
-                destroyUnlitDatablocksRtt();
-                mSceneNodeRtt->detachAllObjects();
-                mSceneManager->destroyItem(mItemRtt);
+                destroyUnlitDatablocksRttSubItemPiciking();
+                mSceneNodeRttSubItemPiciking->detachAllObjects();
+                mSceneManager->destroyItem(mItemRttSubItemPiciking);
             }
 
-            // Create a new itemRtt
-            mItemRtt = mSceneManager->createItem(meshName,
-                                                 Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                                 Ogre::SCENE_DYNAMIC );
+            // Delete the old mItemRttSubItemPiciking
+            if (mItemRttPainting)
+            {
+                destroyUnlitDatablocksRttPainting();
+                mSceneNodeRttPainting->detachAllObjects();
+                mSceneManager->destroyItem(mItemRttPainting);
+            }
 
-            mSceneNodeRtt->attachObject(mItemRtt);
-            mSceneNodeRtt->setVisible(false);
-            createUnlitDatablocksRtt();
-            mItemRtt->setRenderQueueGroup(2);
+            // Create a new itemRttSubItemPiciking
+            mItemRttSubItemPiciking = mSceneManager->createItem(meshName,
+                                                                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                                                Ogre::SCENE_DYNAMIC );
+
+            mSceneNodeRttSubItemPiciking->attachObject(mItemRttSubItemPiciking);
+            mSceneNodeRttSubItemPiciking->setVisible(false);
+            createUnlitDatablocksRttSubItemPiciking();
+            mItemRttSubItemPiciking->setRenderQueueGroup(2);
+
+            // Create a new mItemRttPainting
+            mItemRttPainting = mSceneManager->createItem(meshName,
+                                                         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                                         Ogre::SCENE_DYNAMIC );
+
+            mSceneNodeRttPainting->attachObject(mItemRttPainting);
+            mSceneNodeRttPainting->setVisible(false);
+            createUnlitDatablocksRttPainting();
+            mItemRttPainting->setRenderQueueGroup(2);
 
             // Put an extra renderOneFrame, because of an exception in Debug (D3D11 device cannot Clear State)
             #if _DEBUG || DEBUG
@@ -518,43 +537,6 @@ namespace Magus
         {
         }
     }
-
-    //****************************************************************************/
-    /*
-    void QOgreWidget::setItem(Ogre::Item* item, Ogre::Item* itemRtt, const Ogre::Vector3& scale)
-    {
-        Ogre::String datablockName = "";
-
-        // Delete the old item if available
-        if (mItem)
-        {
-            datablockName = *(mItem->getSubItem(0)->getDatablock()->getFullName());
-            setDefaultDatablockItem();
-            mSceneNode->detachAllObjects();
-            mSceneManager->destroyItem(mItem);
-        }
-
-        // Set the new item
-        mItem = item;
-        mSceneNode->attachObject(mItem);
-        mSceneNode->setScale(scale);
-        mItem->setRenderQueueGroup(2);
-
-        // Delete the old itemRtt if available
-        if (mItemRtt)
-        {
-            destroyUnlitDatablocksRtt();
-            mSceneNodeRtt->detachAllObjects();
-            mSceneManager->destroyItem(mItemRtt);
-        }
-
-        // Set the new itemRtt
-        mItemRtt = itemRtt;
-        mSceneNodeRtt->attachObject(mItemRtt);
-        createUnlitDatablocksRtt();
-        mItemRtt->setRenderQueueGroup(2);
-    }
-    */
 
     //****************************************************************************/
     void QOgreWidget::setDefaultDatablockItem(void)
@@ -594,27 +576,27 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QOgreWidget::setDefaultDatablockItemRtt(void)
+    void QOgreWidget::setDefaultDatablockItemRttSubItemPiciking(void)
     {
         resetHighlight();
-        Ogre::HlmsDatablock* itemRttDatablock = mItemRtt->getSubItem(0)->getDatablock();
+        Ogre::HlmsDatablock* itemRttDatablock = mItemRttSubItemPiciking->getSubItem(0)->getDatablock();
         Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
         Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
         Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
 
         if (itemRttDatablock != hlmsUnlit->getDefaultDatablock())
-            mItemRtt->setDatablock(hlmsUnlit->getDefaultDatablock()->getName());
+            mItemRttSubItemPiciking->setDatablock(hlmsUnlit->getDefaultDatablock()->getName());
         else
             if (itemRttDatablock != hlmsPbs->getDefaultDatablock())
-                mItemRtt->setDatablock(hlmsPbs->getDefaultDatablock()->getName());
+                mItemRttSubItemPiciking->setDatablock(hlmsPbs->getDefaultDatablock()->getName());
             else
-                mItemRtt->setDatablock(DEFAULT_DATABLOCK_NAME);
+                mItemRttSubItemPiciking->setDatablock(DEFAULT_DATABLOCK_NAME);
     }
 
     //****************************************************************************/
-    void QOgreWidget::createUnlitDatablocksRtt(void)
+    void QOgreWidget::createUnlitDatablocksRttSubItemPiciking(void)
     {
-        // Iterate through the subItems of mItemRtt and assign a colourvalue that corresponds with the subItem index
+        // Iterate through the subItems of mItemRttSubItemPiciking and assign a colourvalue that corresponds with the subItem index
         // Set an unlit datablock with that colour
         Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
         Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT) );
@@ -624,11 +606,11 @@ namespace Magus
         Ogre::String datablockName;
 
         // Create a new datablock
-        size_t numSubItems = mItemRtt->getNumSubItems();
+        size_t numSubItems = mItemRttSubItemPiciking->getNumSubItems();
         Ogre::SubItem* subItem;
         for (size_t i = 0; i < numSubItems; ++i)
         {
-            subItem = mItemRtt->getSubItem(i);
+            subItem = mItemRttSubItemPiciking->getSubItem(i);
             datablockName = Ogre::StringConverter::toString(i);
             Ogre::HlmsUnlitDatablock* datablock = static_cast<Ogre::HlmsUnlitDatablock*>(
                         hlmsUnlit->createDatablock( datablockName,
@@ -644,19 +626,32 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QOgreWidget::destroyUnlitDatablocksRtt(void)
+    void QOgreWidget::createUnlitDatablocksRttPainting(void)
     {
-        // Detach all datablocks from mItemRtt
-        setDefaultDatablockItemRtt();
+        // TODO
+        mItemRttSubItemPiciking->setDatablockOrMaterialName("Default"); // TEST
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::destroyUnlitDatablocksRttSubItemPiciking(void)
+    {
+        // Detach all datablocks from mItemRttSubItemPiciking
+        setDefaultDatablockItemRttSubItemPiciking();
 
         // Destroy all unlit materials; assume they are not attached anymore
         Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
         Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
-        size_t numSubItems = mItemRtt->getNumSubItems();
+        size_t numSubItems = mItemRttSubItemPiciking->getNumSubItems();
         for (size_t i = 0; i < numSubItems; ++i)
         {
             hlmsUnlit->destroyDatablock(Ogre::StringConverter::toString(i));
         }
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::destroyUnlitDatablocksRttPainting(void)
+    {
+        // TODO
     }
 
     //****************************************************************************/
@@ -744,21 +739,36 @@ namespace Magus
     void QOgreWidget::createCompositorRenderToTexture(void)
     {
         // Create a render-texture to determine on which subitem the mouse pointer is pointing at
-        mCustomRenderTexture = Ogre::TextureManager::getSingleton().createManual(mRenderTextureName,
-                                                                                 Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                                                                 Ogre::TEX_TYPE_2D,
-                                                                                 RTT_SIZE_X,
-                                                                                 RTT_SIZE_Y,
-                                                                                 1,
-                                                                                 Ogre::PF_R8G8B8A8,
-                                                                                 Ogre::TU_RENDERTARGET);
-        mCustomRenderTexture->load();
-        mRtt = mCustomRenderTexture->getBuffer(0)->getRenderTarget();
+        mCustomRenderTextureSubItemPiciking = Ogre::TextureManager::getSingleton().createManual(mRenderTextureNameSubItemPicking,
+                                                                                                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                                                                                Ogre::TEX_TYPE_2D,
+                                                                                                RTT_SI_SIZE_X,
+                                                                                                RTT_SI_SIZE_Y,
+                                                                                                1,
+                                                                                                Ogre::PF_R8G8B8A8,
+                                                                                                Ogre::TU_RENDERTARGET);
+        mCustomRenderTextureSubItemPiciking->load();
+        mRttSubItemPiciking = mCustomRenderTextureSubItemPiciking->getBuffer(0)->getRenderTarget();
         Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
-        const Ogre::String workspaceName = Ogre::StringConverter::toString(mRoot->getTimer()->getMicroseconds());
-        const Ogre::IdString workspaceNameHash = workspaceName;
-        compositorManager->createBasicWorkspaceDef(workspaceName, Ogre::ColourValue::Black);
-        mWorkspaceRtt = compositorManager->addWorkspace(mSceneManager, (Ogre::RenderTarget*)mRtt, mCamera, workspaceNameHash, false);
+        const Ogre::String workspaceNameSubItemPiciking = Ogre::StringConverter::toString(mRoot->getTimer()->getMicroseconds());
+        const Ogre::IdString workspaceNameSubItemPicikingHash = workspaceNameSubItemPiciking;
+        compositorManager->createBasicWorkspaceDef(workspaceNameSubItemPiciking, Ogre::ColourValue::Black);
+        mWorkspaceRttSubItemPiciking = compositorManager->addWorkspace(mSceneManager, (Ogre::RenderTarget*)mRttSubItemPiciking, mCamera, workspaceNameSubItemPicikingHash, false);
+
+        // Create a render-texture to determine the uv (used for painting)
+        mCustomRenderTexturePainting = Ogre::TextureManager::getSingleton().createManual(mRenderTextureNamePainting,
+                                                                                         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                                                                         Ogre::TEX_TYPE_2D,
+                                                                                         RTT_P_SIZE_X,
+                                                                                         RTT_P_SIZE_Y,
+                                                                                         1,
+                                                                                         Ogre::PF_R8G8B8A8,
+                                                                                         Ogre::TU_RENDERTARGET);
+        mRttPainting = mCustomRenderTexturePainting->getBuffer(0)->getRenderTarget();
+        const Ogre::String workspaceNamePainting = Ogre::StringConverter::toString(mRoot->getTimer()->getMicroseconds());
+        const Ogre::String workspaceNamePaintingHash = workspaceNamePainting;
+        compositorManager->createBasicWorkspaceDef(workspaceNamePainting, Ogre::ColourValue::Black);
+        mWorkspaceRttPainting = compositorManager->addWorkspace(mSceneManager, (Ogre::RenderTarget*)mRttSubItemPiciking, mCamera, workspaceNamePaintingHash, false);
     }
 
     //****************************************************************************/
@@ -787,7 +797,7 @@ namespace Magus
             resize(this->parentWidget()->size());
         }
 
-        if (mWorkspaceRtt)
+        if (mWorkspaceRttSubItemPiciking && mWorkspaceRttPainting)
         {
             // Set the background colour to black, otherwise the colours in the rtt are not uniquely assigned to a subItem anymore
             Ogre::ColourValue c;
@@ -812,19 +822,30 @@ namespace Magus
             skyBoxVisibility = mWorkspaceRttSkyBox->getEnabled();
             mWorkspaceRttSkyBox->setEnabled(false);
 
-            // Make the render texture workspace invisible
-            mSceneNodeRtt->setVisible(true);
+            // Make the render texture workspace for picking visible
+            mSceneNodeRttSubItemPiciking->setVisible(true);
             mSceneManager->updateSceneGraph();
 
             // Update workspace: begin
-            mWorkspaceRtt->_beginUpdate(true);
-            mWorkspaceRtt->_update();
-            mWorkspaceRtt->_endUpdate(true);
+            mWorkspaceRttSubItemPiciking->_beginUpdate(true);
+            mWorkspaceRttSubItemPiciking->_update();
+            mWorkspaceRttSubItemPiciking->_endUpdate(true);
+            mSceneNodeRttSubItemPiciking->setVisible(false);
+            // Update workspace: end
+
+            // Make the render texture workspace for painting visible
+            mSceneNodeRttPainting->setVisible(true);
+            mSceneManager->updateSceneGraph();
+
+            // Update workspace: begin
+            mWorkspaceRttPainting->_beginUpdate(true);
+            mWorkspaceRttPainting->_update();
+            mWorkspaceRttPainting->_endUpdate(true);
+            mSceneNodeRttPainting->setVisible(false);
             // Update workspace: end
 
             // Reset the visibility
             mSceneNode->setVisible(true);
-            mSceneNodeRtt->setVisible(false);
             if (mLightAxisItem)
                 mLightAxisItem->setVisible(lightVisibility);
             mWorkspaceRttSkyBox->setEnabled(skyBoxVisibility);
@@ -874,7 +895,11 @@ namespace Magus
 
             // Testcode to write the render-texture to a file
             if(ev->key() == Qt::Key_S)
-                mRtt->writeContentsToFile("rtt.png");
+                mRttSubItemPiciking->writeContentsToFile("rtt_subitem_piciking.png");
+
+            // Testcode to write the render-texture to a file
+            if(ev->key() == Qt::Key_P)
+                mRttPainting->writeContentsToFile("rtt_painting.png");
         }
     }
 
@@ -1052,13 +1077,13 @@ namespace Magus
         // Sometimes the mousecoordinates are beyond the renderwindow. To prevent crashes in
         // pixelbox.getColourAt the maximum values of the mousecoordinates are validated
         mHelpColour = Ogre::ColourValue::Black;
-        if (x > RTT_SIZE_X || y > RTT_SIZE_Y)
+        if (x > RTT_SI_SIZE_X || y > RTT_SI_SIZE_Y)
             return mHelpColour;
 
         size_t formatSize = Ogre::PixelUtil::getNumElemBytes(Ogre::PF_R8G8B8A8);
-        Ogre::uchar* data = OGRE_ALLOC_T(Ogre::uchar, RTT_SIZE_X * RTT_SIZE_Y * formatSize, Ogre::MEMCATEGORY_RENDERSYS);
-        Ogre::PixelBox pixelbox (RTT_SIZE_X, RTT_SIZE_Y, 1, Ogre::PF_R8G8B8A8, data);
-        mRtt->copyContentsToMemory(pixelbox, Ogre::RenderTarget::FB_AUTO);
+        Ogre::uchar* data = OGRE_ALLOC_T(Ogre::uchar, RTT_SI_SIZE_X * RTT_SI_SIZE_Y * formatSize, Ogre::MEMCATEGORY_RENDERSYS);
+        Ogre::PixelBox pixelbox (RTT_SI_SIZE_X, RTT_SI_SIZE_Y, 1, Ogre::PF_R8G8B8A8, data);
+        mRttSubItemPiciking->copyContentsToMemory(pixelbox, Ogre::RenderTarget::FB_AUTO);
         mHelpColour = pixelbox.getColourAt(x, y, 0);
         OGRE_FREE(data, Ogre::MEMCATEGORY_RENDERSYS);
         return mHelpColour;
@@ -1067,8 +1092,8 @@ namespace Magus
     //****************************************************************************/
     void QOgreWidget::highlightSubItem(Ogre::Vector2 mousePos)
     {
-        size_t x = (mousePos.x / (float)mSize.width()) * RTT_SIZE_X;
-        size_t y = ((mousePos.y) / (float)mSize.height()) * RTT_SIZE_Y;
+        size_t x = (mousePos.x / (float)mSize.width()) * RTT_SI_SIZE_X;
+        size_t y = ((mousePos.y) / (float)mSize.height()) * RTT_SI_SIZE_Y;
         Ogre::ColourValue colour = getColourAtRenderToTexture (x, y); // Get the colour of the mouse position (from the render texture)
         int index = calculateColourToIndex (colour); // Get the index of the subitem, based on the colour at the mouse position
 
@@ -1111,8 +1136,8 @@ namespace Magus
     //****************************************************************************/
     int QOgreWidget::getSubItemIndexWithMouseOver(int mouseX, int mouseY)
     {
-        size_t x = (mouseX / (float)mSize.width()) * RTT_SIZE_X;
-        size_t y = ((mouseY) / (float)mSize.height()) * RTT_SIZE_Y;
+        size_t x = (mouseX / (float)mSize.width()) * RTT_SI_SIZE_X;
+        size_t y = ((mouseY) / (float)mSize.height()) * RTT_SI_SIZE_Y;
         Ogre::ColourValue colour = getColourAtRenderToTexture (x, y); // Get the colour of the mouse position (from the render texture)
         int index = calculateColourToIndex (colour); // Get the index of the subitem, based on the colour at the mouse position
 
@@ -1156,7 +1181,8 @@ namespace Magus
         mLightAxisNode->setPosition(mCamera->getPosition() + Ogre::Vector3(0, -27, -100));
         mLightAxisNode->setOrientation(Ogre::Quaternion::IDENTITY);
         mSceneNode->setPosition(0.0, 0.0, 0.0);
-        mSceneNodeRtt->setPosition(0.0, 0.0, 0.0);
+        mSceneNodeRttSubItemPiciking->setPosition(0.0, 0.0, 0.0);
+        mSceneNodeRttPainting->setPosition(0.0, 0.0, 0.0);
         mCameraManager->resetCameraNode();
     }
 
@@ -1425,7 +1451,6 @@ namespace Magus
                         uv = calculateUVFromMousePosition (mouseX, mouseY);
                         uvCalculated = true;
                     }
-
                     paintLayer->paint(uv.x, uv.y);
                 }
             }
@@ -1434,6 +1459,14 @@ namespace Magus
 
     //****************************************************************************/
     const Ogre::Vector2& QOgreWidget::calculateUVFromMousePosition (int mouseX, int mouseY)
+    {
+        // TODO
+        return helperVector2;
+    }
+
+    // ---------------------------------------------- UNUSED method ----------------------------------------------
+    //****************************************************************************/
+    const Ogre::Vector2& QOgreWidget::calculateUVFromMousePosition (int mouseX, int mouseY, unsigned int subItemIndex)
     {
         // Calculate uv of the texture position pointed by the mouse:
         // 1. Perform a rayscene query
@@ -1445,44 +1478,92 @@ namespace Magus
         helperVector2.x = -1.0f; // Initialize default: There is no hit
         helperVector2.y = -1.0f;
 
-        Ogre::Ray ray = mCamera->getCameraToViewportRay(mouseX/width(), mouseY/height()); // Use normalized values [0..1]
-        Ogre::RaySceneQuery* raySceneQuery = mSceneManager->createRayQuery(ray, Ogre::SceneManager::WORLD_GEOMETRY_TYPE_MASK);
+        float w = mOgreRenderWindow->getWidth();
+        float h = mOgreRenderWindow->getHeight();
+        float divW = (float)mouseX / w;
+        float divH = (float)mouseY / h;
+        Ogre::Ray ray = mCamera->getCameraToViewportRay(divW, divH); // Use normalized values [0..1]
+        Ogre::RaySceneQuery* raySceneQuery = mSceneManager->createRayQuery(ray);
         raySceneQuery->setSortByDistance(true);
         Ogre::RaySceneQueryResult raySceneQueryResult = raySceneQuery->execute();
         if (raySceneQueryResult.size() <= 0)
+        {
+            mSceneManager->destroyQuery(raySceneQuery);
             return helperVector2;
+        }
 
-        Ogre::Real closest_distance = -1.0f;
+        Ogre::Real closestDistance = -1.0f;
         Ogre::Vector3 bary;
         for (size_t qr_idx = 0; qr_idx < raySceneQueryResult.size(); qr_idx++)
         {
             // Only mItem is allowed
             if (raySceneQueryResult[qr_idx].movable  == mItem)
             {
-                for (int i = 0; i < static_cast<int>(mIndexCount); i += 3)
+                // We know the SubMesh (it's the same as the SubItem index)
+                int numberOfIndices = mPositionAndUvMap[subItemIndex].numberOfIndices;
+                PositionAndUv positionAndUv1;
+                PositionAndUv positionAndUv2;
+                PositionAndUv positionAndUv3;
+                Ogre::Vector3 p1;
+                Ogre::Vector3 p2;
+                Ogre::Vector3 p3;
+                Ogre::Vector2 uv1;
+                Ogre::Vector2 uv2;
+                Ogre::Vector2 uv3;
+                Ogre::uint32 index1;
+                Ogre::uint32 index2;
+                Ogre::uint32 index3;
+                for (int i = 0; i < static_cast<int>(numberOfIndices); i += 3)
                 {
                     // check for a hit against the triangle
-                    std::pair<bool, Ogre::Real> hit = Ogre::Math::intersects(ray, mVertices[mIndices[i]],
-                        mVertices[mIndices[i+1]], mVertices[mIndices[i+2]], true, false);
+                    index1 = mPositionAndUvMap[subItemIndex].arrayOfIndices[i];
+                    index2 = mPositionAndUvMap[subItemIndex].arrayOfIndices[i+1];
+                    index3 = mPositionAndUvMap[subItemIndex].arrayOfIndices[i+2];
+                    //Ogre::LogManager::getSingleton().logMessage("Index 1 = " + Ogre::StringConverter::toString(index1)); // DEBUG
+                    //Ogre::LogManager::getSingleton().logMessage("Index 2 = " + Ogre::StringConverter::toString(index2)); // DEBUG
+                    //Ogre::LogManager::getSingleton().logMessage("Index 3 = " + Ogre::StringConverter::toString(index3)); // DEBUG
+                    positionAndUv1 = mPositionAndUvMap[subItemIndex].arrayOfPositionsAndUvs[index1];
+                    positionAndUv2 = mPositionAndUvMap[subItemIndex].arrayOfPositionsAndUvs[index2];
+                    positionAndUv3 = mPositionAndUvMap[subItemIndex].arrayOfPositionsAndUvs[index3];
+                    p1 = positionAndUv1.position;
+                    p2 = positionAndUv2.position;
+                    p3 = positionAndUv3.position;
+                    std::pair<bool, Ogre::Real> hit = Ogre::Math::intersects(ray, p1, p2, p3, true, false);
 
                     // if it was a hit check if its the closest
                     if (hit.first)
                     {
-                        if ((closest_distance < 0.0f) || (hit.second < closest_distance))
+                        if ((closestDistance < 0.0f) || (hit.second < closestDistance))
                         {
                             // this is the closest so far, save it off
-                            closest_distance = hit.second;
-                            bary = calculateBarycentricCoordinates(ray.getPoint(closest_distance), mVertices[mIndices[i]], mVertices[mIndices[i+1]], mVertices[mIndices[i+2]]);
-                            helperVector2 = mUVs[mIndices[i]] * bary.x + mUVs[mIndices[i+1]] * bary.y + mUVs[mIndices[i+2]] * bary.z;
+                            closestDistance = hit.second;
+                            bary = calculateBarycentricCoordinates(ray.getPoint(closestDistance), p1, p2, p3);
+                            uv1 = positionAndUv1.uv;
+                            uv2 = positionAndUv2.uv;
+                            uv3 = positionAndUv3.uv;
+                            helperVector2 = uv1 * bary.x + uv2 * bary.y + uv3 * bary.z;
+                            //Ogre::LogManager::getSingleton().logMessage("Index 1 = " + Ogre::StringConverter::toString(index1)); // DEBUG
+                            //Ogre::LogManager::getSingleton().logMessage("Index 2 = " + Ogre::StringConverter::toString(index2)); // DEBUG
+                            //Ogre::LogManager::getSingleton().logMessage("Index 3 = " + Ogre::StringConverter::toString(index3)); // DEBUG
+                            //Ogre::LogManager::getSingleton().logMessage("Point 1 = " + Ogre::StringConverter::toString(p1)); // DEBUG
+                            //Ogre::LogManager::getSingleton().logMessage("Point 2 = " + Ogre::StringConverter::toString(p2)); // DEBUG
+                            //Ogre::LogManager::getSingleton().logMessage("Point 3 = " + Ogre::StringConverter::toString(p3)); // DEBUG
+                            //Ogre::LogManager::getSingleton().logMessage("UV 1 = " + Ogre::StringConverter::toString(uv1)); // DEBUG
+                            //Ogre::LogManager::getSingleton().logMessage("UV 2 = " + Ogre::StringConverter::toString(uv2)); // DEBUG
+                            //Ogre::LogManager::getSingleton().logMessage("UV 3 = " + Ogre::StringConverter::toString(uv3)); // DEBUG
+                            //Ogre::LogManager::getSingleton().logMessage("UV paint = " + Ogre::StringConverter::toString(helperVector2)); // DEBUG
+                            //Ogre::LogManager::getSingleton().logMessage("Bary = " + Ogre::StringConverter::toString(bary)); // DEBUG
                         }
                     }
                 }
             }
         }
 
+        mSceneManager->destroyQuery(raySceneQuery);
         return helperVector2;
     }
 
+    // ---------------------------------------------- UNUSED method ----------------------------------------------
     //****************************************************************************/
     void QOgreWidget::getMeshInformation (const Ogre::MeshPtr mesh,
                                           const Ogre::Vector3 &position,
@@ -1496,7 +1577,8 @@ namespace Magus
 
         Ogre::Mesh::SubMeshVec::const_iterator subMeshIterator = mesh->getSubMeshes().begin();
 
-        /* This is an alternative version, which also includes a map (mPositionAndUvMap) with positions, uv's and indices in addition to mVertices and mIndices
+        /* This is an alternative version, which includes a map (mPositionAndUvMap) with positions, uv's and indices
+         * in comparions to the 'old'  version in which vertices and indices were used
          */
         PositionAndUvArrayMeta positionAndUvArrayMeta;
         int subMeshIndex = 0;
@@ -1513,12 +1595,6 @@ namespace Magus
             subMeshIterator++;
             subMeshIndex++;
         }
-
-        mVertices = new Ogre::Vector3[numVertices];
-        mUVs = new Ogre::Vector2[numVertices];
-        mIndices = new Ogre::uint32[numIndices];
-        mVertexCount = numVertices;
-        mIndexCount = numIndices;
 
         unsigned int addedIndices = 0;
         unsigned int index_offset = 0;
@@ -1593,8 +1669,8 @@ namespace Magus
                         vec3.z = bufferF32[2];
                     }
                     requests[0].data += requests[0].vertexBuffer->getBytesPerElement();
-                    mVertices[i + subMeshOffset] = (orientation * (vec3 * scale)) + position;
                     mPositionAndUvMap[subMeshIndex].arrayOfPositionsAndUvs[i].position = (orientation * (vec3 * scale)) + position;
+                    //Ogre::LogManager::getSingleton().logMessage("Position: " + Ogre::StringConverter::toString((orientation * (vec3 * scale)) + position)); // DEBUG
 
                     // Get all uv coords
                     for (size_t j=1; j<numVertexElements; ++j)
@@ -1623,8 +1699,8 @@ namespace Magus
                             maxU = vec2.x > maxU ? vec2.x : maxU;
                             minV = vec2.y < minV ? vec2.y : minV;
                             maxV = vec2.y > maxV ? vec2.y : maxV;
-                            mUVs[i + subMeshOffset] = vec2;
                             mPositionAndUvMap[subMeshIndex].arrayOfPositionsAndUvs[i].uv = vec2;
+                            //Ogre::LogManager::getSingleton().logMessage("UV: " + Ogre::StringConverter::toString(vec2)); // DEBUG
                         }
                     }
                 }
@@ -1652,7 +1728,6 @@ namespace Magus
 
                     for (size_t i = addedIndices; i < addedIndices + indexBuffer->getNumElements(); i++)
                     {
-                        mIndices[i] = pIndices[bufferIndex] + index_offset;
                         mPositionAndUvMap[subMeshIndex].arrayOfIndices[i] = pIndices[bufferIndex];
                         bufferIndex++;
                     }
@@ -1675,36 +1750,42 @@ namespace Magus
         }
 
         // Fit uv's into [0..1] for each submesh
-        float uFactor;
-        float vFactor;
-        float minimalU;
-        float minimalV;
         subMeshIndex = 0;
         PositionAndUv positionAndUv;
         size_t numberOfElements;
+        float minU = 0.0f;
+        float maxU = 0.0f;
+        float minV = 0.0f;
+        float maxV = 0.0f;
+        float width = 0.0f;
+        float height = 0.0f;
         subMeshIterator = mesh->getSubMeshes().begin();
         while (subMeshIterator != mesh->getSubMeshes().end())
         {
             numberOfElements = mPositionAndUvMap[subMeshIndex].numberOfElements;
-            minimalU = mPositionAndUvMap[subMeshIndex].minU;
-            minimalV = mPositionAndUvMap[subMeshIndex].minV;
-            uFactor = mPositionAndUvMap[subMeshIndex].maxU - minimalU;
-            vFactor = mPositionAndUvMap[subMeshIndex].maxV - minimalV;
+            minU = mPositionAndUvMap[subMeshIndex].minU;
+            maxU = mPositionAndUvMap[subMeshIndex].maxU;
+            minV = mPositionAndUvMap[subMeshIndex].minV;
+            maxV = mPositionAndUvMap[subMeshIndex].maxV;
+            width = std::abs(maxU - minU);
+            height = std::abs(maxV - minV);
 
             // Run through all elements
             for (size_t i=0; i < numberOfElements; ++i)
             {
                 positionAndUv = mPositionAndUvMap[subMeshIndex].arrayOfPositionsAndUvs[i];
-                positionAndUv.uv.x = (positionAndUv.uv.x - minimalU) / uFactor;
-                positionAndUv.uv.y = (positionAndUv.uv.y - minimalV) / vFactor;
-                Ogre::LogManager::getSingleton().logMessage("Position: " + Ogre::StringConverter::toString(positionAndUv.position)); // DEBUG
-                Ogre::LogManager::getSingleton().logMessage("UV: " + Ogre::StringConverter::toString(positionAndUv.uv)); // DEBUG
+                positionAndUv.uv.x = (positionAndUv.uv.x - minU) / width; // Move to 1st quadrant and fit to [0..1]
+                positionAndUv.uv.y = (positionAndUv.uv.y - minV) / height; // Move to 1st quadrant and fit to [0..1]
+                mPositionAndUvMap[subMeshIndex].arrayOfPositionsAndUvs[i] = positionAndUv;
+                //Ogre::LogManager::getSingleton().logMessage("Position: " + Ogre::StringConverter::toString(positionAndUv.position)); // DEBUG
+                //Ogre::LogManager::getSingleton().logMessage("Recalculated UV: " + Ogre::StringConverter::toString(positionAndUv.uv)); // DEBUG
             }
 
             subMeshIterator++;
         }
     }
 
+    // ---------------------------------------------- UNUSED method ----------------------------------------------
     //****************************************************************************/
     void QOgreWidget::destroyMeshInformation (void)
     {
@@ -1723,17 +1804,9 @@ namespace Magus
         }
 
         mPositionAndUvMap.clear();
-
-        if (mVertices)
-            delete [] mVertices;
-
-        if (mUVs)
-            delete mUVs;
-
-        if (mIndices)
-            delete [] mIndices;
     }
 
+    // ---------------------------------------------- UNUSED method ----------------------------------------------
     //****************************************************************************/
     const Ogre::Vector3& QOgreWidget::calculateBarycentricCoordinates (const Ogre::Vector3& intersect, const Ogre::Vector3& p1, const Ogre::Vector3& p2, const Ogre::Vector3& p3)
     {
