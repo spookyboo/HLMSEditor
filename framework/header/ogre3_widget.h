@@ -84,6 +84,8 @@ namespace Magus
             void createHighlightMaterial(void); // Create the datablock used to highlight a subItem of mItem
             void destroyHighlightMaterial(void); // Destroy the datablock used to highlight a subItem of mItem
             void createUnlitDatablocksRttHoover(void); // Create datablocks of mItemRttHoover
+            void createUnlitDatablockRttPaint(void); // Create datablock of mItemRttPaint
+            void destroyUnlitDatablockRttPaint(void); // Destroy datablock of mItemRttPaint
             void destroyUnlitDatablocksRttHoover(void); // Destroy the datablocks of mItemRttHoover
             void resetHighlight(void); // Undo highlight of mItem (preserving its datablocks)
             void resetCamera(void); // Set position/orientation to default
@@ -122,28 +124,36 @@ namespace Magus
             bool mSystemInitialized;
             Ogre::Item* mItem;
             Ogre::Item* mItemRttHoover;
+            Ogre::Item* mItemRttPaint;
             Ogre::Item* mLightAxisItem;
             Ogre::SceneNode* mSceneNode;
             Ogre::SceneNode* mSceneNodeRttHoover;
+            Ogre::SceneNode* mSceneNodeRttPaint;
             Ogre::SceneNode* mLightNode;
             Ogre::SceneNode* mLightAxisNode;
             Ogre::CompositorWorkspace* mWorkspace;
             Ogre::CompositorWorkspace* mWorkspaceRttHoover;
+            Ogre::CompositorWorkspace* mWorkspaceRttPaint;
             Ogre::CompositorWorkspace* mWorkspaceRttSkyBox;
             bool mRotateCameraMode;
             bool mShiftDown;
             bool mMouseDown;
             Ogre::Light* mLight;
             Ogre::TexturePtr mCustomRenderTextureHoover;
+            Ogre::TexturePtr mCustomRenderTexturePaint;
             Ogre::RenderTexture* mRttHoover;
+            Ogre::RenderTexture* mRttPaint;
             Ogre::ColourValue mHelpColour;
             Ogre::String mRenderTextureNameHoover;
+            Ogre::String mRenderTextureNamePaint;
             int mLatestSubItemIndexHighlighted;
             Ogre::HlmsDatablock* mLatestSubItemDatablock;
             QSize mSize;
             Ogre::IdString mCurrentDatablockName;
             const size_t RTT_HOOVER_SIZE_X = 256;
             const size_t RTT_HOOVER_SIZE_Y = 144; // 9/16 x RTT_HOOVER_SIZE_X
+            const size_t RTT_PAINT_SIZE_X = 256;
+            const size_t RTT_PAINT_SIZE_Y = 144; // 9/16 x RTT_PAINT_SIZE_X
             QMap <int, QVector3D> mColourMap;
             QMap <size_t, Ogre::String> mSnapshotDatablocks;
             bool mHoover;
@@ -170,7 +180,6 @@ namespace Magus
             const Ogre::ColourValue& calculateIndexToColour(int index);
             int calculateColourToIndex(const Ogre::ColourValue& colourValue);
             const Ogre::ColourValue& getColourAtRenderToTexture(size_t x, size_t y);
-            void doPaintLayer(int mouseX, int mouseY); // Apply the paint effect to the layers
 
             /* To highlight a subitem in on the screen, the following steps are performed
              * - Create a render texture and an additional workspace (createCompositorRenderToTexture)
@@ -188,6 +197,12 @@ namespace Magus
             void setHighlightDatablockToSubItem(int index);
             void setColourToDatablockOfSubItem(int index, const Ogre::ColourValue& colour);
             const Ogre::ColourValue& getColourOfDatablockOfSubItem(int index);
+
+            /* Functions used for painting
+             */
+            void setDefaultDatablockItemRttPaint(void); // Set default datablock to the paint item
+            void setUnlitDatablockRttPaint(void); // Set the uv colour map datablock to the paint item
+            void doPaintLayer(int mouseX, int mouseY); // Apply the paint effect to the layers
 
             Ogre::HlmsDatablock* getDatablockByFullName(const Ogre::String& fullName);
             PaintLayers* mPaintLayers; // Pointer to vector of PaintLayer objects

@@ -51,18 +51,22 @@ namespace Magus
         mRoot(0),
         mWorkspace(0),
         mWorkspaceRttHoover(0),
+        mWorkspaceRttPaint(0),
         mWorkspaceRttSkyBox(0),
         mRttHoover(0),
+        mRttPaint(0),
         mOgreRenderWindow(0),
         mCamera(0),
         mCameraManager(0),
         mTimeSinceLastFrame (0.0f),
         mItem(0),
         mItemRttHoover(0),
+        mItemRttPaint(0),
         mLightAxisItem(0),
         mLight(0),
         mSceneNode(0),
         mSceneNodeRttHoover(0),
+        mSceneNodeRttPaint(0),
         mLightNode(0),
         mLightAxisNode(0),
         mSceneCreated(false),
@@ -77,6 +81,7 @@ namespace Magus
         mPaintLayers(0)
     {
         mRenderTextureNameHoover = "RenderTargetHlmsEditorTextureHoover";
+        mRenderTextureNamePaint = "RenderTargetHlmsEditorTexturePaint";
         setMinimumSize(100,100);
         mCurrentDatablockName = "";
         setAttribute(Qt::WA_OpaquePaintEvent);
@@ -90,6 +95,7 @@ namespace Magus
         mRelative = Ogre::Vector2::ZERO;
         mHelpColour = Ogre::ColourValue::Red;
         mCustomRenderTextureHoover.setNull();
+        mCustomRenderTexturePaint.setNull();
         mSnapshotDatablocks.clear();
         helperIndicesAndNames.clear();
 
@@ -181,11 +187,16 @@ namespace Magus
         compositorManager->removeAllWorkspaceDefinitions();
         mWorkspace = 0;
         mWorkspaceRttHoover = 0;
+        mWorkspaceRttPaint = 0;
 
         mCustomRenderTextureHoover->unload();
+        mCustomRenderTexturePaint->unload();
         Ogre::TextureManager::getSingleton().unload(mRenderTextureNameHoover);
         Ogre::TextureManager::getSingleton().remove(mRenderTextureNameHoover);
+        Ogre::TextureManager::getSingleton().unload(mRenderTextureNamePaint);
+        Ogre::TextureManager::getSingleton().remove(mRenderTextureNamePaint);
         mCustomRenderTextureHoover.setNull();
+        mCustomRenderTexturePaint.setNull();
     }
 
     //****************************************************************************/
@@ -271,12 +282,6 @@ namespace Magus
         mCamera = mSceneManager->createCamera("MainCamera");
         mCamera->setAspectRatio(Ogre::Real(mOgreRenderWindow->getWidth()) / Ogre::Real(mOgreRenderWindow->getHeight()));
         mCameraManager = new CameraMan(mCamera);
-
-        // Create the compositor
-        //createCompositor();
-
-        // Create the compositor RTT
-        //createCompositorRenderToTexture();
     }
 
     //****************************************************************************/
@@ -293,9 +298,11 @@ namespace Magus
 
         // Create the node and attach the entity
         mSceneNode = mSceneManager->getRootSceneNode( Ogre::SCENE_DYNAMIC )->createChildSceneNode( Ogre::SCENE_DYNAMIC );
-        mSceneNodeRttHoover = mSceneNode->createChildSceneNode( Ogre::SCENE_DYNAMIC );
         mSceneNode->setPosition(0.0, 0.0, 0.0);
+        mSceneNodeRttHoover = mSceneNode->createChildSceneNode( Ogre::SCENE_DYNAMIC );
         mSceneNodeRttHoover->setPosition(0.0, 0.0, 0.0);
+        mSceneNodeRttPaint = mSceneNode->createChildSceneNode( Ogre::SCENE_DYNAMIC ); // TODO: Does not work independant from mSceneNodeRttHoover
+        mSceneNodeRttPaint->setPosition(0.0, 0.0, 0.0);
         mCameraManager->setTarget(mSceneNode);
 
         // Create an item
@@ -486,13 +493,33 @@ namespace Magus
 
             // Create a new itemRttHoover
             mItemRttHoover = mSceneManager->createItem(meshName,
-                                                 Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                                 Ogre::SCENE_DYNAMIC );
+                                                       Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                                       Ogre::SCENE_DYNAMIC );
 
             mSceneNodeRttHoover->attachObject(mItemRttHoover);
             mSceneNodeRttHoover->setVisible(false);
             createUnlitDatablocksRttHoover();
             mItemRttHoover->setRenderQueueGroup(2);
+
+            // Delete the old itemRttPaint if available
+            if (mItemRttPaint)
+            {
+                setDefaultDatablockItemRttPaint(); // Don't destroy the datablock, because it will be reused
+                mSceneNodeRttPaint->detachAllObjects();
+                mSceneManager->destroyItem(mItemRttPaint);
+            }
+
+            // Create a new itemRttPaint
+            mItemRttPaint = mSceneManager->createItem(meshName,
+                                                      Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                                      Ogre::SCENE_DYNAMIC );
+
+            mSceneNodeRttPaint->attachObject(mItemRttPaint);
+            setUnlitDatablockRttPaint(); // Don't recreate the datablock if not needed
+            mSceneNodeRttPaint->setVisible(false);
+            mItemRttPaint->setRenderQueueGroup(1);  // Must be lower than the render queue used for the mItemRttHoover,
+                                                    // even when the node is not visisble, the result is that the material of
+                                                    // the mItemRttHoover cannot be seen (obscured by the mItemRttPaint?)
 
             // Put an extra renderOneFrame, because of an exception in Debug (D3D11 device cannot Clear State)
             #if _DEBUG || DEBUG
@@ -609,6 +636,52 @@ namespace Magus
     }
 
     //****************************************************************************/
+    void QOgreWidget::setDefaultDatablockItemRttPaint(void)
+    {
+        Ogre::HlmsDatablock* itemRttPaintDatablock = mItemRttPaint->getSubItem(0)->getDatablock();
+        Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+        Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
+        Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+
+        if (itemRttPaintDatablock != hlmsUnlit->getDefaultDatablock())
+            mItemRttPaint->setDatablock(hlmsUnlit->getDefaultDatablock()->getName());
+        else
+            if (itemRttPaintDatablock != hlmsPbs->getDefaultDatablock())
+                mItemRttPaint->setDatablock(hlmsPbs->getDefaultDatablock()->getName());
+            else
+                mItemRttPaint->setDatablock(DEFAULT_DATABLOCK_NAME);
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::createUnlitDatablockRttPaint(void)
+    {
+        // TODO: Create the datablock with a custom UV map
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::setUnlitDatablockRttPaint(void)
+    {
+        // TODO: Set the custom UV map datablock in all subItems
+        setDefaultDatablockItemRttPaint(); // TEST
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::destroyUnlitDatablockRttPaint(void)
+    {
+        // Detach datablock from mItemRttPaint
+        setDefaultDatablockItemRttPaint();
+
+        // Destroy all unlit materials
+        Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+        Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+        size_t numSubItems = mItemRttPaint->getNumSubItems();
+        for (size_t i = 0; i < numSubItems; ++i)
+        {
+            hlmsUnlit->destroyDatablock(Ogre::StringConverter::toString(i));
+        }
+    }
+
+    //****************************************************************************/
     const Ogre::ColourValue& QOgreWidget::calculateIndexToColour(int index)
     {
         QVector3D v = mColourMap[index];
@@ -686,7 +759,7 @@ namespace Magus
         const Ogre::String workspaceName = Ogre::StringConverter::toString(mRoot->getTimer()->getMicroseconds());
         const Ogre::IdString workspaceNameHash = workspaceName;
         compositorManager->createBasicWorkspaceDef(workspaceName, mBackground);
-        mWorkspace = compositorManager->addWorkspace(mSceneManager, mOgreRenderWindow, mCamera, workspaceNameHash, true);
+        mWorkspace = compositorManager->addWorkspace(mSceneManager, mOgreRenderWindow, mCamera, workspaceNameHash, true); // Auto-update, because manual update gives issues
     }
 
     //****************************************************************************/
@@ -708,6 +781,23 @@ namespace Magus
         const Ogre::IdString workspaceNameHooverHash = workspaceNameHoover;
         compositorManager->createBasicWorkspaceDef(workspaceNameHoover, Ogre::ColourValue::Black);
         mWorkspaceRttHoover = compositorManager->addWorkspace(mSceneManager, (Ogre::RenderTarget*)mRttHoover, mCamera, workspaceNameHooverHash, false);
+
+        // Create a render-texture for painting
+        mCustomRenderTexturePaint = Ogre::TextureManager::getSingleton().createManual(mRenderTextureNamePaint,
+                                                                                      Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                                                                                      Ogre::TEX_TYPE_2D,
+                                                                                      RTT_PAINT_SIZE_X,
+                                                                                      RTT_PAINT_SIZE_Y,
+                                                                                      1,
+                                                                                      Ogre::PF_R8G8B8A8,
+                                                                                      Ogre::TU_RENDERTARGET);
+        mCustomRenderTexturePaint->load();
+        mRttPaint = mCustomRenderTexturePaint->getBuffer(0)->getRenderTarget();
+        const Ogre::String workspaceNamePaint = Ogre::StringConverter::toString(mRoot->getTimer()->getMicroseconds());
+        const Ogre::IdString workspaceNamePaintHash = workspaceNamePaint;
+        compositorManager->createBasicWorkspaceDef(workspaceNamePaint, Ogre::ColourValue::Black);
+        mWorkspaceRttPaint = compositorManager->addWorkspace(mSceneManager, (Ogre::RenderTarget*)mRttPaint, mCamera, workspaceNamePaintHash, false);
+
     }
 
     //****************************************************************************/
@@ -761,22 +851,34 @@ namespace Magus
             skyBoxVisibility = mWorkspaceRttSkyBox->getEnabled();
             mWorkspaceRttSkyBox->setEnabled(false);
 
-            // Make the render texture workspace invisible
-            mSceneNodeRttHoover->setVisible(true);
-            mSceneManager->updateSceneGraph();
-
             // Update workspace: begin
+            mSceneNodeRttHoover->setVisible(true);
+            //mSceneNodeRttHoover->setScale(mSceneNode->getScale());
+            mSceneNodeRttPaint->setVisible(false);
+            mSceneManager->updateSceneGraph(); // Items made visible/invisble and if not added, the application crashes
             mWorkspaceRttHoover->_beginUpdate(true);
             mWorkspaceRttHoover->_update();
             mWorkspaceRttHoover->_endUpdate(true);
             // Update workspace: end
 
+            // Update workspace: begin
+            mSceneNodeRttHoover->setVisible(false);
+            mSceneNodeRttPaint->setVisible(true);
+            //mSceneNodeRttPaint->setScale(mSceneNode->getScale());
+            mSceneManager->updateSceneGraph(); // Items made visible/invisble and if not added, the application crashes
+            mWorkspaceRttPaint->_beginUpdate(true);
+            mWorkspaceRttPaint->_update();
+            mWorkspaceRttPaint->_endUpdate(true);
+            mSceneNodeRttPaint->setVisible(false);
+            // Update workspace: end
+
             // Reset the visibility
             mSceneNode->setVisible(true);
-            mSceneNodeRttHoover->setVisible(false);
             if (mLightAxisItem)
                 mLightAxisItem->setVisible(lightVisibility);
             mWorkspaceRttSkyBox->setEnabled(skyBoxVisibility);
+            //mSceneNodeRttHoover->setScale(Ogre::Vector3(0.0001f, 0.0001f, 0.0001f));
+            //mSceneNodeRttPaint->setScale(Ogre::Vector3(0.0001f, 0.0001f, 0.0001f));
 
             if (toggleBackgroundColour)
                 setBackgroundColour(c);
@@ -824,6 +926,8 @@ namespace Magus
             // Testcode to write the render-texture to a file
             if(ev->key() == Qt::Key_S)
                 mRttHoover->writeContentsToFile("rtt_hoover.png");
+            if(ev->key() == Qt::Key_P)
+                mRttPaint->writeContentsToFile("rtt_paint.png");
         }
     }
 
@@ -1106,6 +1210,7 @@ namespace Magus
         mLightAxisNode->setOrientation(Ogre::Quaternion::IDENTITY);
         mSceneNode->setPosition(0.0, 0.0, 0.0);
         mSceneNodeRttHoover->setPosition(0.0, 0.0, 0.0);
+        mSceneNodeRttPaint->setPosition(0.0, 0.0, 0.0);
         mCameraManager->resetCameraNode();
     }
 

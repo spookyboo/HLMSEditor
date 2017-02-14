@@ -1819,6 +1819,7 @@ void MainWindow::destroySpecialDatablocks(void)
     ogreWidget->destroyLightAxisMaterial();
     ogreWidget->destroyHighlightMaterial();
     ogreWidget->destroyUnlitDatablocksRttHoover();
+    ogreWidget->destroyUnlitDatablockRttPaint();
 }
 
 //****************************************************************************/
@@ -1840,6 +1841,7 @@ void MainWindow::createSpecialDatablocks (void)
     ogreWidget->createLightAxisMaterial();
     ogreWidget->createHighlightMaterial();
     ogreWidget->createUnlitDatablocksRttHoover();
+    ogreWidget->createUnlitDatablockRttPaint();
 }
 
 //****************************************************************************/
