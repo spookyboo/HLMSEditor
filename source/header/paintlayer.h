@@ -67,7 +67,10 @@ class PaintLayer
             PAINT_OVERFLOW_TO_OPPOSITE_CORNER  /// If the brush exceeds the texture areas on which is painted, the overflow is continued on the opposite corner
         };
 
-        PaintLayer(PaintLayerManager* paintLayerManager);
+        /* Constructor/destructor
+         * The constructor can have an external id, used for fast search search
+         */
+        PaintLayer(PaintLayerManager* paintLayerManager, int externalLayerId = -1);
         ~PaintLayer(void);
 
         /* Enable or disable the layer for painting
@@ -247,7 +250,13 @@ class PaintLayer
          */
         Ogre::IdString getDatablockName (void);
 
+        /* Returns the external layer Id
+         * Is -1 when not used
+         */
+        int getExternaLayerlId (void) const {return mExternaLayerlId;}
+
     private:
+            int mExternaLayerlId;                           // May be used as a reference for external classes; is -1 if no external id is passed
             clock_t mStartTime;
             clock_t mEndTime;
             bool mEnabled;                                  // If enabled, the layer is painted, otherwise it is skipped

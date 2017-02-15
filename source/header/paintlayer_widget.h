@@ -33,10 +33,11 @@ QT_BEGIN_NAMESPACE
 QT_END_NAMESPACE
 
 static const int TOOL_LAYER_ICON_WIDTH = 24;
-static const int TOOL_LAYER_NAME_WIDTH = 200;
+static const int TOOL_LAYER_NAME_WIDTH = 160;
 static const int TOOL_LAYER_COLUMN_ICON = 0;
 static const int TOOL_LAYER_COLUMN_NAME = 1;
 static const int TOOL_LAYER_COLUMN_VISIBILITY = 2;
+static const int TOOL_LAYER_COLUMN_FILLER = 3;
 static const QString TOOL_LAYER_ACTION_CREATE_LAYER = "Create empty layer";
 static const QString TOOL_LAYER_ACTION_DELETE_LAYER = "Delete layer";
 static const QString TOOL_LAYER_ACTION_RENAME_LAYER = "Rename";
@@ -102,9 +103,6 @@ class PaintLayerWidget : public QWidget
         // Return the id of the currently selected layer
         int getCurrentLayerId(void);
 
-        // The PaintLayerWidget does not respons to drop events
-        void setListenToDropEvents (bool listenToDropEvents = true);
-
         // Return the list of layers with a given name pattern
         //QVector<Layer*> findByName(const QString& namePattern);
 
@@ -128,6 +126,9 @@ class PaintLayerWidget : public QWidget
         // Emitted when a layer is selected; layerId and name of the selected layer is passed
         void layerSelected(int layerId, const QString& name);
 
+        // Emitted when a layer has selected a texture type (as string, received from a list box)
+        void layerTextureTypeSelected (int layerId, QString textureType);
+
     protected:
         void mouseClickHandler(QMouseEvent* event);
         void mouseDblClickHandler(QMouseEvent* event);
@@ -137,11 +138,11 @@ class PaintLayerWidget : public QWidget
         int getRow(int layerId);
         int removeFromLayerVec(int row);
         const QString& getName(int row);
+        void selectTextureType(int layerId, QString textureType);
 
     private:
         QWidget* mParent;
         QString mIconDir;
-        bool mListenToDropEvents;
         bool mListenToDeleteEvents;
         int mListenToSceneId;
         int mLayerIdCounter;

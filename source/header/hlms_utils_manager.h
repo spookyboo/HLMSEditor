@@ -137,6 +137,11 @@ class HlmsUtilsManager
          */
          void addNewDatablockToRegisteredDatablocks (const Ogre::IdString& datablockId, const Ogre::String jsonFileName);
 
+         /* Returns the texture filename of a texture type from a given Pbs datablock.
+          * The datablock MUST be a Pbs datablock.
+          */
+          const Ogre::String& getTextureFileNameOfPbs (const Ogre::IdString& datablockId, Ogre::PbsTextureTypes textureType);
+
     protected:
         bool isInRegisteredDatablocksVec (const Ogre::String& datablockFullName);
 

@@ -18,36 +18,45 @@
 **
 ****************************************************************************/
 
-#ifndef PAINT_DOCKWIDGET_H
-#define PAINT_DOCKWIDGET_H
+#ifndef PAINTLAYER_DOCKWIDGET_H
+#define PAINTLAYER_DOCKWIDGET_H
 
 #include <QtWidgets>
-#include <QMessageBox>
 #include <QDockWidget>
+#include "paintlayer_widget.h"
 
 QT_BEGIN_NAMESPACE
+class QDockWidget;
 QT_END_NAMESPACE
 
 class MainWindow;
+class PaintLayerManager;
 
 /****************************************************************************
- This class represents a DockWidget
- It is the container dockwidget of the PaintLayerDockWidget and the BrushDockWidget
+ The PaintLayerDockWidget is a container to manage the PaintLayerManager and
+ the PaintLayerWidget. The PaintLayerWidget is the actual widget that contains
+ the table with layers/
  ***************************************************************************/
-class PaintDockWidget : public QDockWidget
+class PaintLayerDockWidget : public QDockWidget
 {
     Q_OBJECT
 
     public:
-        PaintDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags = 0);
-        ~PaintDockWidget(void);
-        void addDockWidget(Qt::DockWidgetArea area, QDockWidget* dockWidget);
+        PaintLayerDockWidget(PaintLayerManager* paintLayerManager,
+                             QString title,
+                             MainWindow* parent,
+                             Qt::WindowFlags flags = 0);
+        ~PaintLayerDockWidget(void);
 
     private slots:
+        void handleNewLayer (int layerId, QString layerName);
+        void handleDeleteLayer (int layerId, QString layerName);
+        void handleTextureTypeSelected(int layerId, QString textureType);
 
     private:
         MainWindow* mParent;
-        QMainWindow* mInnerMain;
+        PaintLayerWidget* mPaintLayerWidget;
+        PaintLayerManager* mPaintLayerManager; // Use the PaintLayerManager to manager paint layers
 };
 
 #endif

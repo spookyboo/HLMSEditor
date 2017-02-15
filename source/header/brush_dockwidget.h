@@ -18,32 +18,29 @@
 **
 ****************************************************************************/
 
-#ifndef PAINT_DOCKWIDGET_H
-#define PAINT_DOCKWIDGET_H
+#ifndef BRUSH_DOCKWIDGET_H
+#define BRUSH_DOCKWIDGET_H
 
 #include <QtWidgets>
-#include <QMessageBox>
 #include <QDockWidget>
 
 QT_BEGIN_NAMESPACE
+class QDockWidget;
 QT_END_NAMESPACE
 
 class MainWindow;
 
 /****************************************************************************
  This class represents a DockWidget
- It is the container dockwidget of the PaintLayerDockWidget and the BrushDockWidget
  ***************************************************************************/
-class PaintDockWidget : public QDockWidget
+class BrushDockWidget : public QDockWidget
 {
     Q_OBJECT
 
     public:
-        PaintDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags = 0);
-        ~PaintDockWidget(void);
-        void addDockWidget(Qt::DockWidgetArea area, QDockWidget* dockWidget);
-
-    private slots:
+        BrushDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags = 0);
+        ~BrushDockWidget(void);
+         void addDockWidget(Qt::DockWidgetArea area, QDockWidget* dockWidget);
 
     private:
         MainWindow* mParent;

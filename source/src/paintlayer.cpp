@@ -28,8 +28,9 @@
 #include "math.h"
 
 //****************************************************************************/
-PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager) :
+PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager, int externalLayerId) :
     mPaintLayerManager(paintLayerManager),
+    mExternaLayerlId(externalLayerId),
     mEnabled(true),
     mBrushWidth(0),
     mBrushHeight(0),

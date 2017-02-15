@@ -33,13 +33,38 @@ PaintLayerManager::~PaintLayerManager(void)
 
 //****************************************************************************/
 PaintLayer* PaintLayerManager::createPaintLayer (const Ogre::IdString& datablockName,
-                                                  Ogre::PbsTextureTypes textureType,
-                                                  const Ogre::String& textureFileName)
+                                                 Ogre::PbsTextureTypes textureType,
+                                                 const Ogre::String& textureFileName,
+                                                 int externalLayerId)
 {
-    PaintLayer* paintLayer = new PaintLayer(this);
+    PaintLayer* paintLayer = new PaintLayer(this, externalLayerId);
     TextureLayer* textureLayer = mTextureLayerManager.createOrRetrieveTextureLayer(datablockName, textureType, textureFileName);
     paintLayer->setTextureLayer(textureLayer);
     mPaintLayers.push_back(paintLayer);
+    return paintLayer;
+}
+
+//****************************************************************************/
+PaintLayer* PaintLayerManager::createPaintLayer (int externalLayerId)
+{
+    PaintLayer* paintLayer = new PaintLayer(this, externalLayerId);
+    mPaintLayers.push_back(paintLayer);
+    return paintLayer;
+}
+
+//****************************************************************************/
+PaintLayer* PaintLayerManager::setTextureLayerInPaintLayer (const Ogre::IdString& datablockName,
+                                                            Ogre::PbsTextureTypes textureType,
+                                                            const Ogre::String& textureFileName,
+                                                            int externalLayerId)
+{
+    PaintLayer* paintLayer = getPaintLayer(externalLayerId);
+    if (paintLayer)
+    {
+        TextureLayer* textureLayer = mTextureLayerManager.createOrRetrieveTextureLayer(datablockName, textureType, textureFileName);
+        paintLayer->setTextureLayer(textureLayer);
+    }
+
     return paintLayer;
 }
 
@@ -54,6 +79,25 @@ void PaintLayerManager::removeAndDeletePaintLayer (PaintLayer* paintLayer)
     {
         pl = *it;
         if (pl == paintLayer)
+        {
+            mPaintLayers.erase(it);
+            delete pl;
+            return;
+        }
+    }
+}
+
+//****************************************************************************/
+void PaintLayerManager::removeAndDeletePaintLayer (int externalLayerId)
+{
+    PaintLayers::iterator it;
+    PaintLayers::iterator itStart = mPaintLayers.begin();
+    PaintLayers::iterator itEnd = mPaintLayers.end();
+    PaintLayer* pl;
+    for (it = itStart; it != itEnd; ++it)
+    {
+        pl = *it;
+        if (pl->getExternaLayerlId() == externalLayerId)
         {
             mPaintLayers.erase(it);
             delete pl;
@@ -80,4 +124,21 @@ void PaintLayerManager::removeAndDeleteAllPaintLayers (void)
 PaintLayers* PaintLayerManager::getPaintLayers (void)
 {
     return &mPaintLayers;
+}
+
+//****************************************************************************/
+PaintLayer* PaintLayerManager::getPaintLayer (int externalLayerId)
+{
+    PaintLayers::iterator it;
+    PaintLayers::iterator itStart = mPaintLayers.begin();
+    PaintLayers::iterator itEnd = mPaintLayers.end();
+    PaintLayer* pl;
+    for (it = itStart; it != itEnd; ++it)
+    {
+        pl = *it;
+        if (pl->getExternaLayerlId() == externalLayerId)
+            return pl;
+    }
+
+    return 0;
 }

@@ -376,8 +376,8 @@ void MainWindow::createDockWindows(void)
     mCentralDockWidget->addDockWidget(Qt::RightDockWidgetArea, mNodeEditorDockWidget);
 
     // Paint dock widget
-    mPaintDockWidget = new PaintDockWidget("Paint", this);
-    mPaintLayerDockWidget = new PaintLayerDockWidget("Paint layers", this);
+    mPaintDockWidget = new PaintDockWidget("Paint", this); // The paint dockwidget uses the paint layer manager
+    mPaintLayerDockWidget = new PaintLayerDockWidget(&mPaintLayerManager, "Paint layers", this); // The paintlayer dockwidget uses the paint layer manager
     mBrushDockWidget = new BrushDockWidget("Brushes", this);
     addDockWidget(Qt::RightDockWidgetArea, mPaintDockWidget);
     mPaintDockWidget->addDockWidget(Qt::RightDockWidgetArea, mPaintLayerDockWidget);
@@ -408,6 +408,8 @@ void MainWindow::doNewProjectAction(void)
     ogreWidget->setDefaultDatablockItem();
     mHlmsUtilsManager->destroyDatablocks(true); // Exclude the 'special' datablocks
     mHlmsName = QString("");
+    mCurrentDatablockName = "";
+    mCurrentDatablockFullName = "";
 
     mOgreManager->setPause(false);
 }
@@ -1867,6 +1869,14 @@ void MainWindow::setCurrentDatablockNames(const Ogre::IdString& name, const Ogre
 
     // Pass the datablock name to the ogre widget
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setCurrentDatablockName(mCurrentDatablockName);
+}
+
+//****************************************************************************/
+const Ogre::String& MainWindow::getTextureFileNameOfPbs(const Ogre::IdString& datablockId, Ogre::PbsTextureTypes textureType)
+{
+    // filename from mHlmsUtilsManager
+    mHelperName = mHlmsUtilsManager->getTextureFileNameOfPbs(datablockId, textureType);
+    return mHelperName;
 }
 
 //****************************************************************************/

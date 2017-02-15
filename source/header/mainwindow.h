@@ -30,6 +30,7 @@
 #include <QList>
 #include "OgreDataStream.h"
 #include "OgreMesh2.h"
+#include "Ogre.h"
 #include "renderwindow_dockwidget.h"
 #include "properties_dockwidget.h"
 #include "texture_dockwidget.h"
@@ -68,7 +69,7 @@ class MainWindow : public QMainWindow
         PropertiesDockWidget* mPropertiesDockWidget; // Make is public for easy access
         TextureDockWidget* mTextureDockWidget; // Make is public for easy access
         PaintDockWidget* mPaintDockWidget; // Make is public for easy access
-        BrushDockWidget* mBrushDockWidget;; // Make is public for easy access
+        BrushDockWidget* mBrushDockWidget; // Make is public for easy access
         PaintLayerDockWidget* mPaintLayerDockWidget; // Make is public for easy access
         void initCurrentDatablockFileName(void); // Set the name of the current json file to ""
         void getListOfResources(void); // Function to test which resources are loaded
@@ -82,6 +83,7 @@ class MainWindow : public QMainWindow
         void destroyDatablock(const Ogre::IdString& datablockName);
         void notifyHlmsChanged (void); // To be called if the properties of a datablock are changed (which result in rebuilding the material)
         HlmsUtilsManager* getHlmsUtilsManager (void) {return mHlmsUtilsManager;}
+        const Ogre::String& getTextureFileNameOfPbs(const Ogre::IdString& datablockId, Ogre::PbsTextureTypes textureType); // Returns the filename of a pbs texture type
 
     protected:
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources); // Save the content of a resource vector

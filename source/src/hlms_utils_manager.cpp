@@ -769,6 +769,47 @@ void HlmsUtilsManager::addNewDatablockToRegisteredDatablocks (const Ogre::IdStri
 }
 
 //****************************************************************************/
+const Ogre::String& HlmsUtilsManager::getTextureFileNameOfPbs (const Ogre::IdString& datablockId, Ogre::PbsTextureTypes textureType)
+{
+    helperString = "";
+
+    // Find the datablock
+    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
+    Ogre::HlmsDatablock* datablock = 0;
+    try
+    {
+        datablock = hlmsPbs->getDatablock(datablockId);
+        if (datablock)
+        {
+            // Get the texture
+            Ogre::HlmsPbsDatablock* pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(datablock);
+            if (!pbsDatablock->getTexture(textureType).isNull())
+            {
+                Ogre::HlmsTextureManager::TextureLocation texLocation;
+                Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+                texLocation.texture = pbsDatablock->getTexture(textureType);
+                if( !texLocation.texture.isNull() )
+                {
+                    texLocation.xIdx = pbsDatablock->_getTextureIdx(textureType);
+                    texLocation.yIdx = 0;
+                    texLocation.divisor = 1;
+                    const Ogre::String *texName = hlmsManager->getTextureManager()->findAliasName(texLocation);
+
+                    if(texName)
+                    {
+                        helperString = *texName;
+                    }
+                }
+            }
+        }
+    }
+    catch (Ogre::Exception e) {}
+
+    return helperString;
+}
+
+//****************************************************************************/
 HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablock(const Ogre::IdString& datablockId)
 {
     QVectorIterator<DatablockStruct> itRegisteredDatablocks(mRegisteredDatablocks);

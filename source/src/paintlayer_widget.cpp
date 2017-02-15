@@ -19,6 +19,9 @@
 ****************************************************************************/
 
 // Include
+#include <QApplication>
+#include <QDesktopWidget>
+#include <QRect>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QMessageBox>
@@ -40,30 +43,32 @@ PaintLayerWidget::PaintLayerWidget(const QString& iconDir, QWidget* parent) : QW
     mIconDir = iconDir;
     mLayerIdCounter = 1;
     mListenToSceneId = 0;
-    mListenToDropEvents = true;
     mListenToDeleteEvents = true;
 
     // Create table
-    mTable = new QTableWidget(0, 3, this);
+    mTable = new QTableWidget(0, 4, this);
     mTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     mTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    mTable->setAcceptDrops(true);
+    mTable->setAcceptDrops(false);
     mTable->setShowGrid(false);
     mTable->viewport()->installEventFilter(this);
+    QRect rect = QApplication::desktop()->screenGeometry();
     mTable->setColumnWidth(TOOL_LAYER_COLUMN_ICON, 2 * TOOL_LAYER_ICON_WIDTH);
     mTable->setColumnWidth(TOOL_LAYER_COLUMN_NAME, TOOL_LAYER_NAME_WIDTH);
     mTable->setColumnWidth(TOOL_LAYER_COLUMN_VISIBILITY, 2 * TOOL_LAYER_ICON_WIDTH);
+    mTable->setColumnWidth(TOOL_LAYER_COLUMN_FILLER, rect.width());
     mTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     setStyleSheet("QLineEdit{padding: 0 0px; margin-left: 0px; margin-right: 0px; max-height: 28px; height: 28px;}");
     connect(mTable, SIGNAL(clicked(QModelIndex)), this, SLOT(tableClicked(QModelIndex)));
 
     // Set headers
     QStringList headers;
-    headers << tr("Layer") << tr("") << tr("Visibility");
+    headers << tr("Edit") << tr("Layer name") << tr("Visibility") << tr("");
     mTable->setHorizontalHeaderLabels(headers);
     QFont font;
     font.setBold(true);
     mTable->horizontalHeader()->setFont(font);
+    mTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 
     // Contextmenu
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -190,7 +195,7 @@ void PaintLayerWidget::contextMenuItemSelected(QAction* action)
     else if (action->text() == TOOL_LAYER_ACTION_RENAME_LAYER)
     {
         QTableWidgetItem* item = mTable->currentItem();
-        if (item->column() == TOOL_LAYER_COLUMN_NAME)
+        if (item && item->column() == TOOL_LAYER_COLUMN_NAME)
         {
             // Its the name; edit it
             mTable->editItem(item);
@@ -274,7 +279,7 @@ void PaintLayerWidget::addLayer(QtLayer* layer)
     item = new QTableWidgetItem();
     QString newName = layer->name;
     if (newName.size() == 0)
-        newName = QString("New layer ") + QVariant(layer->layerId).toString();
+        newName = QString("Paint layer ") + QVariant(layer->layerId).toString();
     layer->name = newName;
     item->setText(newName);
     item->setFlags(Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
@@ -327,6 +332,12 @@ const QtLayer* PaintLayerWidget::createLayer(int layerId, const QString& name)
     // Add the layer to the layer vector and the table
     addLayer(layer);
     return layer;
+}
+
+//****************************************************************************/
+void PaintLayerWidget::selectTextureType(int layerId, QString textureType)
+{
+    emit layerTextureTypeSelected(layerId, textureType);
 }
 
 //****************************************************************************/
@@ -501,13 +512,6 @@ const QString& PaintLayerWidget::getName(int row)
         mTempName = item->text();
 
     return mTempName;
-}
-
-//****************************************************************************/
-void PaintLayerWidget::setListenToDropEvents (bool listenToDropEvents)
-{
-    mListenToDropEvents = listenToDropEvents;
-    setAcceptDrops(mListenToDropEvents);
 }
 
 //****************************************************************************/

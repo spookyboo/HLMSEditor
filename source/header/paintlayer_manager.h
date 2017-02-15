@@ -21,6 +21,7 @@
 #ifndef PAINT_LAYER_MANAGER_H
 #define PAINT_LAYER_MANAGER_H
 
+#include "OgreRoot.h"
 #include "paintlayer.h"
 #include "texturelayer_manager.h"
 
@@ -39,21 +40,44 @@ class PaintLayerManager
          */
         PaintLayer* createPaintLayer (const Ogre::IdString& datablockName,
                                       Ogre::PbsTextureTypes textureType,
-                                      const Ogre::String& textureFileName);
+                                      const Ogre::String& textureFileName,
+                                      int externalLayerId = -1);
+
+        /* Create an empty PaintLayer and add it to the PaintLayerManager administration.
+         * This PaintLayer cannot be used. The datablock and texture settings must be
+         * added later.
+         */
+        PaintLayer* createPaintLayer (int externalLayerId);
+
+        /* Set the datablock and texture properties (TextureLayer) in an already created PaintLayer.
+         * The PaintLayer is identified by the external id. If not found, nothing happens.
+         */
+        PaintLayer* setTextureLayerInPaintLayer (const Ogre::IdString& datablockName,
+                                                 Ogre::PbsTextureTypes textureType,
+                                                 const Ogre::String& textureFileName,
+                                                 int externalLayerId);
 
         /* Because the PaintLayer objects are managed by the PaintLayerManager,
          * they also need to be deleted by the PaintLayerManager
          */
         void removeAndDeletePaintLayer (PaintLayer* paintLayer);
 
+        /* The paint layer can also be deleted by means of the external layer id
+         */
+        void removeAndDeletePaintLayer (int externalLayerId);
+
         /* Because the PaintLayer objects are managed by the PaintLayerManager,
          * they also need to be deleted by the PaintLayerManager
          */
         void removeAndDeleteAllPaintLayers (void);
 
-        /* Return the point the the PaintLayers
+        /* Return the pointer to the PaintLayers vector
          */
         PaintLayers* getPaintLayers (void);
+
+        /* Return a specific PaintLayer; search by means of the external layer id
+         */
+        PaintLayer* getPaintLayer (int externalLayerId);
 
     private:
         PaintLayers mPaintLayers;

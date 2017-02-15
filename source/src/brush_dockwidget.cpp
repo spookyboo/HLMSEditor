@@ -18,36 +18,31 @@
 **
 ****************************************************************************/
 
-#ifndef PAINT_DOCKWIDGET_H
-#define PAINT_DOCKWIDGET_H
-
-#include <QtWidgets>
+// Include
 #include <QMessageBox>
-#include <QDockWidget>
+#include "brush_dockwidget.h"
+#include "mainwindow.h"
+#include "constants.h"
 
-QT_BEGIN_NAMESPACE
-QT_END_NAMESPACE
-
-class MainWindow;
-
-/****************************************************************************
- This class represents a DockWidget
- It is the container dockwidget of the PaintLayerDockWidget and the BrushDockWidget
- ***************************************************************************/
-class PaintDockWidget : public QDockWidget
+//****************************************************************************/
+BrushDockWidget::BrushDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags) :
+    QDockWidget (title, parent, flags),
+    mParent(parent)
 {
-    Q_OBJECT
+    mInnerMain = new QMainWindow();
+    mInnerMain->setMinimumSize(100,100);
+    setWidget(mInnerMain);
+    QRect rec = QApplication::desktop()->screenGeometry();
+    setMinimumWidth(0.1 * rec.width());
+}
 
-    public:
-        PaintDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags = 0);
-        ~PaintDockWidget(void);
-        void addDockWidget(Qt::DockWidgetArea area, QDockWidget* dockWidget);
+//****************************************************************************/
+BrushDockWidget::~BrushDockWidget(void)
+{
+}
 
-    private slots:
-
-    private:
-        MainWindow* mParent;
-        QMainWindow* mInnerMain;
-};
-
-#endif
+//****************************************************************************/
+void BrushDockWidget::addDockWidget(Qt::DockWidgetArea area, QDockWidget* dockWidget)
+{
+    mInnerMain->addDockWidget(area, dockWidget);
+}
