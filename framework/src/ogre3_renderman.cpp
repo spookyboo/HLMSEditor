@@ -91,6 +91,7 @@ namespace Magus
             mRoot->initialise(false);
         //}
 
+
         // Initialize resources
         setupResources();
 

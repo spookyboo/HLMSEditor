@@ -225,6 +225,7 @@ namespace Magus
         // Get rendersystem and assign window handle
         mRoot = root;
         Ogre::NameValuePairList parameters;
+        parameters.insert( std::make_pair("gamma", "true") ); // This is needed to have the rtt's correct and to make the materials look good
 
         // Reuse the glContext if available
         GL_CONTEXT glContext = 0;
@@ -323,7 +324,7 @@ namespace Magus
         mLight = mSceneManager->createLight();
         mLightNode = mCameraManager->mCameraNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
         mLightNode->attachObject( mLight );
-        mLight->setPowerScale( Ogre::Math::PI ); // Since we don't do HDR, counter the PBS' division by PI
+        mLight->setPowerScale(Ogre::Math::PI ); // Since we don't do HDR, counter the PBS' division by PI
         mLight->setType( Ogre::Light::LT_DIRECTIONAL );
         mLight->setDiffuseColour( Ogre::ColourValue::White );
         mLight->setSpecularColour( Ogre::ColourValue::White );
@@ -663,30 +664,38 @@ namespace Magus
     {
         Ogre::String uvMappingTextureFileName = OGRE3_PATH + UV_MAPPING_TEXTURE_NAME;
         #ifdef CREATE_UV_MAPPING_TEXTURE
-            // Create the custom uv mapping texture if CREATE_UV_TEXTURE exists. This only to generate the texture once.
-            // After that, we don't need this anymore, but the code still remains to recreate the texture if needed.
-            // Creation of the texture could also be done outside the application, but for convenience it is
-            // part of the HLMS editor.
+            /* Create the custom uv mapping texture if CREATE_UV_TEXTURE exists. This only to generate the texture once.
+             * After that, we don't need this anymore, but the code still remains to recreate the texture if needed.
+             * Creation of the texture could also be done outside the application, but for convenience it is
+             * part of the HLMS editor.
+             *
+             * Note, that a gamma value is applied to the texture, which increases smooth painting. Not sure whether
+             * this gives the same effect on other computers.
+            */
+
             Ogre::Image uvMap;
             Ogre::uint32 width = 1024;
             Ogre::uint32 height = 1024;
             float u = 0;
             float v = 0;
-            float f = 0.25f / 2.0f;
-            float val = 0.0f;
-            uchar* data = new uchar[width * height * 4]; // Ogre::PF_A8R8G8B8 = 4 bytes
+            size_t formatSize = Ogre::PixelUtil::getNumElemBytes(Ogre::PF_R8G8B8A8);
+            uchar* data = new uchar[width * height * formatSize];
             uvMap.loadDynamicImage(data, width, height, Ogre::PF_A8R8G8B8);
             Ogre::PixelBox pixelbox = uvMap.getPixelBox(0, 0);
             Ogre::ColourValue col;
+            float gamma = 2.2f;
+            float gammaCorrection = 1.0f/gamma;
             col.g = 0.0f;
             for (size_t y = 0; y < height; y++)
             {
                 v = (float)y / (float)height;
-                col.b = v;
+                //col.b = v;
+                col.b = std::pow(v, gammaCorrection);
                 for (size_t x = 0; x < width; x++)
                 {
                     u = (float)x / (float)width;
-                    col.r = u;
+                    //col.r = u;
+                    col.r = std::pow(u, gammaCorrection);
                     pixelbox.setColourAt(col, x, y, 0);
                 }
             }
@@ -1204,8 +1213,6 @@ namespace Magus
     //****************************************************************************/
     void QOgreWidget::highlightSubItem(Ogre::Vector2 mousePos)
     {
-        //size_t x = (mousePos.x / (float)mSize.width()) * RTT_HOOVER_SIZE_X;
-        //size_t y = ((mousePos.y) / (float)mSize.height()) * RTT_HOOVER_SIZE_Y;
         Ogre::ColourValue colour = getColourAtRenderToTextureHoover ((int)mousePos.x, (int)mousePos.y); // Get the colour of the mouse position (from the render texture)
         int index = calculateColourToIndex (colour); // Get the index of the subitem, based on the colour at the mouse position
 
@@ -1248,8 +1255,6 @@ namespace Magus
     //****************************************************************************/
     int QOgreWidget::getSubItemIndexWithMouseOver(int mouseX, int mouseY)
     {
-        //size_t x = (mouseX / (float)mSize.width()) * RTT_HOOVER_SIZE_X;
-        //size_t y = ((mouseY) / (float)mSize.height()) * RTT_HOOVER_SIZE_Y;
         Ogre::ColourValue colour = getColourAtRenderToTextureHoover (mouseX, mouseY); // Get the colour of the mouse position (from the render texture)
         int index = calculateColourToIndex (colour); // Get the index of the subitem, based on the colour at the mouse position
 
@@ -1585,13 +1590,6 @@ namespace Magus
         mRttPaint->copyContentsToMemory(pixelbox, Ogre::RenderTarget::FB_AUTO);
         mHelpColour = pixelbox.getColourAt(x, y, 0);
         OGRE_FREE(data, Ogre::MEMCATEGORY_RENDERSYS);
-        //Ogre::LogManager::getSingleton().logMessage("Colour = " + Ogre::StringConverter::toString(mHelpColour)); // DEBUG
-        float gamma = 2.2f;
-        float gammaCorrection = 1.0f/gamma;
-        mHelpColour.r = std::pow(mHelpColour.r, gammaCorrection); // Apply gamma value (2.2)
-        mHelpColour.g = std::pow(mHelpColour.g, gammaCorrection);
-        mHelpColour.b = std::pow(mHelpColour.b, gammaCorrection);
-
         return mHelpColour;
     }
 }

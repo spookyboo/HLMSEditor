@@ -38,7 +38,7 @@
 // Set the next line to comment, otherwise the uv mapping texture will be created
 // at runtime, which is not what we need. It is only for convenience to create the
 // uv mapping texture once.
-#define CREATE_UV_MAPPING_TEXTURE 1
+//#define CREATE_UV_MAPPING_TEXTURE 1
 
 namespace Magus
 {

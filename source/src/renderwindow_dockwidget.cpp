@@ -507,7 +507,7 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
         // First layer
         paintLayer = mParent->mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
                                                                   Ogre::PbsTextureTypes::PBSM_DETAIL0,
-                                                                  "../examples/10points.png"); // Can only be tested with 10points.png
+                                                                  "../examples/floor_diffuse.PNG"); // Can only be tested with floor_diffuse.PNG and detail map
         paintLayer->setBrush("../common/brushes/brush_001.png");
         //paintLayer->setJitterScale(0.1, 1.0);
         //paintLayer->setJitterScaleInterval(0.1);
@@ -515,7 +515,7 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
         //paintLayer->setJitterRotationAngleInterval(0.5);
         //paintLayer->setJitterForce(0.0f, 1.0f);
         //paintLayer->setJitterPaintColour(Ogre::ColourValue(0.4f, 0.1f, 0.4f, 1.0f), Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
-        paintLayer->setScale(0.01f);
+        paintLayer->setScale(0.05f);
         paintLayer->setPaintColour(Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
         paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_COLOR);
 
