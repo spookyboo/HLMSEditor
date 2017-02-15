@@ -361,21 +361,27 @@ void MainWindow::createStatusBar(void)
 //****************************************************************************/
 void MainWindow::createDockWindows(void)
 {
+    // Render dock widget and Properties dockwidget
     mRenderwindowDockWidget = new RenderwindowDockWidget("Renderwindow", this);
     addDockWidget(Qt::LeftDockWidgetArea, mRenderwindowDockWidget);
     mPropertiesDockWidget = new PropertiesDockWidget("Properties", this);
     addDockWidget(Qt::LeftDockWidgetArea, mPropertiesDockWidget);
     mTextureDockWidget = new TextureDockWidget("Textures", this);
-    //addDockWidget(Qt::RightDockWidgetArea, mTextureDockWidget);
     mNodeEditorDockWidget = new NodeEditorDockWidget("NodeEditor", this);
-    //addDockWidget(Qt::RightDockWidgetArea, mNodeEditorDockWidget);
-    mPaintDockWidget = new PaintDockWidget("Paint", this);
-    addDockWidget(Qt::RightDockWidgetArea, mPaintDockWidget);
 
+    // Central dock widget
     mCentralDockWidget = new CentralDockWidget("", this);
     setCentralWidget(mCentralDockWidget);
     mCentralDockWidget->addDockWidget(Qt::RightDockWidgetArea, mTextureDockWidget);
     mCentralDockWidget->addDockWidget(Qt::RightDockWidgetArea, mNodeEditorDockWidget);
+
+    // Paint dock widget
+    mPaintDockWidget = new PaintDockWidget("Paint", this);
+    mPaintLayerDockWidget = new PaintLayerDockWidget("Paint layers", this);
+    mBrushDockWidget = new BrushDockWidget("Brushes", this);
+    addDockWidget(Qt::RightDockWidgetArea, mPaintDockWidget);
+    mPaintDockWidget->addDockWidget(Qt::RightDockWidgetArea, mPaintLayerDockWidget);
+    mPaintDockWidget->addDockWidget(Qt::RightDockWidgetArea, mBrushDockWidget);
 
     connect(mTextureDockWidget, SIGNAL(textureDoubleClicked(QString,QString)), this, SLOT(handleTextureDoubleClicked(QString,QString)));
     connect(mTextureDockWidget, SIGNAL(customContextMenuItemSelected(QString)), this, SLOT(handleCustomContextMenuItemSelected(QString)));
@@ -1128,18 +1134,27 @@ void MainWindow::doConfigureMenuAction(void)
 //****************************************************************************/
 void MainWindow::doResetWindowLayoutMenuAction(void)
 {
-    mRenderwindowDockWidget->show();
+    // Render dock widget and Properties dockwidget
     addDockWidget(Qt::LeftDockWidgetArea, mRenderwindowDockWidget);
     addDockWidget(Qt::LeftDockWidgetArea, mPropertiesDockWidget);
-    mTextureDockWidget->show();
-    //addDockWidget(Qt::RightDockWidgetArea, mTextureDockWidget);
-    mNodeEditorDockWidget->show();
-    //addDockWidget(Qt::RightDockWidgetArea, mNodeEditorDockWidget);
-    mPaintDockWidget->show();
-    addDockWidget(Qt::RightDockWidgetArea, mPaintDockWidget);
+    mRenderwindowDockWidget->show();
+    mPropertiesDockWidget->show();
 
+    // Central dock widget
+    mCentralDockWidget->addDockWidget(Qt::RightDockWidgetArea, mTextureDockWidget);
+    mCentralDockWidget->addDockWidget(Qt::RightDockWidgetArea, mNodeEditorDockWidget);
     mCentralDockWidget->show();
+    mTextureDockWidget->show();
+    mNodeEditorDockWidget->show();
     setCentralWidget(mCentralDockWidget);
+
+    // Paint dock widget
+    addDockWidget(Qt::RightDockWidgetArea, mPaintDockWidget);
+    mPaintDockWidget->addDockWidget(Qt::RightDockWidgetArea, mPaintLayerDockWidget);
+    mPaintDockWidget->addDockWidget(Qt::RightDockWidgetArea, mBrushDockWidget);
+    mPaintDockWidget->show();
+    mPaintDockWidget->show();
+    mBrushDockWidget->show();
 }
 
 //****************************************************************************/

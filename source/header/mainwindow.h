@@ -35,6 +35,8 @@
 #include "texture_dockwidget.h"
 #include "nodeeditor_dockwidget.h"
 #include "paint_dockwidget.h"
+#include "brush_dockwidget.h"
+#include "paintlayer_dockwidget.h"
 #include "central_dockwidget.h"
 #include "material_browser_dialog.h"
 #include "ogre3_renderman.h"
@@ -66,6 +68,8 @@ class MainWindow : public QMainWindow
         PropertiesDockWidget* mPropertiesDockWidget; // Make is public for easy access
         TextureDockWidget* mTextureDockWidget; // Make is public for easy access
         PaintDockWidget* mPaintDockWidget; // Make is public for easy access
+        BrushDockWidget* mBrushDockWidget;; // Make is public for easy access
+        PaintLayerDockWidget* mPaintLayerDockWidget; // Make is public for easy access
         void initCurrentDatablockFileName(void); // Set the name of the current json file to ""
         void getListOfResources(void); // Function to test which resources are loaded
         EditorHlmsTypes getCurrentDatablockType(void); // Returns the current hlms type

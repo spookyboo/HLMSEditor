@@ -18,8 +18,8 @@
 **
 ****************************************************************************/
 
-#ifndef CENTRAL_DOCWIDGET_H
-#define CENTRAL_DOCWIDGET_H
+#ifndef CENTRAL_DOCKWIDGET_H
+#define CENTRAL_DOCKWIDGET_H
 
 #include <QtWidgets>
 #include <QMessageBox>

@@ -99,7 +99,7 @@ namespace Magus
             mCamera->setPosition( Ogre::Vector3( 0, 5, 15 ) );
             mCamera->lookAt( Ogre::Vector3( 0, 0, 0 ) );
             mCamera->setNearClipDistance( 0.1f );
-            mCamera->setFarClipDistance( 10000.0f );
+            mCamera->setFarClipDistance( 20000.0f );
             mCamera->setAutoAspectRatio( true );
 		}
 

@@ -18,8 +18,8 @@
 **
 ****************************************************************************/
 
-#ifndef TEXTURE_DOCWIDGET_H
-#define TEXTURE_DOCWIDGET_H
+#ifndef TEXTURE_DOCKWIDGET_H
+#define TEXTURE_DOCKWIDGET_H
 
 #include <QtWidgets>
 #include "texture_main.h"

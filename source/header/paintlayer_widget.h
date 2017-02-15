@@ -45,7 +45,6 @@ static const QString TOOL_ICON_LAYER = QString("layer_bold.png");
 static const QString TOOL_ICON_VIEW_VISIBLE = QString("view_visible_bold.png");
 static const QString TOOL_ICON_VIEW_INVISIBLE = QString("view_invisible_bold.png");
 
-
 /****************************************************************************
 Struct for layer
 ***************************************************************************/
@@ -56,6 +55,8 @@ struct QtLayer
     bool visible;
 };
 
+class MainWindow;
+
 /****************************************************************************
 Main class for paint layer widget. This widgets displays paint layers.
 ***************************************************************************/
@@ -65,7 +66,7 @@ class PaintLayerWidget : public QWidget
 
     public:
         PaintLayerWidget(const QString& iconDir, QWidget* parent = 0);
-        virtual ~PaintLayerWidget(void);
+        ~PaintLayerWidget(void);
         bool eventFilter(QObject* object, QEvent* event);
 
         // Create a new layer
@@ -130,7 +131,6 @@ class PaintLayerWidget : public QWidget
     protected:
         void mouseClickHandler(QMouseEvent* event);
         void mouseDblClickHandler(QMouseEvent* event);
-        void dropHandler(QObject* object, QEvent* event);
         void updateVisibilityIcon(int row, bool visible);
         int newLayerId(void);
         int getRow(const QString& name);
@@ -139,6 +139,7 @@ class PaintLayerWidget : public QWidget
         const QString& getName(int row);
 
     private:
+        QWidget* mParent;
         QString mIconDir;
         bool mListenToDropEvents;
         bool mListenToDeleteEvents;

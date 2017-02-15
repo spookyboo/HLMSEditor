@@ -23,19 +23,16 @@
 #include "mainwindow.h"
 #include "paint_dockwidget.h"
 
+class MainWindow;
+
 //****************************************************************************/
 PaintDockWidget::PaintDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags) :
-	QDockWidget (title, parent, flags), 
-	mParent(parent)
+    QDockWidget (title, parent, flags),
+    mParent(parent)
 {
-    QWidget* multiWidget = new QWidget(this);
-    QHBoxLayout* mainLayout = new QHBoxLayout;
-    mPaintLayerWidget = new PaintLayerWidget(ICON_PATH, this);
-    mainLayout->addWidget(mPaintLayerWidget);
-    // TODO: Add texture widget with the brushes
-    multiWidget->setLayout(mainLayout);
-    setWidget(multiWidget);
-
+    mInnerMain = new QMainWindow();
+    mInnerMain->setMinimumSize(100,100);
+    setWidget(mInnerMain);
     QRect rec = QApplication::desktop()->screenGeometry();
     setMinimumWidth(0.1 * rec.width());
 }
@@ -43,4 +40,10 @@ PaintDockWidget::PaintDockWidget(QString title, MainWindow* parent, Qt::WindowFl
 //****************************************************************************/
 PaintDockWidget::~PaintDockWidget(void)
 {
+}
+
+//****************************************************************************/
+void PaintDockWidget::addDockWidget(Qt::DockWidgetArea area, QDockWidget* dockWidget)
+{
+    mInnerMain->addDockWidget(area, dockWidget);
 }

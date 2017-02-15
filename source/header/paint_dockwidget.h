@@ -18,15 +18,14 @@
 **
 ****************************************************************************/
 
-#ifndef PAINT_DOCWIDGET_H
-#define PAINT_DOCWIDGET_H
+#ifndef PAINT_DOCKWIDGET_H
+#define PAINT_DOCKWIDGET_H
 
 #include <QtWidgets>
 #include <QMessageBox>
-#include "paintlayer_widget.h"
+#include <QDockWidget>
 
 QT_BEGIN_NAMESPACE
-class QDockWidget;
 QT_END_NAMESPACE
 
 class MainWindow;
@@ -36,19 +35,18 @@ class MainWindow;
  ***************************************************************************/
 class PaintDockWidget : public QDockWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
-	public:
+    public:
         PaintDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags = 0);
         ~PaintDockWidget(void);
+        void addDockWidget(Qt::DockWidgetArea area, QDockWidget* dockWidget);
 
-	private slots:
+    private slots:
 
-	private:
-		MainWindow* mParent;
+    private:
+        MainWindow* mParent;
         QMainWindow* mInnerMain;
-        PaintLayerWidget* mPaintLayerWidget;
 };
 
 #endif
-

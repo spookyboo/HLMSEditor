@@ -18,8 +18,8 @@
 **
 ****************************************************************************/
 
-#ifndef NodeEditorDOCWIDGET_H
-#define NodeEditorDOCWIDGET_H
+#ifndef NodeEditorDOCKWIDGET_H
+#define NodeEditorDOCKWIDGET_H
 
 #include <QtWidgets>
 #include <QMenu>

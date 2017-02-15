@@ -105,8 +105,6 @@ bool PaintLayerWidget::eventFilter(QObject* object, QEvent* event)
             mouseDblClickHandler(mouseEvent);
         break;
 
-        case QEvent::Drop:
-            dropHandler(object, event);
         break;
     }
     return QObject::eventFilter(object, event);
@@ -172,22 +170,6 @@ void PaintLayerWidget::mouseDblClickHandler(QMouseEvent* event)
         }
         break;
     }
-}
-
-//****************************************************************************/
-void PaintLayerWidget::dropHandler(QObject* object, QEvent* event)
-{
-    event->accept();
-
-    if (!mListenToDropEvents)
-        return;
-
-    // Determine whether the data was from an abstractitem modellist
-    QDropEvent* dropEvent = static_cast<QDropEvent*>(event);
-    const QMimeData* mimeData = dropEvent->mimeData();
-    QString mimeType("application/x-qabstractitemmodeldatalist");
-    if (!mimeData->hasFormat(mimeType))
-        return;
 }
 
 //****************************************************************************/
@@ -390,6 +372,7 @@ void PaintLayerWidget::deleteLayer (const QString& name)
         QString name = getName(row);
         mTable->removeRow(row);
         int layerId = removeFromLayerVec(row);
+
         emit layerDeleted(layerId, name);
     }
 }
@@ -412,6 +395,7 @@ void PaintLayerWidget::deleteLayer (const QtLayer* layer)
             name = getName(row);
             mTable->removeRow(row);
             delete layer;
+
             emit layerDeleted(layerId, name);
         }
         ++row;
@@ -428,6 +412,7 @@ void PaintLayerWidget::deleteLayer (int layerId)
         QString name = getName(row);
         mTable->removeRow(row);
         int layerId = removeFromLayerVec(row);
+
         emit layerDeleted(layerId, name);
     }
 }
@@ -537,4 +522,3 @@ int PaintLayerWidget::getCurrentLayerId(void)
 
     return -1;
 }
-

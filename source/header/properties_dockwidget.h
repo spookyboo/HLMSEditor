@@ -18,8 +18,8 @@
 **
 ****************************************************************************/
 
-#ifndef PropertiesDOCWIDGET_H
-#define PropertiesDOCWIDGET_H
+#ifndef PropertiesDOCKWIDGET_H
+#define PropertiesDOCKWIDGET_H
 
 #include <QtWidgets>
 #include <QMenu>

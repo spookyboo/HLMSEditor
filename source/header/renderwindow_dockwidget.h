@@ -18,8 +18,8 @@
 **
 ****************************************************************************/
 
-#ifndef RenderwindowDOCWIDGET_H
-#define RenderwindowDOCWIDGET_H
+#ifndef RenderwindowDOCKWIDGET_H
+#define RenderwindowDOCKWIDGET_H
 
 #include <QtWidgets>
 #include <QMenu>
