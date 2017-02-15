@@ -42,7 +42,7 @@ PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager) :
     mForce(1.0f),
     mScale(1.0f),
     mPaintEffect(PAINT_EFFECT_COLOR),
-    mPaintOverflow(PAINT_OVERFLOW_IGNORE),
+    mPaintOverflow(PAINT_OVERFLOW_TO_OPPOSITE_CORNER),
     mTextureLayer(0),
     calculatedTexturePositionX(0),
     calculatedTexturePositionY(0),

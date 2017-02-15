@@ -38,7 +38,7 @@
 // Set the next line to comment, otherwise the uv mapping texture will be created
 // at runtime, which is not what we need. It is only for convenience to create the
 // uv mapping texture once.
-//#define CREATE_UV_MAPPING_TEXTURE 1
+#define CREATE_UV_MAPPING_TEXTURE 1
 
 namespace Magus
 {
@@ -47,6 +47,8 @@ namespace Magus
     static const Ogre::String UV_MAPPING_MATERIAL_NAME = "UVMM5432123456";
     static const Ogre::String SKYBOX_WORKSPACE = "SkyPostprocessWorkspace";
     static const Ogre::String SKYBOX_MATERIAL_NAME = "SkyPostprocess";
+    static const Ogre::String OGRE3_PATH = "../common/ogre3/";
+    static const Ogre::String UV_MAPPING_TEXTURE_NAME = "uv_mapping.png";
     static const int MAX_SCREEN_SIZE_INT = 10000; // Arbritrary value, but screen size is usually not larger than this, right?
 
     class OgreManager;
@@ -186,7 +188,7 @@ namespace Magus
             void rotateLight(Ogre::Vector2 relativeMouseMove);
             const Ogre::ColourValue& calculateIndexToColour(int index);
             int calculateColourToIndex(const Ogre::ColourValue& colourValue);
-            const Ogre::ColourValue& getColourAtRenderToTextureHoover(size_t x, size_t y);
+            const Ogre::ColourValue& getColourAtRenderToTextureHoover(int x, int y);
 
             /* To highlight a subitem in on the screen, the following steps are performed
              * - Create a render texture and an additional workspace (createCompositorRenderToTexture)
@@ -210,7 +212,7 @@ namespace Magus
             void setDefaultDatablockItemRttPaint(void); // Set default datablock to the paint item
             void setUnlitDatablockRttPaint(void); // Set the uv colour map datablock to the paint item
             const Ogre::Vector2& calculateColourToUv (const Ogre::ColourValue& col); // Use a simple mapping algorithm to convert a colourvalue to a uv
-            const Ogre::ColourValue& getColourAtRenderToTexturePaint(int x, int y);
+            const Ogre::ColourValue& getColourAtRenderToTexturePaint(int x, int y); // Get the colour of the uv mapping texture on a mouse position
             void doPaintLayer(int mouseX, int mouseY); // Apply the paint effect to the layers
 
             Ogre::HlmsDatablock* getDatablockByFullName(const Ogre::String& fullName);

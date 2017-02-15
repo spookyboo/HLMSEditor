@@ -661,13 +661,12 @@ namespace Magus
     //****************************************************************************/
     void QOgreWidget::createUnlitDatablockRttPaint(void)
     {
-        Ogre::String uvMappingTextureFileName = OGRE3_PATH + UV_MAPPING_TEXTURE;
+        Ogre::String uvMappingTextureFileName = OGRE3_PATH + UV_MAPPING_TEXTURE_NAME;
         #ifdef CREATE_UV_MAPPING_TEXTURE
             // Create the custom uv mapping texture if CREATE_UV_TEXTURE exists. This only to generate the texture once.
             // After that, we don't need this anymore, but the code still remains to recreate the texture if needed.
             // Creation of the texture could also be done outside the application, but for convenience it is
             // part of the HLMS editor.
-            // TODO: Create the custom uv texture
             Ogre::Image uvMap;
             Ogre::uint32 width = 1024;
             Ogre::uint32 height = 1024;
@@ -717,7 +716,7 @@ namespace Magus
             // Attach samplerblock
             Ogre::HlmsTextureManager* hlmsTextureManager = hlmsManager->getTextureManager();
             Ogre::HlmsTextureManager::TextureLocation texLocation = hlmsTextureManager->createOrRetrieveTexture(
-                        uvMappingTextureFileName,
+                        UV_MAPPING_TEXTURE_NAME,
                         Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE);
             Ogre::HlmsSamplerblock samplerblock;
             datablock->setTexture(0, texLocation.xIdx, texLocation.texture);
@@ -1183,10 +1182,12 @@ namespace Magus
     }
 
     //****************************************************************************/
-    const Ogre::ColourValue& QOgreWidget::getColourAtRenderToTextureHoover(size_t x, size_t y)
+    const Ogre::ColourValue& QOgreWidget::getColourAtRenderToTextureHoover(int x, int y)
     {
         // Sometimes the mousecoordinates are beyond the renderwindow. To prevent crashes in
         // pixelbox.getColourAt the maximum values of the mousecoordinates are validated
+        x = ((float)x / (float)mSize.width()) * RTT_HOOVER_SIZE_X;
+        y = ((float)y / (float)mSize.height()) * RTT_HOOVER_SIZE_Y;
         mHelpColour = Ogre::ColourValue::Black;
         if (x > RTT_HOOVER_SIZE_X || y > RTT_HOOVER_SIZE_Y)
             return mHelpColour;
@@ -1203,9 +1204,9 @@ namespace Magus
     //****************************************************************************/
     void QOgreWidget::highlightSubItem(Ogre::Vector2 mousePos)
     {
-        size_t x = (mousePos.x / (float)mSize.width()) * RTT_HOOVER_SIZE_X;
-        size_t y = ((mousePos.y) / (float)mSize.height()) * RTT_HOOVER_SIZE_Y;
-        Ogre::ColourValue colour = getColourAtRenderToTextureHoover (x, y); // Get the colour of the mouse position (from the render texture)
+        //size_t x = (mousePos.x / (float)mSize.width()) * RTT_HOOVER_SIZE_X;
+        //size_t y = ((mousePos.y) / (float)mSize.height()) * RTT_HOOVER_SIZE_Y;
+        Ogre::ColourValue colour = getColourAtRenderToTextureHoover ((int)mousePos.x, (int)mousePos.y); // Get the colour of the mouse position (from the render texture)
         int index = calculateColourToIndex (colour); // Get the index of the subitem, based on the colour at the mouse position
 
         // Determine whether index is out of bounds (because of the symplistic scalar to colour mapping algorithm)
@@ -1247,9 +1248,9 @@ namespace Magus
     //****************************************************************************/
     int QOgreWidget::getSubItemIndexWithMouseOver(int mouseX, int mouseY)
     {
-        size_t x = (mouseX / (float)mSize.width()) * RTT_HOOVER_SIZE_X;
-        size_t y = ((mouseY) / (float)mSize.height()) * RTT_HOOVER_SIZE_Y;
-        Ogre::ColourValue colour = getColourAtRenderToTextureHoover (x, y); // Get the colour of the mouse position (from the render texture)
+        //size_t x = (mouseX / (float)mSize.width()) * RTT_HOOVER_SIZE_X;
+        //size_t y = ((mouseY) / (float)mSize.height()) * RTT_HOOVER_SIZE_Y;
+        Ogre::ColourValue colour = getColourAtRenderToTextureHoover (mouseX, mouseY); // Get the colour of the mouse position (from the render texture)
         int index = calculateColourToIndex (colour); // Get the index of the subitem, based on the colour at the mouse position
 
         // Determine whether index is out of bounds
@@ -1530,24 +1531,10 @@ namespace Magus
         if (!datablock)
             return;
 
-        // Calculate uv of the texture position pointed by the mouse:
-        // TODO
-        // 1. DONE! Determine the subItem on which the mouse hoovers by means of getSubItemIndexWithMouseOver()
-        // 2. DONE! Determine whether the subitem index is valid ==> otherwise return (don't paint)
-        // 3. DONE! Determine wether the subitem has a datablock name (IdString) equal to the one used by the paintlayer; use (*it)->getDatablockName()
-        //    DONE! If they differ ==> return (don't paint)
-        // 4. Perform a rayscene query
-        // 5. Determine barycentric coordinates where the ray intersets with the mesh (use a buffer of the values for reuse)
-        //    - calculate barycentric coordinate of point inside triangle
-        //    - get uv coordinate of point with this = Ogre::Vector2 uv = mUVs[mIndices[i]] * bary.x + mUVs[mIndices[i+1]] * bary.y + mUVs[->mIndices[i+2]] * bary.z;
-        // OR
-        // 1. Create an RTT, similar as to the one used to select the subItem.
-        // 2. The RTT renders the item. Each renderer pixels contains the calculated uv positions.
-        // 3. Pick with the mouse the value of the pixel.
-        // Note, that this method is probably not accurate enough!
         float u = 0.5f;
         float v = 0.5f;
         bool uvCalculated = false;
+        Ogre::ColourValue col;
 
         // Iterate through the PaintLayer vector and apply the paint effect
         PaintLayers::iterator it;
@@ -1567,7 +1554,11 @@ namespace Magus
                     // Calculate the uv; we do it here, because it should only be calculated when needed (as late as possible)
                     if (!uvCalculated)
                     {
-                        // TODO: Calculate the uv
+                        // Calculate the uv
+                        col = getColourAtRenderToTexturePaint(mouseX, mouseY);
+                        helperVector2 = calculateColourToUv(col);
+                        u = helperVector2.x;
+                        v = helperVector2.y;
                         uvCalculated = true;
                     }
 
@@ -1580,7 +1571,27 @@ namespace Magus
     //****************************************************************************/
     const Ogre::ColourValue& QOgreWidget::getColourAtRenderToTexturePaint(int x, int y)
     {
-        // TODO
-        return Ogre::ColourValue::White;
+        // Sometimes the mousecoordinates are beyond the renderwindow. To prevent crashes in
+        // pixelbox.getColourAt the maximum values of the mousecoordinates are validated
+        x = ((float)x / (float)mSize.width()) * RTT_PAINT_SIZE_X;
+        y = ((float)y / (float)mSize.height()) * RTT_PAINT_SIZE_Y;
+        mHelpColour = Ogre::ColourValue::Black;
+        if (x > RTT_PAINT_SIZE_X || y > RTT_PAINT_SIZE_Y)
+            return mHelpColour;
+
+        size_t formatSize = Ogre::PixelUtil::getNumElemBytes(Ogre::PF_R8G8B8A8);
+        Ogre::uchar* data = OGRE_ALLOC_T(Ogre::uchar, RTT_PAINT_SIZE_X * RTT_PAINT_SIZE_Y * formatSize, Ogre::MEMCATEGORY_RENDERSYS);
+        Ogre::PixelBox pixelbox (RTT_PAINT_SIZE_X, RTT_PAINT_SIZE_Y, 1, Ogre::PF_R8G8B8A8, data);
+        mRttPaint->copyContentsToMemory(pixelbox, Ogre::RenderTarget::FB_AUTO);
+        mHelpColour = pixelbox.getColourAt(x, y, 0);
+        OGRE_FREE(data, Ogre::MEMCATEGORY_RENDERSYS);
+        //Ogre::LogManager::getSingleton().logMessage("Colour = " + Ogre::StringConverter::toString(mHelpColour)); // DEBUG
+        float gamma = 2.2f;
+        float gammaCorrection = 1.0f/gamma;
+        mHelpColour.r = std::pow(mHelpColour.r, gammaCorrection); // Apply gamma value (2.2)
+        mHelpColour.g = std::pow(mHelpColour.g, gammaCorrection);
+        mHelpColour.b = std::pow(mHelpColour.b, gammaCorrection);
+
+        return mHelpColour;
     }
 }
