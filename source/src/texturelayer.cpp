@@ -64,18 +64,21 @@ void TextureLayer::setDatablockNameAndTexture (const Ogre::IdString& datablockNa
         try
         {
             // Texture on GPU; store the buffers in a vector
-            mTexture = mDatablockPbs->getTexture(textureType); // TextureType MUST exist, otherwise the application crashes
-            mNumMipMaps = mTexture->getNumMipmaps();
-            mBuffers.clear();
-            for (Ogre::uint8 i = 0; i < mNumMipMaps; ++i)
-                mBuffers.push_back(mTexture->getBuffer(0, i).getPointer());
+            if (!mDatablockPbs->getTexture(textureType).isNull())
+            {
+                mTexture = mDatablockPbs->getTexture(textureType); // TextureType MUST exist, otherwise the application crashes
+                mNumMipMaps = mTexture->getNumMipmaps();
+                mBuffers.clear();
+                for (Ogre::uint8 i = 0; i < mNumMipMaps; ++i)
+                    mBuffers.push_back(mTexture->getBuffer(0, i).getPointer());
 
-            // Load the texture as image
-            mTextureOnWhichIsPainted.load(textureFileName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-            mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getPixelBox(0, 0);
-            mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
-            mTextureOnWhichIsPaintedWidth = mPixelboxTextureOnWhichIsPainted.getWidth();
-            mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.getHeight();
+                // Load the texture as image
+                mTextureOnWhichIsPainted.load(textureFileName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+                mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getPixelBox(0, 0);
+                mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
+                mTextureOnWhichIsPaintedWidth = mPixelboxTextureOnWhichIsPainted.getWidth();
+                mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.getHeight();
+            }
         }
         catch (Ogre::Exception e)
         {

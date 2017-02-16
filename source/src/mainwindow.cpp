@@ -48,6 +48,7 @@
 #include "hlms_editor_plugin.h"
 #include "hlms_editor_plugin_action.h"
 #include "config_dialog.h"
+#include "asset_propertywidget_xy.h"
 #include <fstream>
 
 //****************************************************************************/
@@ -403,14 +404,16 @@ void MainWindow::doNewProjectAction(void)
     mNodeEditorDockWidget->clear();
     newProjectName();
 
+    // Clear all painting layers
+    mPaintLayerDockWidget->newHlmsCreated();
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setPaintLayers (0); // Invalidate the PaintLayers vector reference in the Ogre widget
+
     // Set the datablock of the Item in the Ogre widget to 'default'
     // Also destroy the datablocks in memory; strictly speaking this is not required, but it cleans up a bit
     ogreWidget->setDefaultDatablockItem();
     mHlmsUtilsManager->destroyDatablocks(true); // Exclude the 'special' datablocks
-    mHlmsName = QString("");
-    mCurrentDatablockName = "";
-    mCurrentDatablockFullName = "";
 
+    clearHlmsNamesAndRemovePaintLayers();
     mOgreManager->setPause(false);
 }
 
@@ -427,14 +430,14 @@ void MainWindow::newProjectName(void)
 //****************************************************************************/
 void MainWindow::doNewHlmsPbsAction(void)
 {
-    mHlmsName = QString("");
+    clearHlmsNamesAndRemovePaintLayers();
     mNodeEditorDockWidget->newHlmsPbs();
 }
 
 //****************************************************************************/
 void MainWindow::doNewHlmsUnlitAction(void)
 {
-    mHlmsName = QString("");
+    clearHlmsNamesAndRemovePaintLayers();
     mNodeEditorDockWidget->newHlmsUnlit();
 }
 
@@ -517,7 +520,7 @@ void MainWindow::loadProject(const QString& fileName)
                 // materials that are used in the mesh.
                 setDatablocksFromMaterialBrowserInItem();
 
-                mHlmsName = QString("");
+                clearHlmsNamesAndRemovePaintLayers();
                 mPropertiesDockWidget->clear();
                 mNodeEditorDockWidget->clear();
             }
@@ -1312,7 +1315,7 @@ void MainWindow::update(void)
 //****************************************************************************/
 void MainWindow::initCurrentDatablockFileName(void)
 {
-    mHlmsName = QString("");
+    clearHlmsNamesAndRemovePaintLayers();
     mPropertiesDockWidget->clear();
 }
 
@@ -1951,7 +1954,18 @@ void MainWindow::destroyDatablock(const Ogre::IdString& datablockName)
 }
 
 //****************************************************************************/
-void MainWindow::notifyHlmsChanged (void)
+void MainWindow::notifyHlmsChanged (QtProperty* property)
 {
+    // Create a new datablock
     mNodeEditorDockWidget->generateDatablock();
+}
+
+//****************************************************************************/
+void MainWindow::clearHlmsNamesAndRemovePaintLayers(void)
+{
+    mHlmsName = QString("");
+    mCurrentDatablockName = "";
+    mCurrentDatablockFullName = "";
+    mPaintLayerDockWidget->newHlmsCreated(); // Needed to delete the paintlayers, because a new Hlms is created
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setPaintLayers (0); // Invalidate the PaintLayers vector reference in the Ogre widget
 }

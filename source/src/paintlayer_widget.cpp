@@ -33,9 +33,12 @@
 #include <QTableWidgetItem>
 #include <QTreeWidgetItem>
 #include "paintlayer_widget.h"
+#include "paintlayer_dockwidget.h"
 
 //****************************************************************************/
-PaintLayerWidget::PaintLayerWidget(const QString& iconDir, QWidget* parent) : QWidget(parent)
+PaintLayerWidget::PaintLayerWidget(const QString& iconDir, PaintLayerDockWidget* paintLayerDockWidget, QWidget* parent) :
+    QWidget(parent),
+    mPaintLayerDockWidget(paintLayerDockWidget)
 {
     setWindowTitle(QString("Layers"));
     QHBoxLayout* mainLayout = new QHBoxLayout;
@@ -183,7 +186,22 @@ void PaintLayerWidget::contextMenuItemSelected(QAction* action)
     // ---------------- Create layer action ----------------
     if (action->text() == TOOL_LAYER_ACTION_CREATE_LAYER)
     {
-        createLayer(QString(""));
+        if (mPaintLayerDockWidget->currentDatablockExists())
+        {
+            if (mPaintLayerDockWidget->currentDatablockIsPbs())
+            {
+                createLayer(QString(""));
+            }
+            else
+            {
+                QMessageBox::information(0, QString("Warning"), QString("Painting on HLMS Unlit materials is not supported"));
+            }
+        }
+        else
+        {
+            QMessageBox::information(0, QString("Warning"), QString("Create / load a hlms material before creating a paint layer.\n"
+                                                                    "Did you forget to generate (cog icon) or edit the hlms material?"));
+        }
         return;
     }
     else if (action->text() == TOOL_LAYER_ACTION_DELETE_LAYER)
@@ -426,6 +444,14 @@ void PaintLayerWidget::deleteLayer (int layerId)
 
         emit layerDeleted(layerId, name);
     }
+}
+
+//****************************************************************************/
+void PaintLayerWidget::deleteAllLayers (void)
+{
+    mTable->clearContents();
+    mTable->setRowCount(0);
+    mLayerVec.clear();
 }
 
 //****************************************************************************/

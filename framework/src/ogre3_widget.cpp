@@ -1347,11 +1347,13 @@ namespace Magus
             if (datablock)
             {
                 datablockFullName = *datablock->getFullName();
+                // Exclude special datablocks
                 if (    datablock != hlmsPbs->getDefaultDatablock() &&
                         datablock != hlmsUnlit->getDefaultDatablock() &&
                         datablockFullName != DEFAULT_DATABLOCK_NAME &&
                         datablockFullName != Magus::AXIS_MATERIAL_NAME &&
-                        datablockFullName != Magus::HIGHLIGHT_MATERIAL_NAME)
+                        datablockFullName != Magus::HIGHLIGHT_MATERIAL_NAME &&
+                        datablockFullName != Magus::UV_MAPPING_MATERIAL_NAME)
                 {
                     mSnapshotDatablocks[i] = datablockFullName;
                 }

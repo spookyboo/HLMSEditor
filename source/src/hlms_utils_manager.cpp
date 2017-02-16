@@ -367,6 +367,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
     // If excludeSpecialDatablocks == true
     // - Exclude the default datablocks
     // - Exclude Axis and Highlight materials
+    // - Exclude UV Colour mapping material
     // - Exclude the unlit materials associated with the 'render-texture'  item (defined by 0, 1, 2, 3, ...)
     Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
     Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
@@ -400,7 +401,8 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
 
         // Check to see whether special datablocks are excluded
         if (!exclude)
-            exclude = excludeSpecialDatablocks && (fullName == Magus::AXIS_MATERIAL_NAME || fullName == Magus::HIGHLIGHT_MATERIAL_NAME);
+            exclude = excludeSpecialDatablocks && (fullName == Magus::AXIS_MATERIAL_NAME ||
+                                                   fullName == Magus::HIGHLIGHT_MATERIAL_NAME);
 
         // If not excluded because of special datablocks, check whether it must be excluded because of the excludeDatablockName
         if (!exclude)
@@ -440,7 +442,9 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
 
         // Check to see whether special datablocks are excluded
         if (!exclude)
-            exclude = excludeSpecialDatablocks && (fullName == Magus::AXIS_MATERIAL_NAME || fullName == Magus::HIGHLIGHT_MATERIAL_NAME);
+            exclude = excludeSpecialDatablocks && (fullName == Magus::AXIS_MATERIAL_NAME ||
+                                                   fullName == Magus::HIGHLIGHT_MATERIAL_NAME ||
+                                                   fullName == Magus::UV_MAPPING_MATERIAL_NAME);
 
         // If not excluded because of generic special datablocks, check whether it must be excluded because of
         // the other special datablocks. These are the ones with a numberic value as name and used for the
@@ -799,6 +803,8 @@ const Ogre::String& HlmsUtilsManager::getTextureFileNameOfPbs (const Ogre::IdStr
                     if(texName)
                     {
                         helperString = *texName;
+
+                        // TODO: Get the filename from OgreResources
                     }
                 }
             }

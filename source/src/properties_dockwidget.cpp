@@ -185,7 +185,7 @@ void PropertiesDockWidget::displayInfo(const QString& fileName, const QString& h
 }
 
 //****************************************************************************/
-void PropertiesDockWidget::notifyHlmsChanged(void)
+void PropertiesDockWidget::notifyHlmsChanged(QtProperty* property)
 {
-    mParent->notifyHlmsChanged();
+    mParent->notifyHlmsChanged(property);
 }

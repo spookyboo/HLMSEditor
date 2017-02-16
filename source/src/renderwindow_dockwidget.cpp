@@ -502,9 +502,10 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
     if (action->text() == ACTION_SET_CURRENT_MATERIAL)
     {
         // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
-        PaintLayer* paintLayer;
+        //PaintLayer* paintLayer;
 
         // First layer
+        /*
         paintLayer = mParent->mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
                                                                   Ogre::PbsTextureTypes::PBSM_DETAIL0,
                                                                   "../examples/floor_diffuse.PNG"); // Can only be tested with floor_diffuse.PNG and detail map
@@ -518,6 +519,7 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
         paintLayer->setScale(0.05f);
         paintLayer->setPaintColour(Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
         paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_COLOR);
+        */
 
         // Second layer
         /*
@@ -540,7 +542,7 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
         paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_TEXTURE);
         */
 
-        mOgreWidget->setPaintLayers(mParent->mPaintLayerManager.getPaintLayers());
+        //mOgreWidget->setPaintLayers(mParent->mPaintLayerManager.getPaintLayers());
         // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
 
         mOgreWidget->assignCurrentDatablock();

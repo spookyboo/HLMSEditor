@@ -48,6 +48,17 @@ class PaintLayerDockWidget : public QDockWidget
                              Qt::WindowFlags flags = 0);
         ~PaintLayerDockWidget(void);
 
+        /* Determines whether there is a current datablock.
+         * It must be a Pbs, because Unlit painting is not very interesting (and therefor not supported)
+         */
+        bool currentDatablockExists(void);
+        bool currentDatablockIsPbs(void);
+
+        /* The function is called everytime a new Hlms material is created
+         * The Paint Layers don't have any meaning for the new Hlms, so they can be deleted
+         */
+        void newHlmsCreated (void);
+
     private slots:
         void handleNewLayer (int layerId, QString layerName);
         void handleDeleteLayer (int layerId, QString layerName);

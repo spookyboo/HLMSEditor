@@ -392,7 +392,7 @@ void NodeEditorDockWidget::deleteHlmsPbsDatablockNode(void)
     mHlmsPbsDatablockNode = 0;
     mParent->initCurrentDatablockFileName();
 
-    generateDatablock();
+    generateDatablock(); //TODO: Is this needed?
 }
 
 //****************************************************************************/

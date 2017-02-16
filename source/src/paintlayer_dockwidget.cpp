@@ -47,12 +47,34 @@ PaintLayerDockWidget::~PaintLayerDockWidget(void)
 }
 
 //****************************************************************************/
+bool PaintLayerDockWidget::currentDatablockExists(void)
+{
+    return (mParent->getCurrentDatablockName() != "");
+}
+
+//****************************************************************************/
+bool PaintLayerDockWidget::currentDatablockIsPbs(void)
+{
+    return (mParent->getCurrentDatablockType() == HLMS_PBS);
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::newHlmsCreated (void)
+{
+    // Destroy all PaintLayer objects
+    mPaintLayerManager->removeAndDeleteAllPaintLayers();
+
+    // Delete all layers in the PaintL layer widget
+    mPaintLayerWidget->deleteAllLayers();
+}
+
+//****************************************************************************/
 void PaintLayerDockWidget::handleNewLayer (int layerId, QString layerName)
 {
     // A new layer has been created; create a paint layer by means of the PaintLayerManager
     mPaintLayerManager->createPaintLayer(layerId);
 
-    QMessageBox::information(0, QString("handleNewLayer: "), QVariant(layerId).toString()); // test
+    //QMessageBox::information(0, QString("handleNewLayer: "), QVariant(layerId).toString()); // test
 }
 
 //****************************************************************************/
@@ -61,7 +83,7 @@ void PaintLayerDockWidget::handleDeleteLayer (int layerId, QString layerName)
     // A new layer has been created; delete the paint layer by means of the PaintLayerManager
     mPaintLayerManager->removeAndDeletePaintLayer(layerId);
 
-    QMessageBox::information(0, QString("handleDeleteLayer: "), QVariant(layerId).toString()); // test
+    //QMessageBox::information(0, QString("handleDeleteLayer: "), QVariant(layerId).toString()); // test
 }
 
 //****************************************************************************/

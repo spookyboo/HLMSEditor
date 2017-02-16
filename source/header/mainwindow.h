@@ -81,7 +81,7 @@ class MainWindow : public QMainWindow
         const Ogre::String& getCurrentDatablockFullName (void) {return mCurrentDatablockFullName;}
         const Ogre::IdString& getCurrentDatablockName (void) {return mCurrentDatablockName;}
         void destroyDatablock(const Ogre::IdString& datablockName);
-        void notifyHlmsChanged (void); // To be called if the properties of a datablock are changed (which result in rebuilding the material)
+        void notifyHlmsChanged (QtProperty* property); // To be called if the properties of a datablock are changed (which result in rebuilding the material)
         HlmsUtilsManager* getHlmsUtilsManager (void) {return mHlmsUtilsManager;}
         const Ogre::String& getTextureFileNameOfPbs(const Ogre::IdString& datablockId, Ogre::PbsTextureTypes textureType); // Returns the filename of a pbs texture type
 
@@ -120,6 +120,7 @@ class MainWindow : public QMainWindow
         void loadRecentProjectFilesCfg(void);
         void saveRecentProjectFilesCfg(void);
         Ogre::DataStreamPtr openFile(Ogre::String source);
+        void clearHlmsNamesAndRemovePaintLayers(void);
 
 	private slots:
         void doNewProjectAction(void);

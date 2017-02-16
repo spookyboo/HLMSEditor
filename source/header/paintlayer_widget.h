@@ -57,6 +57,7 @@ struct QtLayer
 };
 
 class MainWindow;
+class PaintLayerDockWidget;
 
 /****************************************************************************
 Main class for paint layer widget. This widgets displays paint layers.
@@ -66,7 +67,7 @@ class PaintLayerWidget : public QWidget
     Q_OBJECT
 
     public:
-        PaintLayerWidget(const QString& iconDir, QWidget* parent = 0);
+        PaintLayerWidget(const QString& iconDir, PaintLayerDockWidget* paintLayerDockWidget, QWidget* parent = 0);
         ~PaintLayerWidget(void);
         bool eventFilter(QObject* object, QEvent* event);
 
@@ -87,6 +88,9 @@ class PaintLayerWidget : public QWidget
 
         // Delete a layer (by layerId)
         void deleteLayer (int layerId);
+
+        // Delete all layers; it does not emit layerDeleted though
+        void deleteAllLayers (void);
 
         // Set the (name) name of the layer, identified by the (unique) layerId
         void setLayerName(int layerId, const QString& newName);
@@ -141,6 +145,7 @@ class PaintLayerWidget : public QWidget
         void selectTextureType(int layerId, QString textureType);
 
     private:
+        PaintLayerDockWidget* mPaintLayerDockWidget; // Reference to the dockwidget that contains this widget
         QWidget* mParent;
         QString mIconDir;
         bool mListenToDeleteEvents;
