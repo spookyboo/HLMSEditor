@@ -285,7 +285,6 @@ void PaintLayer::setPaintEffect (PaintEffects paintEffect)
 //****************************************************************************/
 void PaintLayer::setPaintColour (const Ogre::ColourValue& colourValue)
 {
-    mJitterPaintColour = false;
     mPaintColour = colourValue;
 }
 
@@ -332,7 +331,6 @@ bool PaintLayer::getJitterPaint (void)
 //****************************************************************************/
 void PaintLayer::setForce (float force)
 {
-    mJitterForce = false;
     mForce = force;
 }
 
@@ -361,7 +359,6 @@ void PaintLayer::setRotationAngle (float rotationAngle)
 {
     mRotationAngle = rotationAngle;
     mRotate = true;
-    mJitterRotate = false;
     mSinRotationAngle = sin(rotationAngle * Ogre::Math::PI / 180);
     mCosRotationAngle = cos(rotationAngle * Ogre::Math::PI / 180);
 }
@@ -392,7 +389,6 @@ void PaintLayer::resetRotation (void)
 void PaintLayer::setTranslationFactor (float translationFactorX, float translationFactorY)
 {
     mTranslate = true;
-    mJitterTranslate = false;
     mTranslationFactorX = translationFactorX;
     mTranslationFactorY = translationFactorY;
     mTranslationX = translationFactorX * mBrushWidth;
@@ -430,7 +426,6 @@ void PaintLayer::resetTranslation (void)
 void PaintLayer::setScale (float scale)
 {
     mScale = scale;
-    mJitterScale = false;
     mHalfBrushWidthScaled = mScale * mHalfBrushWidth;
     mHalfBrushHeightScaled = mScale * mHalfBrushHeight;
 }
@@ -459,7 +454,6 @@ void PaintLayer::resetScale (void)
 void PaintLayer::setMirrorHorizontal (bool mirrored)
 {
     mMirrorHorizontal = mirrored;
-    mJitterMirrorHorizontal = false;
 }
 
 //****************************************************************************/
@@ -485,7 +479,6 @@ void PaintLayer::resetMirrorHorizontal (void)
 void PaintLayer::setMirrorVertical (bool mirrored)
 {
     mMirrorVertical = mirrored;
-    mJitterMirrorVertical = false;
 }
 
 //****************************************************************************/

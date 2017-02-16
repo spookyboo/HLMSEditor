@@ -277,6 +277,7 @@ void PaintLayerDockWidget::setPaintColour(int layerId, QColor colour)
         col.b = colour.blue() / 255.0f;
         col.a = colour.alpha() / 255.0f;
         paintLayer->setPaintColour(col);
+        paintLayer->resetPaintColour(); // To stop the jitter
     }
 }
 
@@ -396,7 +397,10 @@ void PaintLayerDockWidget::setBrushForce(int layerId, float force)
 {
     PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
     if (paintLayer)
+    {
         paintLayer->setForce(force);
+        paintLayer->resetForce();
+    }
 }
 
 //****************************************************************************/
@@ -415,7 +419,10 @@ void PaintLayerDockWidget::setBrushScale(int layerId, float scale)
 {
     PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
     if (paintLayer)
+    {
         paintLayer->setScale(scale);
+        paintLayer->resetScale();
+    }
 }
 
 //****************************************************************************/
