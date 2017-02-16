@@ -28,7 +28,7 @@
 #include "OgreMath.h"
 #include "ogre3_widget.h"
 
-//****************************************************************************/
+//************************************ QString constants *******************************************/
 static const QString WINDOW_TITLE = QString("HLMS editor");
 static const int OGRE_WIDGET_RENDERWINDOW = 1;
 static const int TB_ICON_AND_SPACING = 32;
@@ -94,9 +94,6 @@ static const QString FILE_RESOURCES_DEFAULT = QString("resources_default.cfg");
 static const QString FILE_SETTINGS = QString("settings.cfg");
 static const QString FILE_SETTINGS_DEFAULT = QString("settings_default.cfg");
 static const QString PROJECT_PATH = "../project/";
-static const Ogre::String DEFAULT_DATABLOCK_NAME = "[Default]";
-static const Ogre::String DATABLOCK_DEBUG_CUBE = "DebugCube";
-static const Ogre::String THUMBS_PATH = "../common/thumbs/";
 static const QString DEFAULT_IMPORT_PATH = "../import/";
 static const QString SETTINGS_GROUP_GENERAL = "General";
 static const QString SETTINGS_IMPORT_PATH = "importPath";
@@ -107,6 +104,29 @@ static const QString NO_SKYBOX = "None";
 static const QString MESH_VERSION_1 = QString("[MeshSerializer_v1");
 static const QString MESH_VERSION_2 = QString("[MeshSerializer_v2");
 
+static const QString PBSM_DIFFUSE_QSTRING = QString("Diffuse map");
+static const QString PBSM_NORMAL_QSTRING = QString("Normal map");
+static const QString PBSM_SPECULAR_QSTRING = QString("Specular / Metallic map");
+static const QString PBSM_ROUGHNESS_QSTRING = QString("Roughness map");
+static const QString PBSM_DETAIL_WEIGHT_QSTRING = QString("Detail weight map");
+static const QString PBSM_DETAIL0_QSTRING = QString("Detail map 0");
+static const QString PBSM_DETAIL1_QSTRING = QString("Detail map 1");
+static const QString PBSM_DETAIL2_QSTRING = QString("Detail map 2");
+static const QString PBSM_DETAIL3_QSTRING = QString("Detail map 30");
+static const QString PBSM_DETAIL0_NM_QSTRING = QString("Detail normal map 0");
+static const QString PBSM_DETAIL1_NM_QSTRING = QString("Detail normal map 1");
+static const QString PBSM_DETAIL2_NM_QSTRING = QString("Detail normal map 2");
+static const QString PBSM_DETAIL3_NM_QSTRING = QString("Detail normal map 3");
+static const QString PBSM_REFLECTION_QSTRING = QString("Env. probe map");
+
+//************************************ Ogre String constants *******************************************/
+static const Ogre::String DEFAULT_DATABLOCK_NAME = "[Default]";
+static const Ogre::String DATABLOCK_DEBUG_CUBE = "DebugCube";
+static const Ogre::String THUMBS_PATH = "../common/thumbs/";
+static const Ogre::String BRUSH_PATH = "../common/brushes/";
+static const Ogre::String DEFAULT_BRUSH = "brush_001.png";
+
+//******************************************************************************************************/
 // Static function to determine the 'resources' file
 static const QString& getResourcesCfg (void)
 {
@@ -141,13 +161,14 @@ struct QtSourcesInfo
 };
 
 static unsigned int gSequence = 0;
-//****************************************************************************/
+//******************************************************************************************************/
 static unsigned int getSequence(void)
 {
     return ++gSequence;
 }
 
-//****************************************************************************/
+//******************************************************************************************************/
+
 static QString getBaseFileName(QString& fileName)
 {
     QString mTempString = fileName;
@@ -161,19 +182,22 @@ static QString getBaseFileName(QString& fileName)
     return mTempString;
 }
 
-//****************************************************************************/
+//******************************************************************************************************/
+
 static float randomBetweenTwoFloats(float min, float max)
 {
     return Ogre::Math::RangeRandom(min, max);
 }
 
-//****************************************************************************/
+//******************************************************************************************************/
+
 static int randomBetweenTwoInts(int min, int max)
 {
     return Ogre::Math::RangeRandom(min, max);
 }
 
-//****************************************************************************/
+//******************************************************************************************************/
+
 static Ogre::ColourValue randomBetweenTwoColours (const Ogre::ColourValue& paintColourMin, const Ogre::ColourValue& paintColourMax)
 {
     return Ogre::ColourValue (randomBetweenTwoFloats (paintColourMin.r, paintColourMax.r),
@@ -182,13 +206,15 @@ static Ogre::ColourValue randomBetweenTwoColours (const Ogre::ColourValue& paint
                               randomBetweenTwoFloats (paintColourMin.a, paintColourMax.a));
 }
 
-//****************************************************************************/
+//******************************************************************************************************/
+
 static bool randomBool(void)
 {
     return randomBetweenTwoInts (0, 2) - 1;
 }
 
-//****************************************************************************/
+//******************************************************************************************************/
+
 // Contextmenu action
 static const QString ACTION_SET_CURRENT_MATERIAL = QString("Set current material");
 static const QString ACTION_TOGGLE_LIGHT_DIRECTION = QString("Light direction");
@@ -196,7 +222,8 @@ static const QString ACTION_RESET_CAMERA = QString("Reset camera position/direct
 static const QString ACTION_TOGGLE_SUBMESH_SELECTION = QString("Toggle Mesh/Submesh selection");
 static const QString ACTION_SELECT_BACKGROUND_COLOUR = QString("Select background colour");
 
-//****************************************************************************/
+//******************************************************************************************************/
+
 // Ports
 static const QString PORT_DATABLOCK = QString("Hlms");
 static const QString PORT_SAMPLERBLOCK = QString("Texture/Samplerblock");
@@ -208,7 +235,8 @@ static const unsigned int PORT_ID_SAMPLERBLOCK = 30;
 static const unsigned int PORT_ID_MACROBLOCK = 40;
 static const unsigned int PORT_ID_BLENDBLOCK = 50;
 
-//****************************************************************************/
+//******************************************************************************************************/
+
 // Properties
 static const int CONTAINER_BLENDBLOCK_GENERAL = 10;
 static const int CONTAINER_MACROBLOCK_GENERAL = 20;
@@ -296,6 +324,29 @@ static const int PROPERTY_BLENDBLOCK_SOURCE_BLEND_FACTOR_ALPHA = 97;
 static const int PROPERTY_BLENDBLOCK_DEST_BLEND_FACTOR_ALPHA = 98;
 static const int PROPERTY_BLENDBLOCK_BLEND_OPERATION = 99;
 static const int PROPERTY_BLENDBLOCK_BLEND_OPERATION_ALPHA = 100;
+
+// Paintlayer properties
+static const int PROPERTY_TEXTURE_TYPE = 200;
+static const int PROPERTY_PAINT_EFFECT = 201;
+static const int PROPERTY_PAINT_OVERFLOW = 202;
+
+static const int PROPERTY_JITTER_PAINT_COLOUR = 210;
+static const int PROPERTY_PAINT_COLOUR = 211;
+static const int PROPERTY_JITTER_PAINT_COLOUR_MIN = 212;
+static const int PROPERTY_JITTER_PAINT_COLOUR_MAX = 213;
+static const int PROPERTY_JITTER_PAINT_COLOUR_INTERVAL = 214;
+
+static const int PROPERTY_JITTER_SCALE = 220;
+static const int PROPERTY_SCALE = 221;
+static const int PROPERTY_JITTER_SCALE_MIN = 222;
+static const int PROPERTY_JITTER_SCALE_MAX = 223;
+static const int PROPERTY_JITTER_SCALE_INTERVAL = 224;
+
+static const int PROPERTY_JITTER_FORCE = 230;
+static const int PROPERTY_FORCE = 231;
+static const int PROPERTY_JITTER_FORCE_MIN = 232;
+static const int PROPERTY_JITTER_FORCE_MAX = 233;
+static const int PROPERTY_JITTER_FORCE_INTERVAL = 234;
 
 // Material and Texture browser
 static const int TOOL_SOURCES_LEVEL_X000_PBS = 1;

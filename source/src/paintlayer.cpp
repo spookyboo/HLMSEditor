@@ -31,7 +31,7 @@
 PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager, int externalLayerId) :
     mPaintLayerManager(paintLayerManager),
     mExternaLayerlId(externalLayerId),
-    mEnabled(true),
+    mEnabled(false),
     mBrushWidth(0),
     mBrushHeight(0),
     mHalfBrushWidth(0),
@@ -41,9 +41,9 @@ PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager, int externalLayerId
     mBrushWidthMinusOne(0),
     mBrushHeightMinusOne(0),
     mForce(1.0f),
-    mScale(1.0f),
+    mScale(0.1f),
     mPaintEffect(PAINT_EFFECT_COLOR),
-    mPaintOverflow(PAINT_OVERFLOW_TO_OPPOSITE_CORNER),
+    mPaintOverflow(PAINT_OVERFLOW_CONTINUE),
     mTextureLayer(0),
     calculatedTexturePositionX(0),
     calculatedTexturePositionY(0),
@@ -246,6 +246,11 @@ void PaintLayer::setTextureLayer (TextureLayer* textureLayer)
     mTextureLayer = textureLayer;
 }
 
+//****************************************************************************/
+TextureLayer* PaintLayer::getTextureLayer (void)
+{
+    return mTextureLayer;
+}
 
 //****************************************************************************/
 void PaintLayer::setBrush (const Ogre::String& brushFileName)
@@ -280,6 +285,7 @@ void PaintLayer::setPaintEffect (PaintEffects paintEffect)
 //****************************************************************************/
 void PaintLayer::setPaintColour (const Ogre::ColourValue& colourValue)
 {
+    mJitterPaintColour = false;
     mPaintColour = colourValue;
 }
 
@@ -288,6 +294,20 @@ void PaintLayer::setJitterPaintColour (const Ogre::ColourValue& paintColourMin, 
 {
     mJitterPaintColour = true;
     mJitterPaintColourMin = paintColourMin;
+    mJitterPaintColourMax = paintColourMax;
+}
+
+//****************************************************************************/
+void PaintLayer::setJitterPaintColourMin (const Ogre::ColourValue& paintColourMin)
+{
+    mJitterPaintColour = true;
+    mJitterPaintColourMin = paintColourMin;
+}
+
+//****************************************************************************/
+void PaintLayer::setJitterPaintColourMax (const Ogre::ColourValue& paintColourMax)
+{
+    mJitterPaintColour = true;
     mJitterPaintColourMax = paintColourMax;
 }
 
@@ -303,10 +323,16 @@ void PaintLayer::resetPaintColour (void)
     mJitterPaintColour = false;
 }
 
+//****************************************************************************/
+bool PaintLayer::getJitterPaint (void)
+{
+    return mJitterPaintColour;
+}
 
 //****************************************************************************/
 void PaintLayer::setForce (float force)
 {
+    mJitterForce = false;
     mForce = force;
 }
 
@@ -335,6 +361,7 @@ void PaintLayer::setRotationAngle (float rotationAngle)
 {
     mRotationAngle = rotationAngle;
     mRotate = true;
+    mJitterRotate = false;
     mSinRotationAngle = sin(rotationAngle * Ogre::Math::PI / 180);
     mCosRotationAngle = cos(rotationAngle * Ogre::Math::PI / 180);
 }
@@ -365,6 +392,7 @@ void PaintLayer::resetRotation (void)
 void PaintLayer::setTranslationFactor (float translationFactorX, float translationFactorY)
 {
     mTranslate = true;
+    mJitterTranslate = false;
     mTranslationFactorX = translationFactorX;
     mTranslationFactorY = translationFactorY;
     mTranslationX = translationFactorX * mBrushWidth;
@@ -402,6 +430,7 @@ void PaintLayer::resetTranslation (void)
 void PaintLayer::setScale (float scale)
 {
     mScale = scale;
+    mJitterScale = false;
     mHalfBrushWidthScaled = mScale * mHalfBrushWidth;
     mHalfBrushHeightScaled = mScale * mHalfBrushHeight;
 }
@@ -430,6 +459,7 @@ void PaintLayer::resetScale (void)
 void PaintLayer::setMirrorHorizontal (bool mirrored)
 {
     mMirrorHorizontal = mirrored;
+    mJitterMirrorHorizontal = false;
 }
 
 //****************************************************************************/
@@ -455,6 +485,7 @@ void PaintLayer::resetMirrorHorizontal (void)
 void PaintLayer::setMirrorVertical (bool mirrored)
 {
     mMirrorVertical = mirrored;
+    mJitterMirrorVertical = false;
 }
 
 //****************************************************************************/
@@ -493,7 +524,7 @@ size_t PaintLayer::calculateTexturePositionX (float u, size_t brushPositionX)
             pos = w - 1;
         return pos;
     }
-    else if (mPaintOverflow == PAINT_OVERFLOW_TO_OPPOSITE_CORNER)
+    else if (mPaintOverflow == PAINT_OVERFLOW_CONTINUE)
     {
         if (pos < 0)
             pos += w;
@@ -522,7 +553,7 @@ size_t PaintLayer::calculateTexturePositionY (float v, size_t brushPositionY)
             pos = h - 1;
         return pos;
     }
-    else if (mPaintOverflow == PAINT_OVERFLOW_TO_OPPOSITE_CORNER)
+    else if (mPaintOverflow == PAINT_OVERFLOW_CONTINUE)
     {
         if (pos < 0)
             pos += h;

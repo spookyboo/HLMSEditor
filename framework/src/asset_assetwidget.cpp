@@ -105,6 +105,12 @@ namespace Magus
     }
 
     //****************************************************************************/
+    void QtAssetWidget::setHeaderHidden(bool hidden)
+    {
+        mHeader->setVisible(!hidden);
+    }
+
+    //****************************************************************************/
     void QtAssetWidget::setHeaderTitle(const QString& title)
     {
         mHeaderTitleLabel->setText(title);

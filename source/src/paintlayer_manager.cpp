@@ -142,3 +142,38 @@ PaintLayer* PaintLayerManager::getPaintLayer (int externalLayerId)
 
     return 0;
 }
+
+//****************************************************************************/
+void  PaintLayerManager::enableAllPaintLayers (bool enabled)
+{
+    PaintLayers::iterator it;
+    PaintLayers::iterator itStart = mPaintLayers.begin();
+    PaintLayers::iterator itEnd = mPaintLayers.end();
+    PaintLayer* pl;
+    for (it = itStart; it != itEnd; ++it)
+    {
+        pl = *it;
+        pl->enable(enabled);
+    }
+}
+
+//****************************************************************************/
+void PaintLayerManager::enablePaintLayers (std::vector<int> externalPaintLayerIds, bool enabled)
+{
+    PaintLayers::iterator it;
+    PaintLayers::iterator itStart = mPaintLayers.begin();
+    PaintLayers::iterator itEnd = mPaintLayers.end();
+    PaintLayer* pl;
+    for (it = itStart; it != itEnd; ++it)
+    {
+        pl = *it;
+        std::vector<int>::iterator itExtId;
+        std::vector<int>::iterator itExtIdStart = externalPaintLayerIds.begin();
+        std::vector<int>::iterator itExtIdEnd = externalPaintLayerIds.end();
+        for (itExtId = itExtIdStart; itExtId != itExtIdEnd; ++itExtId)
+        {
+            if (pl->getExternaLayerlId() == *itExtId)
+                pl->enable(enabled);
+        }
+    }
+}

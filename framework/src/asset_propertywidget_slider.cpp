@@ -77,13 +77,15 @@ namespace Magus
     //****************************************************************************/
     int QtSliderProperty::getIntValue (void) const
     {
-        return QVariant(mEdit->text()).toInt();
+        QString mHelperText = mEdit->text();
+        return QVariant(mHelperText).toInt();
     }
 
     //****************************************************************************/
     float QtSliderProperty::getFloatValue (void) const
     {
-        return QVariant(mEdit->text()).toFloat();
+        QString mHelperText = mEdit->text();
+        return QVariant(mHelperText).toFloat();
     }
 
     //****************************************************************************/

@@ -84,6 +84,7 @@ class MainWindow : public QMainWindow
         void notifyHlmsChanged (QtProperty* property); // To be called if the properties of a datablock are changed (which result in rebuilding the material)
         HlmsUtilsManager* getHlmsUtilsManager (void) {return mHlmsUtilsManager;}
         const Ogre::String& getTextureFileNameOfPbs(const Ogre::IdString& datablockId, Ogre::PbsTextureTypes textureType); // Returns the filename of a pbs texture type
+        PaintLayers* getPaintLayers(void); // Returns pointer to the paintlayers, managed by the PainLayerManager
 
     protected:
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources); // Save the content of a resource vector

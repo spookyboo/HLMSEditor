@@ -65,6 +65,9 @@ namespace Magus
             // --- Header functions ---
             // ------------------------
 
+            // Make the header visible/invisible
+            void setHeaderHidden (bool hidden);
+
             // Set the title in the widgets' header
             void setHeaderTitle(const QString& titleName);
 

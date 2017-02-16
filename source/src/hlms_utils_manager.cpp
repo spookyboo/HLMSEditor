@@ -802,9 +802,7 @@ const Ogre::String& HlmsUtilsManager::getTextureFileNameOfPbs (const Ogre::IdStr
 
                     if(texName)
                     {
-                        helperString = *texName;
-
-                        // TODO: Get the filename from OgreResources
+                        helperString = *texName; // Contains the base name
                     }
                 }
             }

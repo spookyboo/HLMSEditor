@@ -57,6 +57,7 @@ struct QtLayer
 };
 
 class MainWindow;
+class PaintLayerDialog;
 class PaintLayerDockWidget;
 
 /****************************************************************************
@@ -110,12 +111,21 @@ class PaintLayerWidget : public QWidget
         // Return the list of layers with a given name pattern
         //QVector<Layer*> findByName(const QString& namePattern);
 
+        // Return the texture types that can be used to paint on
+        QStringList getAvailableTextureTypes (void);
+
+        // Return a vector with layer id's that are selected
+        QVector<int> getSelectedLayerIds(void);
+
     public slots:
         // Activated when a contextmenu item is selected
         void contextMenuItemSelected(QAction* action);
 
         // Activated when an item in the table is selected
         void tableClicked(QModelIndex index);
+
+        // Activated when an item in the table is double clicked
+        void handleTableDoubleClicked(QModelIndex index);
 
     signals:
         // Emitted when the visibility of a layer is enabled or disabled; layerId, name and visibility is passed
@@ -130,9 +140,6 @@ class PaintLayerWidget : public QWidget
         // Emitted when a layer is selected; layerId and name of the selected layer is passed
         void layerSelected(int layerId, const QString& name);
 
-        // Emitted when a layer has selected a texture type (as string, received from a list box)
-        void layerTextureTypeSelected (int layerId, QString textureType);
-
     protected:
         void mouseClickHandler(QMouseEvent* event);
         void mouseDblClickHandler(QMouseEvent* event);
@@ -142,7 +149,7 @@ class PaintLayerWidget : public QWidget
         int getRow(int layerId);
         int removeFromLayerVec(int row);
         const QString& getName(int row);
-        void selectTextureType(int layerId, QString textureType);
+        void initialisePaintLayerDialog(PaintLayerDialog* paintLayerDialog, int layerId);
 
     private:
         PaintLayerDockWidget* mPaintLayerDockWidget; // Reference to the dockwidget that contains this widget
@@ -155,6 +162,7 @@ class PaintLayerWidget : public QWidget
         QTableWidget* mTable;
         QMenu* mContextMenu;
         QString mTempName;
+        QVector<int> helperIntVector;
 };
 
 #endif

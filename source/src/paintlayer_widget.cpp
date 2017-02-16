@@ -34,6 +34,7 @@
 #include <QTreeWidgetItem>
 #include "paintlayer_widget.h"
 #include "paintlayer_dockwidget.h"
+#include "paintlayer_dialog.h"
 
 //****************************************************************************/
 PaintLayerWidget::PaintLayerWidget(const QString& iconDir, PaintLayerDockWidget* paintLayerDockWidget, QWidget* parent) :
@@ -47,6 +48,7 @@ PaintLayerWidget::PaintLayerWidget(const QString& iconDir, PaintLayerDockWidget*
     mLayerIdCounter = 1;
     mListenToSceneId = 0;
     mListenToDeleteEvents = true;
+    helperIntVector.clear();
 
     // Create table
     mTable = new QTableWidget(0, 4, this);
@@ -63,6 +65,7 @@ PaintLayerWidget::PaintLayerWidget(const QString& iconDir, PaintLayerDockWidget*
     mTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     setStyleSheet("QLineEdit{padding: 0 0px; margin-left: 0px; margin-right: 0px; max-height: 28px; height: 28px;}");
     connect(mTable, SIGNAL(clicked(QModelIndex)), this, SLOT(tableClicked(QModelIndex)));
+    connect(mTable, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(handleTableDoubleClicked(QModelIndex)));
 
     // Set headers
     QStringList headers;
@@ -138,6 +141,21 @@ void PaintLayerWidget::tableClicked(QModelIndex index)
 }
 
 //****************************************************************************/
+QVector<int> PaintLayerWidget::getSelectedLayerIds(void)
+{
+    helperIntVector.clear();
+    QList<QTableWidgetItem*> itemList = mTable->selectedItems();
+    foreach(QTableWidgetItem* item, itemList)
+    {
+        // Do not append all items, but only the rows; so only mark in case of a distinct column
+        if (item->column() == TOOL_LAYER_COLUMN_ICON)
+            helperIntVector.append(item->data(Qt::UserRole).toInt());
+    }
+
+    return helperIntVector;
+}
+
+//****************************************************************************/
 void PaintLayerWidget::mouseClickHandler(QMouseEvent* event)
 {
     switch ((int) event->button())
@@ -206,9 +224,7 @@ void PaintLayerWidget::contextMenuItemSelected(QAction* action)
     }
     else if (action->text() == TOOL_LAYER_ACTION_DELETE_LAYER)
     {
-        QList<QTableWidgetItem*> itemList = mTable->selectedItems();
-        foreach(QTableWidgetItem* item, itemList)
-            deleteLayer((item->data(Qt::UserRole)).toInt());
+        deleteLayer(getCurrentLayerId());
     }
     else if (action->text() == TOOL_LAYER_ACTION_RENAME_LAYER)
     {
@@ -291,6 +307,7 @@ void PaintLayerWidget::addLayer(QtLayer* layer)
     QImage imageLayer(mIconDir + TOOL_ICON_LAYER);
     QPixmap pixMapLayer = QPixmap::fromImage(imageLayer).scaled(TOOL_LAYER_ICON_WIDTH, TOOL_LAYER_ICON_WIDTH);
     item->setData(Qt::DecorationRole, QVariant(pixMapLayer));
+    item->setData(Qt::UserRole, QVariant(layer->layerId));
     mTable->setItem(row, TOOL_LAYER_COLUMN_ICON, item);
 
     // Set the name
@@ -301,6 +318,7 @@ void PaintLayerWidget::addLayer(QtLayer* layer)
     layer->name = newName;
     item->setText(newName);
     item->setFlags(Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+    item->setData(Qt::UserRole, QVariant(layer->layerId));
     mTable->setItem(row, TOOL_LAYER_COLUMN_NAME, item);
 
     // Set the visibility icon
@@ -308,10 +326,11 @@ void PaintLayerWidget::addLayer(QtLayer* layer)
     QImage imageVis(mIconDir + TOOL_ICON_VIEW_VISIBLE);
     QPixmap pixMapVis = QPixmap::fromImage(imageVis).scaled(TOOL_LAYER_ICON_WIDTH, TOOL_LAYER_ICON_WIDTH);
     item->setData(Qt::DecorationRole, QVariant(pixMapVis));
+    item->setData(Qt::UserRole, QVariant(layer->layerId));
     mTable->setItem(row, TOOL_LAYER_COLUMN_VISIBILITY, item);
 
-    // Set the layerId
-    item->setData(Qt::UserRole, QVariant(layer->layerId));
+    // Set the layerId in the visibility icon
+    //item->setData(Qt::UserRole, QVariant(layer->layerId));
 
     //mTable->resizeColumnToContents(0);
 
@@ -350,12 +369,6 @@ const QtLayer* PaintLayerWidget::createLayer(int layerId, const QString& name)
     // Add the layer to the layer vector and the table
     addLayer(layer);
     return layer;
-}
-
-//****************************************************************************/
-void PaintLayerWidget::selectTextureType(int layerId, QString textureType)
-{
-    emit layerTextureTypeSelected(layerId, textureType);
 }
 
 //****************************************************************************/
@@ -551,4 +564,66 @@ int PaintLayerWidget::getCurrentLayerId(void)
         return 0;
 
     return -1;
+}
+
+//****************************************************************************/
+void PaintLayerWidget::handleTableDoubleClicked(QModelIndex index)
+{
+    int row = index.row();
+    int col = index.column();
+    QtLayer* layer = mLayerVec.at(row);
+    int layerId = layer->layerId;
+    if (col == TOOL_LAYER_COLUMN_ICON)
+    {
+        PaintLayerDialog paintLayerDialog (this, layer);
+        paintLayerDialog.setMinimumWidth(400);
+        paintLayerDialog.setMinimumHeight(400);
+        initialisePaintLayerDialog(&paintLayerDialog, layerId); // Fill the dialog with values from the associated PaintLayer
+        paintLayerDialog.exec();
+
+        // Don't check whether the values are changed; just set them in the layer (by means of the mPaintLayerDockWidget as intermediate)
+        mPaintLayerDockWidget->setTextureType(layerId, paintLayerDialog.mTextureTypeSelectProperty->getCurrentText());
+        //mPaintLayerDockWidget->setPaintEffect(layerId, paintLayerDialog.mPaintEffectSelectProperty->getCurrentText());
+        //mPaintLayerDockWidget->setPaintOverflow(layerId, paintLayerDialog.mPaintOverflowSelectProperty->getCurrentText());
+        if (paintLayerDialog.mPaintJitterCheckboxProperty->getValue())
+        {
+            mPaintLayerDockWidget->setJitterPaintColourMin(layerId, paintLayerDialog.mPaintColourJitterMinProperty->getColor());
+            mPaintLayerDockWidget->setJitterPaintColourMax(layerId, paintLayerDialog.mPaintColourJitterMaxProperty->getColor());
+            mPaintLayerDockWidget->setJitterPaintColourInterval(layerId, paintLayerDialog.mPaintColourJitterIntervalProperty->getValue());
+        }
+        else
+        {
+            mPaintLayerDockWidget->setPaintColour(layerId, paintLayerDialog.mPaintColourProperty->getColor());
+        }
+        mPaintLayerDockWidget->setBrushForce(layerId, paintLayerDialog.mForceProperty->getValue());
+        mPaintLayerDockWidget->setBrushScale(layerId, paintLayerDialog.mScaleProperty->getValue());
+    }
+}
+
+//****************************************************************************/
+void PaintLayerWidget::initialisePaintLayerDialog(PaintLayerDialog* paintLayerDialog, int layerId)
+{
+    // General
+    paintLayerDialog->mTextureTypeSelectProperty->setCurrentText(mPaintLayerDockWidget->getTextureType(layerId));
+    //paintLayerDialog->mPaintEffectSelectProperty->setPaintEffect(mPaintLayerDockWidget->getPaintEffect());
+    //paintLayerDialog->mPaintOverflowSelectProperty->setPaintOverflow(mPaintLayerDockWidget->getPaintOverflow());
+
+    // Paint Colour
+    paintLayerDialog->mPaintJitterCheckboxProperty->setValue(mPaintLayerDockWidget->getJitterPaint(layerId));
+    paintLayerDialog->mPaintColourProperty->setColor(mPaintLayerDockWidget->getPaintColour(layerId));
+    paintLayerDialog->mPaintColourJitterMinProperty->setColor(mPaintLayerDockWidget->getJitterPaintColourMin(layerId));
+    paintLayerDialog->mPaintColourJitterMaxProperty->setColor(mPaintLayerDockWidget->getJitterPaintColourMax(layerId));
+    paintLayerDialog->mPaintColourJitterIntervalProperty->setValue(mPaintLayerDockWidget->getJitterPaintColourInterval(layerId));
+
+    // Force
+    paintLayerDialog->mForceProperty->setValue(mPaintLayerDockWidget->getBrushForce(layerId));
+
+    // Scale
+    paintLayerDialog->mScaleProperty->setValue(mPaintLayerDockWidget->getBrushScale(layerId));
+}
+
+//****************************************************************************/
+QStringList PaintLayerWidget::getAvailableTextureTypes(void)
+{
+    return mPaintLayerDockWidget->getAvailableTextureTypes();
 }

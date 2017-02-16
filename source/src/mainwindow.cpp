@@ -1969,3 +1969,10 @@ void MainWindow::clearHlmsNamesAndRemovePaintLayers(void)
     mPaintLayerDockWidget->newHlmsCreated(); // Needed to delete the paintlayers, because a new Hlms is created
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setPaintLayers (0); // Invalidate the PaintLayers vector reference in the Ogre widget
 }
+
+//****************************************************************************/
+PaintLayers* MainWindow::getPaintLayers(void)
+{
+    return mPaintLayerManager.getPaintLayers();
+}
+

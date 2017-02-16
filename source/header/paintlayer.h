@@ -64,7 +64,7 @@ class PaintLayer
         enum PaintOverflowTypes
         {
             PAINT_OVERFLOW_IGNORE, /// If the brush exceeds the texture areas on which is painted, the overflow is ignored
-            PAINT_OVERFLOW_TO_OPPOSITE_CORNER  /// If the brush exceeds the texture areas on which is painted, the overflow is continued on the opposite corner
+            PAINT_OVERFLOW_CONTINUE  /// If the brush exceeds the texture areas on which is painted, the overflow is continued on the opposite corner
         };
 
         /* Constructor/destructor
@@ -82,9 +82,10 @@ class PaintLayer
          */
         void paint(float u, float v);
 
-        /* Set the reference to the texture.
+        /* Set/get the reference to the texture.
          */
         void setTextureLayer (TextureLayer* textureLayer);
+        TextureLayer* getTextureLayer (void);
 
         /* Set the name of the brush used for painting.
          */
@@ -192,6 +193,8 @@ class PaintLayer
          * This setting creates a jittering effect in which the paint colour changes between two values
          */
         void setJitterPaintColour (const Ogre::ColourValue& paintColourMin, const Ogre::ColourValue& paintColourMax);
+        void setJitterPaintColourMin (const Ogre::ColourValue& paintColourMin);
+        void setJitterPaintColourMax (const Ogre::ColourValue& paintColourMax);
         const Ogre::ColourValue& getJitterPaintColourMin (void) const {return mJitterPaintColourMin;}
         const Ogre::ColourValue& getJitterPaintColourMax (void) const {return mJitterPaintColourMax;}
 
@@ -199,6 +202,10 @@ class PaintLayer
          */
         void setJitterPaintColourInterval (float interval);
         float getJitterPaintColourInterval (void) const {return mJitterPaintColourInterval;}
+
+        /* Determines whether there is jitter paint
+         */
+        bool getJitterPaint (void);
 
         /* Stop with paint colour jitter
          */

@@ -79,6 +79,15 @@ class PaintLayerManager
          */
         PaintLayer* getPaintLayer (int externalLayerId);
 
+        /* Set all PaintLayer to either enabled (true) or disabled (false)
+         */
+        void enableAllPaintLayers (bool enabled);
+
+        /* For all PaintLayer with an external layerId that is part of the vector,
+         * is set to either enabled (true) or disabled (false)
+         */
+        void enablePaintLayers (std::vector<int> externalPaintLayerIds, bool enabled);
+
     private:
         PaintLayers mPaintLayers;
         TextureLayerManager mTextureLayerManager;

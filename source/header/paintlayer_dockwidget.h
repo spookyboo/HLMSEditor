@@ -23,6 +23,7 @@
 
 #include <QtWidgets>
 #include <QDockWidget>
+#include <QColor>
 #include "paintlayer_widget.h"
 
 QT_BEGIN_NAMESPACE
@@ -59,15 +60,67 @@ class PaintLayerDockWidget : public QDockWidget
          */
         void newHlmsCreated (void);
 
+        /* Returns a list with available texture types. These are the texture types used by
+         * the current hlms datablock.
+         */
+        QStringList getAvailableTextureTypes(void);
+
+        /* Set/get a texture type in a PaintLayer.
+         * Based on the texture type (and the datablock name), the texture is also searched and set in the PaintLayer.
+         */
+        void setTextureType (int layerId, QString textureType);
+        QString getTextureType (int layerId);
+
+        /* Set/get the paint colour
+         * This colour is forwarded to the PaintLayer
+         */
+        void setPaintColour(int layerId, QColor colour);
+        QColor getPaintColour(int layerId);
+
+        /* Determines whether the jitter is set for colour painting
+         * This value is forwarded to the PaintLayer
+         */
+        bool getJitterPaint(int layerId);
+
+        /* Determines the min value for jitter
+         */
+        void setJitterPaintColourMin(int layerId, QColor colour);
+        QColor getJitterPaintColourMin(int layerId);
+
+        /* Determines the max value for jitter
+         */
+        void setJitterPaintColourMax(int layerId, QColor colour);
+        QColor getJitterPaintColourMax(int layerId);
+
+        /* Determines the jitter interval
+         */
+        void setJitterPaintColourInterval(int layerId, float interval);
+        float getJitterPaintColourInterval(int layerId);
+
+        /* Set/get the brush force
+         * This value is forwarded to the PaintLayer
+         */
+        void setBrushForce(int layerId, float force);
+        float getBrushForce(int layerId);
+
+        /* Set/get the brush scale
+         * This value is forwarded to the PaintLayer
+         */
+        void setBrushScale(int layerId, float force);
+        float getBrushScale(int layerId);
+
     private slots:
         void handleNewLayer (int layerId, QString layerName);
         void handleDeleteLayer (int layerId, QString layerName);
-        void handleTextureTypeSelected(int layerId, QString textureType);
+        void handleLayerSelected (int layerId, QString layerName);
 
     private:
         MainWindow* mParent;
         PaintLayerWidget* mPaintLayerWidget;
         PaintLayerManager* mPaintLayerManager; // Use the PaintLayerManager to manager paint layers
+        QStringList mAvailableTextureTypes;
+        QString mHelperString;
+        QColor mHelplerColour;
 };
 
 #endif

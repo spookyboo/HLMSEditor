@@ -20,6 +20,10 @@
 
 // Include
 #include <QMessageBox>
+#include "OgreRoot.h"
+#include "OgreHlmsPbs.h"
+#include "OgreHlmsPbsDatablock.h"
+#include "OgreHlmsManager.h"
 #include "paintlayer_dockwidget.h"
 #include "paintlayer_manager.h"
 #include "mainwindow.h"
@@ -34,11 +38,12 @@ PaintLayerDockWidget::PaintLayerDockWidget(PaintLayerManager* paintLayerManager,
     mParent(parent),
     mPaintLayerManager(paintLayerManager)
 {
+    mHelperString = "";
     mPaintLayerWidget = new PaintLayerWidget(ICON_PATH, this);
     setWidget(mPaintLayerWidget);
     connect(mPaintLayerWidget, SIGNAL(layerCreatedOrAdded(int,QString)), this, SLOT(handleNewLayer(int,QString)));
     connect(mPaintLayerWidget, SIGNAL(layerDeleted(int,QString)), this, SLOT(handleDeleteLayer(int,QString)));
-    connect(mPaintLayerWidget, SIGNAL(layerTextureTypeSelected(int,QString)), this, SLOT(handleTextureTypeSelected(int,QString)));
+    connect(mPaintLayerWidget, SIGNAL(layerSelected(int,QString)), this, SLOT(handleLayerSelected(int,QString)));
 }
 
 //****************************************************************************/
@@ -72,7 +77,10 @@ void PaintLayerDockWidget::newHlmsCreated (void)
 void PaintLayerDockWidget::handleNewLayer (int layerId, QString layerName)
 {
     // A new layer has been created; create a paint layer by means of the PaintLayerManager
-    mPaintLayerManager->createPaintLayer(layerId);
+    PaintLayer* paintLayer = mPaintLayerManager->createPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setBrush(BRUSH_PATH + "brush_002.png"); // TEST
+        //paintLayer->setBrush(BRUSH_PATH + DEFAULT_BRUSH); // Set a default
 
     //QMessageBox::information(0, QString("handleNewLayer: "), QVariant(layerId).toString()); // test
 }
@@ -87,37 +95,37 @@ void PaintLayerDockWidget::handleDeleteLayer (int layerId, QString layerName)
 }
 
 //****************************************************************************/
-void PaintLayerDockWidget::handleTextureTypeSelected(int layerId, QString textureType)
+void PaintLayerDockWidget::setTextureType (int layerId, QString textureType)
 {
     // Convert texture type to a real Pbs texture type
     Ogre::PbsTextureTypes type;
-    if (textureType == QString("Diffuse map"))
+    if (textureType == PBSM_DIFFUSE_QSTRING)
         type = Ogre::PBSM_DIFFUSE;
-    else if (textureType == QString("Normal map"))
+    else if (textureType == PBSM_NORMAL_QSTRING)
         type = Ogre::PBSM_NORMAL;
-    else if (textureType == QString("Specular / Metallic map"))
+    else if (textureType == PBSM_SPECULAR_QSTRING)
         type = Ogre::PBSM_SPECULAR;
-    else if (textureType == QString("Roughness map"))
+    else if (textureType == PBSM_ROUGHNESS_QSTRING)
         type = Ogre::PBSM_ROUGHNESS;
-    else if (textureType == QString("Detail weight map"))
+    else if (textureType == PBSM_DETAIL_WEIGHT_QSTRING)
         type = Ogre::PBSM_DETAIL_WEIGHT;
-    else if (textureType == QString("Detail map 0"))
+    else if (textureType == PBSM_DETAIL0_QSTRING)
         type = Ogre::PBSM_DETAIL0;
-    else if (textureType == QString("Detail map 1"))
+    else if (textureType == PBSM_DETAIL1_QSTRING)
         type = Ogre::PBSM_DETAIL1;
-    else if (textureType == QString("Detail map 2"))
+    else if (textureType == PBSM_DETAIL2_QSTRING)
         type = Ogre::PBSM_DETAIL2;
-    else if (textureType == QString("Detail map 3"))
+    else if (textureType == PBSM_DETAIL3_QSTRING)
         type = Ogre::PBSM_DETAIL3;
-    else if (textureType == QString("Detail normal map 0"))
+    else if (textureType == PBSM_DETAIL0_NM_QSTRING)
         type = Ogre::PBSM_DETAIL0_NM;
-    else if (textureType == QString("Detail normal map 1"))
+    else if (textureType == PBSM_DETAIL1_NM_QSTRING)
         type = Ogre::PBSM_DETAIL1_NM;
-    else if (textureType == QString("Detail normal map 2"))
+    else if (textureType == PBSM_DETAIL2_NM_QSTRING)
         type = Ogre::PBSM_DETAIL2_NM;
-    else if (textureType == QString("Detail normal map 3"))
+    else if (textureType == PBSM_DETAIL3_NM_QSTRING)
         type = Ogre::PBSM_DETAIL3_NM;
-    else if (textureType == QString("Env. probe map"))
+    else if (textureType == PBSM_REFLECTION_QSTRING)
         type = Ogre::PBSM_REFLECTION;
     else
         return; // Unknown texture type
@@ -129,4 +137,303 @@ void PaintLayerDockWidget::handleTextureTypeSelected(int layerId, QString textur
 
     // Set the datablockName, texturetype and texturefile name in the Paintlayer
     mPaintLayerManager->setTextureLayerInPaintLayer(mParent->getCurrentDatablockName(), type, fileName, layerId);
+}
+
+//****************************************************************************/
+QString PaintLayerDockWidget::getTextureType(int layerId)
+{
+    mHelperString = "";
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        TextureLayer* textureLayer = paintLayer->getTextureLayer();
+        if (textureLayer)
+        {
+            Ogre::PbsTextureTypes textureType = textureLayer->mTextureType;
+            if (textureType == Ogre::PBSM_DIFFUSE)
+                mHelperString = PBSM_DIFFUSE_QSTRING;
+
+            if (textureType == Ogre::PBSM_NORMAL)
+                mHelperString = PBSM_NORMAL_QSTRING;
+
+            if (textureType == Ogre::PBSM_SPECULAR)
+                mHelperString = PBSM_SPECULAR_QSTRING;
+
+            if (textureType == Ogre::PBSM_ROUGHNESS)
+                mHelperString = PBSM_ROUGHNESS_QSTRING;
+
+            if (textureType == Ogre::PBSM_DETAIL_WEIGHT)
+                mHelperString = PBSM_DETAIL_WEIGHT_QSTRING;
+
+            if (textureType == Ogre::PBSM_DETAIL0)
+                mHelperString = PBSM_DETAIL0_QSTRING;
+
+            if (textureType == Ogre::PBSM_DETAIL1)
+                mHelperString = PBSM_DETAIL1_QSTRING;
+
+            if (textureType == Ogre::PBSM_DETAIL2)
+                mHelperString = PBSM_DETAIL2_QSTRING;
+
+            if (textureType == Ogre::PBSM_DETAIL3)
+                mHelperString = PBSM_DETAIL3_QSTRING;
+
+            if (textureType == Ogre::PBSM_DETAIL0_NM)
+                mHelperString = PBSM_DETAIL0_NM_QSTRING;
+
+            if (textureType == Ogre::PBSM_DETAIL1_NM)
+                mHelperString = PBSM_DETAIL1_NM_QSTRING;
+
+            if (textureType == Ogre::PBSM_DETAIL2_NM)
+                mHelperString = PBSM_DETAIL2_NM_QSTRING;
+
+            if (textureType == Ogre::PBSM_DETAIL3_NM)
+                mHelperString = PBSM_DETAIL3_NM_QSTRING;
+
+            if (textureType == Ogre::PBSM_REFLECTION)
+                mHelperString = PBSM_REFLECTION_QSTRING;
+        }
+    }
+
+    return mHelperString;
+}
+
+//****************************************************************************/
+QStringList PaintLayerDockWidget::getAvailableTextureTypes(void)
+{
+    // Run through the datablock and check which texture types are used
+    mAvailableTextureTypes.clear();
+
+    if (mParent->getCurrentDatablockName() == "")
+        return mAvailableTextureTypes;
+
+    // Find the datablock and validate the texture types
+    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
+    Ogre::HlmsDatablock* datablock = 0;
+    try
+    {
+        datablock = hlmsPbs->getDatablock(mParent->getCurrentDatablockName());
+        if (datablock)
+        {
+            // Get the textures
+            Ogre::HlmsPbsDatablock* pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(datablock);
+            if (!pbsDatablock->getTexture(Ogre::PBSM_DIFFUSE).isNull())
+                mAvailableTextureTypes << PBSM_DIFFUSE_QSTRING;
+
+            if (!pbsDatablock->getTexture(Ogre::PBSM_NORMAL).isNull())
+                mAvailableTextureTypes << PBSM_NORMAL_QSTRING;
+
+            if (!pbsDatablock->getTexture(Ogre::PBSM_SPECULAR).isNull())
+                mAvailableTextureTypes << PBSM_SPECULAR_QSTRING;
+
+            if (!pbsDatablock->getTexture(Ogre::PBSM_ROUGHNESS).isNull())
+                mAvailableTextureTypes << PBSM_ROUGHNESS_QSTRING;
+
+            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL_WEIGHT).isNull())
+                mAvailableTextureTypes << PBSM_DETAIL_WEIGHT_QSTRING;
+
+            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL0).isNull())
+                mAvailableTextureTypes << PBSM_DETAIL0_QSTRING;
+
+            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL1).isNull())
+                mAvailableTextureTypes << PBSM_DETAIL1_QSTRING;
+
+            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL2).isNull())
+                mAvailableTextureTypes << PBSM_DETAIL2_QSTRING;
+
+            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL3).isNull())
+                mAvailableTextureTypes << PBSM_DETAIL3_QSTRING;
+
+            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL0_NM).isNull())
+                mAvailableTextureTypes << PBSM_DETAIL0_NM_QSTRING;
+
+            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL1_NM).isNull())
+                mAvailableTextureTypes << PBSM_DETAIL1_NM_QSTRING;
+
+            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL2_NM).isNull())
+                mAvailableTextureTypes << PBSM_DETAIL2_NM_QSTRING;
+
+            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL3_NM).isNull())
+                mAvailableTextureTypes << PBSM_DETAIL3_NM_QSTRING;
+
+            if (!pbsDatablock->getTexture(Ogre::PBSM_REFLECTION).isNull())
+                mAvailableTextureTypes << PBSM_REFLECTION_QSTRING;
+        }
+    }
+    catch (Ogre::Exception e) {}
+
+    return mAvailableTextureTypes;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setPaintColour(int layerId, QColor colour)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        Ogre::ColourValue col;
+        col.r = colour.red() / 255.0f;
+        col.g = colour.green() / 255.0f;
+        col.b = colour.blue() / 255.0f;
+        col.a = colour.alpha() / 255.0f;
+        paintLayer->setPaintColour(col);
+    }
+}
+
+//****************************************************************************/
+QColor PaintLayerDockWidget::getPaintColour(int layerId)
+{
+    mHelplerColour = Qt::white;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        Ogre::ColourValue col = paintLayer->getPaintColour();
+        mHelplerColour.setRed(255.0f * col.r);
+        mHelplerColour.setGreen(255.0f * col.g);
+        mHelplerColour.setBlue(255.0f * col.b);
+        mHelplerColour.setAlpha(255.0f * col.a);
+    }
+
+    return mHelplerColour;
+}
+
+//****************************************************************************/
+bool PaintLayerDockWidget::getJitterPaint(int layerId)
+{
+    bool jitterPaint = false;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        jitterPaint = paintLayer->getJitterPaint();
+
+    return jitterPaint;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterPaintColourMin(int layerId, QColor colour)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        Ogre::ColourValue col;
+        col.r = colour.red() / 255.0f;
+        col.g = colour.green() / 255.0f;
+        col.b = colour.blue() / 255.0f;
+        col.a = colour.alpha() / 255.0f;
+        paintLayer->setJitterPaintColourMin(col);
+    }
+}
+
+//****************************************************************************/
+QColor PaintLayerDockWidget::getJitterPaintColourMin(int layerId)
+{
+    mHelplerColour = Qt::black;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        Ogre::ColourValue col = paintLayer->getJitterPaintColourMin();
+        mHelplerColour.setRed(255.0f * col.r);
+        mHelplerColour.setGreen(255.0f * col.g);
+        mHelplerColour.setBlue(255.0f * col.b);
+        mHelplerColour.setAlpha(255.0f * col.a);
+    }
+
+    return mHelplerColour;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterPaintColourMax(int layerId, QColor colour)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        Ogre::ColourValue col;
+        col.r = colour.red() / 255.0f;
+        col.g = colour.green() / 255.0f;
+        col.b = colour.blue() / 255.0f;
+        col.a = colour.alpha() / 255.0f;
+        paintLayer->setJitterPaintColourMax(col);
+    }
+}
+
+//****************************************************************************/
+QColor PaintLayerDockWidget::getJitterPaintColourMax(int layerId)
+{
+    mHelplerColour = Qt::black;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        Ogre::ColourValue col = paintLayer->getJitterPaintColourMax();
+        mHelplerColour.setRed(255.0f * col.r);
+        mHelplerColour.setGreen(255.0f * col.g);
+        mHelplerColour.setBlue(255.0f * col.b);
+        mHelplerColour.setAlpha(255.0f * col.a);
+    }
+
+    return mHelplerColour;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterPaintColourInterval(int layerId, float interval)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterPaintColourInterval(interval);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getJitterPaintColourInterval(int layerId)
+{
+    float interval = 0.0f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        interval = paintLayer->getJitterPaintColourInterval();
+
+    return interval;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setBrushForce(int layerId, float force)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setForce(force);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getBrushForce(int layerId)
+{
+    float force = 0.1f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        force = paintLayer->getForce();
+
+    return force;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setBrushScale(int layerId, float scale)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setScale(scale);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getBrushScale(int layerId)
+{
+    float scale = 0.1f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        scale = paintLayer->getScale();
+
+    return scale;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::handleLayerSelected (int layerId, QString layerName)
+{
+    // Get the selected layers
+    QVector<int> v = mPaintLayerWidget->getSelectedLayerIds();
+    mPaintLayerManager->enableAllPaintLayers(false); // First disable everything
+    mPaintLayerManager->enablePaintLayers (v.toStdVector(), true); // Enable every selected layer
 }
