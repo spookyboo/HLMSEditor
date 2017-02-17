@@ -235,7 +235,10 @@ void PaintLayer::paint(float u, float v)
         //mTextureLayer->mBuffers.at(i)->unlock();
         w*=0.5f; // Mipmaps always are half of the previous one
         h*=0.5f;
-        textureOnWhichIsPaintedScaled.resize(w, h);
+        if (w > 1.0f && h > 1.0f)
+            textureOnWhichIsPaintedScaled.resize(w, h);
+        else
+            break; // Stop when the mipmaps are too small
     }
     textureOnWhichIsPaintedScaled.freeMemory();
 }
