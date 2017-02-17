@@ -460,7 +460,7 @@ void MainWindow::loadProject(const QString& fileName)
     QApplication::setOverrideCursor(Qt::WaitCursor);
     if (!fileName.isEmpty())
     {
-        QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
+        //QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
         QFileInfo info(fileName);
         mProjectName = info.baseName();
         mProjectPath = info.absolutePath() + QString("/");

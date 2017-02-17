@@ -39,8 +39,6 @@
 #include "OgreMesh2.h"
 #include "OgreSubMesh2.h"
 #include "OgreImage.h"
-//#include "OgreBitwise.h"
-//#include "Vao/OgreAsyncTicket.h"
 #include "constants.h"
 #include "renderwindow_dockwidget.h"
 
@@ -91,7 +89,7 @@ namespace Magus
         resize(mSize);
         setFocusPolicy(Qt::StrongFocus);
         setMouseTracking(true);
-        mBackground = Ogre::ColourValue(0.1f, 0.1f, 0.1f);
+        mBackground = Ogre::ColourValue(0.02f, 0.02f, 0.02f);
         mAbsolute = Ogre::Vector2::ZERO;
         mRelative = Ogre::Vector2::ZERO;
         mHelpColour = Ogre::ColourValue::Red;
@@ -1013,12 +1011,19 @@ namespace Magus
             mCameraManager->injectKeyDown(ev);
             if(ev->key() == Qt::Key_Shift)
                 mShiftDown = true;
+            else if(ev->key() == Qt::Key_A)
+            {
+                mRenderwindowDockWidget->handleTogglePaintMode();
+                mRenderwindowDockWidget->enterEventPublic(0);
+            }
 
             // Testcode to write the render-texture to a file
+            /*
             if(ev->key() == Qt::Key_S)
                 mRttHoover->writeContentsToFile("rtt_hoover.png");
             if(ev->key() == Qt::Key_P)
                 mRttPaint->writeContentsToFile("rtt_paint.png");
+            */
         }
     }
 
@@ -1129,7 +1134,8 @@ namespace Magus
 
                 // Forward it to the render window dockwidget
                 // (note the cast; this is needed, because everything points to each other)
-                static_cast<RenderwindowDockWidget*>(mRenderwindowDockWidget)->mousePressEventPublic(e);
+                //static_cast<RenderwindowDockWidget*>(mRenderwindowDockWidget)->mousePressEventPublic(e);
+                mRenderwindowDockWidget->mousePressEventPublic(e);
             }
         }
     }
@@ -1151,6 +1157,17 @@ namespace Magus
         assignCurrentDatablock();
     }
 
+    //****************************************************************************/
+    void QOgreWidget::enterEvent(QEvent * event)
+    {
+        mRenderwindowDockWidget->enterEventPublic (event); // The render dockwindow needs it
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::leaveEvent(QEvent * event)
+    {
+        mRenderwindowDockWidget->leaveEventPublic (event); // The render dockwindow needs it
+    }
     //****************************************************************************/
     void QOgreWidget::assignCurrentDatablock()
     {
@@ -1510,7 +1527,7 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QOgreWidget::setRenderwindowDockWidget(QDockWidget* renderwindowDockWidget)
+    void QOgreWidget::setRenderwindowDockWidget(RenderwindowDockWidget* renderwindowDockWidget)
     {
         // This is needed to be able to forward the right mousepress to the RenderwindowDockWidget
         mRenderwindowDockWidget = renderwindowDockWidget;

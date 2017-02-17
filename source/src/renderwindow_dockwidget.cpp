@@ -42,7 +42,8 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     mModelIcon(0),
     mMarkerIcon(0),
     mHooverOnIcon(0),
-    mHooverOffIcon(0)
+    mHooverOffIcon(0),
+    mMousePaint(false)
 {
     setMinimumSize(100,100);
 
@@ -153,6 +154,36 @@ RenderwindowDockWidget::~RenderwindowDockWidget(void)
 void RenderwindowDockWidget::mousePressEventPublic( QMouseEvent* e )
 {
     mousePressEvent(e);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::enterEventPublic (QEvent* event)
+{
+    /* If painting is enabled and the mouse cursor is default, it must be set to non-default (cross)
+     * as soon as the mouse enters the window.
+     * Because the RenderwindowDockWidget doesn't get the events itself, it has to rely on the Ogre widget.
+     */
+    if (!mMousePaint)
+        return;
+
+    if (QApplication::overrideCursor() && QApplication::overrideCursor()->shape() == Qt::CrossCursor)
+        return;
+
+    QApplication::setOverrideCursor(Qt::CrossCursor);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::leaveEventPublic (QEvent* event)
+{
+    /* If painting is enabled and the mouse cursor is non-default (cross), it must be set to default
+     * as soon as the mouse leaves the window.
+     * Because the RenderwindowDockWidget doesn't get the events itself, it has to rely on the Ogre widget.
+     */
+    if (!mMousePaint)
+        return;
+
+    if (QApplication::overrideCursor() && QApplication::overrideCursor()->shape() == Qt::CrossCursor)
+        QApplication::restoreOverrideCursor();
 }
 
 //****************************************************************************/
@@ -349,10 +380,13 @@ void RenderwindowDockWidget::setPaintMode(bool enabled)
         mButtonTogglePaint->setIcon(*mPaintOnIcon);
         setModelAndLight(true);
         setHoover(false);
+        mMousePaint = true;
     }
     else
     {
+        QApplication::restoreOverrideCursor();
         mButtonTogglePaint->setIcon(*mPaintOffIcon);
+        mMousePaint = false;
     }
     mOgreWidget->setFocus();
     mOgreWidget->setPaintMode(mTogglePaintMode);
@@ -501,50 +535,6 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
 {
     if (action->text() == ACTION_SET_CURRENT_MATERIAL)
     {
-        // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
-        //PaintLayer* paintLayer;
-
-        // First layer
-        /*
-        paintLayer = mParent->mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
-                                                                  Ogre::PbsTextureTypes::PBSM_DETAIL0,
-                                                                  "../examples/floor_diffuse.PNG"); // Can only be tested with floor_diffuse.PNG and detail map
-        paintLayer->setBrush("../common/brushes/brush_001.png");
-        //paintLayer->setJitterScale(0.1, 1.0);
-        //paintLayer->setJitterScaleInterval(0.1);
-        //paintLayer->setJitterRotationAngle(0, 360);
-        //paintLayer->setJitterRotationAngleInterval(0.5);
-        //paintLayer->setJitterForce(0.0f, 1.0f);
-        //paintLayer->setJitterPaintColour(Ogre::ColourValue(0.4f, 0.1f, 0.4f, 1.0f), Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
-        paintLayer->setScale(0.05f);
-        paintLayer->setPaintColour(Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
-        paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_COLOR);
-        */
-
-        // Second layer
-        /*
-        paintLayer = mParent->mPaintLayerManager.createPaintLayer(mOgreWidget->getCurrentDatablockName(),
-                                                         Ogre::PbsTextureTypes::PBSM_DETAIL0,
-                                                         "../examples/10points.png");
-        paintLayer->setBrush("../common/brushes/brush_grass_01.png");
-        //paintLayer->setScale(0.5);
-        paintLayer->setJitterScale(0.0, 0.5);
-        //paintLayer->setTranslation(-0.2, -0.2f);
-        paintLayer->setJitterTranslationFactor(-0.2, 0.2, 0.0, 0.0);
-        paintLayer->setJitterTranslationInterval(0.7);
-        //paintLayer->setPaintColour(Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
-        //paintLayer->setJitterPaintColour(Ogre::ColourValue(0.4f, 0.1f, 0.4f, 1.0f), Ogre::ColourValue(1.0f, 0.0f, 1.0f, 1.0f));
-        //paintLayer->setRotationAngle(-45);
-        paintLayer->setJitterRotationAngle(-30, 30);
-        paintLayer->setJitterRotationAngleInterval(0.2);
-        //paintLayer->setJitterForce(0.5, 1);
-        paintLayer->setJitterMirrorHorizontal(true);
-        paintLayer->setPaintEffect(PaintLayer::PAINT_EFFECT_TEXTURE);
-        */
-
-        //mOgreWidget->setPaintLayers(mParent->mPaintLayerManager.getPaintLayers());
-        // TESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTESTTEST
-
         mOgreWidget->assignCurrentDatablock();
         mOgreWidget->setPaintLayers (mParent->getPaintLayers()); // Set the pointer to the paintlayers
         return;

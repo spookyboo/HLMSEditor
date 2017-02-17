@@ -59,12 +59,16 @@ class RenderwindowDockWidget : public QDockWidget
         void addToMeshMap(const QString name,
                           const QString meshName,
                           QVector3D scale);
-        void mousePressEventPublic( QMouseEvent* e );
+        void mousePressEventPublic (QMouseEvent* e);
+        void enterEventPublic (QEvent* event);
+        void leaveEventPublic (QEvent* event);
+
+    public slots:
+        void handleTogglePaintMode(void); // Must be public, because it is also used by the ogre widget
 
 	private slots:
         void doChangeMeshAction(QAction* action);
         void handleToggleModelAndLight(void);
-        void handleTogglePaintMode(void);
         void handleMarker(void);
         void handleToggleHoover(void);
         void doTransformationWidgetValueChanged(void);
@@ -86,8 +90,8 @@ class RenderwindowDockWidget : public QDockWidget
         void setCheckedMeshNameInContextMenu (const QString& meshName);
         void setCheckedSkyBoxNameInContextMenu (const QString& skyBoxName);
         void setModelAndLight(bool enabled);
-        void setPaintMode(bool enabled);
         void setHoover(bool enabled);
+        void setPaintMode(bool enabled);
 
 	private:
 		MainWindow* mParent;
@@ -117,6 +121,7 @@ class RenderwindowDockWidget : public QDockWidget
         QActionGroup* mActionGroupMeshes;
         QMenu* mSkyBoxSubMenu;
         QActionGroup* mActionGroupSkyBox;
+        bool mMousePaint;
 };
 
 #endif

@@ -75,15 +75,19 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
     // Create containers
     Magus::QtContainerWidget* container1 = 0;
     container1 = assetWidget->createContainer(1, QString(""));
+    container1->setHeaderHidden(true);
     Magus::QtContainerWidget* container2 = 0;
     container2 = assetWidget->createContainer(2, QString(""));
+    container2->setHeaderHidden(true);
     Magus::QtContainerWidget* container3 = 0;
     container3 = assetWidget->createContainer(3, QString(""));
+    container3->setHeaderHidden(true);
     Magus::QtContainerWidget* container4 = 0;
     container4 = assetWidget->createContainer(4, QString(""));
+    container4->setHeaderHidden(true);
     Magus::QtContainerWidget* container5 = 0;
     container5 = assetWidget->createContainer(5, QString(""));
-    //container->setHeaderHidden(true);
+    container5->setHeaderHidden(true);
 
     // ******** Texture type ********
     QStringList stringListAvailableTextures = paintLayerWidget->getAvailableTextureTypes();
@@ -143,7 +147,7 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
     // ******** Scale ********
     mScaleProperty = static_cast<Magus::QtSliderDecimalProperty*>
             (assetWidget->createProperty(3, PROPERTY_SCALE, QString("Brush scale"), Magus::QtProperty::SLIDER_DECIMAL));
-    mScaleProperty->setSliderRange (0.0f, 1.0f, 0.005f);
+    mScaleProperty->setSliderRange (0.0f, 1.0f, 0.125f);
     mScaleProperty->setValue(0.1f);
 
     // ******** Jitter scale (min/max) ********

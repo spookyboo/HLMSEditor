@@ -193,7 +193,7 @@ namespace Magus
     void QtColorProperty::dialogButtonClicked(void)
     {
         QColorDialog dialog;
-        QColor c = dialog.getColor();
+        QColor c = dialog.getColor(mColorValue);
         mColorValue = c;
         updateHexWithCurrentColor();
         propertyValueChangedHex();

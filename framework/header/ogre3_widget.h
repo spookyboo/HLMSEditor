@@ -40,6 +40,7 @@
 // uv mapping texture once.
 //#define CREATE_UV_MAPPING_TEXTURE 1
 
+class RenderwindowDockWidget;
 namespace Magus
 {
     static const Ogre::String AXIS_MATERIAL_NAME = "AMN0894587568";
@@ -110,7 +111,7 @@ namespace Magus
             void setDatablockInSubItem(int index, const Ogre::IdString datablockName); // Set the datablock in the subitem, based on the id (datablockName) of the datablock
             void setDatablockInSubItems(const QVector<int>& indices, const Ogre::IdString& datablockName); // Set the datablock in the subitems, identified by indices
             void cleanup(void);
-            void setRenderwindowDockWidget(QDockWidget* renderwindowDockWidget);
+            void setRenderwindowDockWidget(RenderwindowDockWidget* renderwindowDockWidget);
             void assignCurrentDatablock(void); // Set the current datablock in the item or subItem
             bool isSkyBoxVisible (void);
             void setSkyBoxVisible (bool visible);
@@ -168,7 +169,7 @@ namespace Magus
             bool mPaintMode;
             QMap<unsigned short, Ogre::String> helperIndicesAndNames;
             QVector<int> helperIndices;
-            QDockWidget* mRenderwindowDockWidget;
+            RenderwindowDockWidget* mRenderwindowDockWidget;
             Ogre::Vector2 helperVector2;
 
             virtual void createCompositor();
@@ -184,6 +185,8 @@ namespace Magus
             virtual void mousePressEvent(QMouseEvent* e);
             virtual void mouseReleaseEvent(QMouseEvent* e);
             virtual void mouseDoubleClickEvent(QMouseEvent *event);
+            virtual void enterEvent(QEvent * event);
+            virtual void leaveEvent(QEvent * event);
             GL_CONTEXT getCurrentGlContext(void);
             void rotateLight(Ogre::Vector2 relativeMouseMove);
             const Ogre::ColourValue& calculateIndexToColour(int index);
