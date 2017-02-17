@@ -337,23 +337,29 @@ static const int PROPERTY_TEXTURE_TYPE = 200;
 static const int PROPERTY_PAINT_EFFECT = 201;
 static const int PROPERTY_PAINT_OVERFLOW = 202;
 
-static const int PROPERTY_JITTER_PAINT_COLOUR = 210;
+static const int PROPERTY_JITTER_PAINT_COLOUR_ENABLED = 210;
 static const int PROPERTY_PAINT_COLOUR = 211;
 static const int PROPERTY_JITTER_PAINT_COLOUR_MIN = 212;
 static const int PROPERTY_JITTER_PAINT_COLOUR_MAX = 213;
 static const int PROPERTY_JITTER_PAINT_COLOUR_INTERVAL = 214;
 
-static const int PROPERTY_JITTER_SCALE = 220;
+static const int PROPERTY_JITTER_SCALE_ENABLED = 220;
 static const int PROPERTY_SCALE = 221;
 static const int PROPERTY_JITTER_SCALE_MIN = 222;
 static const int PROPERTY_JITTER_SCALE_MAX = 223;
 static const int PROPERTY_JITTER_SCALE_INTERVAL = 224;
 
-static const int PROPERTY_JITTER_FORCE = 230;
+static const int PROPERTY_JITTER_FORCE_ENABLED = 230;
 static const int PROPERTY_FORCE = 231;
 static const int PROPERTY_JITTER_FORCE_MIN = 232;
 static const int PROPERTY_JITTER_FORCE_MAX = 233;
 static const int PROPERTY_JITTER_FORCE_INTERVAL = 234;
+
+static const int PROPERTY_JITTER_ROTATION_ANGLE_ENABLED = 240;
+static const int PROPERTY_ROTATION_ANGLE = 241;
+static const int PROPERTY_JITTER_ROTATION_ANGLE_MIN = 242;
+static const int PROPERTY_JITTER_ROTATION_ANGLE_MAX = 243;
+static const int PROPERTY_JITTER_ROTATION_ANGLE_INTERVAL = 244;
 
 // Material and Texture browser
 static const int TOOL_SOURCES_LEVEL_X000_PBS = 1;

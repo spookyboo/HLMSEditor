@@ -98,6 +98,8 @@ class PaintLayer
          * This setting creates a jittering effect in which the scale changes between two values
          */
         void setJitterScale (float jitterScaleMin, float jitterScaleMax);
+        void setJitterScaleMin (float jitterScaleMin);
+        void setJitterScaleMax (float jitterScaleMax);
         float getJitterScaleMin (void) const {return mJitterScaleMin;}
         float getJitterScaleMax (void) const {return mJitterScaleMax;}
 
@@ -105,6 +107,11 @@ class PaintLayer
          */
         void setJitterScaleInterval (float interval);
         float getJitterScaleInterval (void) const {return mJitterScaleInterval;}
+
+        /* Determines whether there is jitter scale
+         */
+        bool hasJitterScaleEnabled (void);
+        void setJitterScaleEnabled (bool enabled);
 
         /* Exclude scaling the brush image
          * This also stops scale jitter.
@@ -120,6 +127,8 @@ class PaintLayer
          * This setting creates a jittering effect in which the brush force changes between two values
          */
         void setJitterForce (float jitterForceMin, float jitterForceMax);
+        void setJitterForceMin (float jitterForceMin);
+        void setJitterForceMax (float jitterForceMax);
         float getJitterForceMin (void) const {return mJitterForceMin;}
         float getJitterForceMax (void) const {return mJitterForceMax;}
 
@@ -127,6 +136,11 @@ class PaintLayer
          */
         void setJitterForceInterval (float interval);
         float getJitterForceInterval (void) const {return mJitterForceInterval;}
+
+        /* Determines whether there is jitter force
+         */
+        bool hasJitterForceEnabled (void);
+        void setJitterForceEnabled (bool enabled);
 
         /* Stop with force jitter
          */
@@ -141,6 +155,8 @@ class PaintLayer
          * This setting creates a jittering effect in which the brush rotation changes between two values
          */
         void setJitterRotationAngle (float rotationAngleMin, float rotationAngleMax);
+        void setJitterRotationAngleMin (float rotationAngleMin);
+        void setJitterRotationAngleMax (float rotationAngleMax);
         float getJitterRotationAngleMin (void) const {return mJitterRotationAngleMin;}
         float getJitterRotationAngleMax (void) const {return mJitterRotationAngleMax;}
 
@@ -148,6 +164,11 @@ class PaintLayer
          */
         void setJitterRotationAngleInterval (float interval);
         float getJitterRotationAngleInterval (void) const {return mJitterRotationAngleInterval;}
+
+        /* Determines whether there is jitter rotation
+         */
+        bool hasJitterRotationEnabled (void);
+        void setJitterRotationEnabled (bool enabled);
 
         /* Exclude rotating the brush image
          * This also stops rotation jitter
@@ -167,10 +188,21 @@ class PaintLayer
                                          float jitterTranslationFactorXmax,
                                          float jitterTranslationFactorYmin,
                                          float jitterTranslationFactorYmax);
+        void setJitterTranslationFactorX (float jitterTranslationFactorXmin,
+                                         float jitterTranslationFactorXmax);
+        void setJitterTranslationFactorY (float jitterTranslationFactorYmin,
+                                         float jitterTranslationFactorYmax);
+        const Ogre::Vector2& getJitterTranslationFactorX (void);
+        const Ogre::Vector2& getJitterTranslationFactorY (void);
 
         /* Determines the frequency of the jitter effect. The interval is set to seconds.
          */
         void setJitterTranslationInterval (float interval);
+
+        /* Determines whether there is jitter translation
+         */
+        bool hasJitterTranslationEnabled (void);
+        void setJitterTranslationEnabled (bool enabled);
 
         /* Exclude translating the brush image
          * This also stops translation jitter.
@@ -208,7 +240,8 @@ class PaintLayer
 
         /* Determines whether there is jitter paint
          */
-        bool getJitterPaint (void);
+        bool hasJitterPaintEnabled (void);
+        void setJitterPaintEnabled (bool enabled);
 
         /* Stop with paint colour jitter
          */
@@ -230,6 +263,11 @@ class PaintLayer
         void setJitterMirrorHorizontalInterval (float interval);
         float getJitterMirrorHorizontalInterval (void) const {return mJitterMirrorHorizontalInterval;}
 
+        /* Determines whether there is jitter mirrot horizontal
+         */
+        bool hasJitterMirrorHorizontalEnabled (void);
+        void setJitterMirrorHorizontalEnabled (bool enabled);
+
         /* Exclude the mirror (horizontally) effect.
          * Stop the jittering effect
          */
@@ -250,6 +288,11 @@ class PaintLayer
          */
         void setJitterMirrorVerticalInterval (float interval);
         float getJitterMirrorVerticalInterval (void) const {return mJitterMirrorVerticalInterval;}
+
+        /* Determines whether there is jitter mirrot vertical
+         */
+        bool hasJitterMirrorVerticalEnabled (void);
+        void setJitterMirrorVerticalEnabled (bool enabled);
 
         /* Exclude the mirror (vertical) effect.
          * Stop the jittering effect
@@ -345,6 +388,7 @@ class PaintLayer
             Ogre::ColourValue mJitterPaintColourMax;        // Max. value used for jittering paint colour
             PaintLayerManager* mPaintLayerManager;
             Ogre::IdString dummyDatablockId;
+            Ogre::Vector2 mHelperVector2;
 
             // Private functions
             size_t calculateTexturePositionX (float u, size_t brushPositionX);

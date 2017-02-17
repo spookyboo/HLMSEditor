@@ -94,16 +94,16 @@ class PaintLayerDockWidget : public QDockWidget
         /* Determines whether the jitter is set for colour painting
          * This value is forwarded to the PaintLayer
          */
-        bool getJitterPaint(int layerId);
+        bool hasJitterPaintEnabled(int layerId);
 
         /* Determines the min value for jitter
          */
-        void setJitterPaintColourMin(int layerId, QColor colour);
+        void setJitterPaintColourMin(int layerId, QColor min);
         QColor getJitterPaintColourMin(int layerId);
 
         /* Determines the max value for jitter
          */
-        void setJitterPaintColourMax(int layerId, QColor colour);
+        void setJitterPaintColourMax(int layerId, QColor max);
         QColor getJitterPaintColourMax(int layerId);
 
         /* Determines the jitter interval
@@ -117,11 +117,60 @@ class PaintLayerDockWidget : public QDockWidget
         void setBrushForce(int layerId, float force);
         float getBrushForce(int layerId);
 
+        /* Determines whether the jitter is set for force
+         */
+        bool hasJitterForceEnabled(int layerId);
+
+        /* Set/get the brush force min and max
+         * This value is forwarded to the PaintLayer
+         */
+        void setJitterForceMin(int layerId, float min);
+        void setJitterForceMax(int layerId, float max);
+        float getJitterForceMin(int layerId);
+        float getJitterForceMax(int layerId);
+
+        /* Set/get the brush force interval
+         * This value is forwarded to the PaintLayer
+         */
+        void setJitterForceInterval(int layerId, float interval);
+        float getJitterForceInterval(int layerId);
+
         /* Set/get the brush scale
          * This value is forwarded to the PaintLayer
          */
-        void setBrushScale(int layerId, float force);
+        void setBrushScale(int layerId, float scale);
         float getBrushScale(int layerId);
+
+        /* Determines whether the jitter is set for scale
+         */
+        bool hasJitterScaleEnabled(int layerId);
+
+        /* Set/get the brush scale min and max
+         * This value is forwarded to the PaintLayer
+         */
+        void setJitterScaleMin(int layerId, float min);
+        void setJitterScaleMax(int layerId, float max);
+        float getJitterScaleMin(int layerId);
+        float getJitterScaleMax(int layerId);
+
+        /* Set/get the brush scale interval
+         * This value is forwarded to the PaintLayer
+         */
+        void setJitterScaleInterval(int layerId, float interval);
+        float getJitterScaleInterval(int layerId);
+
+        /* Rotation angle
+         * This value is forwarded to the PaintLayer
+         */
+        void setRotationAngle(int layerId, float angle);
+        float getRotationAngle(int layerId);
+        bool hasJitterRotationAngleEnabled(int layerId);
+        void setJitterRotationAngleMin(int layerId, float min);
+        float getJitterRotationAngleMin(int layerId);
+        void setJitterRotationAngleMax(int layerId, float max);
+        float getJitterRotationAngleMax(int layerId);
+        void setJitterRotationAngleInterval(int layerId, float interval);
+        float getJitterRotationAngleInterval(int layerId);
 
     private slots:
         void handleNewLayer (int layerId, const QString& layerName);

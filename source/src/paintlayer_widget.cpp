@@ -582,7 +582,7 @@ void PaintLayerWidget::handleTableDoubleClicked(QModelIndex index)
     {
         PaintLayerDialog paintLayerDialog (this, layer);
         paintLayerDialog.setMinimumWidth(600);
-        paintLayerDialog.setMinimumHeight(400);
+        paintLayerDialog.setMinimumHeight(800);
         initialisePaintLayerDialog(&paintLayerDialog, layerId); // Fill the dialog with values from the associated PaintLayer
         paintLayerDialog.exec();
 
@@ -590,6 +590,8 @@ void PaintLayerWidget::handleTableDoubleClicked(QModelIndex index)
         mPaintLayerDockWidget->setTextureType(layerId, paintLayerDialog.mTextureTypeSelectProperty->getCurrentText());
         mPaintLayerDockWidget->setPaintEffect(layerId, paintLayerDialog.mPaintEffectSelectProperty->getCurrentText());
         mPaintLayerDockWidget->setPaintOverflow(layerId, paintLayerDialog.mPaintOverflowSelectProperty->getCurrentText());
+
+        // Paint Colour
         if (paintLayerDialog.mPaintJitterCheckboxProperty->getValue())
         {
             mPaintLayerDockWidget->setJitterPaintColourMin(layerId, paintLayerDialog.mPaintColourJitterMinProperty->getColor());
@@ -600,8 +602,43 @@ void PaintLayerWidget::handleTableDoubleClicked(QModelIndex index)
         {
             mPaintLayerDockWidget->setPaintColour(layerId, paintLayerDialog.mPaintColourProperty->getColor());
         }
-        mPaintLayerDockWidget->setBrushForce(layerId, paintLayerDialog.mForceProperty->getValue());
-        mPaintLayerDockWidget->setBrushScale(layerId, paintLayerDialog.mScaleProperty->getValue());
+
+        // Force
+        if (paintLayerDialog.mJitterForceCheckboxProperty->getValue())
+        {
+            mPaintLayerDockWidget->setJitterForceMin(layerId, paintLayerDialog.mJitterForceMinProperty->getValue());
+            mPaintLayerDockWidget->setJitterForceMax(layerId, paintLayerDialog.mJitterForceMaxProperty->getValue());
+            mPaintLayerDockWidget->setJitterForceInterval(layerId, paintLayerDialog.mJitterForceIntervalProperty->getValue());
+        }
+        else
+        {
+            mPaintLayerDockWidget->setBrushForce(layerId, paintLayerDialog.mForceProperty->getValue());
+        }
+
+
+        // Scale
+        if (paintLayerDialog.mJitterScaleCheckboxProperty->getValue())
+        {
+            mPaintLayerDockWidget->setJitterScaleMin(layerId, paintLayerDialog.mJitterScaleMinProperty->getValue());
+            mPaintLayerDockWidget->setJitterScaleMax(layerId, paintLayerDialog.mJitterScaleMaxProperty->getValue());
+            mPaintLayerDockWidget->setJitterScaleInterval(layerId, paintLayerDialog.mJitterScaleIntervalProperty->getValue());
+        }
+        else
+        {
+            mPaintLayerDockWidget->setBrushScale(layerId, paintLayerDialog.mScaleProperty->getValue());
+        }
+
+        // Rotation angle
+        if (paintLayerDialog.mJitterRotationAngleCheckboxProperty->getValue())
+        {
+            mPaintLayerDockWidget->setJitterRotationAngleMin(layerId, paintLayerDialog.mJitterRotationAngleMinProperty->getValue());
+            mPaintLayerDockWidget->setJitterRotationAngleMax(layerId, paintLayerDialog.mJitterRotationAngleMaxProperty->getValue());
+            mPaintLayerDockWidget->setJitterRotationAngleInterval(layerId, paintLayerDialog.mJitterRotationAngleIntervalProperty->getValue());
+        }
+        else
+        {
+            mPaintLayerDockWidget->setRotationAngle(layerId, paintLayerDialog.mRotationAngleProperty->getValue());
+        }
     }
 }
 
@@ -614,17 +651,32 @@ void PaintLayerWidget::initialisePaintLayerDialog(PaintLayerDialog* paintLayerDi
     paintLayerDialog->mPaintOverflowSelectProperty->setCurrentText(mPaintLayerDockWidget->getPaintOverflow(layerId));
 
     // Paint Colour
-    paintLayerDialog->mPaintJitterCheckboxProperty->setValue(mPaintLayerDockWidget->getJitterPaint(layerId));
+    paintLayerDialog->mPaintJitterCheckboxProperty->setValue(mPaintLayerDockWidget->hasJitterPaintEnabled(layerId));
     paintLayerDialog->mPaintColourProperty->setColor(mPaintLayerDockWidget->getPaintColour(layerId));
     paintLayerDialog->mPaintColourJitterMinProperty->setColor(mPaintLayerDockWidget->getJitterPaintColourMin(layerId));
     paintLayerDialog->mPaintColourJitterMaxProperty->setColor(mPaintLayerDockWidget->getJitterPaintColourMax(layerId));
     paintLayerDialog->mPaintColourJitterIntervalProperty->setValue(mPaintLayerDockWidget->getJitterPaintColourInterval(layerId));
 
     // Force
+    paintLayerDialog->mJitterForceCheckboxProperty->setValue(mPaintLayerDockWidget->hasJitterForceEnabled(layerId));
     paintLayerDialog->mForceProperty->setValue(mPaintLayerDockWidget->getBrushForce(layerId));
+    paintLayerDialog->mJitterForceMinProperty->setValue(mPaintLayerDockWidget->getJitterForceMin(layerId));
+    paintLayerDialog->mJitterForceMaxProperty->setValue(mPaintLayerDockWidget->getJitterForceMax(layerId));
+    paintLayerDialog->mJitterForceIntervalProperty->setValue(mPaintLayerDockWidget->getJitterForceInterval(layerId));
 
     // Scale
+    paintLayerDialog->mJitterScaleCheckboxProperty->setValue(mPaintLayerDockWidget->hasJitterScaleEnabled(layerId));
     paintLayerDialog->mScaleProperty->setValue(mPaintLayerDockWidget->getBrushScale(layerId));
+    paintLayerDialog->mJitterScaleMinProperty->setValue(mPaintLayerDockWidget->getJitterScaleMin(layerId));
+    paintLayerDialog->mJitterScaleMaxProperty->setValue(mPaintLayerDockWidget->getJitterScaleMax(layerId));
+    paintLayerDialog->mJitterScaleIntervalProperty->setValue(mPaintLayerDockWidget->getJitterScaleInterval(layerId));
+
+    // Rotation angle
+    paintLayerDialog->mJitterRotationAngleCheckboxProperty->setValue(mPaintLayerDockWidget->hasJitterRotationAngleEnabled(layerId));
+    paintLayerDialog->mRotationAngleProperty->setValue(mPaintLayerDockWidget->getRotationAngle(layerId));
+    paintLayerDialog->mJitterRotationAngleMinProperty->setValue(mPaintLayerDockWidget->getJitterRotationAngleMin(layerId));
+    paintLayerDialog->mJitterRotationAngleMaxProperty->setValue(mPaintLayerDockWidget->getJitterRotationAngleMax(layerId));
+    paintLayerDialog->mJitterRotationAngleIntervalProperty->setValue(mPaintLayerDockWidget->getJitterRotationAngleInterval(layerId));
 }
 
 //****************************************************************************/

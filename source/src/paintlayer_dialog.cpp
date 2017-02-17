@@ -36,13 +36,30 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
     mTextureTypeSelectProperty = 0;
     mPaintEffectSelectProperty = 0;
     mPaintOverflowSelectProperty = 0;
-    mPaintJitterCheckboxProperty = 0;
+
     mPaintColourProperty = 0;
+    mPaintJitterCheckboxProperty = 0;
     mPaintColourJitterMinProperty = 0;
     mPaintColourJitterMaxProperty = 0;
     mPaintColourJitterIntervalProperty = 0;
+
     mForceProperty = 0;
+    mJitterForceCheckboxProperty = 0;
+    mJitterForceMinProperty = 0;
+    mJitterForceMaxProperty = 0;
+    mJitterForceIntervalProperty = 0;
+
     mScaleProperty = 0;
+    mJitterScaleCheckboxProperty = 0;
+    mJitterScaleMinProperty = 0;
+    mJitterScaleMaxProperty = 0;
+    mJitterScaleIntervalProperty = 0;
+
+    mRotationAngleProperty = 0;
+    mJitterRotationAngleCheckboxProperty = 0;
+    mJitterRotationAngleMinProperty = 0;
+    mJitterRotationAngleMaxProperty = 0;
+    mJitterRotationAngleIntervalProperty = 0;
 
     QFile File(QString("dark.qss"));
     File.open(QFile::ReadOnly);
@@ -55,10 +72,18 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
     connect(assetWidget, SIGNAL(valueChanged(QtProperty*)), this, SLOT(propertyValueChanged(QtProperty*)));
     assetWidget->setHeaderHidden(true); // Don't use a header
 
-    // Create container - General
-    Magus::QtContainerWidget* container = 0;
-    container = assetWidget->createContainer(1, QString(""));
-    container->setHeaderHidden(true);
+    // Create containers
+    Magus::QtContainerWidget* container1 = 0;
+    container1 = assetWidget->createContainer(1, QString(""));
+    Magus::QtContainerWidget* container2 = 0;
+    container2 = assetWidget->createContainer(2, QString(""));
+    Magus::QtContainerWidget* container3 = 0;
+    container3 = assetWidget->createContainer(3, QString(""));
+    Magus::QtContainerWidget* container4 = 0;
+    container4 = assetWidget->createContainer(4, QString(""));
+    Magus::QtContainerWidget* container5 = 0;
+    container5 = assetWidget->createContainer(5, QString(""));
+    //container->setHeaderHidden(true);
 
     // ******** Texture type ********
     QStringList stringListAvailableTextures = paintLayerWidget->getAvailableTextureTypes();
@@ -87,70 +112,121 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
 
     // ******** Jitter paint colour checkbox ********
     mPaintJitterCheckboxProperty = static_cast<Magus::QtCheckBoxProperty*>
-            (assetWidget->createProperty(1, PROPERTY_JITTER_PAINT_COLOUR, QString("Jitter colour"), Magus::QtProperty::CHECKBOX));
+            (assetWidget->createProperty(2, PROPERTY_JITTER_PAINT_COLOUR_ENABLED, QString("Jitter colour"), Magus::QtProperty::CHECKBOX));
     mPaintJitterCheckboxProperty->setValue(false);
 
     // ******** Paint colour ********
     mPaintColourProperty = static_cast<Magus::QtColorProperty*>
-            (assetWidget->createProperty(1, PROPERTY_PAINT_COLOUR, QString("Paint colour"), Magus::QtProperty::COLOR));
+            (assetWidget->createProperty(2, PROPERTY_PAINT_COLOUR, QString("Paint colour"), Magus::QtProperty::COLOR));
 
     // ******** Jitter paint colour (min/max) ********
     mPaintColourJitterMinProperty = static_cast<Magus::QtColorProperty*>
-            (assetWidget->createProperty(1, PROPERTY_JITTER_PAINT_COLOUR_MIN, QString("Jitter colour min"), Magus::QtProperty::COLOR));
+            (assetWidget->createProperty(2, PROPERTY_JITTER_PAINT_COLOUR_MIN, QString("Jitter paint colour min"), Magus::QtProperty::COLOR));
     mPaintColourJitterMinProperty->setVisible(false);
 
     mPaintColourJitterMaxProperty = static_cast<Magus::QtColorProperty*>
-            (assetWidget->createProperty(1, PROPERTY_JITTER_PAINT_COLOUR_MAX, QString("Jitter colour max"), Magus::QtProperty::COLOR));
+            (assetWidget->createProperty(2, PROPERTY_JITTER_PAINT_COLOUR_MAX, QString("Jitter paint colour max"), Magus::QtProperty::COLOR));
     mPaintColourJitterMaxProperty->setVisible(false);
 
     // ******** Jitter paint colour interval (seconds) ********
     mPaintColourJitterIntervalProperty = static_cast<Magus::QtSliderDecimalProperty*>
-            (assetWidget->createProperty(1, PROPERTY_JITTER_PAINT_COLOUR_INTERVAL, QString("Jitter colour interval (sec.)"), Magus::QtProperty::SLIDER_DECIMAL));
+            (assetWidget->createProperty(2, PROPERTY_JITTER_PAINT_COLOUR_INTERVAL, QString("Jitter paint colour interval (sec.)"), Magus::QtProperty::SLIDER_DECIMAL));
     mPaintColourJitterIntervalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
     mPaintColourJitterIntervalProperty->setValue(0.0f);
     mPaintColourJitterIntervalProperty->setVisible(false);
 
     // ******** Jitter scale checkbox ********
-    // TODO: 8
+    mJitterScaleCheckboxProperty = static_cast<Magus::QtCheckBoxProperty*>
+            (assetWidget->createProperty(3, PROPERTY_JITTER_SCALE_ENABLED, QString("Jitter brush scale"), Magus::QtProperty::CHECKBOX));
+    mJitterScaleCheckboxProperty->setValue(false);
 
     // ******** Scale ********
     mScaleProperty = static_cast<Magus::QtSliderDecimalProperty*>
-            (assetWidget->createProperty(1, PROPERTY_SCALE, QString("Brush scale"), Magus::QtProperty::SLIDER_DECIMAL));
+            (assetWidget->createProperty(3, PROPERTY_SCALE, QString("Brush scale"), Magus::QtProperty::SLIDER_DECIMAL));
     mScaleProperty->setSliderRange (0.0f, 1.0f, 0.005f);
     mScaleProperty->setValue(0.1f);
 
     // ******** Jitter scale (min/max) ********
-    // TODO: 9
+    mJitterScaleMinProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (assetWidget->createProperty(3, PROPERTY_JITTER_SCALE_MIN, QString("Jitter brush scale min"), Magus::QtProperty::SLIDER_DECIMAL));
+    mJitterScaleMinProperty->setSliderRange (0.0f, 1.0f, 0.005f);
+    mJitterScaleMinProperty->setValue(0.0f);
+    mJitterScaleMinProperty->setVisible(false);
+
+    mJitterScaleMaxProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (assetWidget->createProperty(3, PROPERTY_JITTER_SCALE_MAX, QString("Jitter brush scale max"), Magus::QtProperty::SLIDER_DECIMAL));
+    mJitterScaleMaxProperty->setSliderRange (0.0f, 1.0f, 0.005f);
+    mJitterScaleMaxProperty->setValue(1.0f);
+    mJitterScaleMaxProperty->setVisible(false);
 
     // ******** Jitter scale interval (seconds) ********
-    // TODO: 10
+    mJitterScaleIntervalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (assetWidget->createProperty(3, PROPERTY_JITTER_SCALE_INTERVAL, QString("Jitter brush scale interval"), Magus::QtProperty::SLIDER_DECIMAL));
+    mJitterScaleIntervalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
+    mJitterScaleIntervalProperty->setValue(1.0f);
+    mJitterScaleIntervalProperty->setVisible(false);
 
     // ******** Jitter force checkbox  ********
-    // TODO
+    mJitterForceCheckboxProperty = static_cast<Magus::QtCheckBoxProperty*>
+            (assetWidget->createProperty(4, PROPERTY_JITTER_FORCE_ENABLED, QString("Jitter brush force"), Magus::QtProperty::CHECKBOX));
+    mJitterForceCheckboxProperty->setValue(false);
 
     // ******** Force ********
     mForceProperty = static_cast<Magus::QtSliderDecimalProperty*>
-            (assetWidget->createProperty(1, PROPERTY_FORCE, QString("Brush force"), Magus::QtProperty::SLIDER_DECIMAL));
+            (assetWidget->createProperty(4, PROPERTY_FORCE, QString("Brush force"), Magus::QtProperty::SLIDER_DECIMAL));
     mForceProperty->setSliderRange (0.0f, 1.0f, 0.005f);
     mForceProperty->setValue(1.0f);
 
     // ******** Jitter force (min/max) ********
-    // TODO
+    mJitterForceMinProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (assetWidget->createProperty(4, PROPERTY_JITTER_FORCE_MIN, QString("Jitter brush force min"), Magus::QtProperty::SLIDER_DECIMAL));
+    mJitterForceMinProperty->setSliderRange (0.0f, 1.0f, 0.005f);
+    mJitterForceMinProperty->setValue(0.0f);
+    mJitterForceMinProperty->setVisible(false);
+
+    mJitterForceMaxProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (assetWidget->createProperty(4, PROPERTY_JITTER_FORCE_MAX, QString("Jitter brush force max"), Magus::QtProperty::SLIDER_DECIMAL));
+    mJitterForceMaxProperty->setSliderRange (0.0f, 1.0f, 0.005f);
+    mJitterForceMaxProperty->setValue(0.0f);
+    mJitterForceMaxProperty->setVisible(false);
 
     // ******** Jitter force interval (seconds) ********
-    // TODO
+    mJitterForceIntervalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (assetWidget->createProperty(4, PROPERTY_JITTER_FORCE_INTERVAL, QString("Jitter brush force interval"), Magus::QtProperty::SLIDER_DECIMAL));
+    mJitterForceIntervalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
+    mJitterForceIntervalProperty->setValue(1.0f);
+    mJitterForceIntervalProperty->setVisible(false);
 
     // ******** Jitter rotation angle checkbox  ********
-    // TODO
+    mJitterRotationAngleCheckboxProperty = static_cast<Magus::QtCheckBoxProperty*>
+            (assetWidget->createProperty(5, PROPERTY_JITTER_ROTATION_ANGLE_ENABLED, QString("Jitter brush rotation angle"), Magus::QtProperty::CHECKBOX));
+    mJitterRotationAngleCheckboxProperty->setValue(false);
 
     // ******** Rotation angle ********
-    // TODO
+    mRotationAngleProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (assetWidget->createProperty(5, PROPERTY_ROTATION_ANGLE, QString("Brush rotation angle"), Magus::QtProperty::SLIDER_DECIMAL));
+    mRotationAngleProperty->setSliderRange (0.0f, 360.0f, 1.0f);
+    mRotationAngleProperty->setValue(0.0f);
 
     // ******** Jitter rotation angle (min/max) ********
-    // TODO
+    mJitterRotationAngleMinProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (assetWidget->createProperty(5, PROPERTY_JITTER_ROTATION_ANGLE_MIN, QString("Jitter brush rotation angle min"), Magus::QtProperty::SLIDER_DECIMAL));
+    mJitterRotationAngleMinProperty->setSliderRange (0.0f, 360.0f, 1.0f);
+    mJitterRotationAngleMinProperty->setValue(0.0f);
+    mJitterRotationAngleMinProperty->setVisible(false);
+
+    mJitterRotationAngleMaxProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (assetWidget->createProperty(5, PROPERTY_JITTER_ROTATION_ANGLE_MAX, QString("Jitter brush rotation angle max"), Magus::QtProperty::SLIDER_DECIMAL));
+    mJitterRotationAngleMaxProperty->setSliderRange (0.0f, 360.0f, 1.0f);
+    mJitterRotationAngleMaxProperty->setValue(360.0f);
+    mJitterRotationAngleMaxProperty->setVisible(false);
 
     // ******** Jitter rotation angle interval (seconds) ********
-    // TODO
+    mJitterRotationAngleIntervalProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (assetWidget->createProperty(5, PROPERTY_JITTER_ROTATION_ANGLE_INTERVAL, QString("Jitter brush rotation interval"), Magus::QtProperty::SLIDER_DECIMAL));
+    mJitterRotationAngleIntervalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
+    mJitterRotationAngleIntervalProperty->setValue(0.0f);
+    mJitterRotationAngleIntervalProperty->setVisible(false);
 
     // ******** Jitter translation checkbox  ********
     // TODO
@@ -219,7 +295,7 @@ void PaintLayerDialog::propertyValueChanged(QtProperty* property)
 
     switch (property->mPropertyId)
     {
-        case PROPERTY_JITTER_PAINT_COLOUR:
+        case PROPERTY_JITTER_PAINT_COLOUR_ENABLED:
         {
             if (!mPaintColourProperty)
                 return; // The other properties are not yet created
@@ -256,6 +332,45 @@ void PaintLayerDialog::propertyValueChanged(QtProperty* property)
                 mPaintColourJitterMaxProperty->setVisible(false);
                 mPaintColourJitterIntervalProperty->setVisible(false);
             }
+        }
+        break;
+
+        case PROPERTY_JITTER_SCALE_ENABLED:
+        {
+            if (!mScaleProperty)
+                return; // The other properties are not yet created
+
+            checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(property);
+            mScaleProperty->setVisible(!checkboxProperty->getValue());
+            mJitterScaleMinProperty->setVisible(checkboxProperty->getValue());
+            mJitterScaleMaxProperty->setVisible(checkboxProperty->getValue());
+            mJitterScaleIntervalProperty->setVisible(checkboxProperty->getValue());
+        }
+        break;
+
+        case PROPERTY_JITTER_FORCE_ENABLED:
+        {
+            if (!mForceProperty)
+                return; // The other properties are not yet created
+
+            checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(property);
+            mForceProperty->setVisible(!checkboxProperty->getValue());
+            mJitterForceMinProperty->setVisible(checkboxProperty->getValue());
+            mJitterForceMaxProperty->setVisible(checkboxProperty->getValue());
+            mJitterForceIntervalProperty->setVisible(checkboxProperty->getValue());
+        }
+        break;
+
+        case PROPERTY_JITTER_ROTATION_ANGLE_ENABLED:
+        {
+            if (!mRotationAngleProperty)
+                return; // The other properties are not yet created
+
+            checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(property);
+            mRotationAngleProperty->setVisible(!checkboxProperty->getValue());
+            mJitterRotationAngleMinProperty->setVisible(checkboxProperty->getValue());
+            mJitterRotationAngleMaxProperty->setVisible(checkboxProperty->getValue());
+            mJitterRotationAngleIntervalProperty->setVisible(checkboxProperty->getValue());
         }
         break;
     }

@@ -339,7 +339,7 @@ void PaintLayerDockWidget::setPaintColour(int layerId, QColor colour)
         col.b = colour.blue() / 255.0f;
         col.a = colour.alpha() / 255.0f;
         paintLayer->setPaintColour(col);
-        paintLayer->resetPaintColour(); // To stop the jitter
+        paintLayer->setJitterPaintEnabled(false); // To stop the jitter
     }
 }
 
@@ -361,27 +361,27 @@ QColor PaintLayerDockWidget::getPaintColour(int layerId)
 }
 
 //****************************************************************************/
-bool PaintLayerDockWidget::getJitterPaint(int layerId)
+bool PaintLayerDockWidget::hasJitterPaintEnabled(int layerId)
 {
-    bool jitterPaint = false;
+    bool jitter = false;
     PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
     if (paintLayer)
-        jitterPaint = paintLayer->getJitterPaint();
+        jitter = paintLayer->hasJitterPaintEnabled();
 
-    return jitterPaint;
+    return jitter;
 }
 
 //****************************************************************************/
-void PaintLayerDockWidget::setJitterPaintColourMin(int layerId, QColor colour)
+void PaintLayerDockWidget::setJitterPaintColourMin(int layerId, QColor min)
 {
     PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
     if (paintLayer)
     {
         Ogre::ColourValue col;
-        col.r = colour.red() / 255.0f;
-        col.g = colour.green() / 255.0f;
-        col.b = colour.blue() / 255.0f;
-        col.a = colour.alpha() / 255.0f;
+        col.r = min.red() / 255.0f;
+        col.g = min.green() / 255.0f;
+        col.b = min.blue() / 255.0f;
+        col.a = min.alpha() / 255.0f;
         paintLayer->setJitterPaintColourMin(col);
     }
 }
@@ -404,16 +404,16 @@ QColor PaintLayerDockWidget::getJitterPaintColourMin(int layerId)
 }
 
 //****************************************************************************/
-void PaintLayerDockWidget::setJitterPaintColourMax(int layerId, QColor colour)
+void PaintLayerDockWidget::setJitterPaintColourMax(int layerId, QColor max)
 {
     PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
     if (paintLayer)
     {
         Ogre::ColourValue col;
-        col.r = colour.red() / 255.0f;
-        col.g = colour.green() / 255.0f;
-        col.b = colour.blue() / 255.0f;
-        col.a = colour.alpha() / 255.0f;
+        col.r = max.red() / 255.0f;
+        col.g = max.green() / 255.0f;
+        col.b = max.blue() / 255.0f;
+        col.a = max.alpha() / 255.0f;
         paintLayer->setJitterPaintColourMax(col);
     }
 }
@@ -461,7 +461,7 @@ void PaintLayerDockWidget::setBrushForce(int layerId, float force)
     if (paintLayer)
     {
         paintLayer->setForce(force);
-        paintLayer->resetForce();
+        paintLayer->setJitterForceEnabled(false); // To stop the jitter
     }
 }
 
@@ -477,13 +477,81 @@ float PaintLayerDockWidget::getBrushForce(int layerId)
 }
 
 //****************************************************************************/
+bool PaintLayerDockWidget::hasJitterForceEnabled(int layerId)
+{
+    bool jitter = false;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        jitter = paintLayer->hasJitterForceEnabled();
+
+    return jitter;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterForceMin(int layerId, float min)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterForceMin(min);
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterForceMax(int layerId, float max)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterForceMax(max);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getJitterForceMin(int layerId)
+{
+    float force = 0.1f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        force = paintLayer->getJitterForceMin();
+
+    return force;
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getJitterForceMax(int layerId)
+{
+    float force = 1.0f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        force = paintLayer->getJitterForceMax();
+
+    return force;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterForceInterval(int layerId, float interval)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterForceInterval(interval);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getJitterForceInterval(int layerId)
+{
+    float interval = 0.0f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        interval = paintLayer->getJitterForceInterval();
+
+    return interval;
+}
+
+//****************************************************************************/
 void PaintLayerDockWidget::setBrushScale(int layerId, float scale)
 {
     PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
     if (paintLayer)
     {
         paintLayer->setScale(scale);
-        paintLayer->resetScale();
+        paintLayer->setJitterScaleEnabled(false); // To stop the jitter
     }
 }
 
@@ -496,6 +564,164 @@ float PaintLayerDockWidget::getBrushScale(int layerId)
         scale = paintLayer->getScale();
 
     return scale;
+}
+
+//****************************************************************************/
+bool PaintLayerDockWidget::hasJitterScaleEnabled(int layerId)
+{
+    bool jitter = false;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        jitter = paintLayer->hasJitterScaleEnabled();
+
+    return jitter;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterScaleMin(int layerId, float min)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterScaleMin(min);
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterScaleMax(int layerId, float max)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterScaleMax(max);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getJitterScaleMin(int layerId)
+{
+    float scale = 0.1f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        scale = paintLayer->getJitterScaleMin();
+
+    return scale;
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getJitterScaleMax(int layerId)
+{
+    float scale = 0.1f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        scale = paintLayer->getJitterScaleMax();
+
+    return scale;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterScaleInterval(int layerId, float interval)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterScaleInterval(interval);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getJitterScaleInterval(int layerId)
+{
+    float interval = 0.1f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        interval = paintLayer->getJitterScaleInterval();
+
+    return interval;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setRotationAngle(int layerId, float angle)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        paintLayer->setRotationAngle(angle);
+        paintLayer->setJitterRotationEnabled(false); // To stop the jitter
+    }
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getRotationAngle(int layerId)
+{
+    float angle = 0.0f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        angle = paintLayer->getRotationAngle();
+
+    return angle;
+}
+
+//****************************************************************************/
+bool PaintLayerDockWidget::hasJitterRotationAngleEnabled(int layerId)
+{
+    bool jitter = false;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        jitter = paintLayer->hasJitterRotationEnabled();
+
+    return jitter;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterRotationAngleMin(int layerId, float min)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterRotationAngleMin(min);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getJitterRotationAngleMin(int layerId)
+{
+    float min = 0.0f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        min = paintLayer->getJitterRotationAngleMin();
+
+    return min;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterRotationAngleMax(int layerId, float max)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterRotationAngleMax(max);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getJitterRotationAngleMax(int layerId)
+{
+    float max = 360.0f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        max = paintLayer->getJitterRotationAngleMax();
+
+    return max;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterRotationAngleInterval(int layerId, float interval)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterRotationAngleInterval(interval);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getJitterRotationAngleInterval(int layerId)
+{
+    float interval = 0.0f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        interval = paintLayer->getJitterRotationAngleInterval();
+
+    return interval;
 }
 
 //****************************************************************************/

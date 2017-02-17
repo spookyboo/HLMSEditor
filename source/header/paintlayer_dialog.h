@@ -46,15 +46,29 @@ class PaintLayerDialog : public QDialog
         QtSelectProperty* mPaintEffectSelectProperty;
         QtSelectProperty* mPaintOverflowSelectProperty;
 
-        QtCheckBoxProperty* mPaintJitterCheckboxProperty;
         QtColorProperty* mPaintColourProperty;
+        QtCheckBoxProperty* mPaintJitterCheckboxProperty;
         QtColorProperty* mPaintColourJitterMinProperty;
         QtColorProperty* mPaintColourJitterMaxProperty;
         QtSliderDecimalProperty* mPaintColourJitterIntervalProperty;
 
         QtSliderDecimalProperty* mForceProperty;
+        QtCheckBoxProperty* mJitterForceCheckboxProperty;
+        QtSliderDecimalProperty* mJitterForceMinProperty;
+        QtSliderDecimalProperty* mJitterForceMaxProperty;
+        QtSliderDecimalProperty* mJitterForceIntervalProperty;
 
         QtSliderDecimalProperty* mScaleProperty;
+        QtCheckBoxProperty* mJitterScaleCheckboxProperty;
+        QtSliderDecimalProperty* mJitterScaleMinProperty;
+        QtSliderDecimalProperty* mJitterScaleMaxProperty;
+        QtSliderDecimalProperty* mJitterScaleIntervalProperty;
+
+        QtSliderDecimalProperty* mRotationAngleProperty;
+        QtCheckBoxProperty* mJitterRotationAngleCheckboxProperty;
+        QtSliderDecimalProperty* mJitterRotationAngleMinProperty;
+        QtSliderDecimalProperty* mJitterRotationAngleMaxProperty;
+        QtSliderDecimalProperty* mJitterRotationAngleIntervalProperty;
 
     private slots:
         void propertyValueChanged(QtProperty* property);
