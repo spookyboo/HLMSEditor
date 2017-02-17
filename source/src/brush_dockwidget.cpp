@@ -29,11 +29,9 @@ BrushDockWidget::BrushDockWidget(QString title, MainWindow* parent, Qt::WindowFl
     QDockWidget (title, parent, flags),
     mParent(parent)
 {
-    mInnerMain = new QMainWindow();
-    mInnerMain->setMinimumSize(100,100);
-    setWidget(mInnerMain);
-    QRect rec = QApplication::desktop()->screenGeometry();
-    setMinimumWidth(0.1 * rec.width());
+    mBrushWidget = new BrushWidget(BRUSH_PATH.c_str(), this);
+    connect(mBrushWidget, SIGNAL(brushDoubleClicked(QString,QString)), this, SLOT(handleBrushDoubleClicked(QString,QString)));
+    setWidget(mBrushWidget);
 }
 
 //****************************************************************************/
@@ -42,7 +40,8 @@ BrushDockWidget::~BrushDockWidget(void)
 }
 
 //****************************************************************************/
-void BrushDockWidget::addDockWidget(Qt::DockWidgetArea area, QDockWidget* dockWidget)
+void BrushDockWidget::handleBrushDoubleClicked(const QString& name, const QString& baseName)
 {
-    mInnerMain->addDockWidget(area, dockWidget);
+    // Callback to parent
+    mParent->setBrushInPaintLayer (name, baseName);
 }

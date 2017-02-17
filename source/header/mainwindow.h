@@ -85,6 +85,7 @@ class MainWindow : public QMainWindow
         HlmsUtilsManager* getHlmsUtilsManager (void) {return mHlmsUtilsManager;}
         const Ogre::String& getTextureFileNameOfPbs(const Ogre::IdString& datablockId, Ogre::PbsTextureTypes textureType); // Returns the filename of a pbs texture type
         PaintLayers* getPaintLayers(void); // Returns pointer to the paintlayers, managed by the PainLayerManager
+        void setBrushInPaintLayer(const QString& name, const QString& baseName); // If a brush is selected, set the new brush in the PaintLayer
 
     protected:
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources); // Save the content of a resource vector

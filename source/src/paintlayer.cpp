@@ -191,7 +191,7 @@ void PaintLayer::paint(float u, float v)
             }
             else if (mPaintEffect == PAINT_EFFECT_ALPHA)
             {
-                // Paint with alpha value of the brush
+                // Paint with alpha value of the brush (note, that the texture must have alpha!)
                 mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
                 mFinalColour = mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                            calculatedTexturePositionY,
@@ -283,6 +283,12 @@ void PaintLayer::setBrush (const Ogre::String& brushFileName)
 void PaintLayer::setPaintEffect (PaintEffects paintEffect)
 {
     mPaintEffect = paintEffect;
+}
+
+//****************************************************************************/
+void PaintLayer::setPaintOverflow (PaintOverflowTypes paintOverflow)
+{
+    mPaintOverflow = paintOverflow;
 }
 
 //****************************************************************************/

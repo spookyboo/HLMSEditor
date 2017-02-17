@@ -581,6 +581,9 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
         mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(false);
         mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(true);
     }
+
+    mPaintLayerDockWidget->newHlmsCreated(); // Needed to delete the paintlayers, because a new Hlms is created
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setPaintLayers (0); // Invalidate the PaintLayers vector reference in the Ogre widget
 }
 
 //****************************************************************************/
@@ -1974,5 +1977,11 @@ void MainWindow::clearHlmsNamesAndRemovePaintLayers(void)
 PaintLayers* MainWindow::getPaintLayers(void)
 {
     return mPaintLayerManager.getPaintLayers();
+}
+
+//****************************************************************************/
+void MainWindow::setBrushInPaintLayer(const QString& name, const QString& baseName)
+{
+    mPaintLayerDockWidget->setBrushInPaintLayer(name, baseName);
 }
 

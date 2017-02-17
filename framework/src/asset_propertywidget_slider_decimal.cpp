@@ -81,8 +81,7 @@ namespace Magus
     //****************************************************************************/
     float QtSliderDecimalProperty::getValue (void) const
     {
-        QString mHelperText = mEdit->text();
-        return QVariant(mHelperText).toFloat();
+        return QVariant(mEdit->text()).toFloat();
     }
 
     //****************************************************************************/

@@ -57,8 +57,6 @@ class PaintLayer
             PAINT_EFFECT_COLOR, /// Paint with color
             PAINT_EFFECT_ALPHA, /// Paint with alpha
             PAINT_EFFECT_TEXTURE, /// Use the colours of the brush
-            PAINT_EFFECT_NORMAL_RAISED, /// Paint on a normal map and apply a raising effect; only used for normal maps
-            PAINT_EFFECT_NORMAL_LOWERED /// Paint on a normal map and apply a lowering effect; only used for normal maps
         };
 
         enum PaintOverflowTypes
@@ -183,6 +181,11 @@ class PaintLayer
          */
         void setPaintEffect (PaintEffects paintEffect);
         PaintEffects getPaintEffect (void) const {return mPaintEffect;}
+
+        /* Set/get the paint overflow.
+         */
+        void setPaintOverflow (PaintOverflowTypes paintOverflow);
+        PaintOverflowTypes getPaintOverflow (void) const {return mPaintOverflow;}
 
         /* Set/get colour used for painting.
          */

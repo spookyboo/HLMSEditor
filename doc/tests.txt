@@ -1,0 +1,66 @@
+Testing:
+=======
+
+HLMS creation:
+-----------------
+- Create Pbs datablock without samplerblock, macroblock and blendblock. 
+  Select 'Set current material' to the mesh in the renderwindow
+
+- Create Unlit datablock without samplerblock, macroblock and blendblock. 
+  Select 'Set current material' to the mesh in the renderwindow
+
+- Create Unlit datablock without samplerblock, macroblock and blendblock. 
+  Select 'Set current material' to the mesh in the renderwindow
+
+- Create Pbs datablock without samplerblock, macroblock and blendblock. 
+  Select 'Set current material' to the mesh in the renderwindow
+  Choose for 'New Project'  in the main menu
+  ==> All HLMS material are removed; the mesh is gray/white
+
+- Create Pbs datablock (with difuse colour) without samplerblock, macroblock and blendblock. 
+  Select 'Set current material' to the mesh in the renderwindow
+  Choose for 'New Hlms Pbs'  in the main menu
+  ==> The created material is still visible on the mesh.
+  ==> A new material with name 'HlmsPbs<sequence_number>' is created (e.g. 'HlmsPbs6'); the sequence number is incremented
+
+
+Painting:
+---------
+- No HLMS material is created
+  Create a painting layer
+  ==> This is not possible (there must be a material)
+
+- Create Pbs datablock without samplerblock, macroblock and blendblock. 
+  Create a painting layer
+  ==> This is possible
+
+- Create Unlit datablock without samplerblock, macroblock and blendblock. 
+  Create a painting layer
+  ==> This is not possible (not supported)
+
+- Create Pbs datablock (with difuse colour) without samplerblock, macroblock and blendblock. 
+  Create a 2 painting layers
+  Choose for 'New Project' in the main menu
+  ==> All HLMS material are removed; the mesh is gray/white
+  ==> All Painting layers are removed
+
+- Create Pbs datablock (with difuse colour) without samplerblock, macroblock and blendblock. 
+  Create a 2 painting layers
+  Choose for 'New Hlms Pbs'  in the main menu
+  ==> A new material with name 'HlmsPbs<sequence_number>' is created (e.g. 'HlmsPbs6'); the sequence number is incremented
+  ==> All Painting layers are removed
+
+- Create Pbs datablock (with difuse colour) without samplerblock, macroblock and blendblock. 
+  Create a 2 painting layers
+  Click the 'X'  on the Pbs datablock node
+  ==> All Painting layers are removed
+
+
+
+Save/Load/Export HLMS:
+---------------------
+
+
+Meshes:
+------
+

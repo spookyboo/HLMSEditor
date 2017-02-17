@@ -32,6 +32,7 @@
 #include <QMimeData>
 #include <QTableWidgetItem>
 #include <QTreeWidgetItem>
+#include "constants.h"
 #include "paintlayer_widget.h"
 #include "paintlayer_dockwidget.h"
 #include "paintlayer_dialog.h"
@@ -302,10 +303,10 @@ void PaintLayerWidget::addLayer(QtLayer* layer)
     mLayerVec.append(layer);
     mTable->insertRow(row);
 
-    // Set the layer icon
+    // Set the default brush icon
     QTableWidgetItem* item = new QTableWidgetItem();
-    QImage imageLayer(mIconDir + TOOL_ICON_LAYER);
-    QPixmap pixMapLayer = QPixmap::fromImage(imageLayer).scaled(TOOL_LAYER_ICON_WIDTH, TOOL_LAYER_ICON_WIDTH);
+    QImage image(DEFAULT_BRUSH_AND_PATH_QSTRING);
+    QPixmap pixMapLayer = QPixmap::fromImage(image).scaled(TOOL_LAYER_ICON_WIDTH, TOOL_LAYER_ICON_WIDTH);
     item->setData(Qt::DecorationRole, QVariant(pixMapLayer));
     item->setData(Qt::UserRole, QVariant(layer->layerId));
     mTable->setItem(row, TOOL_LAYER_COLUMN_ICON, item);
@@ -556,7 +557,11 @@ const QString& PaintLayerWidget::getName(int row)
 //****************************************************************************/
 int PaintLayerWidget::getCurrentLayerId(void)
 {
-    QtLayer* layer = mLayerVec[mTable->currentRow()];
+    int currentRow = mTable->currentRow();
+    if (currentRow < 0)
+        return -1;
+
+    QtLayer* layer = mLayerVec[currentRow];
     if (layer)
         return layer->layerId;
 
@@ -576,15 +581,15 @@ void PaintLayerWidget::handleTableDoubleClicked(QModelIndex index)
     if (col == TOOL_LAYER_COLUMN_ICON)
     {
         PaintLayerDialog paintLayerDialog (this, layer);
-        paintLayerDialog.setMinimumWidth(400);
+        paintLayerDialog.setMinimumWidth(600);
         paintLayerDialog.setMinimumHeight(400);
         initialisePaintLayerDialog(&paintLayerDialog, layerId); // Fill the dialog with values from the associated PaintLayer
         paintLayerDialog.exec();
 
         // Don't check whether the values are changed; just set them in the layer (by means of the mPaintLayerDockWidget as intermediate)
         mPaintLayerDockWidget->setTextureType(layerId, paintLayerDialog.mTextureTypeSelectProperty->getCurrentText());
-        //mPaintLayerDockWidget->setPaintEffect(layerId, paintLayerDialog.mPaintEffectSelectProperty->getCurrentText());
-        //mPaintLayerDockWidget->setPaintOverflow(layerId, paintLayerDialog.mPaintOverflowSelectProperty->getCurrentText());
+        mPaintLayerDockWidget->setPaintEffect(layerId, paintLayerDialog.mPaintEffectSelectProperty->getCurrentText());
+        mPaintLayerDockWidget->setPaintOverflow(layerId, paintLayerDialog.mPaintOverflowSelectProperty->getCurrentText());
         if (paintLayerDialog.mPaintJitterCheckboxProperty->getValue())
         {
             mPaintLayerDockWidget->setJitterPaintColourMin(layerId, paintLayerDialog.mPaintColourJitterMinProperty->getColor());
@@ -605,8 +610,8 @@ void PaintLayerWidget::initialisePaintLayerDialog(PaintLayerDialog* paintLayerDi
 {
     // General
     paintLayerDialog->mTextureTypeSelectProperty->setCurrentText(mPaintLayerDockWidget->getTextureType(layerId));
-    //paintLayerDialog->mPaintEffectSelectProperty->setPaintEffect(mPaintLayerDockWidget->getPaintEffect());
-    //paintLayerDialog->mPaintOverflowSelectProperty->setPaintOverflow(mPaintLayerDockWidget->getPaintOverflow());
+    paintLayerDialog->mPaintEffectSelectProperty->setCurrentText(mPaintLayerDockWidget->getPaintEffect(layerId));
+    paintLayerDialog->mPaintOverflowSelectProperty->setCurrentText(mPaintLayerDockWidget->getPaintOverflow(layerId));
 
     // Paint Colour
     paintLayerDialog->mPaintJitterCheckboxProperty->setValue(mPaintLayerDockWidget->getJitterPaint(layerId));
@@ -626,4 +631,19 @@ void PaintLayerWidget::initialisePaintLayerDialog(PaintLayerDialog* paintLayerDi
 QStringList PaintLayerWidget::getAvailableTextureTypes(void)
 {
     return mPaintLayerDockWidget->getAvailableTextureTypes();
+}
+
+//****************************************************************************/
+void PaintLayerWidget::setBrushIconInCurrentLayers (const QString& brushFileName)
+{
+    QImage image(brushFileName);
+    QPixmap pixMapLayer = QPixmap::fromImage(image).scaled(TOOL_LAYER_ICON_WIDTH, TOOL_LAYER_ICON_WIDTH);
+    QList<QTableWidgetItem*> itemList = mTable->selectedItems();
+    foreach(QTableWidgetItem* item, itemList)
+    {
+        if (item->column() == TOOL_LAYER_COLUMN_ICON)
+        {
+            item->setData(Qt::DecorationRole, QVariant(pixMapLayer));
+        }
+    }
 }

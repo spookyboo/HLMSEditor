@@ -49,6 +49,10 @@ class PaintLayerDockWidget : public QDockWidget
                              Qt::WindowFlags flags = 0);
         ~PaintLayerDockWidget(void);
 
+        /* When a new brush is selected, set it in the currently selected paintlayer
+         */
+        void setBrushInPaintLayer(const QString& name, const QString& baseName);
+
         /* Determines whether there is a current datablock.
          * It must be a Pbs, because Unlit painting is not very interesting (and therefor not supported)
          */
@@ -68,8 +72,18 @@ class PaintLayerDockWidget : public QDockWidget
         /* Set/get a texture type in a PaintLayer.
          * Based on the texture type (and the datablock name), the texture is also searched and set in the PaintLayer.
          */
-        void setTextureType (int layerId, QString textureType);
-        QString getTextureType (int layerId);
+        void setTextureType (int layerId, const QString& textureType);
+        const QString& getTextureType (int layerId);
+
+        /* Set/get the paint effect type.
+         */
+        void setPaintEffect(int layerId, const QString& paintEffect);
+        const QString& getPaintEffect(int layerId);
+
+        /* Set/get the overflow type.
+         */
+        void setPaintOverflow(int layerId, const QString& paintOverflow);
+        const QString& PaintLayerDockWidget::getPaintOverflow(int layerId);
 
         /* Set/get the paint colour
          * This colour is forwarded to the PaintLayer
@@ -110,9 +124,9 @@ class PaintLayerDockWidget : public QDockWidget
         float getBrushScale(int layerId);
 
     private slots:
-        void handleNewLayer (int layerId, QString layerName);
-        void handleDeleteLayer (int layerId, QString layerName);
-        void handleLayerSelected (int layerId, QString layerName);
+        void handleNewLayer (int layerId, const QString& layerName);
+        void handleDeleteLayer (int layerId, const QString& layerName);
+        void handleLayerSelected (int layerId, const QString& layerName);
 
     private:
         MainWindow* mParent;

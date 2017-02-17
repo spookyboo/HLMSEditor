@@ -21,7 +21,6 @@
 #ifndef PAINT_LAYER_WIDGET_H
 #define PAINT_LAYER_WIDGET_H
 
-#include <QMenu>
 #include <QWidget>
 #include <QMouseEvent>
 #include <QTableWidget>
@@ -116,6 +115,9 @@ class PaintLayerWidget : public QWidget
 
         // Return a vector with layer id's that are selected
         QVector<int> getSelectedLayerIds(void);
+
+        // Set an icon in all selected layers
+        void setBrushIconInCurrentLayers (const QString& brushFileName);
 
     public slots:
         // Activated when a contextmenu item is selected

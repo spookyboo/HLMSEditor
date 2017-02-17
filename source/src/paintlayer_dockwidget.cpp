@@ -74,28 +74,23 @@ void PaintLayerDockWidget::newHlmsCreated (void)
 }
 
 //****************************************************************************/
-void PaintLayerDockWidget::handleNewLayer (int layerId, QString layerName)
+void PaintLayerDockWidget::handleNewLayer (int layerId, const QString& layerName)
 {
     // A new layer has been created; create a paint layer by means of the PaintLayerManager
     PaintLayer* paintLayer = mPaintLayerManager->createPaintLayer(layerId);
     if (paintLayer)
-        paintLayer->setBrush(BRUSH_PATH + "brush_002.png"); // TEST
-        //paintLayer->setBrush(BRUSH_PATH + DEFAULT_BRUSH); // Set a default
-
-    //QMessageBox::information(0, QString("handleNewLayer: "), QVariant(layerId).toString()); // test
+        paintLayer->setBrush(BRUSH_PATH + DEFAULT_BRUSH); // Set a default
 }
 
 //****************************************************************************/
-void PaintLayerDockWidget::handleDeleteLayer (int layerId, QString layerName)
+void PaintLayerDockWidget::handleDeleteLayer (int layerId, const QString& layerName)
 {
     // A new layer has been created; delete the paint layer by means of the PaintLayerManager
     mPaintLayerManager->removeAndDeletePaintLayer(layerId);
-
-    //QMessageBox::information(0, QString("handleDeleteLayer: "), QVariant(layerId).toString()); // test
 }
 
 //****************************************************************************/
-void PaintLayerDockWidget::setTextureType (int layerId, QString textureType)
+void PaintLayerDockWidget::setTextureType (int layerId, const QString& textureType)
 {
     // Convert texture type to a real Pbs texture type
     Ogre::PbsTextureTypes type;
@@ -140,7 +135,7 @@ void PaintLayerDockWidget::setTextureType (int layerId, QString textureType)
 }
 
 //****************************************************************************/
-QString PaintLayerDockWidget::getTextureType(int layerId)
+const QString& PaintLayerDockWidget::getTextureType(int layerId)
 {
     mHelperString = "";
     PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
@@ -263,6 +258,73 @@ QStringList PaintLayerDockWidget::getAvailableTextureTypes(void)
     catch (Ogre::Exception e) {}
 
     return mAvailableTextureTypes;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setPaintEffect(int layerId, const QString& paintEffect)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        if (paintEffect == PAINT_EFFECT_COLOR_QSTRING)
+            paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_COLOR);
+        else if (paintEffect == PAINT_EFFECT_ALPHA_QSTRING)
+            paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_ALPHA);
+        else if (paintEffect == PAINT_EFFECT_TEXTURE_QSTRING)
+            paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_TEXTURE);
+    }
+}
+
+//****************************************************************************/
+const QString& PaintLayerDockWidget::getPaintEffect(int layerId)
+{
+    mHelperString = "";
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        switch (paintLayer->getPaintEffect())
+        {
+            case PaintLayer::PAINT_EFFECT_COLOR:
+                mHelperString = PAINT_EFFECT_COLOR_QSTRING;
+            break;
+            case PaintLayer::PAINT_EFFECT_ALPHA:
+                mHelperString = PAINT_EFFECT_ALPHA_QSTRING;
+            break;
+            case PaintLayer::PAINT_EFFECT_TEXTURE:
+                mHelperString = PAINT_EFFECT_TEXTURE_QSTRING;
+            break;
+        }
+    }
+    return mHelperString;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setPaintOverflow(int layerId, const QString& paintOverflow)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        if (paintOverflow == PAINT_OVERFLOW_IGNORE_QSTRING)
+            paintLayer->setPaintOverflow (PaintLayer::PAINT_OVERFLOW_IGNORE);
+        else if (paintOverflow == PAINT_OVERFLOW_CONTINUE_QSTRING)
+            paintLayer->setPaintOverflow (PaintLayer::PAINT_OVERFLOW_CONTINUE);
+    }
+}
+
+//****************************************************************************/
+const QString& PaintLayerDockWidget::getPaintOverflow(int layerId)
+{
+    mHelperString = "";
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        if (paintLayer->getPaintOverflow() == PaintLayer::PAINT_OVERFLOW_IGNORE)
+            mHelperString = PAINT_OVERFLOW_IGNORE_QSTRING;
+        else if (paintLayer->getPaintOverflow() == PaintLayer::PAINT_OVERFLOW_CONTINUE)
+            mHelperString = PAINT_OVERFLOW_CONTINUE_QSTRING;
+    }
+
+    return mHelperString;
 }
 
 //****************************************************************************/
@@ -437,10 +499,25 @@ float PaintLayerDockWidget::getBrushScale(int layerId)
 }
 
 //****************************************************************************/
-void PaintLayerDockWidget::handleLayerSelected (int layerId, QString layerName)
+void PaintLayerDockWidget::handleLayerSelected (int layerId, const QString& layerName)
 {
     // Get the selected layers
     QVector<int> v = mPaintLayerWidget->getSelectedLayerIds();
     mPaintLayerManager->enableAllPaintLayers(false); // First disable everything
     mPaintLayerManager->enablePaintLayers (v.toStdVector(), true); // Enable every selected layer
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setBrushInPaintLayer(const QString& name, const QString& baseName)
+{
+    int layerId = mPaintLayerWidget->getCurrentLayerId();
+    if (layerId < 0)
+        return;
+
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        paintLayer->setBrush(baseName.toStdString());
+        mPaintLayerWidget->setBrushIconInCurrentLayers(name);
+    }
 }

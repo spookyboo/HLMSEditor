@@ -18,37 +18,43 @@
 **
 ****************************************************************************/
 
-#ifndef BRUSH_DOCKWIDGET_H
-#define BRUSH_DOCKWIDGET_H
+#ifndef BRUSH_WIDGET_H
+#define BRUSH_WIDGET_H
 
-#include <QtWidgets>
-#include <QDockWidget>
-#include "brush_widget.h"
+#include <QWidget>
+#include "tool_default_texturewidget.h"
 
 QT_BEGIN_NAMESPACE
-class QDockWidget;
+
 QT_END_NAMESPACE
 
-class MainWindow;
+class BrushDockWidget;
 
 /****************************************************************************
- This class represents a DockWidget
- It is a container class to hold the actual BrushWidget
- ***************************************************************************/
-class BrushDockWidget : public QDockWidget
+Main class for brush widget. This widgets displays brushes.
+***************************************************************************/
+class BrushWidget : public QWidget
 {
     Q_OBJECT
 
     public:
-        BrushDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags = 0);
-        ~BrushDockWidget(void);
+        BrushWidget(const QString& brushDir, BrushDockWidget* brushDockWidget, QWidget* parent = 0);
+        ~BrushWidget(void);
+
+    signals:
+        void brushDoubleClicked(const QString& name, const QString& baseName);
 
     private slots:
         void handleBrushDoubleClicked(const QString& name, const QString& baseName);
 
+    protected:
+        void loadBrushesRecursively(const QString& searchPath);
+
     private:
-        MainWindow* mParent;
-        BrushWidget* mBrushWidget;
+        BrushDockWidget* mBrushDockWidget; // Reference to the dockwidget that contains this widget
+        Magus::QtDefaultTextureWidget* mTextureWidget;
+        QWidget* mParent;
+        QString mBrushDir;
 };
 
 #endif
