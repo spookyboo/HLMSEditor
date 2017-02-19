@@ -226,6 +226,14 @@ void MainWindow::createActions(void)
     mTextureBrowserAddImageMenuAction->setShortcut(QKeySequence(QString("Ctrl+T")));
     connect(mTextureBrowserAddImageMenuAction, SIGNAL(triggered()), this, SLOT(doTextureBrowserAddImageMenuAction()));
 
+    // ******** Painting ********
+    mNewPaintingLayerAction = new QAction(QString(ACTION_NEW_PAINTING_LAYER), this);
+    mNewPaintingLayerAction->setShortcut(QKeySequence(QString("Ctrl+P")));
+    connect(mNewPaintingLayerAction, SIGNAL(triggered()), this, SLOT(doNewPaintingLayerMenuAction()));
+    mDeleteSelectedPaintingLayersAction = new QAction(QString(ACTION_DELETE_CURRENT_PAINTING_LAYERS), this);
+    mDeleteSelectedPaintingLayersAction->setShortcut(QKeySequence(QString("Ctrl+D")));
+    connect(mDeleteSelectedPaintingLayersAction, SIGNAL(triggered()), this, SLOT(doSelectedPaintingLayersMenuAction()));
+
     // ******** Tools ********
     mConfigureMenuAction = new QAction(QString(ACTION_CONFIGURE), this);
     mConfigureMenuAction->setShortcut(QKeySequence(QString("Ctrl+X")));
@@ -242,8 +250,6 @@ void MainWindow::createMenus(void)
 {
     // ******** File ********
     mFileMenu = menuBar()->addMenu(QString("&File"));
-    mMaterialBrowserMenu = menuBar()->addMenu(QString("&Materials"));
-    mTextureBrowserMenu = menuBar()->addMenu(QString("&Textures"));
     QMenu* fileMenuAction = mFileMenu->addMenu("New");
 
     // New
@@ -331,12 +337,19 @@ void MainWindow::createMenus(void)
     mFileMenu->addAction(mQuitMenuAction);
 
     // ******** Material browser ********
+    mMaterialBrowserMenu = menuBar()->addMenu(QString("&Materials"));
     mMaterialBrowserMenu->addAction(mMaterialBrowserOpenMenuAction);
     mMaterialBrowserMenu->addAction(mMaterialBrowserAddMenuAction);
 
     // ******** Texture browser ********
+    mTextureBrowserMenu = menuBar()->addMenu(QString("&Textures"));
     mTextureBrowserMenu->addAction(mTextureBrowserImportMenuAction);
     mTextureBrowserMenu->addAction(mTextureBrowserAddImageMenuAction);
+
+    // ******** Painting ********
+    mWindowMenu = menuBar()->addMenu(QString("&Painting"));
+    mWindowMenu->addAction(mNewPaintingLayerAction);
+    mWindowMenu->addAction(mDeleteSelectedPaintingLayersAction);
 
     // ******** Tools ********
     mWindowMenu = menuBar()->addMenu(QString("&Tools"));
@@ -1125,6 +1138,18 @@ void MainWindow::doTextureBrowserAddImageMenuAction(void)
     }
 
     handleTextureMutationOccured();
+}
+
+//****************************************************************************/
+void MainWindow::doNewPaintingLayerMenuAction(void)
+{
+    mPaintLayerDockWidget->createPaintLayer();
+}
+
+//****************************************************************************/
+void MainWindow::doSelectedPaintingLayersMenuAction(void)
+{
+    mPaintLayerDockWidget->deleteSelectedPaintLayer();
 }
 
 //****************************************************************************/

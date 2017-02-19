@@ -47,8 +47,6 @@ namespace Magus
         mXEdit->setValidator(validator);
         mYEdit->setValidator(validator);
         setXY(x, y);
-        connect(mXEdit, SIGNAL(textEdited(QString)), this, SLOT(propertyValueChanged(void)));
-        connect(mYEdit, SIGNAL(textEdited(QString)), this, SLOT(propertyValueChanged(void)));
 
         // Layout
         xLayout->addWidget(mXlabel, 1);
@@ -62,6 +60,8 @@ namespace Magus
         mainLayout->addLayout(horizontalLayout);
         setLayout(mainLayout);
         mType = XY;
+        connect(mXEdit, SIGNAL(textEdited(QString)), this, SLOT(propertyValueChanged(void)));
+        connect(mYEdit, SIGNAL(textEdited(QString)), this, SLOT(propertyValueChanged(void)));
     }
 
     //****************************************************************************/
@@ -86,13 +86,15 @@ namespace Magus
     //****************************************************************************/
     void QtXYProperty::setX (qreal x)
     {
-        mXEdit->setText(QString::number(x, 'f', mPrecision));
+        QString s = QString::number(x, 'f', mPrecision);
+        mXEdit->setText(s);
     }
 
     //****************************************************************************/
     void QtXYProperty::setY (qreal y)
     {
-        mYEdit->setText(QString::number(y, 'f', mPrecision));
+        QString s = QString::number(y, 'f', mPrecision);
+        mYEdit->setText(s);
     }
 
     //****************************************************************************/

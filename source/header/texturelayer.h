@@ -74,6 +74,7 @@ class TextureLayer
         Ogre::uint32 mTextureOnWhichIsPaintedWidth;     // Width of mTextureOnWhichIsPainted; must be the same as the width of mTexture
         Ogre::uint32 mTextureOnWhichIsPaintedHeight;    // Height of mTextureOnWhichIsPainted; must be the same as the height of mTexture
         bool mTextureOnWhichIsPaintedHasAlpha;          // Painting effect depends on the fact whether the texture has alpha enabled
+        bool mTextureTypeDefined;                       // If true, a valid texture type is assigned to this layer
 };
 
 #endif

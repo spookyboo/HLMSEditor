@@ -198,6 +198,7 @@ class PaintLayer
         /* Determines the frequency of the jitter effect. The interval is set to seconds.
          */
         void setJitterTranslationInterval (float interval);
+        float getJitterTranslationInterval (void) {return mJitterTranslationInterval;}
 
         /* Determines whether there is jitter translation
          */

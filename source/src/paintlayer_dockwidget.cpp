@@ -52,6 +52,18 @@ PaintLayerDockWidget::~PaintLayerDockWidget(void)
 }
 
 //****************************************************************************/
+void PaintLayerDockWidget::createPaintLayer(void)
+{
+    mPaintLayerWidget->createDefaultPaintLayer();
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::deleteSelectedPaintLayer(void)
+{
+    mPaintLayerWidget->deleteSelectedPaintLayer();
+}
+
+//****************************************************************************/
 bool PaintLayerDockWidget::currentDatablockExists(void)
 {
     return (mParent->getCurrentDatablockName() != "");
@@ -723,6 +735,226 @@ float PaintLayerDockWidget::getJitterRotationAngleInterval(int layerId)
 
     return interval;
 }
+
+//****************************************************************************/
+void PaintLayerDockWidget::setTranslation(int layerId, const QVector2D& translation)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        paintLayer->setTranslationFactor(translation.x(), translation.y());
+        paintLayer->setJitterTranslationEnabled(false); // To stop the jitter
+    }
+}
+
+//****************************************************************************/
+const QVector2D& PaintLayerDockWidget::getTranslation(int layerId)
+{
+    mHelperVector2D.setX(0.0f);
+    mHelperVector2D.setY(0.0f);
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        mHelperVector2D.setX(paintLayer->getTranslationFactorX());
+        mHelperVector2D.setY(paintLayer->getTranslationFactorY());
+    }
+    return mHelperVector2D;
+}
+
+//****************************************************************************/
+bool PaintLayerDockWidget::hasJitterTranslationEnabled(int layerId)
+{
+    bool enabled;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        enabled = paintLayer->hasJitterTranslationEnabled();
+
+    return enabled;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterTranslationX(int layerId, const QVector2D& xMinMax)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterTranslationFactorX(xMinMax.x(), xMinMax.y());
+}
+
+//****************************************************************************/
+const QVector2D&  PaintLayerDockWidget::getJitterTranslationX(int layerId)
+{
+    mHelperVector2D.setX(0.0f);
+    mHelperVector2D.setY(0.0f);
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        mHelperVector2D.setX(paintLayer->getJitterTranslationFactorX().x); // xMin
+        mHelperVector2D.setY(paintLayer->getJitterTranslationFactorX().y); // xMax
+    }
+    return mHelperVector2D;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterTranslationY(int layerId, const QVector2D& yMinMax)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterTranslationFactorY(yMinMax.x(), yMinMax.y());
+}
+
+//****************************************************************************/
+const QVector2D& PaintLayerDockWidget::getJitterTranslationY(int layerId)
+{
+    mHelperVector2D.setX(0.0f);
+    mHelperVector2D.setY(0.0f);
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        mHelperVector2D.setX(paintLayer->getJitterTranslationFactorY().x); // yMin
+        mHelperVector2D.setY(paintLayer->getJitterTranslationFactorY().y); // yMax
+    }
+    return mHelperVector2D;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterTranslationInterval(int layerId, float interval)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterTranslationInterval(interval);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getJitterTranslationInterval(int layerId)
+{
+    float interval = 0.0f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        interval = paintLayer->getJitterTranslationInterval();
+
+    return interval;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setMirrorHorizontal(int layerId, bool mirrored)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        paintLayer->setMirrorHorizontal(mirrored);
+        paintLayer->setJitterMirrorHorizontalEnabled(false); // To stop the jitter
+    }
+}
+
+//****************************************************************************/
+bool PaintLayerDockWidget::getMirrorHorizontal(int layerId)
+{
+    bool enabled = false;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        enabled = paintLayer->getMirrorHorizontal();
+
+    return enabled;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterMirrorHorizontal(int layerId, bool enabled)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterMirrorHorizontalEnabled(enabled);
+}
+
+//****************************************************************************/
+bool PaintLayerDockWidget::hasJitterMirrorHorizontal(int layerId)
+{
+    bool enabled = false;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        enabled = paintLayer->hasJitterMirrorHorizontalEnabled();
+
+    return enabled;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterMirrorHorizontalInterval(int layerId, float interval)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterMirrorHorizontalInterval(interval);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getJitterMirrorHorizontalInterval(int layerId)
+{
+    float interval = 0.0f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        interval = paintLayer->getJitterMirrorHorizontalInterval();
+
+    return interval;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setMirrorVertical(int layerId, bool mirrored)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        paintLayer->setMirrorVertical(mirrored);
+        paintLayer->setJitterMirrorVerticalEnabled(false); // To stop the jitter
+    }
+}
+
+//****************************************************************************/
+bool PaintLayerDockWidget::getMirrorVertical(int layerId)
+{
+    bool enabled = false;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        enabled = paintLayer->getMirrorVertical();
+
+    return enabled;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterMirrorVertical(int layerId, bool enabled)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterMirrorVerticalEnabled(enabled);
+}
+
+//****************************************************************************/
+bool PaintLayerDockWidget::hasJitterMirrorVertical(int layerId)
+{
+    bool enabled = false;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        enabled = paintLayer->hasJitterMirrorVerticalEnabled();
+
+    return enabled;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setJitterMirrorVerticalInterval(int layerId, float interval)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setJitterMirrorVerticalInterval(interval);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getJitterMirrorVerticalInterval(int layerId)
+{
+    float interval = 0.0f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        interval = paintLayer->getJitterMirrorVerticalInterval();
+
+    return interval;
+}
+
 
 //****************************************************************************/
 void PaintLayerDockWidget::handleLayerSelected (int layerId, const QString& layerName)

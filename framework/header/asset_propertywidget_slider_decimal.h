@@ -47,6 +47,8 @@ namespace Magus
             void setValue (float value);
             float getValue (void) const;
             void setTitle(const QString title);
+            void setPrecision(int precision);
+            int getPrecision(void);
 
         private slots:
             void editValueChanged(void);
@@ -61,6 +63,7 @@ namespace Magus
             int mMinRange;
             int mMaxRange;
             float mStep;
+            int mPrecision;
     };
 }
 

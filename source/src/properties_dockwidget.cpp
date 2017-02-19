@@ -30,8 +30,8 @@ PropertiesDockWidget::PropertiesDockWidget(QString title, MainWindow* parent, Qt
 	mParent(parent)
 {
     mTextViewer = new QPlainTextEdit();
-    mTextViewer->setMinimumHeight(600);
-    mTextViewer->setMinimumWidth(800);
+    //mTextViewer->setMinimumHeight(600);
+    //mTextViewer->setMinimumWidth(800);
     mTextViewer->hide();
     mTextViewer->setReadOnly(true);
     mTextViewer->setWindowFlags(Qt::WindowStaysOnTopHint);

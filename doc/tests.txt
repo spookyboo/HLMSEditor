@@ -27,6 +27,14 @@ HLMS creation:
 Painting:
 ---------
 - No HLMS material is created
+  Choose from main menu 'Painting' > 'New painting layer'
+  ==> This is not possible (there must be a material)
+
+- No HLMS material is created
+  Choose from main menu 'Painting' > 'Delete selected painting layer'
+  ==> Warning message
+
+- No HLMS material is created
   Create a painting layer
   ==> This is not possible (there must be a material)
 
@@ -54,6 +62,7 @@ Painting:
   Create a 2 painting layers
   Click the 'X'  on the Pbs datablock node
   ==> All Painting layers are removed
+
 
 
 

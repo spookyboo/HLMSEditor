@@ -1121,7 +1121,6 @@ namespace Magus
 
             if (e->button() == Qt::MiddleButton || e->button() == Qt::LeftButton)
             {
-
                 mMouseDown = true;
                 if (mPaintMode && e->button() == Qt::LeftButton)
                 {
@@ -1131,10 +1130,7 @@ namespace Magus
             }
             else if (e->button() == Qt::RightButton)
             {
-
                 // Forward it to the render window dockwidget
-                // (note the cast; this is needed, because everything points to each other)
-                //static_cast<RenderwindowDockWidget*>(mRenderwindowDockWidget)->mousePressEventPublic(e);
                 mRenderwindowDockWidget->mousePressEventPublic(e);
             }
         }

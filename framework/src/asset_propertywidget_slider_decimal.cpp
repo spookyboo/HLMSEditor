@@ -34,6 +34,7 @@ namespace Magus
         mMinRange = 0;
         mMaxRange = 200;
         mStep = 0.005f;
+        mPrecision = 2;
         QVBoxLayout* mainLayout = new QVBoxLayout;
         QHBoxLayout* horizontalLayout = new QHBoxLayout;
         QHBoxLayout* editAndSliderLayout = new QHBoxLayout;
@@ -64,6 +65,7 @@ namespace Magus
         mMin = min;
         mMax = max;
         mStep = step;
+        mMinRange = (int) (min/step);
         mMaxRange = (int) (max/step);
         mSlider->setRange(mMinRange, mMaxRange);
         mSlider->setTickInterval(1);
@@ -75,7 +77,8 @@ namespace Magus
         // Convert to range
         int intValue = (int)(value/mStep);
         mSlider->setValue(intValue);
-        mEdit->setText(QVariant(value).toString());
+        QString s = QString::number(value, 'f', mPrecision);
+        mEdit->setText(s);
     }
 
     //****************************************************************************/
@@ -93,18 +96,33 @@ namespace Magus
         mSlider->setValue(intValue);
         emit valueChanged(this);
     }
+
     //****************************************************************************/
     void QtSliderDecimalProperty::sliderValueChanged(void)
     {
         // Synchronize editbox and slider
         int intValue = QVariant(mSlider->value()).toInt();
         float value = intValue * mStep;
-        mEdit->setText(QVariant(value).toString());
+        QString s = QString::number(value, 'f', mPrecision);
+        mEdit->setText(s);
         emit valueChanged(this);
     }
+
     //****************************************************************************/
     void QtSliderDecimalProperty::setTitle(const QString title)
     {
         mTitle->setText(title);
+    }
+
+    //****************************************************************************/
+    void QtSliderDecimalProperty::setPrecision(int precision)
+    {
+        mPrecision = precision;
+    }
+
+    //****************************************************************************/
+    int QtSliderDecimalProperty::getPrecision(void)
+    {
+        return mPrecision;
     }
 }

@@ -71,6 +71,9 @@ class PaintLayerWidget : public QWidget
         ~PaintLayerWidget(void);
         bool eventFilter(QObject* object, QEvent* event);
 
+        // Create a new layer with default name
+        void createDefaultPaintLayer(void);
+
         // Create a new layer
         const QtLayer* createLayer(const QString& name);
 
@@ -91,6 +94,9 @@ class PaintLayerWidget : public QWidget
 
         // Delete all layers; it does not emit layerDeleted though
         void deleteAllLayers (void);
+
+        // Delete the selected layer; it does not emit layerDeleted though
+        void deleteSelectedPaintLayer(void);
 
         // Set the (name) name of the layer, identified by the (unique) layerId
         void setLayerName(int layerId, const QString& newName);
@@ -165,6 +171,7 @@ class PaintLayerWidget : public QWidget
         QMenu* mContextMenu;
         QString mTempName;
         QVector<int> helperIntVector;
+        QVector2D mHelperVector2D;
 };
 
 #endif

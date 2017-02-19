@@ -31,9 +31,10 @@ TextureLayer::TextureLayer(void) :
     mTextureOnWhichIsPaintedWidth(0),
     mTextureOnWhichIsPaintedHeight(0),
     mTextureOnWhichIsPaintedHasAlpha(false),
-    mNumMipMaps(0)
+    mNumMipMaps(0),
+    mTextureTypeDefined(false)
 {
-    mTextureType = Ogre::PbsTextureTypes::PBSM_DIFFUSE;
+    mTextureType = Ogre::PBSM_DIFFUSE;
     mDatablockName = "";
     mTexture.setNull();
     mBuffers.clear();
@@ -66,6 +67,7 @@ void TextureLayer::setDatablockNameAndTexture (const Ogre::IdString& datablockNa
             // Texture on GPU; store the buffers in a vector
             if (!mDatablockPbs->getTexture(textureType).isNull())
             {
+                mTextureTypeDefined = true;
                 mTexture = mDatablockPbs->getTexture(textureType); // TextureType MUST exist, otherwise the application crashes
                 mNumMipMaps = mTexture->getNumMipmaps();
                 mBuffers.clear();

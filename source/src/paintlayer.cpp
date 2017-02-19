@@ -87,9 +87,9 @@ PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager, int externalLayerId
     mJitterMirrorVerticalElapsedTime(0.0f),
     mJitterRotationAngleMin(0.0f),
     mJitterRotationAngleMax(360.0f),
-    mJitterTranslationFactorXmin(0),
-    mJitterTranslationFactorXmax(0),
-    mJitterTranslationFactorYmin(0),
+    mJitterTranslationFactorXmin(-1),
+    mJitterTranslationFactorXmax(1),
+    mJitterTranslationFactorYmin(-1),
     mJitterTranslationFactorYmax(1),
     mJitterScaleMin(0.0f),
     mJitterScaleMax(1.0f),
@@ -141,11 +141,11 @@ void PaintLayer::paint(float u, float v)
             mPosY = y;
             if (mMirrorHorizontal)
             {
-                mPosX = mBrushWidthMinusOne - mPosX;
+                mPosY = mBrushHeightMinusOne - mPosY;
             }
             if (mMirrorVertical)
             {
-                mPosY = mBrushHeightMinusOne - mPosY;
+                mPosX = mBrushWidthMinusOne - mPosX;
             }
             if (mRotate)
             {

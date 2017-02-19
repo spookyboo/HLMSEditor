@@ -141,6 +141,8 @@ class MainWindow : public QMainWindow
         void doQuitMenuAction(void);
         void doTextureBrowserImportMenuAction(void);
         void doTextureBrowserAddImageMenuAction(void);
+        void doNewPaintingLayerMenuAction(void);
+        void doSelectedPaintingLayersMenuAction(void);
         void doConfigureMenuAction(void);
         void doResetWindowLayoutMenuAction(void);
         void handleTextureDoubleClicked(const QString& fileName, const QString& baseName);
@@ -181,6 +183,8 @@ class MainWindow : public QMainWindow
         QAction* mMaterialBrowserOpenMenuAction;
         QAction* mMaterialBrowserAddMenuAction;
         QAction* mTextureBrowserImportMenuAction;
+        QAction* mNewPaintingLayerAction;
+        QAction* mDeleteSelectedPaintingLayersAction;
         QAction* mConfigureMenuAction;
         QAction* mTextureBrowserAddImageMenuAction;
         QAction* mRecentHlmsFilesMenuAction;

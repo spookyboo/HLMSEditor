@@ -337,29 +337,46 @@ static const int PROPERTY_TEXTURE_TYPE = 200;
 static const int PROPERTY_PAINT_EFFECT = 201;
 static const int PROPERTY_PAINT_OVERFLOW = 202;
 
-static const int PROPERTY_JITTER_PAINT_COLOUR_ENABLED = 210;
-static const int PROPERTY_PAINT_COLOUR = 211;
+static const int PROPERTY_PAINT_COLOUR = 210;
+static const int PROPERTY_JITTER_PAINT_COLOUR_ENABLED = 211;
 static const int PROPERTY_JITTER_PAINT_COLOUR_MIN = 212;
 static const int PROPERTY_JITTER_PAINT_COLOUR_MAX = 213;
 static const int PROPERTY_JITTER_PAINT_COLOUR_INTERVAL = 214;
 
-static const int PROPERTY_JITTER_SCALE_ENABLED = 220;
-static const int PROPERTY_SCALE = 221;
+static const int PROPERTY_SCALE = 220;
+static const int PROPERTY_JITTER_SCALE_ENABLED = 221;
 static const int PROPERTY_JITTER_SCALE_MIN = 222;
 static const int PROPERTY_JITTER_SCALE_MAX = 223;
 static const int PROPERTY_JITTER_SCALE_INTERVAL = 224;
 
-static const int PROPERTY_JITTER_FORCE_ENABLED = 230;
-static const int PROPERTY_FORCE = 231;
+static const int PROPERTY_FORCE = 230;
+static const int PROPERTY_JITTER_FORCE_ENABLED = 231;
 static const int PROPERTY_JITTER_FORCE_MIN = 232;
 static const int PROPERTY_JITTER_FORCE_MAX = 233;
 static const int PROPERTY_JITTER_FORCE_INTERVAL = 234;
 
-static const int PROPERTY_JITTER_ROTATION_ANGLE_ENABLED = 240;
-static const int PROPERTY_ROTATION_ANGLE = 241;
+static const int PROPERTY_ROTATION_ANGLE = 240;
+static const int PROPERTY_JITTER_ROTATION_ANGLE_ENABLED = 241;
 static const int PROPERTY_JITTER_ROTATION_ANGLE_MIN = 242;
 static const int PROPERTY_JITTER_ROTATION_ANGLE_MAX = 243;
 static const int PROPERTY_JITTER_ROTATION_ANGLE_INTERVAL = 244;
+
+static const int PROPERTY_TRANSLATION_X = 250;
+static const int PROPERTY_JITTER_TRANSLATION_ENABLED = 251;
+static const int PROPERTY_TRANSLATION_Y = 252;
+static const int PROPERTY_JITTER_TRANSLATION_X_MIN = 253;
+static const int PROPERTY_JITTER_TRANSLATION_X_MAX = 254;
+static const int PROPERTY_JITTER_TRANSLATION_Y_MIN = 255;
+static const int PROPERTY_JITTER_TRANSLATION_Y_MAX = 256;
+static const int PROPERTY_JITTER_TRANSLATION_INTERVAL = 257;
+
+static const int PROPERTY_MIRROR_HORIZONTAL = 260;
+static const int PROPERTY_JITTER_MIRROR_HORIZONTAL_ENABLED = 261;
+static const int PROPERTY_JITTER_MIRROR_HORIZONTAL_INTERVAL = 262;
+
+static const int PROPERTY_MIRROR_VERTICAL = 270;
+static const int PROPERTY_JITTER_MIRROR_VERTICAL_ENABLED = 271;
+static const int PROPERTY_JITTER_MIRROR_VERTICAL_INTERVAL = 272;
 
 // Material and Texture browser
 static const int TOOL_SOURCES_LEVEL_X000_PBS = 1;
@@ -370,5 +387,9 @@ static const QString ACTION_IMPORT_TEXTURES_FROM_DIR = QString("Import from dire
 static const QString ACTION_CONFIGURE = QString("Configure");
 static const QString ACTION_ADD_TEXTURES = QString("Add texture file(s)");
 static const QString ACTION_EDIT = QString("Edit material");
+
+// Painting
+static const QString ACTION_NEW_PAINTING_LAYER = QString("New painting layer");
+static const QString ACTION_DELETE_CURRENT_PAINTING_LAYERS = QString("Delete selected painting layer");
 
 #endif

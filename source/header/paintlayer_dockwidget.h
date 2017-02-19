@@ -24,6 +24,7 @@
 #include <QtWidgets>
 #include <QDockWidget>
 #include <QColor>
+#include <QVector2D>
 #include "paintlayer_widget.h"
 
 QT_BEGIN_NAMESPACE
@@ -48,6 +49,16 @@ class PaintLayerDockWidget : public QDockWidget
                              MainWindow* parent,
                              Qt::WindowFlags flags = 0);
         ~PaintLayerDockWidget(void);
+
+        /* Create a new paint layer, without settings. This is the same action as performed by the
+         * contextmenu.
+         */
+        void createPaintLayer(void);
+
+        /* Delete the selected paint layers This is the same action as performed by the
+         * contextmenu.
+         */
+        void deleteSelectedPaintLayer(void);
 
         /* When a new brush is selected, set it in the currently selected paintlayer
          */
@@ -172,6 +183,39 @@ class PaintLayerDockWidget : public QDockWidget
         void setJitterRotationAngleInterval(int layerId, float interval);
         float getJitterRotationAngleInterval(int layerId);
 
+        /* Translation
+         * This value is forwarded to the PaintLayer
+         */
+        void setTranslation(int layerId, const QVector2D& translation);
+        const QVector2D& getTranslation(int layerId);
+        bool hasJitterTranslationEnabled(int layerId);
+        void setJitterTranslationX(int layerId, const QVector2D& x);
+        void setJitterTranslationY(int layerId, const QVector2D& y);
+        const QVector2D& getJitterTranslationX(int layerId);
+        const QVector2D& getJitterTranslationY(int layerId);
+        void setJitterTranslationInterval(int layerId, float interval);
+        float getJitterTranslationInterval(int layerId);
+
+        /* Mirror horizontal
+         * This value is forwarded to the PaintLayer
+         */
+        void setMirrorHorizontal(int layerId, bool mirrored);
+        bool getMirrorHorizontal(int layerId);
+        void setJitterMirrorHorizontal(int layerId, bool enabled);
+        bool hasJitterMirrorHorizontal(int layerId);
+        void setJitterMirrorHorizontalInterval(int layerId, float interval);
+        float getJitterMirrorHorizontalInterval(int layerId);
+
+        /* Mirror vertical
+         * This value is forwarded to the PaintLayer
+         */
+        void setMirrorVertical(int layerId, bool mirrored);
+        bool getMirrorVertical(int layerId);
+        void setJitterMirrorVertical(int layerId, bool enabled);
+        bool hasJitterMirrorVertical(int layerId);
+        void setJitterMirrorVerticalInterval(int layerId, float interval);
+        float getJitterMirrorVerticalInterval(int layerId);
+
     private slots:
         void handleNewLayer (int layerId, const QString& layerName);
         void handleDeleteLayer (int layerId, const QString& layerName);
@@ -184,6 +228,7 @@ class PaintLayerDockWidget : public QDockWidget
         QStringList mAvailableTextureTypes;
         QString mHelperString;
         QColor mHelplerColour;
+        QVector2D mHelperVector2D;
 };
 
 #endif

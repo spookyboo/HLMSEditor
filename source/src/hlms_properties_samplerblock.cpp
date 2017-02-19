@@ -53,9 +53,12 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
 
     // Create container - General
     Magus::QtContainerWidget* container = 0;
-    container = mAssetWidget->createContainer(CONTAINER_SAMPLERBLOCK_GENERAL, QString(""));
+    container = mAssetWidget->createContainer(CONTAINER_SAMPLERBLOCK_GENERAL, QString("General"));
+    container->setTitleBold(true);
     container = mAssetWidget->createContainer(CONTAINER_SAMPLERBLOCK_DETAILS, QString("Texture details"));
+    container->setTitleBold(true);
     mDetailMapContainer = mAssetWidget->createContainer(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS, QString("Detail map"));
+    container->setTitleBold(true);
 
     // Create properties
     // ******** Texture ********

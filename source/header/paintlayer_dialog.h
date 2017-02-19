@@ -26,6 +26,7 @@
 #include "asset_propertywidget_color.h"
 #include "asset_propertywidget_slider_decimal.h"
 #include "asset_propertywidget_checkbox.h"
+#include "asset_containerwidget.h"
 
 QT_BEGIN_NAMESPACE
 QT_END_NAMESPACE
@@ -70,6 +71,23 @@ class PaintLayerDialog : public QDialog
         QtSliderDecimalProperty* mJitterRotationAngleMaxProperty;
         QtSliderDecimalProperty* mJitterRotationAngleIntervalProperty;
 
+        QtCheckBoxProperty* mJitterTranslationCheckboxProperty;
+        QtSliderDecimalProperty* mTranslationXProperty;
+        QtSliderDecimalProperty* mTranslationYProperty;
+        QtSliderDecimalProperty* mJitterTranslationXMinProperty;
+        QtSliderDecimalProperty* mJitterTranslationXMaxProperty;
+        QtSliderDecimalProperty* mJitterTranslationYMinProperty;
+        QtSliderDecimalProperty* mJitterTranslationYMaxProperty;
+        QtSliderDecimalProperty* mJitterTranslationIntervalProperty;
+
+        QtCheckBoxProperty* mMirrorHorizontalProperty;
+        QtCheckBoxProperty* mJitterMirrorHorizontalProperty;
+        QtSliderDecimalProperty* mJitterMirrorHorizontalIntervalProperty;
+
+        QtCheckBoxProperty* mMirrorVerticalProperty;
+        QtCheckBoxProperty* mJitterMirrorVerticalProperty;
+        QtSliderDecimalProperty* mJitterMirrorVerticalIntervalProperty;
+
     private slots:
         void propertyValueChanged(QtProperty* property);
 
@@ -77,6 +95,14 @@ class PaintLayerDialog : public QDialog
         void createIcons();
         PaintLayerWidget* mPaintLayerWidget;
         QtLayer* mQtLayer;
+        Magus::QtContainerWidget* mContainer1;
+        Magus::QtContainerWidget* mContainer2;
+        Magus::QtContainerWidget* mContainer3;
+        Magus::QtContainerWidget* mContainer4;
+        Magus::QtContainerWidget* mContainer5;
+        Magus::QtContainerWidget* mContainer6;
+        Magus::QtContainerWidget* mContainer7;
+        Magus::QtContainerWidget* mContainer8;
 };
 
 #endif

@@ -51,7 +51,8 @@ HlmsPropertiesUnlitDatablock::HlmsPropertiesUnlitDatablock(const QString& fileNa
 
     // Create container - General
     Magus::QtContainerWidget* container = 0;
-    container = mAssetWidget->createContainer(CONTAINER_UNLIT_DATABLOCK_GENERAL, QString(""));
+    container = mAssetWidget->createContainer(CONTAINER_UNLIT_DATABLOCK_GENERAL, QString("General"));
+    container->setTitleBold(true);
 
     // Create properties
     // ******** Name ********

@@ -32,6 +32,7 @@
 #include <QMimeData>
 #include <QTableWidgetItem>
 #include <QTreeWidgetItem>
+#include <QVector2D>
 #include "constants.h"
 #include "paintlayer_widget.h"
 #include "paintlayer_dockwidget.h"
@@ -205,27 +206,12 @@ void PaintLayerWidget::contextMenuItemSelected(QAction* action)
     // ---------------- Create layer action ----------------
     if (action->text() == TOOL_LAYER_ACTION_CREATE_LAYER)
     {
-        if (mPaintLayerDockWidget->currentDatablockExists())
-        {
-            if (mPaintLayerDockWidget->currentDatablockIsPbs())
-            {
-                createLayer(QString(""));
-            }
-            else
-            {
-                QMessageBox::information(0, QString("Warning"), QString("Painting on HLMS Unlit materials is not supported"));
-            }
-        }
-        else
-        {
-            QMessageBox::information(0, QString("Warning"), QString("Create / load a hlms material before creating a paint layer.\n"
-                                                                    "Did you forget to generate (cog icon) or edit the hlms material?"));
-        }
+        createDefaultPaintLayer();
         return;
     }
     else if (action->text() == TOOL_LAYER_ACTION_DELETE_LAYER)
     {
-        deleteLayer(getCurrentLayerId());
+        deleteSelectedPaintLayer();
     }
     else if (action->text() == TOOL_LAYER_ACTION_RENAME_LAYER)
     {
@@ -341,6 +327,27 @@ void PaintLayerWidget::addLayer(QtLayer* layer)
 
     // Emit signal
     emit layerCreatedOrAdded(layer->layerId, layer->name);
+}
+
+//****************************************************************************/
+void PaintLayerWidget::createDefaultPaintLayer (void)
+{
+    if (mPaintLayerDockWidget->currentDatablockExists())
+    {
+        if (mPaintLayerDockWidget->currentDatablockIsPbs())
+        {
+            createLayer(QString(""));
+        }
+        else
+        {
+            QMessageBox::information(0, QString("Warning"), QString("Painting on HLMS Unlit materials is not supported"));
+        }
+    }
+    else
+    {
+        QMessageBox::information(0, QString("Warning"), QString("Create / load a hlms material before creating a paint layer.\n"
+                                                                "Did you forget to generate (cog icon) or edit the hlms material?"));
+    }
 }
 
 //****************************************************************************/
@@ -466,6 +473,16 @@ void PaintLayerWidget::deleteAllLayers (void)
     mTable->clearContents();
     mTable->setRowCount(0);
     mLayerVec.clear();
+}
+
+//****************************************************************************/
+void PaintLayerWidget::deleteSelectedPaintLayer(void)
+{
+    int layerId = getCurrentLayerId();
+    if (layerId < 0)
+        QMessageBox::information(0, QString("Warning"), QString("There is no layer to delete"));
+
+    deleteLayer(getCurrentLayerId());
 }
 
 //****************************************************************************/
@@ -639,6 +656,46 @@ void PaintLayerWidget::handleTableDoubleClicked(QModelIndex index)
         {
             mPaintLayerDockWidget->setRotationAngle(layerId, paintLayerDialog.mRotationAngleProperty->getValue());
         }
+
+        // Translation
+        if (paintLayerDialog.mJitterTranslationCheckboxProperty->getValue())
+        {
+            mHelperVector2D.setX(paintLayerDialog.mJitterTranslationXMinProperty->getValue());
+            mHelperVector2D.setY(paintLayerDialog.mJitterTranslationXMaxProperty->getValue());
+            mPaintLayerDockWidget->setJitterTranslationX(layerId, mHelperVector2D);
+            mHelperVector2D.setX(paintLayerDialog.mJitterTranslationYMinProperty->getValue());
+            mHelperVector2D.setY(paintLayerDialog.mJitterTranslationYMaxProperty->getValue());
+            mPaintLayerDockWidget->setJitterTranslationY(layerId, mHelperVector2D);
+            mPaintLayerDockWidget->setJitterTranslationInterval(layerId, paintLayerDialog.mJitterTranslationIntervalProperty->getValue());
+        }
+        else
+        {
+            mHelperVector2D.setX(paintLayerDialog.mTranslationXProperty->getValue());
+            mHelperVector2D.setY(paintLayerDialog.mTranslationYProperty->getValue());
+            mPaintLayerDockWidget->setTranslation(layerId, mHelperVector2D);
+        }
+
+        // Mirror Horizontal
+        if (paintLayerDialog.mJitterMirrorHorizontalProperty->getValue())
+        {
+            mPaintLayerDockWidget->setJitterMirrorHorizontalInterval(layerId, paintLayerDialog.mJitterMirrorHorizontalIntervalProperty->getValue());
+            mPaintLayerDockWidget->setJitterMirrorHorizontal(layerId, paintLayerDialog.mJitterMirrorHorizontalProperty->getValue());
+        }
+        else
+        {
+            mPaintLayerDockWidget->setMirrorHorizontal(layerId, paintLayerDialog.mMirrorHorizontalProperty->getValue());
+        }
+
+        // Mirror Vertical
+        if (paintLayerDialog.mJitterMirrorVerticalProperty->getValue())
+        {
+            mPaintLayerDockWidget->setJitterMirrorVerticalInterval(layerId, paintLayerDialog.mJitterMirrorVerticalIntervalProperty->getValue());
+            mPaintLayerDockWidget->setJitterMirrorVertical(layerId, paintLayerDialog.mJitterMirrorVerticalProperty->getValue());
+        }
+        else
+        {
+            mPaintLayerDockWidget->setMirrorVertical(layerId, paintLayerDialog.mMirrorVerticalProperty->getValue());
+        }
     }
 }
 
@@ -677,6 +734,26 @@ void PaintLayerWidget::initialisePaintLayerDialog(PaintLayerDialog* paintLayerDi
     paintLayerDialog->mJitterRotationAngleMinProperty->setValue(mPaintLayerDockWidget->getJitterRotationAngleMin(layerId));
     paintLayerDialog->mJitterRotationAngleMaxProperty->setValue(mPaintLayerDockWidget->getJitterRotationAngleMax(layerId));
     paintLayerDialog->mJitterRotationAngleIntervalProperty->setValue(mPaintLayerDockWidget->getJitterRotationAngleInterval(layerId));
+
+    // Translation
+    paintLayerDialog->mJitterTranslationCheckboxProperty->setValue(mPaintLayerDockWidget->hasJitterTranslationEnabled(layerId));
+    paintLayerDialog->mTranslationXProperty->setValue(mPaintLayerDockWidget->getTranslation(layerId).x());
+    paintLayerDialog->mTranslationYProperty->setValue(mPaintLayerDockWidget->getTranslation(layerId).y());
+    paintLayerDialog->mJitterTranslationXMinProperty->setValue(mPaintLayerDockWidget->getJitterTranslationX(layerId).x());
+    paintLayerDialog->mJitterTranslationXMaxProperty->setValue(mPaintLayerDockWidget->getJitterTranslationX(layerId).y());
+    paintLayerDialog->mJitterTranslationYMinProperty->setValue(mPaintLayerDockWidget->getJitterTranslationY(layerId).x());
+    paintLayerDialog->mJitterTranslationYMaxProperty->setValue(mPaintLayerDockWidget->getJitterTranslationY(layerId).y());
+    paintLayerDialog->mJitterTranslationIntervalProperty->setValue(mPaintLayerDockWidget->getJitterTranslationInterval(layerId));
+
+    // Mirror Horizontal
+    paintLayerDialog->mJitterMirrorHorizontalProperty->setValue(mPaintLayerDockWidget->hasJitterMirrorHorizontal(layerId));
+    paintLayerDialog->mMirrorHorizontalProperty->setValue(mPaintLayerDockWidget->getMirrorHorizontal(layerId));
+    paintLayerDialog->mJitterMirrorHorizontalIntervalProperty->setValue(mPaintLayerDockWidget->getJitterMirrorHorizontalInterval(layerId));
+
+    // Mirror Vertical
+    paintLayerDialog->mJitterMirrorVerticalProperty->setValue(mPaintLayerDockWidget->hasJitterMirrorVertical(layerId));
+    paintLayerDialog->mMirrorVerticalProperty->setValue(mPaintLayerDockWidget->getMirrorVertical(layerId));
+    paintLayerDialog->mJitterMirrorVerticalIntervalProperty->setValue(mPaintLayerDockWidget->getJitterMirrorVerticalInterval(layerId));
 }
 
 //****************************************************************************/
