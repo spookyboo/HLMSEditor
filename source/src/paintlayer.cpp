@@ -31,7 +31,7 @@
 PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager, int externalLayerId) :
     mPaintLayerManager(paintLayerManager),
     mExternaLayerlId(externalLayerId),
-    mEnabled(false),
+    mEnabled(true),
     mBrushWidth(0),
     mBrushHeight(0),
     mHalfBrushWidth(0),

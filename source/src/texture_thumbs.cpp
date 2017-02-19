@@ -90,12 +90,16 @@ void TextureThumbsDockWidget::addTextureFile (const QString& fileName)
     QString baseName = fileName;
     baseName = getBaseFileName(baseName);
     QPixmap pixmap;
-    if (Magus::fileExist(fileName))
-        pixmap.load(fileName);
-    else
-        pixmap.load(FILE_NO_IMAGE);
+    try
+    {
+        if (Magus::fileExist(fileName))
+            pixmap.load(fileName);
+        else
+            pixmap.load(FILE_NO_IMAGE);
 
-    mTextureWidget->addTexture(pixmap, fileName, baseName);
+        mTextureWidget->addTexture(pixmap, fileName, baseName);
+    }
+    catch (QException e){}
 }
 
 //****************************************************************************/

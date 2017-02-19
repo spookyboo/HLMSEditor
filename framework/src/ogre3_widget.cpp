@@ -1125,7 +1125,25 @@ namespace Magus
                 if (mPaintMode && e->button() == Qt::LeftButton)
                 {
                     Ogre::Vector2 pos = Ogre::Vector2::ZERO;
-                    doPaintLayer(e->pos().x(), e->pos().y());
+                    int result = doPaintLayer(e->pos().x(), e->pos().y());
+                    switch (result)
+                    {
+                        case 1:
+                            QMessageBox::information(0, QString("Warning"), QString("Cannot paint. You haven't created any paint layers."));
+                        break;
+
+                        case 2:
+                            QMessageBox::information(0, QString("Warning"), QString("Cannot paint. There is no material assigned to this part of the model."));
+                        break;
+
+                        case 3:
+                            QMessageBox::information(0, QString("Warning"), QString("Cannot paint. Did you forget to set the texture type in the paint layer?"));
+                        break;
+
+                        case 4:
+                            QMessageBox::information(0, QString("Warning"), QString("Cannot paint. The current material is not assigned to that part of the model"));
+                        break;
+                    }
                 }
             }
             else if (e->button() == Qt::RightButton)
@@ -1536,20 +1554,30 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QOgreWidget::doPaintLayer(int mouseX, int mouseY)
+    int QOgreWidget::doPaintLayer(int mouseX, int mouseY)
     {
-        if (!mPaintLayers || !mItem)
-            return;
+        // Only paint in case:
+        // - The paint layer is enabled
+        // - The datablock of the submesh is equal to datablock of the paint layer
+        // - The texture type is set in all paintlayers
+        // - The material on the item must be set with the current material in the editor
+
+        if (!mItem)
+            return 0;
 
         // If the mouse didn't hoover over a submesh, don't paint (this can be done quickly by using the RTT mechanism that is already used for mouse hoovering)
         int index = getSubItemIndexWithMouseOver(mouseX, mouseY);
         if (index < 0)
-            return;
+            return 0;
+
+        // If there are no paintlayers, don't continue
+        if (!mPaintLayers || mPaintLayers->size() == 0)
+            return 1;
 
         // The subitem must have a valid datablock; otherwise don't paint
         Ogre::HlmsDatablock* datablock = mItem->getSubItem(index)->getDatablock();
-        if (!datablock)
-            return;
+        if (!datablock || datablock->getName() == DEFAULT_DATABLOCK_NAME)
+            return 2;
 
         float u = 0.5f;
         float v = 0.5f;
@@ -1563,29 +1591,31 @@ namespace Magus
         PaintLayer* paintLayer;
         for (it = itStart; it != itEnd; ++it)
         {
-            // Only paint in case:
-            // - The paint layer is enabled
-            // - The datablock of the submesh is equal to datablock of the paint layer
             paintLayer = *it;
             if (paintLayer->isEnabled())
             {
-                if (paintLayer->getDatablockName() == datablock->getName())
-                {
-                    // Calculate the uv; we do it here, because it should only be calculated when needed (as late as possible)
-                    if (!uvCalculated)
-                    {
-                        // Calculate the uv
-                        col = getColourAtRenderToTexturePaint(mouseX, mouseY);
-                        helperVector2 = calculateColourToUv(col);
-                        u = helperVector2.x;
-                        v = helperVector2.y;
-                        uvCalculated = true;
-                    }
+                if (!paintLayer->getTextureLayer() || !paintLayer->getTextureLayer()->mTextureTypeDefined)
+                    return 3;
 
-                    paintLayer->paint(u, v);
+                if (paintLayer->getDatablockName() != datablock->getName())
+                    return 4;
+
+                // Calculate the uv; we do it here, because it should only be calculated when needed (as late as possible)
+                if (!uvCalculated)
+                {
+                    // Calculate the uv
+                    col = getColourAtRenderToTexturePaint(mouseX, mouseY);
+                    helperVector2 = calculateColourToUv(col);
+                    u = helperVector2.x;
+                    v = helperVector2.y;
+                    uvCalculated = true;
                 }
+
+                paintLayer->paint(u, v);
             }
         }
+
+        return 0;
     }
 
     //****************************************************************************/

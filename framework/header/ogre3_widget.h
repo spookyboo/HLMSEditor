@@ -216,7 +216,15 @@ namespace Magus
             void setUnlitDatablockRttPaint(void); // Set the uv colour map datablock to the paint item
             const Ogre::Vector2& calculateColourToUv (const Ogre::ColourValue& col); // Use a simple mapping algorithm to convert a colourvalue to a uv
             const Ogre::ColourValue& getColourAtRenderToTexturePaint(int x, int y); // Get the colour of the uv mapping texture on a mouse position
-            void doPaintLayer(int mouseX, int mouseY); // Apply the paint effect to the layers; is false is returned, painting was not possible
+
+            /* Apply the paint effect to the layers. This funtion returns a code. Depending on the code, a message can be displayed
+             * doPaintLayer returns:
+             * 0 - everything ok. Painting was possible
+             * 1 - Painting is not possible, because the mousepointer did not hoover over the mesh (don't display a message)
+             * 2 - There is no material assigned to the mesh
+             * 3 - There is no texture type assigned in the paint layer
+             */
+            int doPaintLayer(int mouseX, int mouseY);
 
             Ogre::HlmsDatablock* getDatablockByFullName(const Ogre::String& fullName);
             PaintLayers* mPaintLayers; // Pointer to vector of PaintLayer objects

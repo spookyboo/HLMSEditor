@@ -322,8 +322,8 @@ void PaintLayerWidget::addLayer(QtLayer* layer)
     //mTable->resizeColumnToContents(0);
 
     // Set the item to selected
-    mTable->selectRow(row);
     mTable->resizeRowsToContents();
+    mTable->selectRow(row);
 
     // Emit signal
     emit layerCreatedOrAdded(layer->layerId, layer->name);

@@ -124,6 +124,10 @@ MainWindow::MainWindow(void) :
         ++it;
     }
     Ogre::LogManager::getSingleton().logMessage("Supported Qt formats: " + supportedFormatString.toStdString());
+
+    // Set the paintlayer pointer in the ogre widget (the widget is already created in the RenderwindowDockWidget)
+    QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
+    ogreWidget->setPaintLayers(mPaintLayerManager.getPaintLayers());
 }
 
 //****************************************************************************/
@@ -419,7 +423,7 @@ void MainWindow::doNewProjectAction(void)
 
     // Clear all painting layers
     mPaintLayerDockWidget->newHlmsCreated();
-    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setPaintLayers (0); // Invalidate the PaintLayers vector reference in the Ogre widget
+    //mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setPaintLayers (0); // Invalidate the PaintLayers vector reference in the Ogre widget
 
     // Set the datablock of the Item in the Ogre widget to 'default'
     // Also destroy the datablocks in memory; strictly speaking this is not required, but it cleans up a bit
@@ -596,7 +600,7 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
     }
 
     mPaintLayerDockWidget->newHlmsCreated(); // Needed to delete the paintlayers, because a new Hlms is created
-    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setPaintLayers (0); // Invalidate the PaintLayers vector reference in the Ogre widget
+    //mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setPaintLayers (0); // Invalidate the PaintLayers vector reference in the Ogre widget
 }
 
 //****************************************************************************/
@@ -1143,7 +1147,7 @@ void MainWindow::doTextureBrowserAddImageMenuAction(void)
 //****************************************************************************/
 void MainWindow::doNewPaintingLayerMenuAction(void)
 {
-    mPaintLayerDockWidget->createPaintLayer();
+    mPaintLayerDockWidget->createPaintLayer(); // Automaticall results in setting the paintlayer in the Ogre widget
 }
 
 //****************************************************************************/
@@ -1995,7 +1999,7 @@ void MainWindow::clearHlmsNamesAndRemovePaintLayers(void)
     mCurrentDatablockName = "";
     mCurrentDatablockFullName = "";
     mPaintLayerDockWidget->newHlmsCreated(); // Needed to delete the paintlayers, because a new Hlms is created
-    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setPaintLayers (0); // Invalidate the PaintLayers vector reference in the Ogre widget
+    //mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setPaintLayers (0); // Invalidate the PaintLayers vector reference in the Ogre widget
 }
 
 //****************************************************************************/

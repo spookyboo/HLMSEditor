@@ -536,7 +536,7 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
     if (action->text() == ACTION_SET_CURRENT_MATERIAL)
     {
         mOgreWidget->assignCurrentDatablock();
-        mOgreWidget->setPaintLayers (mParent->getPaintLayers()); // Set the pointer to the paintlayers
+        //mOgreWidget->setPaintLayers (mParent->getPaintLayers()); // Set the pointer to the paintlayers
         return;
     }
     else if (action->text() == ACTION_TOGGLE_LIGHT_DIRECTION)
