@@ -132,6 +132,7 @@ static const Ogre::String DATABLOCK_DEBUG_CUBE = "DebugCube";
 static const Ogre::String THUMBS_PATH = "../common/thumbs/";
 static const Ogre::String BRUSH_PATH = "../common/brushes/";
 static const Ogre::String DEFAULT_BRUSH = "brush_001.png";
+static const Ogre::String TEMP_PATH = "../temp/";
 
 //******************************************************************************************************/
 // Static function to determine the 'resources' file
@@ -391,5 +392,6 @@ static const QString ACTION_EDIT = QString("Edit material");
 // Painting
 static const QString ACTION_NEW_PAINTING_LAYER = QString("New painting layer");
 static const QString ACTION_DELETE_CURRENT_PAINTING_LAYERS = QString("Delete selected painting layer");
+static const int TEXTURE_FILE_GENERATION_DEPTH = 5; // Determines number of undo's
 
 #endif

@@ -76,6 +76,11 @@ class PaintLayer
         void enable(bool enabled);
         bool isEnabled (void) {return mEnabled;}
 
+        /* If not visible, the layer cannot be painted on
+         */
+        void setVisible (bool visible);
+        bool isVisible(void);
+
         /* Apply the paint effect.
          */
         void paint(float u, float v);
@@ -309,11 +314,17 @@ class PaintLayer
          */
         int getExternaLayerlId (void) const {return mExternaLayerlId;}
 
+        /* Save the texture file associated by this PaintLayer. Each file is padded with a sequence number,
+         * used for undo and redo functions.
+         */
+        void saveTextureGeneration (void);
+
     private:
             int mExternaLayerlId;                           // May be used as a reference for external classes; is -1 if no external id is passed
             clock_t mStartTime;
             clock_t mEndTime;
             bool mEnabled;                                  // If enabled, the layer is painted, otherwise it is skipped
+            bool mVisible;                                  // If visible, the layer can be painted on, otherwise it is skipped (even if it was enabled)
             Ogre::Image mBrush;                             // Image of the brush
             Ogre::String mBrushFileName;                    // Full qualified name of the brush file
             Ogre::PixelBox mPixelboxBrush;                  // Pixelbox of mBrush; for speed purposes, it is created when the brush is set

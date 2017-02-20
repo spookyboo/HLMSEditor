@@ -77,7 +77,8 @@ namespace Magus
         mLatestSubItemDatablock(0),
         mHoover(false),
         mPaintMode(false),
-        mPaintLayers(0)
+        mPaintLayers(0),
+        mLatestPaintResult(0)
     {
         mRenderTextureNameHoover = "RenderTargetHlmsEditorTextureHoover";
         mRenderTextureNamePaint = "RenderTargetHlmsEditorTexturePaint";
@@ -1125,22 +1126,22 @@ namespace Magus
                 if (mPaintMode && e->button() == Qt::LeftButton)
                 {
                     Ogre::Vector2 pos = Ogre::Vector2::ZERO;
-                    int result = doPaintLayer(e->pos().x(), e->pos().y());
-                    switch (result)
+                    mLatestPaintResult = doPaintLayer(e->pos().x(), e->pos().y());
+                    switch (mLatestPaintResult)
                     {
-                        case 1:
+                        case 2:
                             QMessageBox::information(0, QString("Warning"), QString("Cannot paint. You haven't created any paint layers."));
                         break;
 
-                        case 2:
+                        case 3:
                             QMessageBox::information(0, QString("Warning"), QString("Cannot paint. There is no material assigned to this part of the model."));
                         break;
 
-                        case 3:
+                        case 4:
                             QMessageBox::information(0, QString("Warning"), QString("Cannot paint. Did you forget to set the texture type in the paint layer?"));
                         break;
 
-                        case 4:
+                        case 5:
                             QMessageBox::information(0, QString("Warning"), QString("Cannot paint. The current material is not assigned to that part of the model"));
                         break;
                     }
@@ -1162,6 +1163,12 @@ namespace Magus
             mCameraManager->injectMouseUp(e);
             if (e->button() == Qt::MiddleButton || e->button() == Qt::LeftButton)
                 mMouseDown = false;
+
+            if (mPaintMode && e->button() == Qt::LeftButton)
+            {
+                // Save next generation texture image
+                doPaintSaveTextureGeneration();
+            }
         }
     }
 
@@ -1558,26 +1565,27 @@ namespace Magus
     {
         // Only paint in case:
         // - The paint layer is enabled
+        // - The paint layer is visible
         // - The datablock of the submesh is equal to datablock of the paint layer
         // - The texture type is set in all paintlayers
         // - The material on the item must be set with the current material in the editor
 
         if (!mItem)
-            return 0;
+            return 1;
 
         // If the mouse didn't hoover over a submesh, don't paint (this can be done quickly by using the RTT mechanism that is already used for mouse hoovering)
         int index = getSubItemIndexWithMouseOver(mouseX, mouseY);
         if (index < 0)
-            return 0;
+            return 1;
 
         // If there are no paintlayers, don't continue
         if (!mPaintLayers || mPaintLayers->size() == 0)
-            return 1;
+            return 2;
 
         // The subitem must have a valid datablock; otherwise don't paint
         Ogre::HlmsDatablock* datablock = mItem->getSubItem(index)->getDatablock();
         if (!datablock || datablock->getName() == DEFAULT_DATABLOCK_NAME)
-            return 2;
+            return 3;
 
         float u = 0.5f;
         float v = 0.5f;
@@ -1592,13 +1600,13 @@ namespace Magus
         for (it = itStart; it != itEnd; ++it)
         {
             paintLayer = *it;
-            if (paintLayer->isEnabled())
+            if (paintLayer->isEnabled() && paintLayer->isVisible())
             {
                 if (!paintLayer->getTextureLayer() || !paintLayer->getTextureLayer()->mTextureTypeDefined)
-                    return 3;
+                    return 4;
 
                 if (paintLayer->getDatablockName() != datablock->getName())
-                    return 4;
+                    return 5;
 
                 // Calculate the uv; we do it here, because it should only be calculated when needed (as late as possible)
                 if (!uvCalculated)
@@ -1616,6 +1624,27 @@ namespace Magus
         }
 
         return 0;
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::doPaintSaveTextureGeneration (void)
+    {
+        // Iterate through the PaintLayer vector and apply the paint effect
+        PaintLayers::iterator it;
+        PaintLayers::iterator itStart = mPaintLayers->begin();
+        PaintLayers::iterator itEnd = mPaintLayers->end();
+        PaintLayer* paintLayer;
+        for (it = itStart; it != itEnd; ++it)
+        {
+            paintLayer = *it;
+            if (paintLayer->isEnabled())
+            {
+                // Only if the latest result was 0, the painting was successful; save the image
+                if (mLatestPaintResult == 0)
+                    paintLayer->saveTextureGeneration();
+                mLatestPaintResult = 0;
+            }
+        }
     }
 
     //****************************************************************************/

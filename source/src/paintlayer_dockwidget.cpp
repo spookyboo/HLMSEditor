@@ -44,6 +44,7 @@ PaintLayerDockWidget::PaintLayerDockWidget(PaintLayerManager* paintLayerManager,
     connect(mPaintLayerWidget, SIGNAL(layerCreatedOrAdded(int,QString)), this, SLOT(handleNewLayer(int,QString)));
     connect(mPaintLayerWidget, SIGNAL(layerDeleted(int,QString)), this, SLOT(handleDeleteLayer(int,QString)));
     connect(mPaintLayerWidget, SIGNAL(layerSelected(int,QString)), this, SLOT(handleLayerSelected(int,QString)));
+    connect(mPaintLayerWidget, SIGNAL(layerVisibiltyChanged(int,QString,bool)), this, SLOT(handleLayerVisibilityChanged(int,QString,bool)));
 }
 
 //****************************************************************************/
@@ -963,6 +964,44 @@ void PaintLayerDockWidget::handleLayerSelected (int layerId, const QString& laye
     QVector<int> v = mPaintLayerWidget->getSelectedLayerIds();
     mPaintLayerManager->enableAllPaintLayers(false); // First disable everything
     mPaintLayerManager->enablePaintLayers (v.toStdVector(), true); // Enable every selected layer
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::handleLayerVisibilityChanged(int layerId, const QString& name, bool visible)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    TextureLayer* textureLayer = paintLayer->getTextureLayer();
+    if (!textureLayer)
+        return;
+
+    if (!textureLayer->mTextureTypeDefined)
+        return;
+
+    Ogre::PbsTextureTypes type = textureLayer->mTextureType;
+    QVector<QtLayer*> v = mPaintLayerWidget->getLayers();
+    foreach (QtLayer* layer, v)
+    {
+        paintLayer = mPaintLayerManager->getPaintLayer(layer->layerId);
+        textureLayer = paintLayer->getTextureLayer();
+        if (textureLayer &&
+                textureLayer->mTextureTypeDefined &&
+                textureLayer->mTextureType == type)
+        {
+            // Set the icon
+            mPaintLayerWidget->updateVisibilityIconForLayerId(layer->layerId, visible, false);
+
+            // Disable the paintlayer from painting if the icon is set to invisible; enable it again
+            // if the icon is visible.
+            paintLayer->setVisible(visible);
+        }
+    }
+
+    // Set to the correct texture. The first texture generation is the original texture and the
+    // last texture generation is the texture on which is painted.
+    if (visible)
+        textureLayer->setLastTextureGeneration();
+    else
+        textureLayer->setFirstTextureGeneration();
 }
 
 //****************************************************************************/

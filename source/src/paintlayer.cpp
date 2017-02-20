@@ -32,6 +32,7 @@ PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager, int externalLayerId
     mPaintLayerManager(paintLayerManager),
     mExternaLayerlId(externalLayerId),
     mEnabled(true),
+    mVisible(true),
     mBrushWidth(0),
     mBrushHeight(0),
     mHalfBrushWidth(0),
@@ -117,10 +118,22 @@ void PaintLayer::enable(bool enabled)
 }
 
 //****************************************************************************/
+void PaintLayer::setVisible (bool visible)
+{
+    mVisible = visible;
+}
+
+//****************************************************************************/
+bool PaintLayer::isVisible(void)
+{
+    return mVisible;
+}
+
+//****************************************************************************/
 void PaintLayer::paint(float u, float v)
 {
     // Apply paint effect if there is a texture
-    if (!mEnabled || !mTextureLayer || mTextureLayer->mTexture.isNull())
+    if (!mEnabled || !mVisible || !mTextureLayer || mTextureLayer->mTexture.isNull())
         return;
 
     /* If there are jitter effects, they are applied first. This means that certain jitter attributes are set
@@ -225,6 +238,9 @@ void PaintLayer::paint(float u, float v)
      * texture loaded as an image (mTextureOnWhichIsPainted), although they refer to the
      * same texture file. Mipsmaps are updated by means of scaling the texture image.
      */
+    mTextureLayer->blitTexture();
+
+    /*
     size_t w = mTextureLayer->mTextureOnWhichIsPaintedWidth;
     size_t h = mTextureLayer->mTextureOnWhichIsPaintedHeight;
     Ogre::Image textureOnWhichIsPaintedScaled = mTextureLayer->mTextureOnWhichIsPainted; // Define textureOnWhichIsPaintedScaled each time; reusing results in exception
@@ -241,6 +257,7 @@ void PaintLayer::paint(float u, float v)
             break; // Stop when the mipmaps are too small
     }
     textureOnWhichIsPaintedScaled.freeMemory();
+    */
 }
 
 //****************************************************************************/
@@ -813,4 +830,14 @@ Ogre::IdString PaintLayer::getDatablockName (void)
         return dummyDatablockId;
 
     return mTextureLayer->mDatablockName;
+}
+
+//****************************************************************************/
+void PaintLayer::saveTextureGeneration (void)
+{
+    // It is never possible to save a texture when the paintlayer is not visible
+    if (!mVisible)
+        return;
+
+    mTextureLayer->saveTextureGeneration ();
 }

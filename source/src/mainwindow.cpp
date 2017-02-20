@@ -57,6 +57,14 @@ MainWindow::MainWindow(void) :
     mFirst(true),
     mSaveTextureBrowserTimerActive(false)
 {
+    // Delete all files in the 'temp' directory and create a new 'temp' dir
+    QString path = TEMP_PATH.c_str();
+    QDir dir(path);
+    if (dir.exists())
+        dir.removeRecursively();
+
+    QDir().mkdir(path);
+
     setMinimumSize(100,100);
     installEventFilter(this);
 
@@ -423,7 +431,6 @@ void MainWindow::doNewProjectAction(void)
 
     // Clear all painting layers
     mPaintLayerDockWidget->newHlmsCreated();
-    //mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setPaintLayers (0); // Invalidate the PaintLayers vector reference in the Ogre widget
 
     // Set the datablock of the Item in the Ogre widget to 'default'
     // Also destroy the datablocks in memory; strictly speaking this is not required, but it cleans up a bit
@@ -600,7 +607,6 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
     }
 
     mPaintLayerDockWidget->newHlmsCreated(); // Needed to delete the paintlayers, because a new Hlms is created
-    //mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setPaintLayers (0); // Invalidate the PaintLayers vector reference in the Ogre widget
 }
 
 //****************************************************************************/
@@ -1999,7 +2005,6 @@ void MainWindow::clearHlmsNamesAndRemovePaintLayers(void)
     mCurrentDatablockName = "";
     mCurrentDatablockFullName = "";
     mPaintLayerDockWidget->newHlmsCreated(); // Needed to delete the paintlayers, because a new Hlms is created
-    //mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setPaintLayers (0); // Invalidate the PaintLayers vector reference in the Ogre widget
 }
 
 //****************************************************************************/

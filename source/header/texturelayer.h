@@ -56,25 +56,72 @@ class TextureLayer
                                          Ogre::PbsTextureTypes textureType,
                                          const Ogre::String& textureFileName);
 
+        /* Blit the current pixelbox
+         */
+        void blitTexture (void);
+
+        /* Save the texture as a temporary file, with a sequence number
+         */
+        void saveTextureGeneration (void);
+
+        /* It is possible to move between generations of a texture layer. A generation is a set images with the same
+         * base texture image. The images in the set represent a certain painting state.
+         * This makes it possible to perform an undo or redo system.
+         * The setNextTextureGeneration searches for the next image in a sequence and loads it.
+         */
+        void setNextTextureGeneration (void);
+
+        /* The setPreviousTextureGeneration searches for the previous image in a sequence and loads it.
+         */
+        void setPreviousTextureGeneration (void);
+
+        /* The setFirstTextureGeneration searches for the first (original) image in a sequence and loads it.
+         */
+        void setFirstTextureGeneration (void);
+
+        /* The setlastTextureGeneration searches for the last image (identified by mMaxSequence) in a sequence and loads it.
+         */
+        void setLastTextureGeneration (void);
+
         Ogre::IdString mDatablockName;
         Ogre::PbsTextureTypes mTextureType;
-        Ogre::String mTextureFileName;                 // Full qualified name of the texture file
-        Ogre::HlmsDatablock* mDatablock;                // The datablock used to paint on
-        Ogre::HlmsPbsDatablock* mDatablockPbs;          // If the datablock is a Pbs, it is casted to a HlmsPbsDatablock*
-        Ogre::TexturePtr mTexture;                      // The texture layer on which is painted
-        Ogre::uint8 mNumMipMaps;                        // Number of mipmaps of mTexture (on the GPU)
-        std::vector<Ogre::v1::HardwarePixelBuffer*> mBuffers; // Texture buffers; depends on number of mipmaps
-        Ogre::Image mTextureOnWhichIsPainted;           // Contains a texture Image; this image is uploaded to the texture layer of the Hlms (on GPU), every time
-                                                        // the applyPaintEffect() function is called. This basically updates the texture layer in the Pbs.
-                                                        // Initially, textureOnWhichIsPainted is the same image from disk, also loaded in the Pbs.
-                                                        // mTextureOnWhichIsPainted is changed while painting. Intermediate versions of mTextureOnWhichIsPainted
-                                                        // are stored (example: texturename.png, texturename_01.png, texturename_02.png. texturename_03.png, ...)
-                                                        // and can be used for 'undo'.
-        Ogre::PixelBox mPixelboxTextureOnWhichIsPainted;// Pixelbox of mTextureOnWhichIsPainted; for speed purposes, it is created when the texture is set
-        Ogre::uint32 mTextureOnWhichIsPaintedWidth;     // Width of mTextureOnWhichIsPainted; must be the same as the width of mTexture
-        Ogre::uint32 mTextureOnWhichIsPaintedHeight;    // Height of mTextureOnWhichIsPainted; must be the same as the height of mTexture
-        bool mTextureOnWhichIsPaintedHasAlpha;          // Painting effect depends on the fact whether the texture has alpha enabled
-        bool mTextureTypeDefined;                       // If true, a valid texture type is assigned to this layer
+        Ogre::String mTextureFileName;                          // Full qualified name of the texture file
+        Ogre::HlmsDatablock* mDatablock;                        // The datablock used to paint on
+        Ogre::HlmsPbsDatablock* mDatablockPbs;                  // If the datablock is a Pbs, it is casted to a HlmsPbsDatablock*
+        Ogre::TexturePtr mTexture;                              // The texture layer on which is painted
+        Ogre::uint8 mNumMipMaps;                                // Number of mipmaps of mTexture (on the GPU)
+        std::vector<Ogre::v1::HardwarePixelBuffer*> mBuffers;   // Texture buffers; depends on number of mipmaps
+        Ogre::Image mTextureOnWhichIsPainted;                   // Contains a texture Image; this image is uploaded to the texture layer of the Hlms (on GPU), every time
+                                                                // the applyPaintEffect() function is called. This basically updates the texture layer in the Pbs.
+                                                                // Initially, textureOnWhichIsPainted is the same image from disk, also loaded in the Pbs.
+                                                                // mTextureOnWhichIsPainted is changed while painting. Intermediate versions of mTextureOnWhichIsPainted
+                                                                // are stored (example: texturename.png, texturename_01.png, texturename_02.png. texturename_03.png, ...)
+                                                                // and can be used for 'undo'.
+        Ogre::PixelBox mPixelboxTextureOnWhichIsPainted;        // Pixelbox of mTextureOnWhichIsPainted; for speed purposes, it is created when the texture is set
+        Ogre::uint32 mTextureOnWhichIsPaintedWidth;             // Width of mTextureOnWhichIsPainted; must be the same as the width of mTexture
+        Ogre::uint32 mTextureOnWhichIsPaintedHeight;            // Height of mTextureOnWhichIsPainted; must be the same as the height of mTexture
+        bool mTextureOnWhichIsPaintedHasAlpha;                  // Painting effect depends on the fact whether the texture has alpha enabled
+        bool mTextureTypeDefined;                               // If true, a valid texture type is assigned to this layer
+
+    protected:
+        /* Returns the filename of a certain generation, defined by the sequence.
+         * Assume the filename (mTextureFileName) is 'image.png'. The sequence is a value [0..mMaxSequence].
+         * The following is returned:
+         * sequence = 0                             ==> returned is 'image.png'
+         * sequence = 1                             ==> returned is 'image1.png'
+         * sequence = 2                             ==> returned is 'image2.png'
+         * sequence = 3 (= mMaxSequence)            ==> returned is 'image3.png'
+         * sequence = 4                             ==> returned is 'image3.png'
+         * ... etc.
+         * fullQualified indicates that either the basename is returned (fullQualified is false) or a full
+         * qualified filename (fullQualified is true).
+         */
+        const Ogre::String& getTextureFileNameGeneration (int sequence, bool fullQualified = true);
+
+    private:
+        Ogre::ushort mCurrentSequence;                          // Sequence number of the temporary texture file, used for undo/redo functions
+        Ogre::ushort mMaxSequence;                              // Max sequence number of the temporary texture file, used for undo/redo functions
+        Ogre::String mHelperString;
 };
 
 #endif

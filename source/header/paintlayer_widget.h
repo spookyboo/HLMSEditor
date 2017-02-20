@@ -125,6 +125,12 @@ class PaintLayerWidget : public QWidget
         // Set an icon in all selected layers
         void setBrushIconInCurrentLayers (const QString& brushFileName);
 
+        // Set the visibility icon on/off
+        void updateVisibilityIconForLayerId(int layerId, bool visible, bool doEmit = true);
+
+        // Get the item based on layerId and column
+        QTableWidgetItem* getItem (int layerId, int column);
+
     public slots:
         // Activated when a contextmenu item is selected
         void contextMenuItemSelected(QAction* action);
@@ -151,7 +157,7 @@ class PaintLayerWidget : public QWidget
     protected:
         void mouseClickHandler(QMouseEvent* event);
         void mouseDblClickHandler(QMouseEvent* event);
-        void updateVisibilityIcon(int row, bool visible);
+        void updateVisibilityIcon(int row, bool visible, bool doEmit = true);
         int newLayerId(void);
         int getRow(const QString& name);
         int getRow(int layerId);

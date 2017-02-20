@@ -220,6 +220,7 @@ class PaintLayerDockWidget : public QDockWidget
         void handleNewLayer (int layerId, const QString& layerName);
         void handleDeleteLayer (int layerId, const QString& layerName);
         void handleLayerSelected (int layerId, const QString& layerName);
+        void handleLayerVisibilityChanged(int layerId, const QString& name, bool visible);
 
     private:
         MainWindow* mParent;

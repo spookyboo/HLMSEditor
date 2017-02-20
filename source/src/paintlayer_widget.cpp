@@ -132,7 +132,7 @@ void PaintLayerWidget::tableClicked(QModelIndex index)
     QtLayer* layer = mLayerVec.at(row);
     if (col == TOOL_LAYER_COLUMN_VISIBILITY)
     {
-        if (layer->visible == true)
+        if (layer->visible)
             updateVisibilityIcon(row, false);
         else
             updateVisibilityIcon(row, true);
@@ -237,31 +237,44 @@ void PaintLayerWidget::contextMenuItemSelected(QAction* action)
 }
 
 //****************************************************************************/
-void PaintLayerWidget::updateVisibilityIcon(int row, bool visible)
+void PaintLayerWidget::updateVisibilityIcon(int row, bool visible, bool doEmit)
 {
     QTableWidgetItem* item = mTable->item(row, TOOL_LAYER_COLUMN_VISIBILITY);
     if (!item)
         return;
 
-    QPixmap pixMap;
     QtLayer* layer = mLayerVec.at(row);
+    updateVisibilityIconForLayerId(layer->layerId, visible, doEmit);
+}
+
+//****************************************************************************/
+void PaintLayerWidget::updateVisibilityIconForLayerId(int layerId, bool visible, bool doEmit)
+{
+    QtLayer* layer = getLayer(layerId);
+    if (!layer)
+        return;
+
+    QTableWidgetItem* item = getItem(layerId, TOOL_LAYER_COLUMN_VISIBILITY);
+    if (!item)
+        return;
+
+    QPixmap pixMap;
     layer->visible = visible;
     if (visible)
     {
         QImage image(mIconDir + TOOL_ICON_VIEW_VISIBLE);
         pixMap = QPixmap::fromImage(image).scaled(TOOL_LAYER_ICON_WIDTH, TOOL_LAYER_ICON_WIDTH);
         item->setData(Qt::DecorationRole, QVariant(pixMap));
-        //layer->visible = true;
     }
     else
     {
         QImage image(mIconDir + TOOL_ICON_VIEW_INVISIBLE);
         pixMap = QPixmap::fromImage(image).scaled(TOOL_LAYER_ICON_WIDTH, TOOL_LAYER_ICON_WIDTH);
         item->setData(Qt::DecorationRole, QVariant(pixMap));
-        //layer->visible = false;
     }
 
-    emit layerVisibiltyChanged(layer->layerId, item->text(), layer->visible);
+    if (doEmit)
+        emit layerVisibiltyChanged(layer->layerId, item->text(), layer->visible);
 }
 
 //****************************************************************************/
@@ -537,7 +550,7 @@ QtLayer* PaintLayerWidget::getLayer(int layerId)
     for (it = mLayerVec.begin(); it != mLayerVec.end(); ++it)
     {
         layer = *it;
-        if (layer->layerId = layerId)
+        if (layer->layerId == layerId)
             return layer;
     }
 
@@ -775,4 +788,24 @@ void PaintLayerWidget::setBrushIconInCurrentLayers (const QString& brushFileName
             item->setData(Qt::DecorationRole, QVariant(pixMapLayer));
         }
     }
+}
+
+//****************************************************************************/
+QTableWidgetItem* PaintLayerWidget::getItem (int layerId, int column)
+{
+    int rows = mTable->rowCount();
+    QTableWidgetItem* item;
+    int id;
+    for (int i = 0; i < rows; ++i)
+    {
+        item = mTable->item(i, column);
+        if (item)
+        {
+            id = item->data(Qt::UserRole).toInt();
+            if (layerId == id)
+                return item;
+        }
+    }
+
+    return 0;
 }

@@ -18,6 +18,7 @@
 **
 ****************************************************************************/
 
+#include "constants.h"
 #include "texturelayer.h"
 #include "OgreHlmsPbs.h"
 #include "OgreHlmsManager.h"
@@ -32,7 +33,9 @@ TextureLayer::TextureLayer(void) :
     mTextureOnWhichIsPaintedHeight(0),
     mTextureOnWhichIsPaintedHasAlpha(false),
     mNumMipMaps(0),
-    mTextureTypeDefined(false)
+    mTextureTypeDefined(false),
+    mCurrentSequence(0),
+    mMaxSequence(0)
 {
     mTextureType = Ogre::PBSM_DIFFUSE;
     mDatablockName = "";
@@ -88,4 +91,116 @@ void TextureLayer::setDatablockNameAndTexture (const Ogre::IdString& datablockNa
             mBuffers.clear();
         }
     }
+}
+
+//****************************************************************************/
+void TextureLayer::blitTexture (void)
+{
+    size_t w = mTextureOnWhichIsPaintedWidth;
+    size_t h = mTextureOnWhichIsPaintedHeight;
+    Ogre::Image textureOnWhichIsPaintedScaled = mTextureOnWhichIsPainted; // Define textureOnWhichIsPaintedScaled each time; reusing results in exception
+    for (Ogre::uint8 i = 0; i < mNumMipMaps; ++i)
+    {
+        mBuffers.at(i)->blitFromMemory(textureOnWhichIsPaintedScaled.getPixelBox(0,0), Ogre::Box(0, 0, 0, w, h, 1));
+        w*=0.5f; // Mipmaps always are half of the previous one
+        h*=0.5f;
+        if (w > 1.0f && h > 1.0f)
+            textureOnWhichIsPaintedScaled.resize(w, h);
+        else
+            break; // Stop when the mipmaps are too small
+    }
+    textureOnWhichIsPaintedScaled.freeMemory();
+}
+
+//****************************************************************************/
+void TextureLayer::setNextTextureGeneration (void)
+{
+     // TODO: Check whether file exists
+    mCurrentSequence = mCurrentSequence > mMaxSequence ? mMaxSequence : ++mCurrentSequence;
+    Ogre::String textureFileNameGeneration = getTextureFileNameGeneration (mCurrentSequence);
+    mTextureOnWhichIsPainted.load(textureFileNameGeneration, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getPixelBox(0, 0);
+    mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
+    mTextureOnWhichIsPaintedWidth = mPixelboxTextureOnWhichIsPainted.getWidth();
+    mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.getHeight();
+    blitTexture();
+}
+
+//****************************************************************************/
+void TextureLayer::setPreviousTextureGeneration (void)
+{
+    // TODO: Check whether file exists
+    mCurrentSequence = mCurrentSequence < 1 ? 0 : --mCurrentSequence;
+    Ogre::String textureFileNameGeneration = getTextureFileNameGeneration (mCurrentSequence);
+    mTextureOnWhichIsPainted.load(textureFileNameGeneration, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME); // TODO: File is in resource group????
+    mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getPixelBox(0, 0);
+    mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
+    mTextureOnWhichIsPaintedWidth = mPixelboxTextureOnWhichIsPainted.getWidth();
+    mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.getHeight();
+    blitTexture();
+}
+
+//****************************************************************************/
+void TextureLayer::setFirstTextureGeneration (void)
+{
+    // TODO: Check whether file exists
+    mCurrentSequence = 0;
+    mTextureOnWhichIsPainted.load(mTextureFileName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getPixelBox(0, 0);
+    mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
+    mTextureOnWhichIsPaintedWidth = mPixelboxTextureOnWhichIsPainted.getWidth();
+    mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.getHeight();
+    blitTexture();
+}
+
+//****************************************************************************/
+void TextureLayer::setLastTextureGeneration (void)
+{
+    // TODO: Check whether file exists
+    mCurrentSequence = mMaxSequence;
+    Ogre::String textureFileNameGeneration = getTextureFileNameGeneration (mCurrentSequence);
+    mTextureOnWhichIsPainted.load(textureFileNameGeneration, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME); // TODO: File is in resource group????
+    mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getPixelBox(0, 0);
+    mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
+    mTextureOnWhichIsPaintedWidth = mPixelboxTextureOnWhichIsPainted.getWidth();
+    mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.getHeight();
+    blitTexture();
+}
+
+//****************************************************************************/
+void TextureLayer::saveTextureGeneration (void)
+{
+    // Increase the sequence
+    ++mMaxSequence;
+    Ogre::String textureFileNameGeneration = getTextureFileNameGeneration (mMaxSequence);
+    mTextureOnWhichIsPainted.save(textureFileNameGeneration);
+
+    // TODO: Is this file part of the resourcegroup or should the resourcegroup be initialized again??
+}
+
+//****************************************************************************/
+const Ogre::String& TextureLayer::getTextureFileNameGeneration (int sequence, bool fullQualified)
+{
+    // TODO: Restrict to limited number of generations?
+
+    mHelperString = mTextureFileName;
+
+    // Do not go beyond the max sequence number
+    sequence = sequence > mMaxSequence ? mMaxSequence : sequence;
+    if (sequence > 0)
+    {
+        // Do not go below sequence number 1 (otherwise the original mTextureFileName is returned)
+        Ogre::String strippedTextureFileName = mTextureFileName;
+        Ogre::String extension = mTextureFileName;
+        strippedTextureFileName.erase(strippedTextureFileName.find_last_of("."), Ogre::String::npos);
+        extension.erase(0, extension.find_last_of("."));
+        mHelperString = strippedTextureFileName +
+                Ogre::StringConverter::toString(sequence) +
+                extension;
+
+        if (fullQualified)
+            mHelperString = TEMP_PATH + mHelperString;
+    }
+
+    return mHelperString;
 }
