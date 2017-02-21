@@ -69,11 +69,11 @@ class TextureLayer
          * This makes it possible to perform an undo or redo system.
          * The setNextTextureGeneration searches for the next image in a sequence and loads it.
          */
-        void setNextTextureGeneration (void);
+        //void setNextTextureGeneration (void);
 
         /* The setPreviousTextureGeneration searches for the previous image in a sequence and loads it.
          */
-        void setPreviousTextureGeneration (void);
+        //void setPreviousTextureGeneration (void);
 
         /* The setFirstTextureGeneration searches for the first (original) image in a sequence and loads it.
          */
@@ -82,6 +82,14 @@ class TextureLayer
         /* The setlastTextureGeneration searches for the last image (identified by mMaxSequence) in a sequence and loads it.
          */
         void setLastTextureGeneration (void);
+
+        /* Checks if a filename is an Ogre resource. The filename argument is a fully qualified filename or a base filename.
+         */
+        bool isTextureFileNameDefinedAsResource (const Ogre::String& filename);
+
+        /* Checks if a file exists. The filename argument is a fully qualified filename
+         */
+        bool textureFileExists (const Ogre::String& filename);
 
         Ogre::IdString mDatablockName;
         Ogre::PbsTextureTypes mTextureType;

@@ -63,6 +63,9 @@ MainWindow::MainWindow(void) :
     if (dir.exists())
         dir.removeRecursively();
 
+    // Add rmdir to be sure it is removed, so the mkdir is able to create a new dir (using removeRecursively without rmdir
+    // sometimes results in not creating the new dir)
+    dir.rmdir(path);
     QDir().mkdir(path);
 
     setMinimumSize(100,100);

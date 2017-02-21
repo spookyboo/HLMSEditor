@@ -24,6 +24,7 @@
 #include "OgreHlmsManager.h"
 #include "OgreLogManager.h"
 #include "OgreStringConverter.h"
+#include <fstream>
 
 //****************************************************************************/
 TextureLayer::TextureLayer(void) :
@@ -77,7 +78,7 @@ void TextureLayer::setDatablockNameAndTexture (const Ogre::IdString& datablockNa
                 for (Ogre::uint8 i = 0; i < mNumMipMaps; ++i)
                     mBuffers.push_back(mTexture->getBuffer(0, i).getPointer());
 
-                // Load the texture as image
+                // Load the texture as image; assume it can be loaded, because it was already loaded as part of the material
                 mTextureOnWhichIsPainted.load(textureFileName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
                 mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getPixelBox(0, 0);
                 mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
@@ -113,11 +114,12 @@ void TextureLayer::blitTexture (void)
 }
 
 //****************************************************************************/
+/*
 void TextureLayer::setNextTextureGeneration (void)
 {
      // TODO: Check whether file exists
     mCurrentSequence = mCurrentSequence > mMaxSequence ? mMaxSequence : ++mCurrentSequence;
-    Ogre::String textureFileNameGeneration = getTextureFileNameGeneration (mCurrentSequence);
+    Ogre::String textureFileNameGeneration = getTextureFileNameGeneration (mCurrentSequence); // returns full qualified filename
     mTextureOnWhichIsPainted.load(textureFileNameGeneration, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getPixelBox(0, 0);
     mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
@@ -125,13 +127,15 @@ void TextureLayer::setNextTextureGeneration (void)
     mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.getHeight();
     blitTexture();
 }
+*/
 
 //****************************************************************************/
+/*
 void TextureLayer::setPreviousTextureGeneration (void)
 {
     // TODO: Check whether file exists
     mCurrentSequence = mCurrentSequence < 1 ? 0 : --mCurrentSequence;
-    Ogre::String textureFileNameGeneration = getTextureFileNameGeneration (mCurrentSequence);
+    Ogre::String textureFileNameGeneration = getTextureFileNameGeneration (mCurrentSequence); // returns full qualified filename
     mTextureOnWhichIsPainted.load(textureFileNameGeneration, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME); // TODO: File is in resource group????
     mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getPixelBox(0, 0);
     mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
@@ -139,11 +143,12 @@ void TextureLayer::setPreviousTextureGeneration (void)
     mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.getHeight();
     blitTexture();
 }
+*/
 
 //****************************************************************************/
 void TextureLayer::setFirstTextureGeneration (void)
 {
-    // TODO: Check whether file exists
+    // Don't check on existence mTextureFileName, because it does exist
     mCurrentSequence = 0;
     mTextureOnWhichIsPainted.load(mTextureFileName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getPixelBox(0, 0);
@@ -156,15 +161,17 @@ void TextureLayer::setFirstTextureGeneration (void)
 //****************************************************************************/
 void TextureLayer::setLastTextureGeneration (void)
 {
-    // TODO: Check whether file exists
     mCurrentSequence = mMaxSequence;
-    Ogre::String textureFileNameGeneration = getTextureFileNameGeneration (mCurrentSequence);
-    mTextureOnWhichIsPainted.load(textureFileNameGeneration, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME); // TODO: File is in resource group????
-    mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getPixelBox(0, 0);
-    mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
-    mTextureOnWhichIsPaintedWidth = mPixelboxTextureOnWhichIsPainted.getWidth();
-    mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.getHeight();
-    blitTexture();
+    Ogre::String textureFileNameGeneration = getTextureFileNameGeneration (mCurrentSequence); // returns full qualified filename
+    if (textureFileExists(textureFileNameGeneration))
+    {
+        mTextureOnWhichIsPainted.load(textureFileNameGeneration, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+        mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getPixelBox(0, 0);
+        mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
+        mTextureOnWhichIsPaintedWidth = mPixelboxTextureOnWhichIsPainted.getWidth();
+        mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.getHeight();
+        blitTexture();
+    }
 }
 
 //****************************************************************************/
@@ -172,17 +179,13 @@ void TextureLayer::saveTextureGeneration (void)
 {
     // Increase the sequence
     ++mMaxSequence;
-    Ogre::String textureFileNameGeneration = getTextureFileNameGeneration (mMaxSequence);
+    Ogre::String textureFileNameGeneration = getTextureFileNameGeneration (mMaxSequence); // returns full qualified filename
     mTextureOnWhichIsPainted.save(textureFileNameGeneration);
-
-    // TODO: Is this file part of the resourcegroup or should the resourcegroup be initialized again??
 }
 
 //****************************************************************************/
 const Ogre::String& TextureLayer::getTextureFileNameGeneration (int sequence, bool fullQualified)
 {
-    // TODO: Restrict to limited number of generations?
-
     mHelperString = mTextureFileName;
 
     // Do not go beyond the max sequence number
@@ -203,4 +206,27 @@ const Ogre::String& TextureLayer::getTextureFileNameGeneration (int sequence, bo
     }
 
     return mHelperString;
+}
+
+//****************************************************************************/
+bool TextureLayer::isTextureFileNameDefinedAsResource (const Ogre::String& filename)
+{
+    Ogre::String path;
+    Ogre::FileInfoListPtr list = Ogre::ResourceGroupManager::getSingleton().listResourceFileInfo(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME) ;
+    Ogre::FileInfoList::iterator it;
+    Ogre::FileInfoList::iterator itStart = list->begin();
+    Ogre::FileInfoList::iterator itEnd = list->end();
+    for(it = itStart; it != itEnd; ++it)
+    {
+        Ogre::FileInfo& fileInfo = (*it);
+        if (fileInfo.basename == filename || fileInfo.filename == filename)
+            return true;
+    }
+}
+
+//****************************************************************************/
+bool TextureLayer::textureFileExists (const Ogre::String& filename)
+{
+    std::ifstream infile(filename);
+    return infile.good();
 }

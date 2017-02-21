@@ -1641,7 +1641,13 @@ namespace Magus
             {
                 // Only if the latest result was 0, the painting was successful; save the image
                 if (mLatestPaintResult == 0)
+                {
+                    // Save the latest image
                     paintLayer->saveTextureGeneration();
+
+                    // TODO: Add the (unique) texture type and sequence number to the UndoRedoQueueu
+                    // If the sequence number is 1, first add the base texture (sequence 0) to the UndoRedoQueueu first
+                }
                 mLatestPaintResult = 0;
             }
         }
