@@ -180,7 +180,16 @@ void TextureLayer::saveTextureGeneration (void)
     // Increase the sequence
     ++mMaxSequence;
     Ogre::String textureFileNameGeneration = getTextureFileNameGeneration (mMaxSequence); // returns full qualified filename
-    mTextureOnWhichIsPainted.save(textureFileNameGeneration);
+
+    // Saving the Image must be done in the background, otherwise the painting stutters
+    QThread* thread = new QThread;
+    TextureSaveWorker* textureSaveWorker = new TextureSaveWorker (mTextureOnWhichIsPainted, textureFileNameGeneration);
+    textureSaveWorker->moveToThread(thread);
+    connect(thread, SIGNAL(started()), textureSaveWorker, SLOT(saveImage()));
+    connect(textureSaveWorker, SIGNAL(finished()), thread, SLOT(quit()));
+    connect(textureSaveWorker, SIGNAL(finished()), textureSaveWorker, SLOT(deleteLater()));
+    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+    thread->start();
 }
 
 //****************************************************************************/
@@ -192,7 +201,7 @@ const Ogre::String& TextureLayer::getTextureFileNameGeneration (int sequence, bo
     sequence = sequence > mMaxSequence ? mMaxSequence : sequence;
     if (sequence > 0)
     {
-        // Do not go below sequence number 1 (otherwise the original mTextureFileName is returned)
+        // Do not go below sequence number 1 (otherwise the original mTextureFileName (without path) is returned)
         Ogre::String strippedTextureFileName = mTextureFileName;
         Ogre::String extension = mTextureFileName;
         strippedTextureFileName.erase(strippedTextureFileName.find_last_of("."), Ogre::String::npos);
@@ -222,6 +231,8 @@ bool TextureLayer::isTextureFileNameDefinedAsResource (const Ogre::String& filen
         if (fileInfo.basename == filename || fileInfo.filename == filename)
             return true;
     }
+
+    return false;
 }
 
 //****************************************************************************/
@@ -230,3 +241,4 @@ bool TextureLayer::textureFileExists (const Ogre::String& filename)
     std::ifstream infile(filename);
     return infile.good();
 }
+

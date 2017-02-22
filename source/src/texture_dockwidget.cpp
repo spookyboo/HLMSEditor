@@ -35,8 +35,8 @@ TextureDockWidget::TextureDockWidget(QString title, MainWindow* parent, Qt::Wind
     createMenus();
     createToolBars();
 
-    QRect rec = QApplication::desktop()->screenGeometry();
-    setMaximumHeight(0.7 * rec.height());
+    //QRect rec = QApplication::desktop()->screenGeometry();
+    //setMaximumHeight(0.7 * rec.height());
 }
 
 //****************************************************************************/

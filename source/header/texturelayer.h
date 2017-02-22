@@ -21,6 +21,7 @@
 #ifndef TEXTURE_LAYER_H
 #define TEXTURE_LAYER_H
 
+#include <QThread>
 #include "OgreRoot.h"
 #include "OgreImage.h"
 #include "OgreTexture.h"
@@ -35,14 +36,42 @@
 #include "OgreHardwarePixelBuffer.h"
 
 /****************************************************************************
+ The TextureSaveWorker class is used to save a texture generation
+ (used for undo/redo and set layer visible/invisible) in the background.
+ ***************************************************************************/
+class TextureSaveWorker : public QObject
+{
+    Q_OBJECT
+
+    public:
+        TextureSaveWorker::TextureSaveWorker (const Ogre::Image& image, const Ogre::String& filename) :
+            mImage(image)
+        {
+            mImage = image;
+            mFilename = filename;
+        }
+
+    public slots:
+        void saveImage (void)
+        {
+            mImage.save(mFilename);
+        }
+
+    private:
+        Ogre::Image mImage;
+        Ogre::String mFilename;
+ };
+
+/****************************************************************************
  This class contains functions used by the Hlms editor painter window. A
  TextureLayer provides a reference to the texture atributes needed by the
  PaintLayer.
  A TextureLayer can be used by multiple PaintLayer objects.
  ***************************************************************************/
-
-class TextureLayer
+class TextureLayer : public QObject
 {
+    Q_OBJECT
+
 	public:
         TextureLayer(void);
         ~TextureLayer(void);

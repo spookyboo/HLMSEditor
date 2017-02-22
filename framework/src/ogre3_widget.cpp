@@ -78,7 +78,7 @@ namespace Magus
         mHoover(false),
         mPaintMode(false),
         mPaintLayers(0),
-        mLatestPaintResult(0)
+        mLatestPaintResult(1)
     {
         mRenderTextureNameHoover = "RenderTargetHlmsEditorTextureHoover";
         mRenderTextureNamePaint = "RenderTargetHlmsEditorTexturePaint";
@@ -1071,9 +1071,7 @@ namespace Magus
             if (mPaintMode)
             {
                 if (mMouseDown)
-                {
                     doPaintLayer(e->pos().x(), e->pos().y());
-                }
             }
             else
             {
@@ -1090,6 +1088,8 @@ namespace Magus
                     highlightSubItem(mAbsolute);
             }
         }
+
+        e->accept();
     }
 
     //****************************************************************************/
@@ -1166,10 +1166,13 @@ namespace Magus
 
             if (mPaintMode && e->button() == Qt::LeftButton)
             {
-                // Save next generation texture image
-                doPaintSaveTextureGeneration();
+                // Only if the latest result was 0, the painting was successful; save the image
+                if (mLatestPaintResult == 0)
+                    doPaintSaveTextureGeneration();
+                mLatestPaintResult = 1;
             }
         }
+        e->accept();
     }
 
     //****************************************************************************/
@@ -1637,18 +1640,13 @@ namespace Magus
         for (it = itStart; it != itEnd; ++it)
         {
             paintLayer = *it;
-            if (paintLayer->isEnabled())
+            if (paintLayer->isEnabled() && paintLayer->isVisible())
             {
-                // Only if the latest result was 0, the painting was successful; save the image
-                if (mLatestPaintResult == 0)
-                {
-                    // Save the latest image
-                    paintLayer->saveTextureGeneration();
+                // Save the latest image
+                paintLayer->saveTextureGeneration();
 
-                    // TODO: Add the (unique) texture type and sequence number to the UndoRedoQueueu
-                    // If the sequence number is 1, first add the base texture (sequence 0) to the UndoRedoQueueu first
-                }
-                mLatestPaintResult = 0;
+                // TODO: Add the (unique) texture type and sequence number to the UndoRedoQueueu
+                // If the sequence number is 1, first add the base texture (sequence 0) to the UndoRedoQueueu first
             }
         }
     }
