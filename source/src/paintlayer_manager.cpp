@@ -177,3 +177,11 @@ void PaintLayerManager::enablePaintLayers (std::vector<int> externalPaintLayerId
         }
     }
 }
+
+//****************************************************************************/
+void PaintLayerManager::loadTextureGeneration (Ogre::PbsTextureTypes textureType, Ogre::ushort sequence)
+{
+    TextureLayer* textureLayer = mTextureLayerManager.getTextureLayer(textureType);
+    if (textureLayer && textureLayer->mTextureTypeDefined)
+        textureLayer->loadTextureGeneration(sequence);
+}

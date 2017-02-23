@@ -86,6 +86,7 @@ class MainWindow : public QMainWindow
         const Ogre::String& getTextureFileNameOfPbs(const Ogre::IdString& datablockId, Ogre::PbsTextureTypes textureType); // Returns the filename of a pbs texture type
         PaintLayers* getPaintLayers(void); // Returns pointer to the paintlayers, managed by the PainLayerManager
         void setBrushInPaintLayer(const QString& name, const QString& baseName); // If a brush is selected, set the new brush in the PaintLayer
+        void loadTextureGeneration (Ogre::PbsTextureTypes textureType, Ogre::ushort sequence); // Load a texture, based on the type and sequence (texture is blit to the GPU)
 
     protected:
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources); // Save the content of a resource vector
@@ -136,6 +137,7 @@ class MainWindow : public QMainWindow
         void doSaveAsProjectMenuAction(void);
         void doSaveAsDatablockMenuAction(void);
         void doSaveAsMeshMenuAction(void);
+        void doMaterialSetMenuAction(void);
         void doMaterialBrowserOpenMenuAction(void);
         void doMaterialBrowserAddMenuAction(void);
         void doQuitMenuAction(void);
@@ -164,8 +166,8 @@ class MainWindow : public QMainWindow
         Ogre::String mTempOgreString;
         MaterialBrowserDialog* mMaterialBrowser;
         QMenu* mFileMenu;
-        QMenu* mMaterialBrowserMenu;
-        QMenu* mTextureBrowserMenu;
+        QMenu* mMaterialMenu;
+        QMenu* mTextureMenu;
         QMenu* mWindowMenu;
         QMenu* mRecentHlmsFilesMenu;
         QMenu* mRecentProjectFilesMenu;
@@ -180,6 +182,7 @@ class MainWindow : public QMainWindow
         QAction* mSaveAsProjectMenuAction;
         QAction* mSaveAsDatablockMenuAction;
         QAction* mSaveAsMeshMenuAction;
+        QAction* mMaterialSetMenuAction;
         QAction* mMaterialBrowserOpenMenuAction;
         QAction* mMaterialBrowserAddMenuAction;
         QAction* mTextureBrowserImportMenuAction;

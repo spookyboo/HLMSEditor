@@ -57,7 +57,7 @@ NodeEditorDockWidget::NodeEditorDockWidget(QString title, MainWindow* parent, Qt
     mCurrentDatablockName = DEFAULT_PBS_DATABLOCK_NAME;
     mHlmsPbsBuilder = new HlmsPbsBuilder(mNodeEditor);
     mHlmsUnlitBuilder = new HlmsUnlitBuilder(mNodeEditor);
-    mNodeEditor->setZoom(0.9f);
+    mNodeEditor->setZoom(0.75f);
 
     // Make some space
     //setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);

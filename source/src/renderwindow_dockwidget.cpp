@@ -26,7 +26,63 @@
 #include "paintlayer_manager.h"
 
 //****************************************************************************/
-RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags) : 
+UndoRedoQueue::UndoRedoQueue (void)
+{
+    clearQueue();
+}
+
+//****************************************************************************/
+UndoRedoQueue::~UndoRedoQueue (void)
+{
+}
+
+//****************************************************************************/
+void UndoRedoQueue::clearQueue (void)
+{
+    mQueue.clear();
+    mQueuePointer = 0;
+}
+
+//****************************************************************************/
+UndoRedoQueue::UndoRedoQueueEntry UndoRedoQueue::undo (void)
+{
+    // Return the first entry if the pointer is at the start
+    if (mQueuePointer <= 0)
+    {
+        mQueuePointer = 0;
+        return mQueue.at(0);
+    }
+
+    --mQueuePointer;
+    return mQueue.at(mQueuePointer);
+}
+
+//****************************************************************************/
+UndoRedoQueue::UndoRedoQueueEntry UndoRedoQueue::redo (void)
+{
+    // Return the last entry if the pointer is at the end
+    if (mQueuePointer >= mQueue.size() - 1)
+    {
+        mQueuePointer = mQueue.size() - 1;
+        return mQueue.at(mQueuePointer);
+    }
+
+    ++mQueuePointer;
+    return mQueue.at(mQueuePointer);
+}
+
+//****************************************************************************/
+void UndoRedoQueue::addEntry (const UndoRedoQueueEntry& entry)
+{
+    mQueue.append(entry);
+    mQueuePointer = mQueue.size() - 1;
+}
+
+
+//****************************************************************************/
+//****************************************************************************/
+//****************************************************************************/
+RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags) :
 	QDockWidget (title, parent, flags), 
     mParent(parent),
     mButtonToggleModelAndLight(0),
@@ -34,6 +90,8 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     mTogglePaintMode(false),
     mButtonMarker(0),
     mButtonToggleHoover(0),
+    mButtonUndo(0),
+    mButtonRedo(0),
     mButtonModelActive(true),
     mToggleHooverOn(false),
     mLightIcon(0),
@@ -43,6 +101,8 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     mMarkerIcon(0),
     mHooverOnIcon(0),
     mHooverOffIcon(0),
+    mPaintUndoIcon(0),
+    mPaintRedoIcon(0),
     mMousePaint(false)
 {
     setMinimumSize(100,100);
@@ -187,6 +247,21 @@ void RenderwindowDockWidget::leaveEventPublic (QEvent* event)
 }
 
 //****************************************************************************/
+void RenderwindowDockWidget::addUndoRedoQueueEntry (Ogre::PbsTextureTypes textureType, Ogre::ushort textureSequence)
+{
+    UndoRedoQueue::UndoRedoQueueEntry entry;
+    entry.textureType = textureType;
+    entry.textureSequence = textureSequence;
+    mUndoRedoQueue.addEntry(entry);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::clearUndoRedoQueueEntry (void)
+{
+    mUndoRedoQueue.clearQueue();
+}
+
+//****************************************************************************/
 void RenderwindowDockWidget::mousePressEvent( QMouseEvent* e )
 {
     if (e->button() == Qt::RightButton)
@@ -276,6 +351,8 @@ void RenderwindowDockWidget::createToolBars(void)
     mButtonTogglePaint = new QPushButton();
     mButtonMarker = new QPushButton();
     mButtonToggleHoover = new QPushButton();
+    mButtonUndo = new QPushButton();
+    mButtonRedo = new QPushButton();
     mModelIcon = new QIcon(ICON_MODEL);
     mLightIcon = new QIcon(ICON_LIGHT);
     mPaintOnIcon = new QIcon(ICON_PAINT_ON);
@@ -283,14 +360,22 @@ void RenderwindowDockWidget::createToolBars(void)
     mMarkerIcon = new QIcon(ICON_MARKER);
     mHooverOnIcon = new QIcon(ICON_HOOVER_ON);
     mHooverOffIcon = new QIcon(ICON_HOOVER_OFF);
+    mPaintUndoIcon = new QIcon(ICON_UNDO);
+    mPaintRedoIcon = new QIcon(ICON_REDO);
+
     mButtonToggleModelAndLight->setIcon(*mModelIcon);
     mButtonTogglePaint->setIcon(*mPaintOffIcon);
     mButtonMarker->setIcon(*mMarkerIcon);
     mButtonToggleHoover->setIcon(*mHooverOffIcon);
+    mButtonUndo->setIcon(*mPaintUndoIcon);
+    mButtonRedo->setIcon(*mPaintRedoIcon);
+
     connect(mButtonToggleModelAndLight, SIGNAL(clicked(bool)), this, SLOT(handleToggleModelAndLight()));
     connect(mButtonTogglePaint, SIGNAL(clicked(bool)), this, SLOT(handleTogglePaintMode()));
     connect(mButtonMarker, SIGNAL(clicked(bool)), this, SLOT(handleMarker()));
     connect(mButtonToggleHoover, SIGNAL(clicked(bool)), this, SLOT(handleToggleHoover()));
+    connect(mButtonUndo, SIGNAL(clicked(bool)), this, SLOT(handleUndo()));
+    connect(mButtonRedo, SIGNAL(clicked(bool)), this, SLOT(handleRedo()));
 
     // Transformation widget
     mTransformationWidget = new Magus::TransformationWidget(mHToolBar);
@@ -309,6 +394,8 @@ void RenderwindowDockWidget::createToolBars(void)
     mHToolBar->addWidget(mButtonTogglePaint);
     mHToolBar->addWidget(mButtonMarker);
     mHToolBar->addWidget(mButtonToggleHoover);
+    mHToolBar->addWidget(mButtonUndo);
+    mHToolBar->addWidget(mButtonRedo);
     mHToolBar->addWidget(spacer);
     mHToolBar->addAction(mChangeBackgroundAction);
     connect(mTransformationWidget, SIGNAL(valueChanged()), this, SLOT(doTransformationWidgetValueChanged()));
@@ -421,6 +508,20 @@ void RenderwindowDockWidget::setHoover(bool enabled)
 void RenderwindowDockWidget::handleToggleHoover(void)
 {
     setHoover(!mToggleHooverOn);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::handleUndo(void)
+{
+    UndoRedoQueue::UndoRedoQueueEntry entry = mUndoRedoQueue.undo();
+    mParent->loadTextureGeneration (entry.textureType, entry.textureSequence);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::handleRedo(void)
+{
+    UndoRedoQueue::UndoRedoQueueEntry entry = mUndoRedoQueue.redo();
+    mParent->loadTextureGeneration (entry.textureType, entry.textureSequence);
 }
 
 //****************************************************************************/

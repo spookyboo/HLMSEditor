@@ -42,6 +42,46 @@ struct MeshStruct
     QVector3D scale;
 };
 
+
+/****************************************************************************
+ This class represents an Undo/Redo queue for painting
+ ***************************************************************************/
+class UndoRedoQueue
+{
+    public:
+        struct UndoRedoQueueEntry
+        {
+            Ogre::PbsTextureTypes textureType;
+            Ogre::ushort textureSequence;
+        };
+
+        UndoRedoQueue (void);
+        ~UndoRedoQueue (void);
+
+        /* Delete all entries from the queue
+         */
+        void clearQueue (void);
+
+        /* Move one step back in the queue.
+         * The first entry cannot be passed
+         */
+        UndoRedoQueueEntry undo (void);
+
+        /* Move one step forward in the queue
+         * The last entry cannot be passed
+         */
+        UndoRedoQueueEntry redo (void);
+
+        /* Add a new entry to the queue
+         */
+        void addEntry (const UndoRedoQueueEntry& entry);
+
+    private:
+        QVector<UndoRedoQueueEntry> mQueue;
+        int mQueuePointer;
+};
+
+
 /****************************************************************************
  This class represents a DockWidget
  ***************************************************************************/
@@ -62,6 +102,8 @@ class RenderwindowDockWidget : public QDockWidget
         void mousePressEventPublic (QMouseEvent* e);
         void enterEventPublic (QEvent* event);
         void leaveEventPublic (QEvent* event);
+        void addUndoRedoQueueEntry (Ogre::PbsTextureTypes textureType, Ogre::ushort textureSequence);
+        void clearUndoRedoQueueEntry (void);
 
     public slots:
         void handleTogglePaintMode(void); // Must be public, because it is also used by the ogre widget
@@ -71,6 +113,8 @@ class RenderwindowDockWidget : public QDockWidget
         void handleToggleModelAndLight(void);
         void handleMarker(void);
         void handleToggleHoover(void);
+        void handleUndo(void);
+        void handleRedo(void);
         void doTransformationWidgetValueChanged(void);
         void doChangeBackgroundAction(void);
         void contextMenuSelected(QAction* action);
@@ -103,6 +147,8 @@ class RenderwindowDockWidget : public QDockWidget
         QPushButton* mButtonTogglePaint;
         QPushButton* mButtonMarker;
         QPushButton* mButtonToggleHoover;
+        QPushButton* mButtonUndo;
+        QPushButton* mButtonRedo;
         QMap<QString, MeshStruct> mMeshMap;
         Magus::TransformationWidget* mTransformationWidget;
         QMenu* mMeshMenu;
@@ -116,12 +162,15 @@ class RenderwindowDockWidget : public QDockWidget
         QIcon* mMarkerIcon;
         QIcon* mHooverOnIcon;
         QIcon* mHooverOffIcon;
+        QIcon* mPaintUndoIcon;
+        QIcon* mPaintRedoIcon;
         QMenu* mContextMenu;
         QMenu* mMeshesSubMenu;
         QActionGroup* mActionGroupMeshes;
         QMenu* mSkyBoxSubMenu;
         QActionGroup* mActionGroupSkyBox;
         bool mMousePaint;
+        UndoRedoQueue mUndoRedoQueue;
 };
 
 #endif

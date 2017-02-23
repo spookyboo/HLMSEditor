@@ -67,6 +67,9 @@ static const QString ICON_PAINT_OFF = QString("../common/icons/paint_off.png");
 static const QString ICON_MARKER = QString("../common/icons/marker.png");
 static const QString ICON_HOOVER_ON = QString("../common/icons/hoover_on.png");
 static const QString ICON_HOOVER_OFF = QString("../common/icons/hoover_off.png");
+static const QString ICON_UNDO = QString("../common/icons/undo.png");
+static const QString ICON_REDO = QString("../common/icons/redo.png");
+
 static const QString ICON_HLMS = QString("../common/icons/HLMSEditor.png");
 static const QString ICON_PBS_DATABLOCK_NO_PATH = QString("pbs.png");
 static const QString ICON_PBS_DATABLOCK_SMALL_NO_PATH = QString("pbs_small.png");
@@ -224,7 +227,7 @@ static bool randomBool(void)
 //******************************************************************************************************/
 
 // Contextmenu action
-static const QString ACTION_SET_CURRENT_MATERIAL = QString("Set current material");
+static const QString ACTION_SET_CURRENT_MATERIAL = QString("Apply current material to (sub)mesh");
 static const QString ACTION_TOGGLE_LIGHT_DIRECTION = QString("Light direction");
 static const QString ACTION_RESET_CAMERA = QString("Reset camera position/direction");
 static const QString ACTION_TOGGLE_SUBMESH_SELECTION = QString("Toggle Mesh/Submesh selection");

@@ -226,6 +226,9 @@ void MainWindow::createActions(void)
     connect(mQuitMenuAction, SIGNAL(triggered()), this, SLOT(doQuitMenuAction()));
 
     // ******** Materials menu ********
+    mMaterialSetMenuAction = new QAction(QString("Apply current material to (sub)mesh"), this);
+    mMaterialSetMenuAction->setShortcut(QKeySequence(QString("Ctrl+M")));
+    connect(mMaterialSetMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialSetMenuAction()));
     mMaterialBrowserOpenMenuAction = new QAction(QString("Open browser"), this);
     mMaterialBrowserOpenMenuAction->setShortcut(QKeySequence(QString("Ctrl+B")));
     connect(mMaterialBrowserOpenMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserOpenMenuAction()));
@@ -352,14 +355,15 @@ void MainWindow::createMenus(void)
     mFileMenu->addAction(mQuitMenuAction);
 
     // ******** Material browser ********
-    mMaterialBrowserMenu = menuBar()->addMenu(QString("&Materials"));
-    mMaterialBrowserMenu->addAction(mMaterialBrowserOpenMenuAction);
-    mMaterialBrowserMenu->addAction(mMaterialBrowserAddMenuAction);
+    mMaterialMenu = menuBar()->addMenu(QString("&Materials"));
+    mMaterialMenu->addAction(mMaterialSetMenuAction);
+    mMaterialMenu->addAction(mMaterialBrowserOpenMenuAction);
+    mMaterialMenu->addAction(mMaterialBrowserAddMenuAction);
 
     // ******** Texture browser ********
-    mTextureBrowserMenu = menuBar()->addMenu(QString("&Textures"));
-    mTextureBrowserMenu->addAction(mTextureBrowserImportMenuAction);
-    mTextureBrowserMenu->addAction(mTextureBrowserAddImageMenuAction);
+    mTextureMenu = menuBar()->addMenu(QString("&Textures"));
+    mTextureMenu->addAction(mTextureBrowserImportMenuAction);
+    mTextureMenu->addAction(mTextureBrowserAddImageMenuAction);
 
     // ******** Painting ********
     mWindowMenu = menuBar()->addMenu(QString("&Painting"));
@@ -1059,6 +1063,13 @@ void MainWindow::loadMaterialBrowserCfg(void)
 void MainWindow::doQuitMenuAction(void)
 {
     close();
+}
+
+//****************************************************************************/
+void MainWindow::doMaterialSetMenuAction(void)
+{
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->assignCurrentDatablock();
+    return;
 }
 
 //****************************************************************************/
@@ -2008,6 +2019,7 @@ void MainWindow::clearHlmsNamesAndRemovePaintLayers(void)
     mCurrentDatablockName = "";
     mCurrentDatablockFullName = "";
     mPaintLayerDockWidget->newHlmsCreated(); // Needed to delete the paintlayers, because a new Hlms is created
+    mRenderwindowDockWidget->clearUndoRedoQueueEntry();
 }
 
 //****************************************************************************/
@@ -2022,3 +2034,8 @@ void MainWindow::setBrushInPaintLayer(const QString& name, const QString& baseNa
     mPaintLayerDockWidget->setBrushInPaintLayer(name, baseName);
 }
 
+//****************************************************************************/
+void MainWindow::loadTextureGeneration (Ogre::PbsTextureTypes textureType, Ogre::ushort sequence)
+{
+    mPaintLayerManager.loadTextureGeneration (textureType, sequence);
+}

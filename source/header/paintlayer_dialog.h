@@ -33,7 +33,7 @@ QT_END_NAMESPACE
 
 using namespace Magus;
 class PaintLayerWidget;
-class QtLayer;
+struct QtLayer;
 class PaintLayerDialog : public QDialog
 {
     Q_OBJECT

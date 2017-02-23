@@ -1637,6 +1637,9 @@ namespace Magus
         PaintLayers::iterator itStart = mPaintLayers->begin();
         PaintLayers::iterator itEnd = mPaintLayers->end();
         PaintLayer* paintLayer;
+        TextureLayer* textureLayer;
+        Ogre::ushort sequence;
+        Ogre::PbsTextureTypes textureType;
         for (it = itStart; it != itEnd; ++it)
         {
             paintLayer = *it;
@@ -1645,8 +1648,20 @@ namespace Magus
                 // Save the latest image
                 paintLayer->saveTextureGeneration();
 
-                // TODO: Add the (unique) texture type and sequence number to the UndoRedoQueueu
-                // If the sequence number is 1, first add the base texture (sequence 0) to the UndoRedoQueueu first
+                // Add the texture type and sequence number to the UndoRedoQueueu.
+                // If the sequence number is 1, add the base texture (sequence 0) to the UndoRedoQueueu first
+                textureLayer = paintLayer->getTextureLayer();
+                if (textureLayer && textureLayer->mTextureTypeDefined)
+                {
+                    sequence = textureLayer->mMaxSequence;
+                    textureType = textureLayer->mTextureType;
+                    if (sequence == 1)
+                    {
+                        // First add the base texture (the first one)
+                        mRenderwindowDockWidget->addUndoRedoQueueEntry(textureType, 0);
+                    }
+                    mRenderwindowDockWidget->addUndoRedoQueueEntry(textureType, sequence);
+                }
             }
         }
     }

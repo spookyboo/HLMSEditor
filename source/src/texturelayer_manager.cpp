@@ -91,3 +91,18 @@ TextureLayerManager::TextureLayers* TextureLayerManager::getTextureLayers (void)
 {
     return &mTextureLayers;
 }
+
+//****************************************************************************/
+TextureLayer* TextureLayerManager::getTextureLayer (Ogre::PbsTextureTypes textureType)
+{
+    TextureLayers::iterator it;
+    TextureLayers::iterator itStart = mTextureLayers.begin();
+    TextureLayers::iterator itEnd = mTextureLayers.end();
+    TextureLayer* tl;
+    for (it = itStart; it != itEnd; ++it)
+    {
+        tl = *it;
+        if (tl->mTextureType == textureType)
+            return tl;
+    }
+}

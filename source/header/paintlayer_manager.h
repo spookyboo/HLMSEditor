@@ -88,6 +88,11 @@ class PaintLayerManager
          */
         void enablePaintLayers (std::vector<int> externalPaintLayerIds, bool enabled);
 
+        /* Load a texture and blit it to the GPU. The texture is determined by
+         * type and sequence
+         */
+        void loadTextureGeneration (Ogre::PbsTextureTypes textureType, Ogre::ushort sequence);
+
     private:
         PaintLayers mPaintLayers;
         TextureLayerManager mTextureLayerManager;

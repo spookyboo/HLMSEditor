@@ -89,20 +89,17 @@ class TextureLayer : public QObject
          */
         void blitTexture (void);
 
+        /* Load a texture file
+         */
+        void loadTextureGeneration (const Ogre::String& filename);
+
+        /* Load a texture file, based on the sequence
+         */
+        void loadTextureGeneration (Ogre::ushort sequence);
+
         /* Save the texture as a temporary file, with a sequence number
          */
         void saveTextureGeneration (void);
-
-        /* It is possible to move between generations of a texture layer. A generation is a set images with the same
-         * base texture image. The images in the set represent a certain painting state.
-         * This makes it possible to perform an undo or redo system.
-         * The setNextTextureGeneration searches for the next image in a sequence and loads it.
-         */
-        //void setNextTextureGeneration (void);
-
-        /* The setPreviousTextureGeneration searches for the previous image in a sequence and loads it.
-         */
-        //void setPreviousTextureGeneration (void);
 
         /* The setFirstTextureGeneration searches for the first (original) image in a sequence and loads it.
          */
@@ -139,6 +136,7 @@ class TextureLayer : public QObject
         Ogre::uint32 mTextureOnWhichIsPaintedHeight;            // Height of mTextureOnWhichIsPainted; must be the same as the height of mTexture
         bool mTextureOnWhichIsPaintedHasAlpha;                  // Painting effect depends on the fact whether the texture has alpha enabled
         bool mTextureTypeDefined;                               // If true, a valid texture type is assigned to this layer
+        Ogre::ushort mMaxSequence;                              // Max sequence number of the temporary texture file, used for undo/redo functions
 
     protected:
         /* Returns the filename of a certain generation, defined by the sequence.
@@ -156,8 +154,6 @@ class TextureLayer : public QObject
         const Ogre::String& getTextureFileNameGeneration (int sequence, bool fullQualified = true);
 
     private:
-        Ogre::ushort mCurrentSequence;                          // Sequence number of the temporary texture file, used for undo/redo functions
-        Ogre::ushort mMaxSequence;                              // Max sequence number of the temporary texture file, used for undo/redo functions
         Ogre::String mHelperString;
 };
 

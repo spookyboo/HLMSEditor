@@ -51,9 +51,14 @@ class TextureLayerManager
          */
         void removeAndDeleteAllTextureLayers (void);
 
-        /* Return the point the the TextureLayers
+        /* Return the pointer the TextureLayers
          */
         TextureLayers* getTextureLayers (void);
+
+        /* Return the pointer to a specific TextureLayer
+         */
+        TextureLayer* getTextureLayer (Ogre::PbsTextureTypes textureType);
+
 
     private:
         TextureLayers mTextureLayers;
