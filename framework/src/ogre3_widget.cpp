@@ -688,12 +688,10 @@ namespace Magus
             for (size_t y = 0; y < height; y++)
             {
                 v = (float)y / (float)height;
-                //col.b = v;
                 col.b = std::pow(v, gammaCorrection);
                 for (size_t x = 0; x < width; x++)
                 {
                     u = (float)x / (float)width;
-                    //col.r = u;
                     col.r = std::pow(u, gammaCorrection);
                     pixelbox.setColourAt(col, x, y, 0);
                 }
@@ -1019,12 +1017,13 @@ namespace Magus
             }
 
             // Testcode to write the render-texture to a file
-            /*
             if(ev->key() == Qt::Key_S)
                 mRttHoover->writeContentsToFile("rtt_hoover.png");
-            if(ev->key() == Qt::Key_P)
-                mRttPaint->writeContentsToFile("rtt_paint.png");
-            */
+
+            #ifdef CREATE_UV_MAPPING_TEXTURE
+                if(ev->key() == Qt::Key_P)
+                    mRttPaint->writeContentsToFile("rtt_paint.png");
+            #endif
         }
     }
 
@@ -1068,25 +1067,27 @@ namespace Magus
     {
         if(mSystemInitialized)
         {
-            if (mPaintMode)
+            if (mMouseDown)
             {
-                if (mMouseDown)
+                if (mPaintMode)
+                {
                     doPaintLayer(e->pos().x(), e->pos().y());
+                    e->accept();
+                    return;
+                }
             }
-            else
-            {
-                Ogre::Vector2 oldPos = mAbsolute;
-                mAbsolute = Ogre::Vector2(e->pos().x(), e->pos().y());
-                mRelative = mAbsolute - oldPos;
-                if (mRotateCameraMode)
-                    mCameraManager->injectMouseMove(mRelative);
-                else
-                    rotateLight(mRelative);
 
-                // Determine over which subItem the mouse hoovers
-                if (mHoover)
-                    highlightSubItem(mAbsolute);
-            }
+            Ogre::Vector2 oldPos = mAbsolute;
+            mAbsolute = Ogre::Vector2(e->pos().x(), e->pos().y());
+            mRelative = mAbsolute - oldPos;
+            if (mRotateCameraMode)
+                mCameraManager->injectMouseMove(mRelative);
+            else
+                rotateLight(mRelative);
+
+            // Determine over which subItem the mouse hoovers
+            if (mHoover)
+                highlightSubItem(mAbsolute);
         }
 
         e->accept();

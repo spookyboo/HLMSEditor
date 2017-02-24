@@ -542,6 +542,7 @@ namespace Magus
         }
         mCompoundNodeDropped = 0;
         setCursor(Qt::ArrowCursor);
+        repaint();
         return true;
     }
 
@@ -961,6 +962,8 @@ namespace Magus
 
         foreach(QtNode* selectedNode, mCurrentlySelectedNodes)
             removeNode(selectedNode);
+
+        repaint();
     }
 
     //****************************************************************************/
@@ -970,6 +973,8 @@ namespace Magus
         foreach(QGraphicsItem* item, items)
             if (isNode(item))
                 item->setPos(0, 0);
+
+        repaint();
     }
 
     //****************************************************************************/
@@ -1190,6 +1195,7 @@ namespace Magus
         setZoom(zoom);
         resetZoomSubmenu();
         action->setChecked(true);
+        repaint();
     }
 
     //****************************************************************************/

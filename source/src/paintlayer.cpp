@@ -239,25 +239,6 @@ void PaintLayer::paint(float u, float v)
      * same texture file. Mipsmaps are updated by means of scaling the texture image.
      */
     mTextureLayer->blitTexture();
-
-    /*
-    size_t w = mTextureLayer->mTextureOnWhichIsPaintedWidth;
-    size_t h = mTextureLayer->mTextureOnWhichIsPaintedHeight;
-    Ogre::Image textureOnWhichIsPaintedScaled = mTextureLayer->mTextureOnWhichIsPainted; // Define textureOnWhichIsPaintedScaled each time; reusing results in exception
-    for (Ogre::uint8 i = 0; i < mTextureLayer->mNumMipMaps; ++i)
-    {
-        //mTextureLayer->mBuffers.at(i)->lock(Ogre::v1::HardwareBuffer::HBL_DISCARD);
-        mTextureLayer->mBuffers.at(i)->blitFromMemory(textureOnWhichIsPaintedScaled.getPixelBox(0,0), Ogre::Box(0, 0, 0, w, h, 1));
-        //mTextureLayer->mBuffers.at(i)->unlock();
-        w*=0.5f; // Mipmaps always are half of the previous one
-        h*=0.5f;
-        if (w > 1.0f && h > 1.0f)
-            textureOnWhichIsPaintedScaled.resize(w, h);
-        else
-            break; // Stop when the mipmaps are too small
-    }
-    textureOnWhichIsPaintedScaled.freeMemory();
-    */
 }
 
 //****************************************************************************/

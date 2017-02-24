@@ -101,8 +101,10 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     mMarkerIcon(0),
     mHooverOnIcon(0),
     mHooverOffIcon(0),
-    mPaintUndoIcon(0),
-    mPaintRedoIcon(0),
+    mPaintUndoOffIcon(0),
+    mPaintUndoOnIcon(0),
+    mPaintRedoOffIcon(0),
+    mPaintRedoOnIcon(0),
     mMousePaint(false)
 {
     setMinimumSize(100,100);
@@ -360,15 +362,17 @@ void RenderwindowDockWidget::createToolBars(void)
     mMarkerIcon = new QIcon(ICON_MARKER);
     mHooverOnIcon = new QIcon(ICON_HOOVER_ON);
     mHooverOffIcon = new QIcon(ICON_HOOVER_OFF);
-    mPaintUndoIcon = new QIcon(ICON_UNDO);
-    mPaintRedoIcon = new QIcon(ICON_REDO);
+    mPaintUndoOffIcon = new QIcon(ICON_UNDO_OFF);
+    mPaintUndoOnIcon = new QIcon(ICON_UNDO_ON);
+    mPaintRedoOffIcon = new QIcon(ICON_REDO_OFF);
+    mPaintRedoOnIcon = new QIcon(ICON_REDO_ON);
 
     mButtonToggleModelAndLight->setIcon(*mModelIcon);
     mButtonTogglePaint->setIcon(*mPaintOffIcon);
     mButtonMarker->setIcon(*mMarkerIcon);
     mButtonToggleHoover->setIcon(*mHooverOffIcon);
-    mButtonUndo->setIcon(*mPaintUndoIcon);
-    mButtonRedo->setIcon(*mPaintRedoIcon);
+    mButtonUndo->setIcon(*mPaintUndoOffIcon);
+    mButtonRedo->setIcon(*mPaintRedoOffIcon);
 
     connect(mButtonToggleModelAndLight, SIGNAL(clicked(bool)), this, SLOT(handleToggleModelAndLight()));
     connect(mButtonTogglePaint, SIGNAL(clicked(bool)), this, SLOT(handleTogglePaintMode()));
@@ -465,6 +469,8 @@ void RenderwindowDockWidget::setPaintMode(bool enabled)
     {
         // Painting is on, light axis is disabled and hoover is off
         mButtonTogglePaint->setIcon(*mPaintOnIcon);
+        mButtonUndo->setIcon(*mPaintUndoOnIcon);
+        mButtonRedo->setIcon(*mPaintRedoOnIcon);
         setModelAndLight(true);
         setHoover(false);
         mMousePaint = true;
@@ -473,6 +479,8 @@ void RenderwindowDockWidget::setPaintMode(bool enabled)
     {
         QApplication::restoreOverrideCursor();
         mButtonTogglePaint->setIcon(*mPaintOffIcon);
+        mButtonUndo->setIcon(*mPaintUndoOffIcon);
+        mButtonRedo->setIcon(*mPaintRedoOffIcon);
         mMousePaint = false;
     }
     mOgreWidget->setFocus();
@@ -513,15 +521,21 @@ void RenderwindowDockWidget::handleToggleHoover(void)
 //****************************************************************************/
 void RenderwindowDockWidget::handleUndo(void)
 {
-    UndoRedoQueue::UndoRedoQueueEntry entry = mUndoRedoQueue.undo();
-    mParent->loadTextureGeneration (entry.textureType, entry.textureSequence);
+    if (mTogglePaintMode)
+    {
+        UndoRedoQueue::UndoRedoQueueEntry entry = mUndoRedoQueue.undo();
+        mParent->loadTextureGeneration (entry.textureType, entry.textureSequence);
+    }
 }
 
 //****************************************************************************/
 void RenderwindowDockWidget::handleRedo(void)
 {
-    UndoRedoQueue::UndoRedoQueueEntry entry = mUndoRedoQueue.redo();
-    mParent->loadTextureGeneration (entry.textureType, entry.textureSequence);
+    if (mTogglePaintMode)
+    {
+        UndoRedoQueue::UndoRedoQueueEntry entry = mUndoRedoQueue.redo();
+        mParent->loadTextureGeneration (entry.textureType, entry.textureSequence);
+    }
 }
 
 //****************************************************************************/

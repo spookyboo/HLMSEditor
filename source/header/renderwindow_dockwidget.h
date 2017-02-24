@@ -162,8 +162,10 @@ class RenderwindowDockWidget : public QDockWidget
         QIcon* mMarkerIcon;
         QIcon* mHooverOnIcon;
         QIcon* mHooverOffIcon;
-        QIcon* mPaintUndoIcon;
-        QIcon* mPaintRedoIcon;
+        QIcon* mPaintUndoOffIcon;
+        QIcon* mPaintUndoOnIcon;
+        QIcon* mPaintRedoOffIcon;
+        QIcon* mPaintRedoOnIcon;
         QMenu* mContextMenu;
         QMenu* mMeshesSubMenu;
         QActionGroup* mActionGroupMeshes;

@@ -67,8 +67,10 @@ static const QString ICON_PAINT_OFF = QString("../common/icons/paint_off.png");
 static const QString ICON_MARKER = QString("../common/icons/marker.png");
 static const QString ICON_HOOVER_ON = QString("../common/icons/hoover_on.png");
 static const QString ICON_HOOVER_OFF = QString("../common/icons/hoover_off.png");
-static const QString ICON_UNDO = QString("../common/icons/undo.png");
-static const QString ICON_REDO = QString("../common/icons/redo.png");
+static const QString ICON_UNDO_ON = QString("../common/icons/undo_on.png");
+static const QString ICON_UNDO_OFF = QString("../common/icons/undo_off.png");
+static const QString ICON_REDO_OFF = QString("../common/icons/redo_off.png");
+static const QString ICON_REDO_ON = QString("../common/icons/redo_on.png");
 
 static const QString ICON_HLMS = QString("../common/icons/HLMSEditor.png");
 static const QString ICON_PBS_DATABLOCK_NO_PATH = QString("pbs.png");
