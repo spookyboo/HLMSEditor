@@ -38,6 +38,7 @@ static const int TOOL_LAYER_COLUMN_NAME = 1;
 static const int TOOL_LAYER_COLUMN_VISIBILITY = 2;
 static const int TOOL_LAYER_COLUMN_FILLER = 3;
 static const QString TOOL_LAYER_ACTION_CREATE_LAYER = "Create empty layer";
+static const QString TOOL_LAYER_ACTION_EDIT_LAYER = "Edit layer";
 static const QString TOOL_LAYER_ACTION_DELETE_LAYER = "Delete layer";
 static const QString TOOL_LAYER_ACTION_RENAME_LAYER = "Rename";
 static const QString TOOL_LAYER_ACTION_ALL_VISIBLE = "Make all layers visible";
@@ -82,6 +83,9 @@ class PaintLayerWidget : public QWidget
 
         // Add a precreated layer; the layer object is managed (and deleted) by the QtLayerWidget
         void addLayer(QtLayer* layer);
+
+        // Edit the selected layer
+        void editSelectedPaintLayer(void);
 
         // Delete a layer (by name)
         void deleteLayer (const QString& name);

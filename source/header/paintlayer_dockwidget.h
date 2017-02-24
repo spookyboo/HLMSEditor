@@ -55,6 +55,11 @@ class PaintLayerDockWidget : public QDockWidget
          */
         void createPaintLayer(void);
 
+        /* Edit the selected paint layers This is the same action as performed by the
+         * contextmenu.
+         */
+        void editSelectedPaintLayer(void);
+
         /* Delete the selected paint layers This is the same action as performed by the
          * contextmenu.
          */

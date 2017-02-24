@@ -394,6 +394,7 @@ static const QString ACTION_EDIT = QString("Edit material");
 
 // Painting
 static const QString ACTION_NEW_PAINTING_LAYER = QString("New painting layer");
+static const QString ACTION_EDIT_PAINTING_LAYER = QString("Edit selected painting layer");
 static const QString ACTION_DELETE_CURRENT_PAINTING_LAYERS = QString("Delete selected painting layer");
 static const int TEXTURE_FILE_GENERATION_DEPTH = 5; // Determines number of undo's
 

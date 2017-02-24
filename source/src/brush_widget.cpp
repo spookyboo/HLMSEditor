@@ -44,10 +44,9 @@ BrushWidget::BrushWidget (const QString& brushDir, BrushDockWidget* brushDockWid
     mBrushDir = brushDir;
 
     mTextureWidget = new Magus::QtDefaultTextureWidget(this);
-    mTextureWidget->setTextureSize(QSize(64, 64));
-    mTextureWidget->setContentsMargins(-8, -8, -8, -8);
+    mTextureWidget->setTextureSize(QSize(72, 64)); // Add 8 pixels to the width to compensate the frame width
+    //mTextureWidget->setContentsMargins(-8, -8, -8, -8);
     loadBrushesRecursively (mBrushDir);
-    //connect(mTextureWidget, SIGNAL(selected(QString,QString)), this, SLOT(handleAssetSelected(QString,QString)));
     connect(mTextureWidget, SIGNAL(doubleClicked(QString,QString)), this, SLOT(handleBrushDoubleClicked(QString,QString)));
 
     // Layout

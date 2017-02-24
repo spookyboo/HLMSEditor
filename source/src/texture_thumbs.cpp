@@ -29,7 +29,7 @@ TextureThumbsDockWidget::TextureThumbsDockWidget(const QString& iconDir, const Q
 {
     mIconDir = iconDir;
     mTextureWidget = new Magus::QtDefaultTextureWidget(this);
-    mTextureWidget->setTextureSize(QSize(120, 120));
+    mTextureWidget->setTextureSize(QSize(128, 120)); // Add 8 pixels to the width to compensate the frame width
     setWidget(mTextureWidget);
     connect(mTextureWidget, SIGNAL(selected(QString,QString)), this, SLOT(handleAssetSelected(QString,QString)));
     connect(mTextureWidget, SIGNAL(textureFileDropped(QString,QString)), this, SLOT(handleTextureFileDropped(QString,QString)));

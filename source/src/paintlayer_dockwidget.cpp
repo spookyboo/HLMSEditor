@@ -59,6 +59,12 @@ void PaintLayerDockWidget::createPaintLayer(void)
 }
 
 //****************************************************************************/
+void PaintLayerDockWidget::editSelectedPaintLayer(void)
+{
+    mPaintLayerWidget->editSelectedPaintLayer();
+}
+
+//****************************************************************************/
 void PaintLayerDockWidget::deleteSelectedPaintLayer(void)
 {
     mPaintLayerWidget->deleteSelectedPaintLayer();

@@ -82,6 +82,7 @@ PaintLayerWidget::PaintLayerWidget(const QString& iconDir, PaintLayerDockWidget*
     setContextMenuPolicy(Qt::CustomContextMenu);
     mContextMenu = new QMenu(mTable);
     mContextMenu->addAction(new QAction(TOOL_LAYER_ACTION_CREATE_LAYER, mTable));
+    mContextMenu->addAction(new QAction(TOOL_LAYER_ACTION_EDIT_LAYER, mTable));
     mContextMenu->addAction(new QAction(TOOL_LAYER_ACTION_DELETE_LAYER, mTable));
     mContextMenu->addAction(new QAction(TOOL_LAYER_ACTION_RENAME_LAYER, mTable));
     mContextMenu->addAction(new QAction(TOOL_LAYER_ACTION_ALL_VISIBLE, mTable));
@@ -207,6 +208,11 @@ void PaintLayerWidget::contextMenuItemSelected(QAction* action)
     if (action->text() == TOOL_LAYER_ACTION_CREATE_LAYER)
     {
         createDefaultPaintLayer();
+        return;
+    }
+    else if (action->text() == TOOL_LAYER_ACTION_EDIT_LAYER)
+    {
+        editSelectedPaintLayer();
         return;
     }
     else if (action->text() == TOOL_LAYER_ACTION_DELETE_LAYER)
@@ -493,9 +499,32 @@ void PaintLayerWidget::deleteSelectedPaintLayer(void)
 {
     int layerId = getCurrentLayerId();
     if (layerId < 0)
+    {
         QMessageBox::information(0, QString("Warning"), QString("There is no layer to delete"));
+        return;
+    }
 
     deleteLayer(getCurrentLayerId());
+}
+
+//****************************************************************************/
+void PaintLayerWidget::editSelectedPaintLayer(void)
+{
+    // First check whether there is a paint layer
+    int layerId = getCurrentLayerId();
+    if (layerId < 0)
+    {
+        QMessageBox::information(0, QString("Warning"), QString("There is no layer to edit"));
+        return;
+    }
+
+    // First set the correct column to current
+    int currentRow = mTable->currentRow();
+    mTable->setCurrentCell(currentRow, TOOL_LAYER_COLUMN_ICON); // Do this to set the correct column
+
+    // Get the current index
+    QModelIndex index = mTable->currentIndex();
+    handleTableDoubleClicked(index);
 }
 
 //****************************************************************************/

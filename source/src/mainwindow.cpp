@@ -248,6 +248,9 @@ void MainWindow::createActions(void)
     mNewPaintingLayerAction = new QAction(QString(ACTION_NEW_PAINTING_LAYER), this);
     mNewPaintingLayerAction->setShortcut(QKeySequence(QString("Ctrl+P")));
     connect(mNewPaintingLayerAction, SIGNAL(triggered()), this, SLOT(doNewPaintingLayerMenuAction()));
+    mEditPaintingLayerAction = new QAction(QString(ACTION_EDIT_PAINTING_LAYER), this);
+    mEditPaintingLayerAction->setShortcut(QKeySequence(QString("Ctrl+E")));
+    connect(mEditPaintingLayerAction, SIGNAL(triggered()), this, SLOT(doNewEditLayerMenuAction()));
     mDeleteSelectedPaintingLayersAction = new QAction(QString(ACTION_DELETE_CURRENT_PAINTING_LAYERS), this);
     mDeleteSelectedPaintingLayersAction->setShortcut(QKeySequence(QString("Ctrl+D")));
     connect(mDeleteSelectedPaintingLayersAction, SIGNAL(triggered()), this, SLOT(doSelectedPaintingLayersMenuAction()));
@@ -368,6 +371,7 @@ void MainWindow::createMenus(void)
     // ******** Painting ********
     mWindowMenu = menuBar()->addMenu(QString("&Painting"));
     mWindowMenu->addAction(mNewPaintingLayerAction);
+    mWindowMenu->addAction(mEditPaintingLayerAction);
     mWindowMenu->addAction(mDeleteSelectedPaintingLayersAction);
 
     // ******** Tools ********
@@ -1168,6 +1172,12 @@ void MainWindow::doTextureBrowserAddImageMenuAction(void)
 void MainWindow::doNewPaintingLayerMenuAction(void)
 {
     mPaintLayerDockWidget->createPaintLayer(); // Automaticall results in setting the paintlayer in the Ogre widget
+}
+
+//****************************************************************************/
+void MainWindow::doEditPaintingLayerMenuAction(void)
+{
+    mPaintLayerDockWidget->editSelectedPaintLayer();
 }
 
 //****************************************************************************/

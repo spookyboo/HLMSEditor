@@ -172,7 +172,7 @@ namespace Magus
         mNameTexture = QString("");
         mBaseNameTexture = QString("");
         mSystemCommandEditAsset = QString("");
-        mTextureSize = QSize(128, 128);
+        mTextureSize = QSize(128, 218);
         mOriginIsFile = true;
         QHBoxLayout* mainLayout = new QHBoxLayout;
         QVBoxLayout* textureSelectionLayout = new QVBoxLayout;

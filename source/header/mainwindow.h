@@ -144,6 +144,7 @@ class MainWindow : public QMainWindow
         void doTextureBrowserImportMenuAction(void);
         void doTextureBrowserAddImageMenuAction(void);
         void doNewPaintingLayerMenuAction(void);
+        void doEditPaintingLayerMenuAction(void);
         void doSelectedPaintingLayersMenuAction(void);
         void doConfigureMenuAction(void);
         void doResetWindowLayoutMenuAction(void);
@@ -187,6 +188,7 @@ class MainWindow : public QMainWindow
         QAction* mMaterialBrowserAddMenuAction;
         QAction* mTextureBrowserImportMenuAction;
         QAction* mNewPaintingLayerAction;
+        QAction* mEditPaintingLayerAction;
         QAction* mDeleteSelectedPaintingLayersAction;
         QAction* mConfigureMenuAction;
         QAction* mTextureBrowserAddImageMenuAction;
