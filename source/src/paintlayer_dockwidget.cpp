@@ -977,6 +977,7 @@ void PaintLayerDockWidget::handleLayerVisibilityChanged(int layerId, const QStri
 {
     PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
     TextureLayer* textureLayer = paintLayer->getTextureLayer();
+    TextureLayer* textureLayerToSetVisible = 0;
     if (!textureLayer)
         return;
 
@@ -993,8 +994,8 @@ void PaintLayerDockWidget::handleLayerVisibilityChanged(int layerId, const QStri
                 textureLayer->mTextureTypeDefined &&
                 textureLayer->mTextureType == type)
         {
-            // Set the icon
-            mPaintLayerWidget->updateVisibilityIconForLayerId(layer->layerId, visible, false);
+            // Get the texture layer
+            textureLayerToSetVisible = textureLayer;
 
             // Disable the paintlayer from painting if the icon is set to invisible; enable it again
             // if the icon is visible.
@@ -1004,10 +1005,13 @@ void PaintLayerDockWidget::handleLayerVisibilityChanged(int layerId, const QStri
 
     // Set to the correct texture. The first texture generation is the original texture and the
     // last texture generation is the texture on which is painted.
+    if (!textureLayerToSetVisible)
+        return;
+
     if (visible)
-        textureLayer->setLastTextureGeneration();
+        textureLayerToSetVisible->setLastTextureGeneration();
     else
-        textureLayer->setFirstTextureGeneration();
+        textureLayerToSetVisible->setFirstTextureGeneration();
 }
 
 //****************************************************************************/
