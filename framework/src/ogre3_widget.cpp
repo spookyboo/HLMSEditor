@@ -1649,8 +1649,8 @@ namespace Magus
                 // Save the latest image
                 paintLayer->saveTextureGeneration();
 
-                // Add the texture type and sequence number to the UndoRedoQueueu.
-                // If the sequence number is 1, add the base texture (sequence 0) to the UndoRedoQueueu first
+                // Add the texture type and sequence number to the UndoRedoStack.
+                // If the sequence number is 1, add the base texture (sequence 0) to the UndoRedoStack first
                 textureLayer = paintLayer->getTextureLayer();
                 if (textureLayer && textureLayer->mTextureTypeDefined)
                 {
@@ -1659,9 +1659,9 @@ namespace Magus
                     if (sequence == 1)
                     {
                         // First add the base texture (the first one)
-                        mRenderwindowDockWidget->addUndoRedoQueueEntry(textureType, 0);
+                        mRenderwindowDockWidget->addUndoRedoStackEntry(textureType, 0);
                     }
-                    mRenderwindowDockWidget->addUndoRedoQueueEntry(textureType, sequence);
+                    mRenderwindowDockWidget->addUndoRedoStackEntry(textureType, sequence);
                 }
             }
         }

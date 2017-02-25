@@ -62,7 +62,7 @@ NodeEditorDockWidget::NodeEditorDockWidget(QString title, MainWindow* parent, Qt
     // Make some space
     //setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     QRect rec = QApplication::desktop()->screenGeometry();
-    setMinimumHeight(0.3 * rec.height());
+    setMinimumHeight(0.1 * rec.height());
     //layout()->setSizeConstraint(QLayout::SetMinimumSize);
 }
 

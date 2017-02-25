@@ -2029,7 +2029,7 @@ void MainWindow::clearHlmsNamesAndRemovePaintLayers(void)
     mCurrentDatablockName = "";
     mCurrentDatablockFullName = "";
     mPaintLayerDockWidget->newHlmsCreated(); // Needed to delete the paintlayers, because a new Hlms is created
-    mRenderwindowDockWidget->clearUndoRedoQueueEntry();
+    mRenderwindowDockWidget->clearUndoRedoStackEntry();
 }
 
 //****************************************************************************/

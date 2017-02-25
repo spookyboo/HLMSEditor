@@ -44,41 +44,41 @@ struct MeshStruct
 
 
 /****************************************************************************
- This class represents an Undo/Redo queue for painting
+ This class represents an Undo/Redo stack for painting
  ***************************************************************************/
-class UndoRedoQueue
+class UndoRedoStack
 {
     public:
-        struct UndoRedoQueueEntry
+        struct UndoRedoStackEntry
         {
             Ogre::PbsTextureTypes textureType;
             Ogre::ushort textureSequence;
         };
 
-        UndoRedoQueue (void);
-        ~UndoRedoQueue (void);
+        UndoRedoStack (void);
+        ~UndoRedoStack (void);
 
-        /* Delete all entries from the queue
+        /* Delete all entries from the stack
          */
-        void clearQueue (void);
+        void clearStack (void);
 
-        /* Move one step back in the queue.
+        /* Move one step back in the stack.
          * The first entry cannot be passed
          */
-        UndoRedoQueueEntry undo (void);
+        UndoRedoStackEntry undo (void);
 
-        /* Move one step forward in the queue
+        /* Move one step forward in the stack
          * The last entry cannot be passed
          */
-        UndoRedoQueueEntry redo (void);
+        UndoRedoStackEntry redo (void);
 
-        /* Add a new entry to the queue
+        /* Add a new entry to the stack
          */
-        void addEntry (const UndoRedoQueueEntry& entry);
+        void addEntry (const UndoRedoStackEntry& entry);
 
     private:
-        QVector<UndoRedoQueueEntry> mQueue;
-        int mQueuePointer;
+        QVector<UndoRedoStackEntry> mStack;
+        int mStackPointer;
 };
 
 
@@ -102,8 +102,8 @@ class RenderwindowDockWidget : public QDockWidget
         void mousePressEventPublic (QMouseEvent* e);
         void enterEventPublic (QEvent* event);
         void leaveEventPublic (QEvent* event);
-        void addUndoRedoQueueEntry (Ogre::PbsTextureTypes textureType, Ogre::ushort textureSequence);
-        void clearUndoRedoQueueEntry (void);
+        void addUndoRedoStackEntry (Ogre::PbsTextureTypes textureType, Ogre::ushort textureSequence);
+        void clearUndoRedoStackEntry (void);
 
     public slots:
         void handleTogglePaintMode(void); // Must be public, because it is also used by the ogre widget
@@ -172,7 +172,7 @@ class RenderwindowDockWidget : public QDockWidget
         QMenu* mSkyBoxSubMenu;
         QActionGroup* mActionGroupSkyBox;
         bool mMousePaint;
-        UndoRedoQueue mUndoRedoQueue;
+        UndoRedoStack mUndoRedoStack;
 };
 
 #endif

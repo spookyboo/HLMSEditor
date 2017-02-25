@@ -26,56 +26,56 @@
 #include "paintlayer_manager.h"
 
 //****************************************************************************/
-UndoRedoQueue::UndoRedoQueue (void)
+UndoRedoStack::UndoRedoStack (void)
 {
-    clearQueue();
+    clearStack();
 }
 
 //****************************************************************************/
-UndoRedoQueue::~UndoRedoQueue (void)
+UndoRedoStack::~UndoRedoStack (void)
 {
 }
 
 //****************************************************************************/
-void UndoRedoQueue::clearQueue (void)
+void UndoRedoStack::clearStack (void)
 {
-    mQueue.clear();
-    mQueuePointer = 0;
+    mStack.clear();
+    mStackPointer = 0;
 }
 
 //****************************************************************************/
-UndoRedoQueue::UndoRedoQueueEntry UndoRedoQueue::undo (void)
+UndoRedoStack::UndoRedoStackEntry UndoRedoStack::undo (void)
 {
     // Return the first entry if the pointer is at the start
-    if (mQueuePointer <= 0)
+    if (mStackPointer <= 0)
     {
-        mQueuePointer = 0;
-        return mQueue.at(0);
+        mStackPointer = 0;
+        return mStack.at(0);
     }
 
-    --mQueuePointer;
-    return mQueue.at(mQueuePointer);
+    --mStackPointer;
+    return mStack.at(mStackPointer);
 }
 
 //****************************************************************************/
-UndoRedoQueue::UndoRedoQueueEntry UndoRedoQueue::redo (void)
+UndoRedoStack::UndoRedoStackEntry UndoRedoStack::redo (void)
 {
     // Return the last entry if the pointer is at the end
-    if (mQueuePointer >= mQueue.size() - 1)
+    if (mStackPointer >= mStack.size() - 1)
     {
-        mQueuePointer = mQueue.size() - 1;
-        return mQueue.at(mQueuePointer);
+        mStackPointer = mStack.size() - 1;
+        return mStack.at(mStackPointer);
     }
 
-    ++mQueuePointer;
-    return mQueue.at(mQueuePointer);
+    ++mStackPointer;
+    return mStack.at(mStackPointer);
 }
 
 //****************************************************************************/
-void UndoRedoQueue::addEntry (const UndoRedoQueueEntry& entry)
+void UndoRedoStack::addEntry (const UndoRedoStackEntry& entry)
 {
-    mQueue.append(entry);
-    mQueuePointer = mQueue.size() - 1;
+    mStack.append(entry);
+    mStackPointer = mStack.size() - 1;
 }
 
 
@@ -249,18 +249,18 @@ void RenderwindowDockWidget::leaveEventPublic (QEvent* event)
 }
 
 //****************************************************************************/
-void RenderwindowDockWidget::addUndoRedoQueueEntry (Ogre::PbsTextureTypes textureType, Ogre::ushort textureSequence)
+void RenderwindowDockWidget::addUndoRedoStackEntry (Ogre::PbsTextureTypes textureType, Ogre::ushort textureSequence)
 {
-    UndoRedoQueue::UndoRedoQueueEntry entry;
+    UndoRedoStack::UndoRedoStackEntry entry;
     entry.textureType = textureType;
     entry.textureSequence = textureSequence;
-    mUndoRedoQueue.addEntry(entry);
+    mUndoRedoStack.addEntry(entry);
 }
 
 //****************************************************************************/
-void RenderwindowDockWidget::clearUndoRedoQueueEntry (void)
+void RenderwindowDockWidget::clearUndoRedoStackEntry (void)
 {
-    mUndoRedoQueue.clearQueue();
+    mUndoRedoStack.clearStack();
 }
 
 //****************************************************************************/
@@ -523,7 +523,7 @@ void RenderwindowDockWidget::handleUndo(void)
 {
     if (mTogglePaintMode)
     {
-        UndoRedoQueue::UndoRedoQueueEntry entry = mUndoRedoQueue.undo();
+        UndoRedoStack::UndoRedoStackEntry entry = mUndoRedoStack.undo();
         mParent->loadTextureGeneration (entry.textureType, entry.textureSequence);
     }
 }
@@ -533,7 +533,7 @@ void RenderwindowDockWidget::handleRedo(void)
 {
     if (mTogglePaintMode)
     {
-        UndoRedoQueue::UndoRedoQueueEntry entry = mUndoRedoQueue.redo();
+        UndoRedoStack::UndoRedoStackEntry entry = mUndoRedoStack.redo();
         mParent->loadTextureGeneration (entry.textureType, entry.textureSequence);
     }
 }

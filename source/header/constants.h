@@ -125,7 +125,7 @@ static const QString PBSM_DETAIL3_NM_QSTRING = QString("Detail normal map 3");
 static const QString PBSM_REFLECTION_QSTRING = QString("Env. probe map");
 static const QString PAINT_EFFECT_COLOR_QSTRING = QString("Colour");
 static const QString PAINT_EFFECT_ALPHA_QSTRING = QString("Alpha");
-static const QString PAINT_EFFECT_TEXTURE_QSTRING = QString("Texture/Normal");
+static const QString PAINT_EFFECT_TEXTURE_QSTRING = QString("Texture / Normal");
 static const QString PAINT_OVERFLOW_IGNORE_QSTRING = QString("Ignore");
 static const QString PAINT_OVERFLOW_CONTINUE_QSTRING = QString("Continue");
 
