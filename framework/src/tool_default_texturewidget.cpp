@@ -63,6 +63,7 @@ namespace Magus
         textureAndNameLayout->addWidget(mBaseNameEdit, 1);
         mainLayout->addLayout(textureAndNameLayout);
         setLayout(mainLayout);
+        setStyleSheet("QWidget{background-color : #333333;}");
     }
 
     //****************************************************************************/

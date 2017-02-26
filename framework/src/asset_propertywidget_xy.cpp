@@ -19,6 +19,7 @@
 ****************************************************************************/
 
 // Include
+#include "OgreLogManager.h"
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QRegExpValidator>
@@ -29,7 +30,9 @@ namespace Magus
     //****************************************************************************/
     QtXYProperty::QtXYProperty(const QString& title, qreal x, qreal y, QWidget* parent) :
         QtProperty(parent),
-        mPrecision(3)
+        mPrecision(3),
+        mXEdit(0),
+        mYEdit(0)
     {
         QVBoxLayout* mainLayout = new QVBoxLayout;
         QHBoxLayout* horizontalLayout = new QHBoxLayout;
@@ -46,7 +49,7 @@ namespace Magus
         QRegExpValidator* validator = new QRegExpValidator(regularExpression);
         mXEdit->setValidator(validator);
         mYEdit->setValidator(validator);
-        setXY(x, y);
+        //setXY(x, y);
 
         // Layout
         xLayout->addWidget(mXlabel, 1);
@@ -79,7 +82,6 @@ namespace Magus
     //****************************************************************************/
     void QtXYProperty::setXY (qreal x, qreal y)
     {
-        // TODO: This causes a crash!!
         setX(x);
         setY(y);
     }
@@ -101,15 +103,19 @@ namespace Magus
     //****************************************************************************/
     const qreal QtXYProperty::getX (void) const
     {
-        double d = mXEdit->text().toDouble();
-        return QVariant(d).toReal();
+        QString s = mXEdit->text();
+        double d = s.toDouble();
+        //return QVariant(d).toReal();
+        return d;
     }
 
     //****************************************************************************/
     const qreal QtXYProperty::getY (void) const
     {
-        double d = mYEdit->text().toDouble();
-        return QVariant(d).toReal();
+        QString s = mYEdit->text();
+        double d = s.toDouble();
+        //return QVariant(d).toReal();
+        return d;
     }
 
     //****************************************************************************/

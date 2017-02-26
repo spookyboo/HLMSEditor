@@ -80,9 +80,9 @@ namespace Magus
         mLatestPaintResult(1),
         mPbsDatablockBlockOffsetTexture(0),
         mUnlitDatablockBlockOffsetTexture(0),
-        mPbsTextureTypeOffsetTexture(Ogre::PBSM_DIFFUSE),
         mUnlitTextureTypeOffsetTexture(0)
     {
+        mPbsTextureTypeOffsetTexture = Ogre::PBSM_DIFFUSE;
         mRenderTextureNameHoover = "RenderTargetHlmsEditorTextureHoover";
         mRenderTextureNamePaint = "RenderTargetHlmsEditorTexturePaint";
         setMinimumSize(100,100);
@@ -1601,7 +1601,7 @@ namespace Magus
         mRelative = mAbsolute - oldPos;
         if (mPbsDatablockBlockOffsetTexture)
         {
-            int index = getDetailMapIndexFromTextureTypeForScaleAndOffset(mPbsTextureTypeOffsetTexture);
+            unsigned int index = getDetailMapIndexFromTextureTypeForScaleAndOffset(mPbsTextureTypeOffsetTexture);
             if (index < 999)
             {
                 Ogre::Vector4 v4 = mPbsDatablockBlockOffsetTexture->getDetailMapOffsetScale(index);
@@ -1609,7 +1609,7 @@ namespace Magus
                 v4.x = saturate(v4.x);
                 v4.y += mRelative.y / (float)height();
                 v4.y = saturate(v4.y);
-                mPbsDatablockBlockOffsetTexture->setDetailMapOffsetScale(index, v4);
+                mPbsDatablockBlockOffsetTexture->setDetailMapOffsetScale((Ogre::uint8)index, v4);
                 mRenderwindowDockWidget->notifyOffsetTextureUpdated(v4.x, v4.y);
             }
         }

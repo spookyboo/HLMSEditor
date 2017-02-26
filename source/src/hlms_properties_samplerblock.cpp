@@ -457,12 +457,16 @@ void HlmsPropertiesSamplerblock::setObject (HlmsNodeSamplerblock* hlmsNodeSample
     // ******** Detail: Offset ********
     xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_OFFSET));
     QVector2D v2 = mHlmsNodeSamplerblock->getOffset();
-    xyProperty->setXY(v2.x(), v2.y());
+    //xyProperty->setXY(v2.x(), v2.y());
+    xyProperty->setX(v2.x());
+    xyProperty->setY(v2.y());
 
     // ******** Detail: Scale ********
     xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_SCALE));
     v2 = mHlmsNodeSamplerblock->getScale();
-    xyProperty->setXY(v2.x(), v2.y());
+    //xyProperty->setXY(v2.x(), v2.y());
+    xyProperty->setX(v2.x());
+    xyProperty->setY(v2.y());
 
     // ******** Animation Matrix (unlit only) ********
     // Decompose in Scale, Rotate and Transform
@@ -471,7 +475,9 @@ void HlmsPropertiesSamplerblock::setObject (HlmsNodeSamplerblock* hlmsNodeSample
 
     xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_SCALE));
     v2 = mHlmsNodeSamplerblock->getAnimationScale();
-    xyProperty->setXY(v2.x(), v2.y());
+    //xyProperty->setXY(v2.x(), v2.y());
+    xyProperty->setX(v2.x());
+    xyProperty->setY(v2.y());
 
     quaternionProperty = static_cast<Magus::QtQuaternionProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ROTATE));
     QQuaternion q = mHlmsNodeSamplerblock->getAnimationOrientation();
@@ -479,7 +485,9 @@ void HlmsPropertiesSamplerblock::setObject (HlmsNodeSamplerblock* hlmsNodeSample
 
     xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE));
     v2 = mHlmsNodeSamplerblock->getAnimationTranslate();
-    xyProperty->setXY(v2.x(), v2.y());
+    //xyProperty->setXY(v2.x(), v2.y());
+    xyProperty->setX(v2.x());
+    xyProperty->setY(v2.y());
 }
 
 //****************************************************************************/
@@ -716,13 +724,34 @@ void HlmsPropertiesSamplerblock::updateOffsetPropertiesExternal (HlmsNodeSampler
         checkBoxProperty->setValue(true);
         xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE));
         v2 = mHlmsNodeSamplerblock->getAnimationTranslate();
-        xyProperty->setXY(v2.x(), v2.y());
+        xyProperty->setX(v2.x());
+        xyProperty->setY(v2.y());
     }
     else
     {
         xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_OFFSET));
         v2 = mHlmsNodeSamplerblock->getOffset();
-        xyProperty->setX(v2.x()); // Don't use setXY, because that function contains a bug
+        xyProperty->setX(v2.x()); // Don't use setXY, because that function contains a bug?
         xyProperty->setY(v2.y());
+    }
+}
+
+//****************************************************************************/
+void HlmsPropertiesSamplerblock::updateOffsetPropertiesExternal (const QVector2D& offset, EditorHlmsTypes type)
+{
+    Magus::QtXYProperty* xyProperty;
+    if (type == HLMS_UNLIT)
+    {
+        Magus::QtCheckBoxProperty* checkBoxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ENABLED));
+        checkBoxProperty->setValue(true);
+        xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE));
+        xyProperty->setX(offset.x());
+        xyProperty->setY(offset.y());
+    }
+    else if (type == HLMS_PBS)
+    {
+        xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_OFFSET));
+        xyProperty->setX(offset.x());
+        xyProperty->setY(offset.y());
     }
 }

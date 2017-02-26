@@ -45,7 +45,9 @@ namespace Magus
             virtual ~QtXYProperty(void) {}
             void setXY (qreal x, qreal y);
             void setX (qreal x);
+            void setX (qreal x, bool block);
             void setY (qreal y);
+            void setY (qreal y, bool block);
             const qreal getX (void) const;
             const qreal getY (void) const;
             int getPrecision(void) {return mPrecision;}

@@ -47,7 +47,7 @@ namespace Magus
         protected:
             void mousePressEvent(QMouseEvent *event) {emit clicked();}
             void enterEvent(QEvent*)
-                {setStyleSheet("background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #e5e5e5, stop:0.2 #a6a6a6, stop:0.8 #8a8a8a, stop:1 #4a4a4a);"
+                {setStyleSheet("background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #737373, stop:0.2 #a6a6a6, stop:0.8 #737373, stop:1 #4a4a4a);"
                            "border: 0px solid #000000;");}
             void leaveEvent(QEvent*)
                 {setStyleSheet("background: transparent; border: 0px solid #000000;");}

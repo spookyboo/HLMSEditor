@@ -67,7 +67,7 @@ namespace Magus
         mHeader->setMaximumHeight(ASSET_HEADER_HEIGHT);
         mHeader->setMinimumHeight(ASSET_HEADER_HEIGHT);
         mHeader->setAutoFillBackground(true);
-        mHeader->setStyleSheet(QString("background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #a6a6a6, stop:1 #8a8a8a);"
+        mHeader->setStyleSheet(QString("background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #686868, stop:0.8 #686868, stop:0.9 #474747, stop:1 #202020);"
                                        "margin: 0px;"
                                        "border: 1px solid #353535;")); // TODO: Put in file?
 

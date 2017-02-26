@@ -102,7 +102,7 @@ namespace Magus
         QImage imageClear(mIconDir + TOOL_RESOURCETREE_ICON_CLOSE);
         QPixmap pixMapClear = QPixmap::fromImage(imageClear).scaled(TOOL_RESOURCETREE_DEFAULT_ICON_WIDTH, TOOL_RESOURCETREE_DEFAULT_ICON_HEIGHT);
         mSearchClearButton = new QPushButton();
-        mSearchClearButton->setStyleSheet(QString("QPushButton {border: none; background: transparent;} QPushButton:hover {background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #565656, stop:1 #464646);}"));
+        mSearchClearButton->setStyleSheet(QString("QPushButton {border: none; background: transparent;} QPushButton:hover {background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #565656, stop:1 #8a8a8a);}"));
         mSearchClearButton->setIcon(QIcon(pixMapClear));
         mSearchClearButton->setIconSize(QSize(TOOL_RESOURCETREE_DEFAULT_ICON_WIDTH, TOOL_RESOURCETREE_DEFAULT_ICON_HEIGHT));
         mSearchClearButton->setContentsMargins(-8, -8, -8, -8);

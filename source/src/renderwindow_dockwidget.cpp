@@ -483,7 +483,7 @@ void RenderwindowDockWidget::setModelAndLight(bool enabled)
     }
     else
     {
-        // Enable Light axis; painting and move texture are off
+        // Enable Light axis; painting and offset texture are off
         mButtonToggleModelAndLight->setIcon(*mLightIcon);
         mOgreWidget->enableLightItem(true);
         setPaintMode(false);
@@ -536,7 +536,7 @@ void RenderwindowDockWidget::setHoover(bool enabled)
     mToggleHooverOn = enabled;
     if (mToggleHooverOn)
     {
-        // If hoover is on, painting and move texture are off
+        // If hoover is on, painting and offset texture are off
         mButtonToggleHoover->setIcon(*mHooverOnIcon);
         setPaintMode(false);
         setOffsetTextureMode(false);
@@ -569,7 +569,7 @@ void RenderwindowDockWidget::setOffsetTextureMode(bool enabled, bool showMessage
         mToggleOffsetTexture = enabled;
         if (enabled)
         {
-            // Activate the 'move texture' function; other options are off
+            // Activate the 'offset texture' function; other options are off
             mButtonOffsetTexture->setIcon(*mOffsetTextureOnIcon);
             mOgreWidget->setOffsetTextureMode(true,
                                               mCurrentPbsDatablockBlock,
@@ -582,7 +582,7 @@ void RenderwindowDockWidget::setOffsetTextureMode(bool enabled, bool showMessage
         }
         else
         {
-            // Deactivate the 'move texture' function
+            // Deactivate the 'offset texture' function
             QApplication::restoreOverrideCursor();
             mButtonOffsetTexture->setIcon(*mOffsetTextureOffIcon);
             mOgreWidget->setOffsetTextureMode(false);
@@ -841,6 +841,7 @@ void RenderwindowDockWidget::notifyHlmsPropertiesUnlitSamplerblockVisible(bool v
 void RenderwindowDockWidget::notifyOffsetTextureUpdated (float offsetX, float offsetY)
 {
     // The offset was changed by means of the Ogre widget, so the properties widget must be updated
+    /*
     HlmsPropertiesSamplerblock* samplerProperties = mParent->mPropertiesDockWidget->mHlmsPropertiesSamplerblock;
     if (samplerProperties)
     {
@@ -861,5 +862,18 @@ void RenderwindowDockWidget::notifyOffsetTextureUpdated (float offsetX, float of
             }
             samplerProperties->updateOffsetPropertiesExternal(samplerBlock);
         }
+    }
+    */
+
+    HlmsPropertiesSamplerblock* samplerProperties = mParent->mPropertiesDockWidget->mHlmsPropertiesSamplerblock;
+    if (samplerProperties)
+    {
+        QVector2D offset;
+        offset.setX(offsetX);
+        offset.setY(offsetY);
+        if (mCurrentPbsDatablockBlock)
+            samplerProperties->updateOffsetPropertiesExternal(offset, HLMS_PBS);
+        else if (mCurrentUnlitDatablockBlock)
+            samplerProperties->updateOffsetPropertiesExternal(offset, HLMS_UNLIT);
     }
 }
