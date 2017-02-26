@@ -66,6 +66,7 @@ class MainWindow : public QMainWindow
         PaintLayerManager mPaintLayerManager;
 
         Magus::OgreManager* getOgreManager(void) const {return mOgreManager;}
+        RenderwindowDockWidget* mRenderwindowDockWidget; // Make is public for easy access
         PropertiesDockWidget* mPropertiesDockWidget; // Make is public for easy access
         TextureDockWidget* mTextureDockWidget; // Make is public for easy access
         PaintDockWidget* mPaintDockWidget; // Make is public for easy access
@@ -87,6 +88,7 @@ class MainWindow : public QMainWindow
         PaintLayers* getPaintLayers(void); // Returns pointer to the paintlayers, managed by the PainLayerManager
         void setBrushInPaintLayer(const QString& name, const QString& baseName); // If a brush is selected, set the new brush in the PaintLayer
         void loadTextureGeneration (Ogre::PbsTextureTypes textureType, Ogre::ushort sequence); // Load a texture, based on the type and sequence (texture is blit to the GPU)
+        void notifyNodeDeleted(unsigned int nodeType); // Is called by the node editor if a node is deleted
 
     protected:
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources); // Save the content of a resource vector
@@ -124,6 +126,7 @@ class MainWindow : public QMainWindow
         void saveRecentProjectFilesCfg(void);
         Ogre::DataStreamPtr openFile(Ogre::String source);
         void clearHlmsNamesAndRemovePaintLayers(void);
+        void deleteTempPathRecursive(void);
 
 	private slots:
         void doNewProjectAction(void);
@@ -196,7 +199,6 @@ class MainWindow : public QMainWindow
         QAction* mRecentProjectFilesMenuAction;
         QAction* mQuitMenuAction;
         QAction* mResetWindowLayoutMenuAction;
-        RenderwindowDockWidget* mRenderwindowDockWidget;
         NodeEditorDockWidget* mNodeEditorDockWidget;
         CentralDockWidget* mCentralDockWidget;
         Magus::OgreManager* mOgreManager;

@@ -30,6 +30,8 @@
 #include "OgreColourValue.h"
 #include "OgreVector2.h"
 #include "OgreItem.h"
+#include "OgreHlmsPbsDatablock.h"
+#include "OgreHlmsUnlitDatablock.h"
 #include "ogre3_cameraman.h"
 #include "ogre_prereqs.h"
 #include <QDockWidget>
@@ -100,6 +102,15 @@ namespace Magus
             void resetCamera(void); // Set position/orientation to default
             void setHoover(bool hoover); // Determines whether the subItems are highlighted when the mousecursor hoovers over them
             void setPaintMode(bool enabled); // Determines whether paint mode is on or off
+
+            // Determines whether moving tetures (displacement) mode is on or off
+            // Either pbsDatablockBlockOffsetTexture is set or unlitDatablockBlockOffsetTexture is set in case enabled is true
+            void setOffsetTextureMode(bool enabled,
+                                      Ogre::HlmsPbsDatablock* pbsDatablockBlockOffsetTexture = 0,
+                                      Ogre::HlmsUnlitDatablock* unlitDatablockBlockOffsetTexture = 0,
+                                      Ogre::PbsTextureTypes pbsTextureTypeOffsetTexture = Ogre::PBSM_DIFFUSE,
+                                      Ogre::uint8 unlitTextureTypeOffsetTexture = 0);
+
             void setCurrentDatablockName(const Ogre::IdString& datablockName); // Only set the new datablock name; the new datablock is not set in an item/subitem
             const Ogre::IdString& getCurrentDatablockName(void) const {return mCurrentDatablockName;}
             const QVector<int>& getSubItemIndicesWithDatablock(const Ogre::IdString& datablockName); // Get the list of indices of subItems that have 'datablockName'
@@ -166,11 +177,16 @@ namespace Magus
             QMap <int, QVector3D> mColourMap;
             QMap <size_t, Ogre::String> mSnapshotDatablocks;
             bool mHoover;
-            bool mPaintMode;
+            bool mPaintMode; // If true, painting is enabled
+            bool mOffsetTextureMode; // If true, moving textures (displacement) is enabled
             QMap<unsigned short, Ogre::String> helperIndicesAndNames;
             QVector<int> helperIndices;
             RenderwindowDockWidget* mRenderwindowDockWidget;
             Ogre::Vector2 helperVector2;
+            Ogre::HlmsPbsDatablock* mPbsDatablockBlockOffsetTexture;
+            Ogre::HlmsUnlitDatablock* mUnlitDatablockBlockOffsetTexture;
+            Ogre::PbsTextureTypes mPbsTextureTypeOffsetTexture;
+            Ogre::uint8 mUnlitTextureTypeOffsetTexture;
 
             virtual void createCompositor();
             virtual void createCompositorRenderToTexture();
@@ -232,6 +248,19 @@ namespace Magus
             Ogre::HlmsDatablock* getDatablockByFullName(const Ogre::String& fullName);
             PaintLayers* mPaintLayers; // Pointer to vector of PaintLayer objects
             int mLatestPaintResult; // This value is used to determines what the result of a painting action was
+
+
+            /* Functions used moving the texture with the mouse (creating offset)
+             */
+            void doOffsetTexture(int mouseX, int mouseY);
+
+            /* Clamp argument 'val' between [0..1]
+             */
+            float saturate (float val);
+
+            /* Determine the index of a detail map
+             */
+            unsigned int getDetailMapIndexFromTextureTypeForScaleAndOffset (Ogre::PbsTextureTypes textureType);
     };
 }
 

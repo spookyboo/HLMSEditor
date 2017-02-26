@@ -940,3 +940,64 @@ void HlmsUtilsManager::enrichTextureMapFromUnlit(DatablockStruct* datablockStruc
     }
 }
 
+//****************************************************************************/
+Ogre::HlmsPbsDatablock* HlmsUtilsManager::getPbsDatablock (const Ogre::IdString& datablockId)
+{
+    // Find the datablock
+    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
+    Ogre::HlmsDatablock* datablock = 0;
+    try
+    {
+        datablock = hlmsPbs->getDatablock(datablockId);
+        if (datablock)
+            return static_cast<Ogre::HlmsPbsDatablock*> (datablock);
+    }
+    catch (Ogre::Exception e) {}
+
+    return 0;
+}
+
+//****************************************************************************/
+Ogre::HlmsUnlitDatablock* HlmsUtilsManager::getUnlitDatablock (const Ogre::IdString& datablockId)
+{
+    // Find the datablock
+    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+    Ogre::HlmsDatablock* datablock = 0;
+    try
+    {
+        datablock = hlmsUnlit->getDatablock(datablockId);
+        if (datablock)
+            return static_cast<Ogre::HlmsUnlitDatablock*> (datablock);
+    }
+    catch (Ogre::Exception e) {}
+
+    return 0;
+}
+
+//****************************************************************************/
+const Ogre::HlmsSamplerblock* HlmsUtilsManager::getSamplerFromPbsDatablock (const Ogre::IdString& datablockId, Ogre::PbsTextureTypes textureType)
+{
+    Ogre::HlmsPbsDatablock* datablock = getPbsDatablock (datablockId);
+    if (datablock)
+    {
+        const Ogre::HlmsSamplerblock* samplerblock = datablock->getSamplerblock(textureType);
+        return samplerblock;
+    }
+
+    return 0;
+}
+
+//****************************************************************************/
+const Ogre::HlmsSamplerblock* HlmsUtilsManager::getSamplerFromUnlitDatablock (const Ogre::IdString& datablockId, Ogre::uint8 textureType)
+{
+    Ogre::HlmsUnlitDatablock* datablock = getUnlitDatablock (datablockId);
+    if (datablock)
+    {
+        return datablock->getSamplerblock(textureType);
+    }
+
+    return 0;
+}
+

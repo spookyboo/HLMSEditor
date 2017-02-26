@@ -77,13 +77,24 @@ class HlmsPbsBuilder : public HlmsBuilder
         void connectNodes(HlmsNodePbsDatablock* pbsnode,
                           HlmsNodeBlendblock* blendnode);
 
+        // Returns a texture type based on a HlmsNodeSamplerblock
+        Ogre::PbsTextureTypes getPbsTextureTypeFromSamplerNode(HlmsNodeSamplerblock* samplerNode);
+
+        // Returns the index of a detail diffuse map based on a texturetype
+        unsigned int getDetailMapIndexFromTextureType (Ogre::PbsTextureTypes textureType);
+
+        // Returns the index of a detail normal map based on a texturetype for offset/scale; returns values [4..7]
+        unsigned int getDetailNormalMapIndexForOffSetScale (Ogre::PbsTextureTypes textureType);
+
+        // Returns the index of a detail normal map based on a texturetype; returns values [0..3]
+        unsigned int getDetailNormalMapIndexFromTextureType (Ogre::PbsTextureTypes textureType);
+
 	private:
         Magus::QtNodeEditor* mNodeEditor;
         Ogre::String mTempOgreString;
 
         // Some private functions
         unsigned int getIndexFromTextureType(Ogre::PbsTextureTypes textureType);
-        Ogre::PbsTextureTypes getPbsTextureTypeFromSamplerNode(HlmsNodeSamplerblock* samplerNode);
         Ogre::HlmsTextureManager::TextureMapType getTextureMapTypeFromPbsTextureTypes(Ogre::PbsTextureTypes textureType);
         Ogre::HlmsTextureManager::TextureMapType getTextureMapTypeFromSamplerNode(HlmsNodeSamplerblock* samplerNode);
 
@@ -115,9 +126,6 @@ class HlmsPbsBuilder : public HlmsBuilder
         Ogre::PbsBrdf::PbsBrdf getBrdfFromIndex (unsigned int index);
         unsigned int getIndexFromBlendMode (Ogre::PbsBlendModes blendMode);
         Ogre::PbsBlendModes getBlendModeFromIndex (unsigned int index);
-        unsigned int getDetailMapIndexFromTextureType (Ogre::PbsTextureTypes textureType);
-        unsigned int getDetailNormalMapIndexFromTextureType (Ogre::PbsTextureTypes textureType);
-        unsigned int getDetailNormalMapIndexForOffSetScale (Ogre::PbsTextureTypes textureType);
 };
 
 #endif

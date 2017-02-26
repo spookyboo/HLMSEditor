@@ -21,6 +21,7 @@
 #ifndef RenderwindowDOCKWIDGET_H
 #define RenderwindowDOCKWIDGET_H
 
+#include "constants.h"
 #include <QtWidgets>
 #include <QMenu>
 #include <QAction>
@@ -29,6 +30,8 @@
 #include <QTabWidget>
 #include "ogre3_renderman.h"
 #include "tb_transformationwidget.h"
+#include "OgreHlmsPbsDatablock.h"
+#include "OgreHlmsUnlitDatablock.h"
 
 QT_BEGIN_NAMESPACE
 class QDockWidget;
@@ -104,6 +107,13 @@ class RenderwindowDockWidget : public QDockWidget
         void leaveEventPublic (QEvent* event);
         void addUndoRedoStackEntry (Ogre::PbsTextureTypes textureType, Ogre::ushort textureSequence);
         void clearUndoRedoStackEntry (void);
+        void notifyHlmsPropertiesPbsSamplerblockVisible (bool visible,
+                                                         const Ogre::IdString& datablockId,
+                                                         const Ogre::PbsTextureTypes textureType); // Called when a pbs samplerblock is visible/invisible
+        void notifyHlmsPropertiesUnlitSamplerblockVisible (bool visible,
+                                                           const Ogre::IdString& datablockId,
+                                                           Ogre::uint8 textureType); // Called when an unlit samplerblock is visible/invisible
+        void notifyOffsetTextureUpdated (float offsetX, float offsetY); // Texture offset is changed
 
     public slots:
         void handleTogglePaintMode(void); // Must be public, because it is also used by the ogre widget
@@ -113,6 +123,7 @@ class RenderwindowDockWidget : public QDockWidget
         void handleToggleModelAndLight(void);
         void handleMarker(void);
         void handleToggleHoover(void);
+        void handleToggleOffsetTexture(void);
         void handleUndo(void);
         void handleRedo(void);
         void doTransformationWidgetValueChanged(void);
@@ -136,6 +147,7 @@ class RenderwindowDockWidget : public QDockWidget
         void setModelAndLight(bool enabled);
         void setHoover(bool enabled);
         void setPaintMode(bool enabled);
+        void setOffsetTextureMode(bool enabled, bool showMessage = false);
 
 	private:
 		MainWindow* mParent;
@@ -147,6 +159,7 @@ class RenderwindowDockWidget : public QDockWidget
         QPushButton* mButtonTogglePaint;
         QPushButton* mButtonMarker;
         QPushButton* mButtonToggleHoover;
+        QPushButton* mButtonOffsetTexture;
         QPushButton* mButtonUndo;
         QPushButton* mButtonRedo;
         QMap<QString, MeshStruct> mMeshMap;
@@ -155,6 +168,7 @@ class RenderwindowDockWidget : public QDockWidget
         bool mButtonModelActive;
         bool mToggleHooverOn; // If true, use mouseover to highlight the subItems
         bool mTogglePaintMode; // If true, painting mode is active
+        bool mToggleOffsetTexture; // If true, moving textures (offset) is active
         QIcon* mLightIcon;
         QIcon* mPaintOnIcon;
         QIcon* mPaintOffIcon;
@@ -162,6 +176,8 @@ class RenderwindowDockWidget : public QDockWidget
         QIcon* mMarkerIcon;
         QIcon* mHooverOnIcon;
         QIcon* mHooverOffIcon;
+        QIcon* mOffsetTextureOnIcon;
+        QIcon* mOffsetTextureOffIcon;
         QIcon* mPaintUndoOffIcon;
         QIcon* mPaintUndoOnIcon;
         QIcon* mPaintRedoOffIcon;
@@ -171,8 +187,11 @@ class RenderwindowDockWidget : public QDockWidget
         QActionGroup* mActionGroupMeshes;
         QMenu* mSkyBoxSubMenu;
         QActionGroup* mActionGroupSkyBox;
-        bool mMousePaint;
         UndoRedoStack mUndoRedoStack;
+        Ogre::HlmsPbsDatablock* mCurrentPbsDatablockBlock;
+        Ogre::HlmsUnlitDatablock* mCurrentUnlitDatablockBlock;
+        Ogre::PbsTextureTypes mCurrentPbsTextureType;
+        Ogre::uint8 mCurrentUnlitTextureType;
 };
 
 #endif

@@ -24,6 +24,7 @@
 #include "OgreMeshManager2.h"
 #include "renderwindow_dockwidget.h"
 #include "paintlayer_manager.h"
+#include "hlms_utils_manager.h"
 
 //****************************************************************************/
 UndoRedoStack::UndoRedoStack (void)
@@ -88,6 +89,7 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     mButtonToggleModelAndLight(0),
     mButtonTogglePaint(0),
     mTogglePaintMode(false),
+    mToggleOffsetTexture(false),
     mButtonMarker(0),
     mButtonToggleHoover(0),
     mButtonUndo(0),
@@ -95,6 +97,9 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     mButtonModelActive(true),
     mToggleHooverOn(false),
     mLightIcon(0),
+    mButtonOffsetTexture(0),
+    mOffsetTextureOnIcon(0),
+    mOffsetTextureOffIcon(0),
     mPaintOnIcon(0),
     mPaintOffIcon(0),
     mModelIcon(0),
@@ -105,10 +110,11 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     mPaintUndoOnIcon(0),
     mPaintRedoOffIcon(0),
     mPaintRedoOnIcon(0),
-    mMousePaint(false)
+    mCurrentPbsDatablockBlock(0),
+    mCurrentUnlitDatablockBlock(0),
+    mCurrentPbsTextureType (Ogre::PBSM_DIFFUSE),
+    mCurrentUnlitTextureType(0)
 {
-    setMinimumSize(100,100);
-
     // Create a context menu
     installEventFilter(this);
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -225,13 +231,20 @@ void RenderwindowDockWidget::enterEventPublic (QEvent* event)
      * as soon as the mouse enters the window.
      * Because the RenderwindowDockWidget doesn't get the events itself, it has to rely on the Ogre widget.
      */
-    if (!mMousePaint)
-        return;
+    if (mTogglePaintMode)
+    {
+        if (QApplication::overrideCursor() && QApplication::overrideCursor()->shape() == Qt::CrossCursor)
+            return;
 
-    if (QApplication::overrideCursor() && QApplication::overrideCursor()->shape() == Qt::CrossCursor)
-        return;
+        QApplication::setOverrideCursor(Qt::CrossCursor);
+    }
+    else if (mToggleOffsetTexture)
+    {
+        if (QApplication::overrideCursor() && QApplication::overrideCursor()->shape() == Qt::OpenHandCursor)
+            return;
 
-    QApplication::setOverrideCursor(Qt::CrossCursor);
+        QApplication::setOverrideCursor(Qt::OpenHandCursor);
+    }
 }
 
 //****************************************************************************/
@@ -241,11 +254,16 @@ void RenderwindowDockWidget::leaveEventPublic (QEvent* event)
      * as soon as the mouse leaves the window.
      * Because the RenderwindowDockWidget doesn't get the events itself, it has to rely on the Ogre widget.
      */
-    if (!mMousePaint)
-        return;
-
-    if (QApplication::overrideCursor() && QApplication::overrideCursor()->shape() == Qt::CrossCursor)
-        QApplication::restoreOverrideCursor();
+    if (mTogglePaintMode)
+    {
+        if (QApplication::overrideCursor() && QApplication::overrideCursor()->shape() == Qt::CrossCursor)
+            QApplication::restoreOverrideCursor();
+    }
+    else if (mToggleOffsetTexture)
+    {
+        if (QApplication::overrideCursor() && QApplication::overrideCursor()->shape() == Qt::OpenHandCursor)
+            QApplication::restoreOverrideCursor();
+    }
 }
 
 //****************************************************************************/
@@ -353,31 +371,46 @@ void RenderwindowDockWidget::createToolBars(void)
     mButtonTogglePaint = new QPushButton();
     mButtonMarker = new QPushButton();
     mButtonToggleHoover = new QPushButton();
+    mButtonOffsetTexture = new QPushButton();
     mButtonUndo = new QPushButton();
     mButtonRedo = new QPushButton();
+
     mModelIcon = new QIcon(ICON_MODEL);
     mLightIcon = new QIcon(ICON_LIGHT);
+    mOffsetTextureOnIcon = new QIcon(ICON_MOVE_TEXTURE_ON);
+    mOffsetTextureOffIcon = new QIcon(ICON_MOVE_TEXTURE_OFF);
     mPaintOnIcon = new QIcon(ICON_PAINT_ON);
     mPaintOffIcon = new QIcon(ICON_PAINT_OFF);
     mMarkerIcon = new QIcon(ICON_MARKER);
     mHooverOnIcon = new QIcon(ICON_HOOVER_ON);
     mHooverOffIcon = new QIcon(ICON_HOOVER_OFF);
+    mOffsetTextureOnIcon = new QIcon(ICON_MOVE_TEXTURE_ON);
+    mOffsetTextureOffIcon = new QIcon(ICON_MOVE_TEXTURE_OFF);
     mPaintUndoOffIcon = new QIcon(ICON_UNDO_OFF);
     mPaintUndoOnIcon = new QIcon(ICON_UNDO_ON);
     mPaintRedoOffIcon = new QIcon(ICON_REDO_OFF);
     mPaintRedoOnIcon = new QIcon(ICON_REDO_ON);
 
     mButtonToggleModelAndLight->setIcon(*mModelIcon);
+    mButtonToggleModelAndLight->setToolTip(ACTION_TOGGLE_LIGHT_DIRECTION);
     mButtonTogglePaint->setIcon(*mPaintOffIcon);
+    mButtonTogglePaint->setToolTip(ACTION_TOGGLE_PAINT);
     mButtonMarker->setIcon(*mMarkerIcon);
+    mButtonMarker->setToolTip(ACTION_RESET_CAMERA);
     mButtonToggleHoover->setIcon(*mHooverOffIcon);
+    mButtonToggleHoover->setToolTip(ACTION_TOGGLE_SUBMESH_SELECTION);
+    mButtonOffsetTexture->setIcon(*mOffsetTextureOffIcon);
+    mButtonOffsetTexture->setToolTip(ACTION_MOVE_TEXTURE);
     mButtonUndo->setIcon(*mPaintUndoOffIcon);
+    mButtonUndo->setToolTip(ACTION_UNDO_PAINT);
     mButtonRedo->setIcon(*mPaintRedoOffIcon);
+    mButtonRedo->setToolTip(ACTION_REDO_PAINT);
 
     connect(mButtonToggleModelAndLight, SIGNAL(clicked(bool)), this, SLOT(handleToggleModelAndLight()));
     connect(mButtonTogglePaint, SIGNAL(clicked(bool)), this, SLOT(handleTogglePaintMode()));
     connect(mButtonMarker, SIGNAL(clicked(bool)), this, SLOT(handleMarker()));
     connect(mButtonToggleHoover, SIGNAL(clicked(bool)), this, SLOT(handleToggleHoover()));
+    connect(mButtonOffsetTexture, SIGNAL(clicked(bool)), this, SLOT(handleToggleOffsetTexture()));
     connect(mButtonUndo, SIGNAL(clicked(bool)), this, SLOT(handleUndo()));
     connect(mButtonRedo, SIGNAL(clicked(bool)), this, SLOT(handleRedo()));
 
@@ -395,11 +428,14 @@ void RenderwindowDockWidget::createToolBars(void)
     // Add widgets
     mHToolBar->addWidget(mTransformationWidget);
     mHToolBar->addWidget(mButtonToggleModelAndLight);
-    mHToolBar->addWidget(mButtonTogglePaint);
     mHToolBar->addWidget(mButtonMarker);
     mHToolBar->addWidget(mButtonToggleHoover);
+    mHToolBar->addWidget(mButtonOffsetTexture);
+    mHToolBar->addSeparator();
+    mHToolBar->addWidget(mButtonTogglePaint);
     mHToolBar->addWidget(mButtonUndo);
     mHToolBar->addWidget(mButtonRedo);
+    mHToolBar->addSeparator();
     mHToolBar->addWidget(spacer);
     mHToolBar->addAction(mChangeBackgroundAction);
     connect(mTransformationWidget, SIGNAL(valueChanged()), this, SLOT(doTransformationWidgetValueChanged()));
@@ -447,10 +483,11 @@ void RenderwindowDockWidget::setModelAndLight(bool enabled)
     }
     else
     {
-        // Enable Light axis and painting is off
+        // Enable Light axis; painting and move texture are off
         mButtonToggleModelAndLight->setIcon(*mLightIcon);
         mOgreWidget->enableLightItem(true);
         setPaintMode(false);
+        setOffsetTextureMode(false);
     }
     mOgreWidget->setFocus();
 }
@@ -471,9 +508,9 @@ void RenderwindowDockWidget::setPaintMode(bool enabled)
         mButtonTogglePaint->setIcon(*mPaintOnIcon);
         mButtonUndo->setIcon(*mPaintUndoOnIcon);
         mButtonRedo->setIcon(*mPaintRedoOnIcon);
-        setModelAndLight(true);
+        setModelAndLight(true); // Show model, not the light
         setHoover(false);
-        mMousePaint = true;
+        setOffsetTextureMode(false);
     }
     else
     {
@@ -481,7 +518,6 @@ void RenderwindowDockWidget::setPaintMode(bool enabled)
         mButtonTogglePaint->setIcon(*mPaintOffIcon);
         mButtonUndo->setIcon(*mPaintUndoOffIcon);
         mButtonRedo->setIcon(*mPaintRedoOffIcon);
-        mMousePaint = false;
     }
     mOgreWidget->setFocus();
     mOgreWidget->setPaintMode(mTogglePaintMode);
@@ -500,9 +536,10 @@ void RenderwindowDockWidget::setHoover(bool enabled)
     mToggleHooverOn = enabled;
     if (mToggleHooverOn)
     {
-        // If hoover is on, painting is off
+        // If hoover is on, painting and move texture are off
         mButtonToggleHoover->setIcon(*mHooverOnIcon);
         setPaintMode(false);
+        setOffsetTextureMode(false);
     }
     else
     {
@@ -516,6 +553,48 @@ void RenderwindowDockWidget::setHoover(bool enabled)
 void RenderwindowDockWidget::handleToggleHoover(void)
 {
     setHoover(!mToggleHooverOn);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::handleToggleOffsetTexture(void)
+{
+    setOffsetTextureMode (!mToggleOffsetTexture, true);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::setOffsetTextureMode(bool enabled, bool showMessage)
+{
+    if (mCurrentPbsDatablockBlock || mCurrentUnlitDatablockBlock)
+    {
+        mToggleOffsetTexture = enabled;
+        if (enabled)
+        {
+            // Activate the 'move texture' function; other options are off
+            mButtonOffsetTexture->setIcon(*mOffsetTextureOnIcon);
+            mOgreWidget->setOffsetTextureMode(true,
+                                              mCurrentPbsDatablockBlock,
+                                              mCurrentUnlitDatablockBlock,
+                                              mCurrentPbsTextureType,
+                                              mCurrentUnlitTextureType);
+            setModelAndLight(true); // Show model, not the light
+            setHoover(false);
+            setPaintMode(false);
+        }
+        else
+        {
+            // Deactivate the 'move texture' function
+            QApplication::restoreOverrideCursor();
+            mButtonOffsetTexture->setIcon(*mOffsetTextureOffIcon);
+            mOgreWidget->setOffsetTextureMode(false);
+        }
+    }
+    else
+    {
+        if (showMessage)
+            QMessageBox::information(0, QString("Warning"), QString("Please select a samplerblock first. It must match the following conditions:\n"
+                                                                    "- In case of PBS: Only detal diffuse textures and detail normal textures are allowed.\n"
+                                                                    "- In case of Unlit: All texture types are allowed."));
+    }
 }
 
 //****************************************************************************/
@@ -704,4 +783,83 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
 
     // Action is not recognized; it is probably a selected mesh
     doChangeMeshAction(action);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::notifyHlmsPropertiesPbsSamplerblockVisible(bool visible,
+                                                                        const Ogre::IdString& datablockId,
+                                                                        const Ogre::PbsTextureTypes textureType)
+{
+    if (visible && (textureType == Ogre::PBSM_DETAIL0 ||
+                    textureType == Ogre::PBSM_DETAIL1 ||
+                    textureType == Ogre::PBSM_DETAIL2 ||
+                    textureType == Ogre::PBSM_DETAIL3 ||
+                    textureType == Ogre::PBSM_DETAIL0_NM ||
+                    textureType == Ogre::PBSM_DETAIL1_NM ||
+                    textureType == Ogre::PBSM_DETAIL2_NM ||
+                    textureType == Ogre::PBSM_DETAIL3_NM))
+    {
+        // It is allowed to set the icon to 'on' (it can only be set to 'on' if the user clicks on it)
+        HlmsUtilsManager* hlmsUtilManager = mParent->getHlmsUtilsManager(); // Use the HlmsUtilsManager of the mainwindow
+        mCurrentPbsDatablockBlock = hlmsUtilManager->getPbsDatablock(datablockId);
+        mCurrentPbsTextureType = textureType;
+    }
+    else
+    {
+        // Deactivate moving texture
+        mButtonOffsetTexture->setIcon(*mOffsetTextureOffIcon);
+        mOgreWidget->setOffsetTextureMode(false);
+        mCurrentPbsDatablockBlock = 0;
+        mCurrentPbsTextureType = Ogre::PBSM_DIFFUSE;
+        mToggleOffsetTexture = false;
+    }
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::notifyHlmsPropertiesUnlitSamplerblockVisible(bool visible,
+                                                                          const Ogre::IdString& datablockId,
+                                                                          Ogre::uint8 textureType)
+{
+    if (visible)
+    {
+        // It is allowed to set the icon to 'on' (it can only be set to 'on' if the user clicks on it)
+        HlmsUtilsManager* hlmsUtilManager = mParent->getHlmsUtilsManager(); // Use the HlmsUtilsManager of the mainwindow
+        mCurrentUnlitDatablockBlock = hlmsUtilManager->getUnlitDatablock(datablockId);
+        mCurrentUnlitTextureType = textureType;
+    }
+    else
+    {
+        // Deactivate moving texture
+        mButtonOffsetTexture->setIcon(*mOffsetTextureOffIcon);
+        mOgreWidget->setOffsetTextureMode(false);
+        mCurrentUnlitDatablockBlock = 0;
+        mCurrentUnlitTextureType = 0;
+    }
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::notifyOffsetTextureUpdated (float offsetX, float offsetY)
+{
+    // The offset was changed by means of the Ogre widget, so the properties widget must be updated
+    HlmsPropertiesSamplerblock* samplerProperties = mParent->mPropertiesDockWidget->mHlmsPropertiesSamplerblock;
+    if (samplerProperties)
+    {
+        HlmsNodeSamplerblock* samplerBlock = samplerProperties->getHlmsNodeSamplerblock ();
+        if (samplerBlock)
+        {
+            QVector2D v2;
+            v2.setX(offsetX);
+            v2.setY(offsetY);
+            if (mCurrentPbsDatablockBlock)
+            {
+                samplerBlock->setOffset(v2);
+            }
+            else if (mCurrentUnlitDatablockBlock)
+            {
+                samplerBlock->setAnimationTranslate(v2);
+                samplerBlock->setAnimationEnabled(true);
+            }
+            samplerProperties->updateOffsetPropertiesExternal(samplerBlock);
+        }
+    }
 }

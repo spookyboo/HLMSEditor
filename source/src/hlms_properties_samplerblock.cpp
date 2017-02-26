@@ -703,3 +703,26 @@ void HlmsPropertiesSamplerblock::infoClicked(void)
     PropertiesDockWidget* parent = static_cast<PropertiesDockWidget*>(parentWidget());
     parent->displayInfo(INFO_SAMPLERBLOCK, QString("Info"));
 }
+
+//****************************************************************************/
+void HlmsPropertiesSamplerblock::updateOffsetPropertiesExternal (HlmsNodeSamplerblock* hlmsNodeSamplerblock)
+{
+    mHlmsNodeSamplerblock = hlmsNodeSamplerblock;
+    Magus::QtXYProperty* xyProperty;
+    QVector2D v2;
+    if (mHlmsNodeSamplerblock->getAnimationEnabled())
+    {
+        Magus::QtCheckBoxProperty* checkBoxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ENABLED));
+        checkBoxProperty->setValue(true);
+        xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE));
+        v2 = mHlmsNodeSamplerblock->getAnimationTranslate();
+        xyProperty->setXY(v2.x(), v2.y());
+    }
+    else
+    {
+        xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_OFFSET));
+        v2 = mHlmsNodeSamplerblock->getOffset();
+        xyProperty->setX(v2.x()); // Don't use setXY, because that function contains a bug
+        xyProperty->setY(v2.y());
+    }
+}

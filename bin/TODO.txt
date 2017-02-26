@@ -6,7 +6,7 @@ V 1.0 updates:
 - Paint tools: Smudge tool
 - Paint tools: Cavity modulator (edge detection) for rough edges
 - Paint brushes => tabs per categorie (follow brush dir structure; normal brush, ...)
-- Tooltips over icons
+- Tooltips over icons (DONE partly)
 - Move texture over the mesh (apply offset by means of the mouse)
 - Offset samplerblock -> by means of slider
 - Scale samplerblock -> by means of slider
@@ -24,6 +24,8 @@ V 1.0 updates:
 
 V 1.0 Bugs:
 ==========
+- Select and apply Pbs material to mesh. Select detail normal map and move the texture (texture offset). Change the offset settings by means of the property editor and move the texture
+  again with the mouse -> crash (no log message).
 - Faster loading of textures in texture browser (problem with importing dirs with a lot of texture files)
 - Resetting position and orientation of the camera/mesh in the renderwindow requires two mouse clicks on the same marker button
 - Scroll wheel not linear? Moving a mesh is too fast when the object is zoomed in a lot

@@ -57,16 +57,8 @@ MainWindow::MainWindow(void) :
     mFirst(true),
     mSaveTextureBrowserTimerActive(false)
 {
-    // Delete all files in the 'temp' directory and create a new 'temp' dir
-    QString path = TEMP_PATH.c_str();
-    QDir dir(path);
-    if (dir.exists())
-        dir.removeRecursively();
-
-    // Add rmdir to be sure it is removed, so the mkdir is able to create a new dir (using removeRecursively without rmdir
-    // sometimes results in not creating the new dir)
-    dir.rmdir(path);
-    QDir().mkdir(path);
+    // Delete all files in the 'temp' directory
+    deleteTempPathRecursive();
 
     setMinimumSize(100,100);
     installEventFilter(this);
@@ -2048,4 +2040,55 @@ void MainWindow::setBrushInPaintLayer(const QString& name, const QString& baseNa
 void MainWindow::loadTextureGeneration (Ogre::PbsTextureTypes textureType, Ogre::ushort sequence)
 {
     mPaintLayerManager.loadTextureGeneration (textureType, sequence);
+}
+
+//****************************************************************************/
+void MainWindow::notifyNodeDeleted(unsigned int nodeType)
+{
+    switch (nodeType)
+    {
+        case NODE_TYPE_PBS_DATABLOCK:
+            mPropertiesDockWidget->setHlmsPropertiesPbsDatablockVisible(false);
+        break;
+
+        case NODE_TYPE_UNLIT_DATABLOCK:
+            mPropertiesDockWidget->setHlmsPropertiesUnlitDatablockVisible(false);
+        break;
+
+        case NODE_TYPE_SAMPLERBLOCK:
+            mPropertiesDockWidget->setHlmsPropertiesSamplerblockVisible(false);
+        break;
+
+        case NODE_TYPE_BLENDBLOCK:
+            mPropertiesDockWidget->setHlmsPropertiesBlendblockVisible(false);
+        break;
+
+        case NODE_TYPE_MACROBLOCK:
+            mPropertiesDockWidget->setHlmsPropertiesMacroblockVisible(false);
+        break;
+    }
+}
+
+//****************************************************************************/
+void MainWindow::deleteTempPathRecursive(void)
+{
+    // Note, that QDir::removeRecursively exist, but this also deletes the temp directory itself, so use the old way
+    QString path = TEMP_PATH.c_str();
+    QDir dir(path);
+    if (!dir.exists())
+    {
+        // It doesn't exist, so create it
+        QDir().mkdir(path);
+        return;
+    }
+
+    dir.makeAbsolute();
+    Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst))
+    {
+        if (!info.isDir())
+        {
+            if (info.fileName() != "readme.md" && info.fileName() != "README.md" && info.fileName() != "README.MD")
+                QFile::remove(info.absoluteFilePath());
+        }
+    }
 }

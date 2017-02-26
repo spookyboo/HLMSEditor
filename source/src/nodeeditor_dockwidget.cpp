@@ -276,6 +276,9 @@ HlmsNodeSamplerblock* NodeEditorDockWidget::doNewSamplerblockAction(void)
         mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
         mHlmsPbsBuilder->connectNodes(mHlmsPbsDatablockNode, sampler);
         nodeConnected(mHlmsPbsDatablockNode, sampler);
+        Ogre::IdString id = mHlmsPbsDatablockNode->getName().toStdString();
+        Ogre::PbsTextureTypes textureType =  mHlmsPbsBuilder->getPbsTextureTypeFromSamplerNode(sampler);
+        mParent->mRenderwindowDockWidget->notifyHlmsPropertiesPbsSamplerblockVisible(true, id, textureType);
     }
     else if (mHlmsUnlitDatablockNode)
     {
@@ -284,6 +287,9 @@ HlmsNodeSamplerblock* NodeEditorDockWidget::doNewSamplerblockAction(void)
         mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(true);
         mHlmsUnlitBuilder->connectNodes(mHlmsUnlitDatablockNode, sampler);
         nodeConnected(mHlmsPbsDatablockNode, sampler);
+        Ogre::IdString id = mHlmsUnlitDatablockNode->getName().toStdString();
+        Ogre::uint8 textureType = sampler->getTextureIndex();
+        mParent->mRenderwindowDockWidget->notifyHlmsPropertiesUnlitSamplerblockVisible(true, id, textureType);
     }
 
     return sampler;
@@ -377,7 +383,14 @@ void NodeEditorDockWidget::nodeToBeDeleted(QtNode* node)
         deleteHlmsUnlitDatablockNode();
 
     if (node->getType() == NODE_TYPE_SAMPLERBLOCK)
+    {
         setBackgroundDiffusePropertyVisibleBasedOnSamplerNodes();
+        mParent->mRenderwindowDockWidget->notifyHlmsPropertiesPbsSamplerblockVisible(false, "", Ogre::PBSM_DIFFUSE); // Inform the render widget about it
+        mParent->mRenderwindowDockWidget->notifyHlmsPropertiesUnlitSamplerblockVisible(false, "", 0); // Inform the render widget about it
+    }
+
+    // Notify the mainwindow, so the property widget can be made invisible
+    mParent->notifyNodeDeleted(node->getType());
 
     // Rebuid the datablock again
     generateDatablock();
@@ -388,11 +401,8 @@ void NodeEditorDockWidget::deleteHlmsPbsDatablockNode(void)
 {
     // When the node is deleted from the node-editor, do not destroy the datablock itself
     // It may be still be applied to one of the items.
-    Ogre::IdString name = mHlmsPbsDatablockNode->getName().toStdString();
     mHlmsPbsDatablockNode = 0;
     mParent->initCurrentDatablockFileName();
-
-    generateDatablock(); //TODO: Is this needed?
 }
 
 //****************************************************************************/
@@ -400,7 +410,6 @@ void NodeEditorDockWidget::deleteHlmsUnlitDatablockNode(void)
 {
     // When the node is deleted from the node-editor, do not destroy the datablock itself
     // It may be still be applied to one of the items.
-    Ogre::IdString name = mHlmsUnlitDatablockNode->getName().toStdString();
     mHlmsUnlitDatablockNode = 0;
     mParent->initCurrentDatablockFileName();
 }
@@ -408,6 +417,9 @@ void NodeEditorDockWidget::deleteHlmsUnlitDatablockNode(void)
 //****************************************************************************/
 void NodeEditorDockWidget::nodeSelected(QtNode* node)
 {
+    mParent->mRenderwindowDockWidget->notifyHlmsPropertiesPbsSamplerblockVisible(false, "", Ogre::PBSM_DIFFUSE); // Inform the render widget about it
+    mParent->mRenderwindowDockWidget->notifyHlmsPropertiesUnlitSamplerblockVisible(false, "", 0); // Inform the render widget about it
+
     if (!node)
     {
         HlmsPropertiesPbsDatablock* hlmsPropertiesPbsDatablock = mParent->mPropertiesDockWidget->mHlmsPropertiesPbsDatablock;
@@ -457,6 +469,30 @@ void NodeEditorDockWidget::nodeSelected(QtNode* node)
         {
             hlmsPropertiesSamplerblock->setObject(static_cast<HlmsNodeSamplerblock*>(node));
             mParent->mPropertiesDockWidget->setHlmsPropertiesSamplerblockVisible(true);
+            Ogre::IdString id = getCurrentDatablockName().toStdString();
+
+            if (getCurrentDatablockType() == HLMS_PBS)
+            {
+                HlmsNodeSamplerblock* sampler = hlmsPropertiesSamplerblock->getHlmsNodeSamplerblock();
+                if (sampler)
+                {
+                    Ogre::PbsTextureTypes textureType =  mHlmsPbsBuilder->getPbsTextureTypeFromSamplerNode(sampler);
+                    mParent->mRenderwindowDockWidget->notifyHlmsPropertiesPbsSamplerblockVisible(true,
+                                                                                                 id,
+                                                                                                 textureType);
+                }
+            }
+            else if (getCurrentDatablockType() == HLMS_UNLIT)
+            {
+                HlmsNodeSamplerblock* sampler = hlmsPropertiesSamplerblock->getHlmsNodeSamplerblock();
+                if (sampler)
+                {
+                    Ogre::uint8 textureType = sampler->getTextureIndex();
+                    mParent->mRenderwindowDockWidget->notifyHlmsPropertiesUnlitSamplerblockVisible(true,
+                                                                                                   id,
+                                                                                                   textureType);
+                }
+            }
         }
     }
     else if (node->getTitle() == NODE_TITLE_MACROBLOCK)

@@ -33,9 +33,7 @@
 #include "OgreTimer.h"
 #include "OgreHlmsManager.h"
 #include "OgreHlmsPbs.h"
-#include "OgreHlmsPbsDatablock.h"
 #include "OgreHlmsUnlit.h"
-#include "OgreHlmsUnlitDatablock.h"
 #include "OgreMesh2.h"
 #include "OgreSubMesh2.h"
 #include "OgreImage.h"
@@ -77,8 +75,13 @@ namespace Magus
         mLatestSubItemDatablock(0),
         mHoover(false),
         mPaintMode(false),
+        mOffsetTextureMode(false),
         mPaintLayers(0),
-        mLatestPaintResult(1)
+        mLatestPaintResult(1),
+        mPbsDatablockBlockOffsetTexture(0),
+        mUnlitDatablockBlockOffsetTexture(0),
+        mPbsTextureTypeOffsetTexture(Ogre::PBSM_DIFFUSE),
+        mUnlitTextureTypeOffsetTexture(0)
     {
         mRenderTextureNameHoover = "RenderTargetHlmsEditorTextureHoover";
         mRenderTextureNamePaint = "RenderTargetHlmsEditorTexturePaint";
@@ -1063,6 +1066,20 @@ namespace Magus
     }
 
     //****************************************************************************/
+    void QOgreWidget::setOffsetTextureMode(bool enabled,
+                                         Ogre::HlmsPbsDatablock* pbsDatablockBlockOffsetTexture,
+                                         Ogre::HlmsUnlitDatablock* unlitDatablockBlockOffsetTexture,
+                                         Ogre::PbsTextureTypes pbsTextureTypeOffsetTexture,
+                                         Ogre::uint8 unlitTextureTypeOffsetTexture)
+    {
+        mOffsetTextureMode = enabled;
+        mPbsDatablockBlockOffsetTexture = pbsDatablockBlockOffsetTexture;
+        mUnlitDatablockBlockOffsetTexture = unlitDatablockBlockOffsetTexture;
+        mPbsTextureTypeOffsetTexture = pbsTextureTypeOffsetTexture;
+        mUnlitTextureTypeOffsetTexture = unlitTextureTypeOffsetTexture;
+    }
+
+    //****************************************************************************/
     void QOgreWidget::mouseMoveEvent( QMouseEvent* e )
     {
         if(mSystemInitialized)
@@ -1072,6 +1089,12 @@ namespace Magus
                 if (mPaintMode)
                 {
                     doPaintLayer(e->pos().x(), e->pos().y());
+                    e->accept();
+                    return;
+                }
+                else if (mOffsetTextureMode)
+                {
+                    doOffsetTexture(e->pos().x(), e->pos().y());
                     e->accept();
                     return;
                 }
@@ -1121,10 +1144,10 @@ namespace Magus
         {
             mCameraManager->injectMouseDown(e);
 
-            if (e->button() == Qt::MiddleButton || e->button() == Qt::LeftButton)
+            if (e->button() == Qt::LeftButton)
             {
                 mMouseDown = true;
-                if (mPaintMode && e->button() == Qt::LeftButton)
+                if (mPaintMode)
                 {
                     Ogre::Vector2 pos = Ogre::Vector2::ZERO;
                     mLatestPaintResult = doPaintLayer(e->pos().x(), e->pos().y());
@@ -1147,6 +1170,10 @@ namespace Magus
                         break;
                     }
                 }
+                else if (mOffsetTextureMode)
+                {
+                    // TODO
+                }
             }
             else if (e->button() == Qt::RightButton)
             {
@@ -1162,15 +1189,22 @@ namespace Magus
         if(mSystemInitialized)
         {
             mCameraManager->injectMouseUp(e);
-            if (e->button() == Qt::MiddleButton || e->button() == Qt::LeftButton)
+            if (e->button() == Qt::LeftButton)
+            {
                 mMouseDown = false;
 
-            if (mPaintMode && e->button() == Qt::LeftButton)
-            {
-                // Only if the latest result was 0, the painting was successful; save the image
-                if (mLatestPaintResult == 0)
-                    doPaintSaveTextureGeneration();
-                mLatestPaintResult = 1;
+                if (mPaintMode)
+                {
+                    // Only if the latest result was 0, the painting was successful; save the image
+                    if (mLatestPaintResult == 0)
+                        doPaintSaveTextureGeneration();
+
+                    mLatestPaintResult = 1;
+                }
+                else if (mOffsetTextureMode)
+                {
+                    // TODO
+                }
             }
         }
         e->accept();
@@ -1556,6 +1590,82 @@ namespace Magus
     {
         // This is needed to be able to forward the right mousepress to the RenderwindowDockWidget
         mRenderwindowDockWidget = renderwindowDockWidget;
+    }
+
+
+    //****************************************************************************/
+    void QOgreWidget::doOffsetTexture(int mouseX, int mouseY)
+    {
+        Ogre::Vector2 oldPos = mAbsolute;
+        mAbsolute = Ogre::Vector2(mouseX, mouseY);
+        mRelative = mAbsolute - oldPos;
+        if (mPbsDatablockBlockOffsetTexture)
+        {
+            int index = getDetailMapIndexFromTextureTypeForScaleAndOffset(mPbsTextureTypeOffsetTexture);
+            if (index < 999)
+            {
+                Ogre::Vector4 v4 = mPbsDatablockBlockOffsetTexture->getDetailMapOffsetScale(index);
+                v4.x += mRelative.x / (float)width();
+                v4.x = saturate(v4.x);
+                v4.y += mRelative.y / (float)height();
+                v4.y = saturate(v4.y);
+                mPbsDatablockBlockOffsetTexture->setDetailMapOffsetScale(index, v4);
+                mRenderwindowDockWidget->notifyOffsetTextureUpdated(v4.x, v4.y);
+            }
+        }
+        else if (mUnlitDatablockBlockOffsetTexture)
+        {
+            Ogre::Matrix4 m4 = mUnlitDatablockBlockOffsetTexture->getAnimationMatrix(mUnlitTextureTypeOffsetTexture);
+            Ogre::Vector3 v3 = m4.getTrans();
+            v3.x += mRelative.x / (float)width();
+            v3.x = saturate (v3.x);
+            v3.y += mRelative.y / (float)height();
+            v3.y = saturate (v3.y);
+            m4.setTrans(v3);
+            mUnlitDatablockBlockOffsetTexture->setAnimationMatrix(mUnlitTextureTypeOffsetTexture, m4);
+            mUnlitDatablockBlockOffsetTexture->setEnableAnimationMatrix(mUnlitTextureTypeOffsetTexture, true);
+            mRenderwindowDockWidget->notifyOffsetTextureUpdated(v3.x, v3.y);
+        }
+    }
+
+    //****************************************************************************/
+    float QOgreWidget::saturate (float val)
+    {
+        val = val > 1.0f ? 1.0f : (val < 0.0f ? 0.0f : val);
+        return val;
+    }
+
+    //****************************************************************************/
+    unsigned int QOgreWidget::getDetailMapIndexFromTextureTypeForScaleAndOffset (Ogre::PbsTextureTypes textureType)
+    {
+        switch (textureType)
+        {
+            case Ogre::PBSM_DETAIL0:
+                return 0;
+            break;
+            case Ogre::PBSM_DETAIL1:
+                return 1;
+            break;
+            case Ogre::PBSM_DETAIL2:
+                return 2;
+            break;
+            case Ogre::PBSM_DETAIL3:
+                return 3;
+            break;
+            case Ogre::PBSM_DETAIL0_NM:
+                return 4;
+            break;
+            case Ogre::PBSM_DETAIL1_NM:
+                return 5;
+            break;
+            case Ogre::PBSM_DETAIL2_NM:
+                return 6;
+            break;
+            case Ogre::PBSM_DETAIL3_NM:
+                return 7;
+            break;
+        }
+        return 999;
     }
 
     //****************************************************************************/

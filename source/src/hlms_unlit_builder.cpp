@@ -74,7 +74,7 @@ Ogre::HlmsUnlitDatablock* HlmsUnlitBuilder::createUnlitDatablock (Magus::OgreMan
     }
 
     // First destroy any existing datablock with that name
-    Ogre::String datablockName = unlitnode->getName().toStdString();
+    Ogre::String datablockName = unlitnode->getName().toStdString(); // TODO Ogre::String -> Ogre::IdString
     Ogre::HlmsDatablock* latestDatablock = hlmsUnlit->getDatablock(datablockName);
     if (latestDatablock && latestDatablock != hlmsUnlit->getDefaultDatablock())
         hlmsUnlit->destroyDatablock(latestDatablock->getName());
@@ -517,7 +517,7 @@ void HlmsUnlitBuilder::repositionUnlitNode(HlmsNodeUnlitDatablock* unlitnode)
     // Reposition the unlit node (this is only done once)
     QPointF pos = unlitnode->pos();
     //pos.setX(-1.0f * unlitnode->getWidth());
-    //pos.setY(-0.5f * unlitnode->getHeigth());
+    pos.setY(pos.y() + 0.6f * unlitnode->getHeigth());
     unlitnode->setPos(pos);
 }
 
@@ -567,8 +567,8 @@ void HlmsUnlitBuilder::connectNodes(HlmsNodeUnlitDatablock* unlitnode,
 
     // Reposition the macro node
     QPointF pos = unlitnode->pos();
-    pos.setX(pos.x() + unlitnode->getWidth() + 2 * portUnlit->pos().y());
-    pos.setY(portUnlit->pos().y() - unlitnode->getHeigth());
+    pos.setX(pos.x() + unlitnode->getWidth() + pos.y());
+    pos.setY(pos.y() - 0.3f * unlitnode->getHeigth());
     macronode->setPos(pos);
 }
 
@@ -591,8 +591,8 @@ void HlmsUnlitBuilder::connectNodes(HlmsNodeUnlitDatablock* unlitnode,
 
     // Reposition the blend node
     QPointF pos = unlitnode->pos();
-    pos.setX(pos.x() + unlitnode->getWidth() + 2 * portUnlit->pos().y());
-    pos.setY(portUnlit->pos().y() - unlitnode->getHeigth());
+    pos.setX(pos.x() + unlitnode->getWidth() + pos.y());
+    pos.setY(pos.y() - 0.4f * unlitnode->getHeigth());
     blendnode->setPos(pos);
 }
 
@@ -691,4 +691,3 @@ Ogre::UnlitBlendModes HlmsUnlitBuilder::getBlendModeFromIndex (unsigned int inde
     }
     return Ogre::UNLIT_BLEND_NORMAL_NON_PREMUL;
 }
-

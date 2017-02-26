@@ -44,11 +44,13 @@ class HlmsPropertiesSamplerblock : public QWidget
                                    QWidget* parent = 0);
         virtual ~HlmsPropertiesSamplerblock(void);
         void setObject (HlmsNodeSamplerblock* hlmsNodeSamplerblock);
+        void updateOffsetPropertiesExternal (HlmsNodeSamplerblock* hlmsNodeSamplerblock); // mHlmsNodeSamplerblock will be updated
 
         // Set properties visible/invisible
         void setTextureTypePropertyVisible (bool visible);
         void setDetailMapWOSPropertiesVisible (bool visible);
         void setDetailMapAnimationPropertiesVisible (bool visible);
+        HlmsNodeSamplerblock* getHlmsNodeSamplerblock (void) {return mHlmsNodeSamplerblock;}
 
     private slots:
         void propertyValueChanged(QtProperty* property);

@@ -60,7 +60,7 @@ class PropertiesDockWidget : public QDockWidget
         void setTextureTypePropertyVisible(bool visible);
         void setDetailMapWOSPropertiesVisible(bool visible);
         void setDetailMapAnimationPropertiesVisible (bool visible);
-        void clear();
+        void clear(); // Make all property widgets invisible
         void displayInfo(const QString& fileName, const QString& headerText); // Used for displaying info files
         void notifyHlmsChanged(QtProperty* property); // Called when a property is changed; the property determines the latest property that has been changed
 

@@ -532,7 +532,6 @@ namespace Magus
                     QtCompoundNode* compound = nodeOverCompound(node);
                     if (compound)
                     {
-                        //setCursor(Qt::SizeAllCursor); // Indication that the node(s) can be dropped
                         setCursor(Qt::CrossCursor); // Indication that the node(s) can be dropped
                         mCompoundNodeDropped = compound;
                         return true;

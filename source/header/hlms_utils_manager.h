@@ -25,6 +25,7 @@
 #include "OgreRoot.h"
 #include "OgreHlmsManager.h"
 #include "OgreHlmsPbsDatablock.h"
+#include "OgreHlmsUnlitDatablock.h"
 #include "rapidjson/document.h"
 
 /****************************************************************************
@@ -141,6 +142,26 @@ class HlmsUtilsManager
           * The datablock MUST be a Pbs datablock.
           */
           const Ogre::String& getTextureFileNameOfPbs (const Ogre::IdString& datablockId, Ogre::PbsTextureTypes textureType);
+
+          /* Returns a Pbs datablock
+           * This function only searches datablocks in Ogre
+           */
+          Ogre::HlmsPbsDatablock* getPbsDatablock (const Ogre::IdString& datablockId);
+
+          /* Returns an Unlit datablock
+           * This function only searches datablocks in Ogre
+           */
+          Ogre::HlmsUnlitDatablock* getUnlitDatablock (const Ogre::IdString& datablockId);
+
+          /* Returns a samplerblock of a Pbs datablock
+           * This function only searches datablocks in Ogre
+           */
+          const Ogre::HlmsSamplerblock* getSamplerFromPbsDatablock (const Ogre::IdString& datablockId, Ogre::PbsTextureTypes textureType);
+
+          /* Returns a samplerblock of an Unlit datablock
+           * This function only searches datablocks in Ogre
+           */
+          const Ogre::HlmsSamplerblock* getSamplerFromUnlitDatablock (const Ogre::IdString& datablockId, Ogre::uint8 textureType);
 
     protected:
         bool isInRegisteredDatablocksVec (const Ogre::String& datablockFullName);

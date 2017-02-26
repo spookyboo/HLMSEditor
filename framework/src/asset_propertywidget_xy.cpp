@@ -79,6 +79,7 @@ namespace Magus
     //****************************************************************************/
     void QtXYProperty::setXY (qreal x, qreal y)
     {
+        // TODO: This causes a crash!!
         setX(x);
         setY(y);
     }
