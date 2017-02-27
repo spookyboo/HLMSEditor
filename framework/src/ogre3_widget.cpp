@@ -678,8 +678,8 @@ namespace Magus
             Ogre::Image uvMap;
             Ogre::uint32 width = 1024;
             Ogre::uint32 height = 1024;
-            float u = 0;
-            float v = 0;
+            float u = 0.0f;
+            float v = 0.0f;
             size_t formatSize = Ogre::PixelUtil::getNumElemBytes(Ogre::PF_R8G8B8A8);
             uchar* data = new uchar[width * height * formatSize];
             uvMap.loadDynamicImage(data, width, height, Ogre::PF_A8R8G8B8);
@@ -748,7 +748,6 @@ namespace Magus
     {
         if (mItemRttPaint)
         {
-            //mItemRttPaint->setDatablockOrMaterialName(UV_MAPPING_MATERIAL_NAME); // TODO: Sets the datablock in each subItem????
             size_t numSubItems = mItemRttPaint->getNumSubItems();
             Ogre::SubItem* subItem;
             for (size_t i = 0; i < numSubItems; ++i)
@@ -765,14 +764,14 @@ namespace Magus
         // Detach datablock from mItemRttPaint
         setDefaultDatablockItemRttPaint();
 
-        // Destroy all unlit materials
-        Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
-        Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
-        size_t numSubItems = mItemRttPaint->getNumSubItems();
-        for (size_t i = 0; i < numSubItems; ++i)
+        try
         {
-            hlmsUnlit->destroyDatablock(Ogre::StringConverter::toString(i));
+            Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+            Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT) );
+            if (hlmsUnlit->getDatablock(UV_MAPPING_MATERIAL_NAME))
+                hlmsUnlit->destroyDatablock(UV_MAPPING_MATERIAL_NAME);
         }
+        catch (Ogre::Exception e){}
     }
 
     //****************************************************************************/

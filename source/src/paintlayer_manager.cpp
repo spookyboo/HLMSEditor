@@ -19,6 +19,10 @@
 ****************************************************************************/
 
 #include "paintlayer_manager.h"
+#include "OgreLogManager.h"
+#include "OgreMesh2.h"
+#include "OgreSubMesh2.h"
+#include "OgreBitwise.h"
 
 //****************************************************************************/
 PaintLayerManager::PaintLayerManager(void)
@@ -184,4 +188,106 @@ void PaintLayerManager::loadTextureGeneration (Ogre::PbsTextureTypes textureType
     TextureLayer* textureLayer = mTextureLayerManager.getTextureLayer(textureType);
     if (textureLayer && textureLayer->mTextureTypeDefined)
         textureLayer->loadTextureGeneration(sequence);
+}
+
+//****************************************************************************/
+const MeshIndexUvMapType& PaintLayerManager::getMinMaxUVFromMesh (const Ogre::MeshPtr mesh)
+{
+    mMeshIndexUvMapType.clear();
+    float minU, maxU;
+    float minV, maxV;
+    float val;
+    Ogre::Vector4 minUmaxUminVmaxV;
+    size_t index = 0;
+    Ogre::Mesh::SubMeshVec::const_iterator subMeshIterator = mesh->getSubMeshes().begin();
+    while (subMeshIterator != mesh->getSubMeshes().end())
+    {
+        Ogre::SubMesh* subMesh = *subMeshIterator;
+        Ogre::VertexArrayObjectArray vaos = subMesh->mVao[0];
+
+        if (!vaos.empty())
+        {
+            // Get the first LOD level
+            Ogre::VertexArrayObject *vao = vaos[0];
+
+            Ogre::VertexArrayObject::ReadRequestsArray readRequests;
+            Ogre::VertexElement2VecVec vertexDeclaration = vao->getVertexDeclaration();
+            Ogre::VertexElement2VecVec::const_iterator it0 = vertexDeclaration.begin();
+            Ogre::VertexElement2VecVec::const_iterator en0 = vertexDeclaration.end();
+
+            while( it0 != en0 )
+            {
+                Ogre::VertexElement2Vec::const_iterator it1 = it0->begin();
+                Ogre::VertexElement2Vec::const_iterator en1 = it0->end();
+
+                while( it1 != en1 )
+                {
+                    if( *it1 == Ogre::VES_TEXTURE_COORDINATES )
+                    {
+                        readRequests.push_back( Ogre::VES_TEXTURE_COORDINATES );
+                        break; // Just get the first texture coordinate set
+                    }
+                    ++it1;
+                }
+                ++it0;
+            }
+
+            vao->readRequests(readRequests);
+            vao->mapAsyncTickets(readRequests);
+            minU = 99999999.0f;
+            maxU = -99999999.0f;
+            minV = 99999999.0f;
+            maxV = -99999999.0f;
+            const size_t subMeshVerticiesNum = readRequests[0].vertexBuffer->getNumElements(); // Number of vertices per submesh
+            // Number of elements per vertex declaration per submesh is not important; the result only contains 1 texcoords set
+
+            for (size_t i = 0; i < subMeshVerticiesNum; ++i)
+            {
+                if (readRequests[0].type == Ogre::VET_HALF2)
+                {
+                    Ogre::uint16 const * RESTRICT_ALIAS bufferF16 =
+                            reinterpret_cast<Ogre::uint16 const * RESTRICT_ALIAS>( readRequests[0].data );
+                    val = Ogre::Bitwise::halfToFloat( bufferF16[0] );
+                    minU = std::min(minU, val);
+                    maxU = std::max(maxU, val);
+                    val = Ogre::Bitwise::halfToFloat( bufferF16[1] );
+                    minV = std::min(minV, val);
+                    maxV = std::max(maxV, val);
+
+                }
+                else
+                {
+                    float const * RESTRICT_ALIAS bufferF32 =
+                            reinterpret_cast<float const * RESTRICT_ALIAS>( readRequests[0].data );
+                    val = bufferF32[0];
+                    minU = std::min(minU, val);
+                    maxU = std::max(maxU, val);
+                    val = bufferF32[1];
+                    minV = std::min(minV, val);
+                    maxV = std::max(maxV, val);
+                }
+
+                readRequests[0].data += readRequests[0].vertexBuffer->getBytesPerElement();
+            }
+
+            minUmaxUminVmaxV = Ogre::Vector4::ZERO;
+            minUmaxUminVmaxV.x = minU;
+            minUmaxUminVmaxV.y = maxU;
+            minUmaxUminVmaxV.z = minV;
+            minUmaxUminVmaxV.w = maxV;
+            mMeshIndexUvMapType[index] = minUmaxUminVmaxV;
+            Ogre::LogManager::getSingleton().logMessage("UV index(" +
+                                                        Ogre::StringConverter::toString(index) +
+                                                        "): " +
+                                                        Ogre::StringConverter::toString(minUmaxUminVmaxV)); // DEBUG
+
+
+            vao->unmapAsyncTickets(readRequests);
+        }
+
+        subMeshIterator++;
+        index++;
+    }
+
+    return mMeshIndexUvMapType;
 }

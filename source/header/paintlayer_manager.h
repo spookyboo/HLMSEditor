@@ -26,6 +26,7 @@
 #include "texturelayer_manager.h"
 
 typedef std::vector<PaintLayer*> PaintLayers;
+typedef std::map<size_t, Ogre::Vector4> MeshIndexUvMapType;
 
 /****************************************************************************
  This class manages all PaintLayers assigned to a datablock
@@ -93,9 +94,18 @@ class PaintLayerManager
          */
         void loadTextureGeneration (Ogre::PbsTextureTypes textureType, Ogre::ushort sequence);
 
+        /* Returns the min and max uv's of all submeshes in a mesh
+         * The intention of this function was to generate different uv_mapping textures in case of models
+         * that do not use an uv interval between [0..1], but uv's in the other quadrants.
+         * The differen uv_mapping images however did not produce the correct result.
+         * This function is currently not used, but it may be possible for future use.
+         */
+        const MeshIndexUvMapType& getMinMaxUVFromMesh (const Ogre::MeshPtr mesh);
+
     private:
         PaintLayers mPaintLayers;
         TextureLayerManager mTextureLayerManager;
+        MeshIndexUvMapType mMeshIndexUvMapType;
 };
 
 #endif
