@@ -138,6 +138,7 @@ namespace Magus
 
             // Define the width and height of a texture in the selection box
             void setTextureSize (QSize size);
+            QSize getTextureSize (void) {return mTextureSize;}
 
             // Apply filtering; only the items that meet the pattern are displayed
             void filter(const QString& pattern);

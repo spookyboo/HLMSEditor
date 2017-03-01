@@ -27,6 +27,7 @@
 #include <QColor>
 #include <QPainter>
 #include <QPixmap>
+#include <QImageReader>
 #include "node_constants.h"
 #include "node_node.h"
 #include "node_port.h"
@@ -678,7 +679,11 @@ namespace Magus
     //****************************************************************************/
     void QtNode::setImage(const QString& fileNameImage)
     {
-        mImage = QPixmap(fileNameImage);
+        // Decrease the texture, otherwise it cannot be loaded by the pixmap
+        QImageReader reader(fileNameImage);
+        reader.setScaledSize(QSize(128, 128)); // Prevents from reading to much data in memory
+        QImage image = reader.read();
+        mImage.convertFromImage(image);
         setImage(mImage);
     }
 

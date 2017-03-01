@@ -504,7 +504,7 @@ QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical
 
 QSlider
 {
-	background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #808080, stop:1 #737373);
+	background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #2d2d2d, stop: 1.0 #737373);
 }
 
 QSlider::groove:vertical
@@ -938,5 +938,6 @@ QListView::item:hover
 
 QTableWidget
 {
+	color: #cccccc;
 	background: #535353;
 }

@@ -89,13 +89,22 @@ void TextureThumbsDockWidget::addTextureFile (const QString& fileName)
 {
     QString baseName = fileName;
     baseName = getBaseFileName(baseName);
+    QImage image;
     QPixmap pixmap;
     try
     {
         if (Magus::fileExist(fileName))
-            pixmap.load(fileName);
+        {
+            // Decrease the texture, otherwise it cannot be loaded by the pixmap
+            QImageReader reader(fileName);
+            reader.setScaledSize(mTextureWidget->getTextureSize()); // Prevents from reading to much data in memory
+            image = reader.read();
+            pixmap.convertFromImage(image);
+        }
         else
+        {
             pixmap.load(FILE_NO_IMAGE);
+        }
 
         mTextureWidget->addTexture(pixmap, fileName, baseName);
     }
