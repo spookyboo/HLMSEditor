@@ -101,6 +101,12 @@ class TextureLayer : public QObject
          */
         void saveTextureGeneration (void);
 
+        /* Save the texture as file in the import directory. The basename of the original filename
+         * is extended with a 'timestamp'
+         * The function returns the basename of the saved file
+         */
+        const Ogre::String& saveTextureWithTimeStampToImportDir (void);
+
         /* The setFirstTextureGeneration searches for the first (original) image in a sequence and loads it.
          */
         void setFirstTextureGeneration (void);

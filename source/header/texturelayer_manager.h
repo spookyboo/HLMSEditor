@@ -23,6 +23,8 @@
 
 #include "texturelayer.h"
 
+typedef std::map<Ogre::PbsTextureTypes, Ogre::String> TypeAndNewTextureNames; // List of texturenames with their new the name they have when they have been painted
+
 /****************************************************************************
  This class manages all TextureLayers.
  ***************************************************************************/
@@ -59,9 +61,15 @@ class TextureLayerManager
          */
         TextureLayer* getTextureLayer (Ogre::PbsTextureTypes textureType);
 
+        /* Save all textures used for painting in the import directory with a new name
+         * OldNewTextureNames contains a map of the textureTypes and new names
+         */
+        const TypeAndNewTextureNames& saveTexturesWithTimeStampToImportDir (void);
+
 
     private:
         TextureLayers mTextureLayers;
+        TypeAndNewTextureNames mTypeAndNewTextureNames;
 };
 
 #endif

@@ -116,8 +116,10 @@ class MainWindow : public QMainWindow
         void loadDatablockAndSet(const QString jsonFileName);
         void loadMesh(const QString meshFileName);
         void loadProject(const QString& fileName);
-        void saveDatablock_old(void); // Deprecated; this version deletes all datablocks execpt the one-to-be-saved
-        void saveDatablock(void);
+         // Saves the current datablock; if validatePaintLayers is true, the validation whether there are paintlayers must still be done
+        void saveDatablock(bool validatePaintLayers);
+        bool continueEvenIfThereArePaintLayers(void); // Validate whether there are paintlayers (before saving the datablock)
+
         void loadMaterialBrowserCfg(void);
         void saveMaterialBrowserCfg(void);
         void loadRecentHlmsFilesCfg(void);

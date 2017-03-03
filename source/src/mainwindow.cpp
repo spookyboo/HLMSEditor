@@ -578,6 +578,7 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
         return;
     }
 
+    clearHlmsNamesAndRemovePaintLayers();
     mHlmsName = jsonFileName;
     appendRecentHlms(jsonFileName);
     setCurrentDatablockNames (datablockStruct.datablockId, datablockStruct.datablockFullName);
@@ -879,13 +880,16 @@ void MainWindow::doSaveDatablockMenuAction(void)
         doSaveAsDatablockMenuAction();
     else
     {
-        saveDatablock();
+        saveDatablock(true);
     }
 }
 
 //****************************************************************************/
 void MainWindow::doSaveAsDatablockMenuAction(void)
 {
+    if (!continueEvenIfThereArePaintLayers())
+        return;
+
     // Get hlms name
     mHlmsName = mCurrentDatablockFullName.c_str();
     mHlmsName = mHlmsName + QString(".material.json");
@@ -900,57 +904,20 @@ void MainWindow::doSaveAsDatablockMenuAction(void)
     if (!fileName.isEmpty())
     {
         mHlmsName = fileName;
-        saveDatablock();
+        saveDatablock(false);
     }
 }
 
 //****************************************************************************/
-void MainWindow::saveDatablock_old(void)
-{
-    Ogre::String fname = mHlmsName.toStdString();
-    QString baseNameJson = mHlmsName;
-    baseNameJson = getBaseFileName(baseNameJson);
-    QString thumb = baseNameJson + ".png";
-
-    // Update the thumb image in the material browser
-    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->saveToFile(THUMBS_PATH + thumb.toStdString());
-    loadMaterialBrowserCfg();
-
-    // First, detach the datablocks from the Item
-    detachMaterialsFromItem();
-
-    // Destroy all special datablocks (axis, highlight and unlit rtt), otherwise they will also be saved or exported
-    destroySpecialDatablocks();
-
-    // Destroy the rest of the datablock, except the current one
-    // Do not exclude special datablocks (although they are already destroyed)
-    // Keep the list with loaded materials
-    // Do not destroy the current datablock
-    mHlmsUtilsManager->destroyDatablocks(false, true, mCurrentDatablockFullName);
-
-    Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
-    if (getCurrentDatablockType() == HLMS_PBS)
-    {
-        hlmsManager->saveMaterials (Ogre::HLMS_PBS, fname);
-        appendRecentHlms(mHlmsName);
-    }
-    else if (getCurrentDatablockType() == HLMS_UNLIT)
-    {
-        hlmsManager->saveMaterials (Ogre::HLMS_UNLIT, fname);
-        appendRecentHlms(mHlmsName);
-    }
-
-    // Recreate and attach the materials again
-    mHlmsUtilsManager->reloadNonSpecialDatablocks(); // Reloades (and re-creates) the non-special datablocks
-    createSpecialDatablocks(); // Create special-datablocks and set them in the right (sub)Item (if needed)
-    restoreMaterialsOfItem(); // Set one or more of the reloaded datablocks back to the subitem in which it was
-}
-
-//****************************************************************************/
-void MainWindow::saveDatablock(void)
+void MainWindow::saveDatablock(bool validatePaintLayers)
 {
     // This is the new version of save datablock. With the introduction of HlmsManager::saveMaterial
     // it isn't needed anymore to delete all datablocks except the one-to-be-saved.
+
+    // If validation is needed, then validate whether there are paintlayers (Pbs only)
+    if (validatePaintLayers && !continueEvenIfThereArePaintLayers())
+        return;
+
     Ogre::String fname = mHlmsName.toStdString();
     QString baseNameJson = mHlmsName;
     baseNameJson = getBaseFileName(baseNameJson);
@@ -962,8 +929,53 @@ void MainWindow::saveDatablock(void)
 
     Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
     Ogre::HlmsDatablock* datablock = hlmsManager->getDatablock(mCurrentDatablockName);
-    hlmsManager->saveMaterial (datablock, fname);
+    if (!datablock)
+        return;
+
+    if (mPaintLayerManager.texturesUsedInPaintLayers())
+    {
+        // Replace the current textures in the datablock with the saved ones
+        TypeAndNewTextureNames typeAndNewTextureNames = mPaintLayerManager.saveTexturesWithTimeStampToImportDir();
+        {
+            TypeAndNewTextureNames::iterator it;
+            TypeAndNewTextureNames::iterator itStart = typeAndNewTextureNames.begin();
+            TypeAndNewTextureNames::iterator itEnd = typeAndNewTextureNames.end();
+            Ogre::PbsTextureTypes type;
+            Ogre::String filename;
+            for (it = itStart; it != itEnd; ++it)
+            {
+                type = it->first;
+                filename = it->second;
+                mHlmsUtilsManager->replaceTextureInPbsDatablock(datablock->getName(), type, filename);
+            }
+        }
+        hlmsManager->saveMaterial (datablock, fname);
+        loadDatablockAndSet(fname.c_str()); // Reload, because this also updates everything in the editor
+    }
+    else
+    {
+        // Just save the datablock
+        hlmsManager->saveMaterial (datablock, fname);
+    }
+
     appendRecentHlms(mHlmsName);
+}
+
+//****************************************************************************/
+bool MainWindow::continueEvenIfThereArePaintLayers(void)
+{
+    if (mPaintLayerManager.texturesUsedInPaintLayers())
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(0, "", "There are textures assigned to paintlayers.\n"
+                                             "Updated textures are saved as new image files in the /import directory.\n"
+                                             "Do you still want to save?", QMessageBox::Ok|QMessageBox::Cancel);
+
+        // If Ok pressed, true is returned; false is returned in case of Cancel
+        return reply == QMessageBox::Ok;
+    }
+
+    return true; // Continue, because there are no paintlayers
 }
 
 //****************************************************************************/

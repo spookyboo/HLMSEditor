@@ -58,6 +58,9 @@ TextureLayer* TextureLayerManager::createOrRetrieveTextureLayer (const Ogre::IdS
 //****************************************************************************/
 void TextureLayerManager::removeAndDeleteTextureLayer (TextureLayer* textureLayer)
 {
+    if (!textureLayer)
+        return;
+
     TextureLayers::iterator it;
     TextureLayers::iterator itStart = mTextureLayers.begin();
     TextureLayers::iterator itEnd = mTextureLayers.end();
@@ -105,4 +108,21 @@ TextureLayer* TextureLayerManager::getTextureLayer (Ogre::PbsTextureTypes textur
         if (tl->mTextureType == textureType)
             return tl;
     }
+}
+
+//****************************************************************************/
+const TypeAndNewTextureNames& TextureLayerManager::saveTexturesWithTimeStampToImportDir (void)
+{
+    mTypeAndNewTextureNames.clear();
+    Ogre::String newTextureFileName;
+    foreach (TextureLayer* textureLayer, mTextureLayers)
+    {
+        if (textureLayer->mTextureTypeDefined)
+        {
+            newTextureFileName = textureLayer->saveTextureWithTimeStampToImportDir();
+            mTypeAndNewTextureNames[textureLayer->mTextureType] = newTextureFileName;
+        }
+    }
+
+    return mTypeAndNewTextureNames;
 }

@@ -102,6 +102,23 @@ class PaintLayerManager
          */
         const MeshIndexUvMapType& getMinMaxUVFromMesh (const Ogre::MeshPtr mesh);
 
+        /* Returns true, if there is at least one paintlayer for which a TextureLayer is assigned
+         */
+        bool texturesUsedInPaintLayers (void);
+
+        /* Save all textures used for painting in the import directory with a new name
+         * OldNewTextureNames contains a map of the textureTypes and the new names
+         */
+        const TypeAndNewTextureNames& saveTexturesWithTimeStampToImportDir (void);
+
+    protected:
+        /* Return the total number of PaintLayers that have the same TextureType as the
+         * PaintLayer identified with externalLayerId. The total also includes the PaintLayer
+         * identified by externalLayerId
+         * If no texturetype defined, this function returns 0
+         */
+        unsigned short getNumberOfPaintLayersWithTheSameTextureType (PaintLayer* paintLayer);
+
     private:
         PaintLayers mPaintLayers;
         TextureLayerManager mTextureLayerManager;

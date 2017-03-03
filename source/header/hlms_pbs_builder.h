@@ -89,13 +89,15 @@ class HlmsPbsBuilder : public HlmsBuilder
         // Returns the index of a detail normal map based on a texturetype; returns values [0..3]
         unsigned int getDetailNormalMapIndexFromTextureType (Ogre::PbsTextureTypes textureType);
 
-	private:
+        // Returns the TextureMapType for a given Pbs textureType
+        Ogre::HlmsTextureManager::TextureMapType getTextureMapTypeFromPbsTextureTypes(Ogre::PbsTextureTypes textureType);
+
+    private:
         Magus::QtNodeEditor* mNodeEditor;
         Ogre::String mTempOgreString;
 
         // Some private functions
         unsigned int getIndexFromTextureType(Ogre::PbsTextureTypes textureType);
-        Ogre::HlmsTextureManager::TextureMapType getTextureMapTypeFromPbsTextureTypes(Ogre::PbsTextureTypes textureType);
         Ogre::HlmsTextureManager::TextureMapType getTextureMapTypeFromSamplerNode(HlmsNodeSamplerblock* samplerNode);
 
         // Create a Sampler node from a HlmsPbsDatablock if that datablock contains a texture of a certain textureType

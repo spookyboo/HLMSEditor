@@ -20,12 +20,17 @@ V 1.0 updates:
 - Forum topic: Would be possible to use the same texture sampler for different textures? I know when exporting, if all textures use the same settings in texture sampler, 
   only one will be written, but inside the edit, still need to set a diferente one for each texture.
 - Use mesh with multiple UV sets
+- Different method to calculate mouse position to uv; current method doesn't work with uv ranges outside [0..1]
 
 
 V 1.0 Bugs:
 ==========
-- Select and apply Pbs material to mesh. Select detail normal map and move the texture (texture offset). Change the offset settings by means of the property editor and move the texture
-  again with the mouse -> crash (no log message).
+- Select and apply Pbs material to mesh. Select detail normal map and move the texture (texture offset). 
+  Change the offset settings by means of the property editor (or do another action on the property editor) and move the texture
+  again with the mouse -> crash (no log message). Is this a bug in Qt?
+- Load a Pbs material, paint on the diffuse texture, save the material (updated texture is also save). Then create a new paintlayer
+  an paint again on the texture layer. Painting is still done (see textures in the /temp directory). The TextureLayer::blitTexture
+  doesn't work anymore. When loading the material from file again, the texture is updated (but still not possible to paint).
 - Faster loading of textures in texture browser (problem with importing dirs with a lot of texture files)
 - Resetting position and orientation of the camera/mesh in the renderwindow requires two mouse clicks on the same marker button
 - Scroll wheel not linear? Moving a mesh is too fast when the object is zoomed in a lot

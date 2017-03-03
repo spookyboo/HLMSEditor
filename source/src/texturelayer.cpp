@@ -25,6 +25,7 @@
 #include "OgreLogManager.h"
 #include "OgreStringConverter.h"
 #include <fstream>
+#include <ctime>
 
 //****************************************************************************/
 TextureLayer::TextureLayer(void) :
@@ -168,6 +169,24 @@ void TextureLayer::saveTextureGeneration (void)
 }
 
 //****************************************************************************/
+const Ogre::String& TextureLayer::saveTextureWithTimeStampToImportDir (void)
+{
+    Ogre::String strippedTextureFileName = mTextureFileName;
+    Ogre::String extension = mTextureFileName;
+    strippedTextureFileName.erase(strippedTextureFileName.find_last_of("."), Ogre::String::npos); // Remove extension
+    if (strippedTextureFileName.find("_hlms") != Ogre::String::npos)
+        strippedTextureFileName.erase(strippedTextureFileName.find("_hlms"), Ogre::String::npos); // Remove earlier hlms editor additions
+    extension.erase(0, extension.find_last_of("."));
+    mHelperString = strippedTextureFileName +
+            "_hlms" +
+            Ogre::StringConverter::toString((size_t)time(0)) +
+            extension;
+
+    mTextureOnWhichIsPainted.save(DEFAULT_IMPORT_PATH.toStdString() + mHelperString); // Saving to the import dir doesn't have to be in the background
+    return mHelperString; // Return the basename
+}
+
+//****************************************************************************/
 const Ogre::String& TextureLayer::getTextureFileNameGeneration (int sequence, bool fullQualified)
 {
     mHelperString = mTextureFileName;
@@ -216,4 +235,3 @@ bool TextureLayer::textureFileExists (const Ogre::String& filename)
     std::ifstream infile(filename);
     return infile.good();
 }
-

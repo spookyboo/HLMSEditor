@@ -163,6 +163,12 @@ class HlmsUtilsManager
            */
           const Ogre::HlmsSamplerblock* getSamplerFromUnlitDatablock (const Ogre::IdString& datablockId, Ogre::uint8 textureType);
 
+          /* Replaces a texture with a specific textureType in a datablock; the datablock must be a Pbs datablock
+           */
+          void replaceTextureInPbsDatablock (const Ogre::IdString& datablockId,
+                                             Ogre::PbsTextureTypes textureType,
+                                             const Ogre::String& fileNameTexture);
+
     protected:
         bool isInRegisteredDatablocksVec (const Ogre::String& datablockFullName);
 

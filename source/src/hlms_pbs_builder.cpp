@@ -567,8 +567,8 @@ void HlmsPbsBuilder::repositionPbsNode(HlmsNodePbsDatablock* pbsnode)
 
     // Reposition the pbs node (this is only done once)
     QPointF pos = pbsnode->pos();
-    //pos.setX(-1.0f * pbsnode->getWidth());
-    pos.setY(pos.y() + 0.6f * pbsnode->getHeigth());
+    //pos.setY(pos.y() + 0.6f * pbsnode->getHeigth());
+    pos.setY(-0.5 * pbsnode->getHeigth());
     pbsnode->setPos(pos);
 }
 
@@ -595,7 +595,7 @@ void HlmsPbsBuilder::connectNodes(HlmsNodePbsDatablock* pbsnode,
     // Reposition the sampler node
     QPointF pos = pbsnode->pos();
     pos.setX(pos.x() + pbsnode->getWidth() + 2 * portPbs->pos().y());
-    pos.setY(portPbs->pos().y());
+    pos.setY(-portPbs->pos().y());
     samplernode->setPos(pos);
 }
 
@@ -618,8 +618,8 @@ void HlmsPbsBuilder::connectNodes(HlmsNodePbsDatablock* pbsnode,
 
     // Reposition the macro node
     QPointF pos = pbsnode->pos();
-    pos.setX(pos.x() + pbsnode->getWidth() + pos.y());
-    pos.setY(pos.y() - 0.3f * pbsnode->getHeigth());
+    pos.setX(pos.x() + 2 * pbsnode->getWidth());
+    pos.setY(pos.y() - 0.1f * pbsnode->getHeigth());
     macronode->setPos(pos);
 }
 
@@ -643,7 +643,7 @@ void HlmsPbsBuilder::connectNodes(HlmsNodePbsDatablock* pbsnode,
     // Reposition the blend node
     QPointF pos = pbsnode->pos();
     pos.setX(pos.x() + pbsnode->getWidth() + portPbs->pos().y());
-    pos.setY(pos.y() - 0.4f * pbsnode->getHeigth());
+    pos.setY(pos.y() + 0.1 * pbsnode->getHeigth());
     blendnode->setPos(pos);
 }
 

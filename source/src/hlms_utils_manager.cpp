@@ -22,6 +22,7 @@
 #include "QTextStream"
 #include "constants.h"
 #include "hlms_utils_manager.h"
+#include "hlms_pbs_builder.h"
 #include "OgreHlmsPbs.h"
 #include "OgreHlmsUnlit.h"
 #include "OgreHlmsPbsDatablock.h"
@@ -1001,3 +1002,21 @@ const Ogre::HlmsSamplerblock* HlmsUtilsManager::getSamplerFromUnlitDatablock (co
     return 0;
 }
 
+//****************************************************************************/
+void HlmsUtilsManager::replaceTextureInPbsDatablock (const Ogre::IdString& datablockId,
+                                                     Ogre::PbsTextureTypes textureType,
+                                                     const Ogre::String& fileNameTexture)
+{
+    // Check whether there is a sampler for a given texture type
+    const Ogre::HlmsSamplerblock* sampler = getSamplerFromPbsDatablock (datablockId, textureType);
+    if (sampler)
+    {
+        Ogre::HlmsPbsDatablock* datablock = getPbsDatablock(datablockId);
+        Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+        Ogre::HlmsTextureManager* hlmsTextureManager = hlmsManager->getTextureManager();
+        HlmsPbsBuilder builder(0);
+        Ogre::HlmsTextureManager::TextureMapType textureMapType = builder.getTextureMapTypeFromPbsTextureTypes(textureType);
+        Ogre::HlmsTextureManager::TextureLocation texLocation = hlmsTextureManager->createOrRetrieveTexture(fileNameTexture, textureMapType);
+        datablock->setTexture(textureType, texLocation.xIdx, texLocation.texture);
+    }
+}

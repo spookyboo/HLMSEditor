@@ -75,6 +75,11 @@ PaintLayer* PaintLayerManager::setTextureLayerInPaintLayer (const Ogre::IdString
 //****************************************************************************/
 void PaintLayerManager::removeAndDeletePaintLayer (PaintLayer* paintLayer)
 {
+    // First check how many other paintlayers are refering to the same texture layers
+    TextureLayer* textureLayer = 0;
+    if (getNumberOfPaintLayersWithTheSameTextureType (paintLayer) < 2)
+        textureLayer = paintLayer->getTextureLayer(); // Indicating that it must be deleted
+
     PaintLayers::iterator it;
     PaintLayers::iterator itStart = mPaintLayers.begin();
     PaintLayers::iterator itEnd = mPaintLayers.end();
@@ -89,25 +94,19 @@ void PaintLayerManager::removeAndDeletePaintLayer (PaintLayer* paintLayer)
             return;
         }
     }
+
+    // Delete dangling texture layer
+    mTextureLayerManager.removeAndDeleteTextureLayer(textureLayer); // If textureLayer is 0, it will be ignored
 }
 
 //****************************************************************************/
 void PaintLayerManager::removeAndDeletePaintLayer (int externalLayerId)
 {
-    PaintLayers::iterator it;
-    PaintLayers::iterator itStart = mPaintLayers.begin();
-    PaintLayers::iterator itEnd = mPaintLayers.end();
-    PaintLayer* pl;
-    for (it = itStart; it != itEnd; ++it)
-    {
-        pl = *it;
-        if (pl->getExternaLayerlId() == externalLayerId)
-        {
-            mPaintLayers.erase(it);
-            delete pl;
-            return;
-        }
-    }
+    PaintLayer* layer = getPaintLayer(externalLayerId);
+    if (!layer)
+        return;
+
+    removeAndDeletePaintLayer(layer);
 }
 
 //****************************************************************************/
@@ -122,6 +121,34 @@ void PaintLayerManager::removeAndDeleteAllPaintLayers (void)
     mPaintLayers.clear();
 
     mTextureLayerManager.removeAndDeleteAllTextureLayers();
+}
+
+//****************************************************************************/
+unsigned short PaintLayerManager::getNumberOfPaintLayersWithTheSameTextureType (PaintLayer* paintLayer)
+{
+    if (!paintLayer || !paintLayer->getTextureLayer() || !paintLayer->getTextureLayer()->mTextureTypeDefined)
+        return 0;
+
+    Ogre::PbsTextureTypes type = paintLayer->getTextureLayer()->mTextureType;
+
+    unsigned short count = 0;
+    PaintLayers::iterator it;
+    PaintLayers::iterator itStart = mPaintLayers.begin();
+    PaintLayers::iterator itEnd = mPaintLayers.end();
+    PaintLayer* pl;
+    TextureLayer* textureLayer;
+    for (it = itStart; it != itEnd; ++it)
+    {
+        pl = *it;
+        textureLayer = pl->getTextureLayer();
+        if (textureLayer && textureLayer->mTextureTypeDefined)
+        {
+            if (textureLayer->mTextureType == type)
+            ++count;
+        }
+    }
+
+    return count;
 }
 
 //****************************************************************************/
@@ -290,4 +317,26 @@ const MeshIndexUvMapType& PaintLayerManager::getMinMaxUVFromMesh (const Ogre::Me
     }
 
     return mMeshIndexUvMapType;
+}
+
+//****************************************************************************/
+bool PaintLayerManager::texturesUsedInPaintLayers (void)
+{
+    if (mPaintLayers.size() > 0)
+    {
+        // There are paintlayers; do they use a texture?
+        foreach (PaintLayer* paintLayer, mPaintLayers)
+        {
+            if (paintLayer->getTextureLayer())
+                return true;
+        }
+    }
+
+    return false;
+}
+
+//****************************************************************************/
+const TypeAndNewTextureNames& PaintLayerManager::saveTexturesWithTimeStampToImportDir (void)
+{
+    return mTextureLayerManager.saveTexturesWithTimeStampToImportDir();
 }

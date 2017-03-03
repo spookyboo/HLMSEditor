@@ -517,7 +517,7 @@ void HlmsUnlitBuilder::repositionUnlitNode(HlmsNodeUnlitDatablock* unlitnode)
     // Reposition the unlit node (this is only done once)
     QPointF pos = unlitnode->pos();
     //pos.setX(-1.0f * unlitnode->getWidth());
-    pos.setY(pos.y() + 0.6f * unlitnode->getHeigth());
+    pos.setY(-0.5f * unlitnode->getHeigth());
     unlitnode->setPos(pos);
 }
 
@@ -544,7 +544,7 @@ void HlmsUnlitBuilder::connectNodes(HlmsNodeUnlitDatablock* unlitnode,
     // Reposition the sampler node
     QPointF pos = unlitnode->pos();
     pos.setX(pos.x() + unlitnode->getWidth() + 2 * portUnlit->pos().y());
-    pos.setY(portUnlit->pos().y());
+    pos.setY(-portUnlit->pos().y());
     samplernode->setPos(pos);
 }
 
@@ -567,8 +567,8 @@ void HlmsUnlitBuilder::connectNodes(HlmsNodeUnlitDatablock* unlitnode,
 
     // Reposition the macro node
     QPointF pos = unlitnode->pos();
-    pos.setX(pos.x() + unlitnode->getWidth() + pos.y());
-    pos.setY(pos.y() - 0.3f * unlitnode->getHeigth());
+    pos.setX(pos.x() + 2* unlitnode->getWidth());
+    pos.setY(pos.y() - 0.1f * unlitnode->getHeigth());
     macronode->setPos(pos);
 }
 
@@ -592,7 +592,7 @@ void HlmsUnlitBuilder::connectNodes(HlmsNodeUnlitDatablock* unlitnode,
     // Reposition the blend node
     QPointF pos = unlitnode->pos();
     pos.setX(pos.x() + unlitnode->getWidth() + pos.y());
-    pos.setY(pos.y() - 0.4f * unlitnode->getHeigth());
+    pos.setY(pos.y() + 0.1 * unlitnode->getHeigth());
     blendnode->setPos(pos);
 }
 
