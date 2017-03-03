@@ -2032,6 +2032,7 @@ void MainWindow::clearHlmsNamesAndRemovePaintLayers(void)
     mHlmsName = QString("");
     mCurrentDatablockName = "";
     mCurrentDatablockFullName = "";
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setCurrentDatablockName(mCurrentDatablockName);
     mPaintLayerDockWidget->newHlmsCreated(); // Needed to delete the paintlayers, because a new Hlms is created
     mRenderwindowDockWidget->clearUndoRedoStackEntry();
 }

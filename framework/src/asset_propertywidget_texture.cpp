@@ -93,12 +93,14 @@ namespace Magus
         mBaseFileNameTexture = fileInfo.fileName();
         mPathTexture = fileInfo.absolutePath();
         mTextureNameLabel->setText(mBaseFileNameTexture);
-        mTexturePixmap = QPixmap(fileNameTexture).scaled(mTextureSize.width(),
-                                                         mTextureSize.height(),
-                                                         Qt::KeepAspectRatio,
-                                                         Qt::SmoothTransformation);
+
+        QImageReader reader(fileNameTexture);
+        reader.setScaledSize(mTextureSize); // Prevents from reading to much data in memory
+        QImage image = reader.read();
+        image.scaledToHeight(mTextureSize.height(), Qt::SmoothTransformation);
+        mTexturePixmap.convertFromImage(image);
         mTextureLabel->setPixmap(mTexturePixmap);
-        mTextureLabel->setMaximumWidth(mTextureSize.width());
+        mTextureLabel->setMaximumWidth(mTextureSize.height());
         mTextureLabel->setMaximumHeight(mTextureSize.height());
     }
 
