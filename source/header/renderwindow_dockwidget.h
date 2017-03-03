@@ -65,6 +65,10 @@ class UndoRedoStack
          */
         void clearStack (void);
 
+        /* Returns the size of the stack
+         */
+        int getStackSize (void);
+
         /* Move one step back in the stack.
          * The first entry cannot be passed
          */

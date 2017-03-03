@@ -45,6 +45,12 @@ void UndoRedoStack::clearStack (void)
 }
 
 //****************************************************************************/
+int UndoRedoStack::getStackSize (void)
+{
+    return mStack.size();
+}
+
+//****************************************************************************/
 UndoRedoStack::UndoRedoStackEntry UndoRedoStack::undo (void)
 {
     // Return the first entry if the pointer is at the start
@@ -600,7 +606,7 @@ void RenderwindowDockWidget::setOffsetTextureMode(bool enabled, bool showMessage
 //****************************************************************************/
 void RenderwindowDockWidget::handleUndo(void)
 {
-    if (mTogglePaintMode)
+    if (mTogglePaintMode && mUndoRedoStack.getStackSize() > 0)
     {
         UndoRedoStack::UndoRedoStackEntry entry = mUndoRedoStack.undo();
         mParent->loadTextureGeneration (entry.textureType, entry.textureSequence);
@@ -610,7 +616,7 @@ void RenderwindowDockWidget::handleUndo(void)
 //****************************************************************************/
 void RenderwindowDockWidget::handleRedo(void)
 {
-    if (mTogglePaintMode)
+    if (mTogglePaintMode && mUndoRedoStack.getStackSize() > 0)
     {
         UndoRedoStack::UndoRedoStackEntry entry = mUndoRedoStack.redo();
         mParent->loadTextureGeneration (entry.textureType, entry.textureSequence);
