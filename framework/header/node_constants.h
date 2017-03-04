@@ -73,7 +73,7 @@ namespace Magus
     //****************************************************************************/
     // Default image values
     static const qreal NODE_IMAGE_OFFSET = 5.0f;
-    static const qreal NODE_IMAGE_FRACTION = 0.95f;
+    static const qreal NODE_IMAGE_FRACTION = 0.7f;
 
     //****************************************************************************/
     // Actions

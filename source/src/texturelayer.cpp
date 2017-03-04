@@ -49,7 +49,9 @@ TextureLayer::TextureLayer(void) :
 TextureLayer::~TextureLayer(void)
 {
     if (!mTexture.isNull())
+    {
         mTexture.setNull();
+    }
 }
 
 //****************************************************************************/

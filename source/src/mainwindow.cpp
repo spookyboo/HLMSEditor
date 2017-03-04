@@ -423,6 +423,9 @@ void MainWindow::doNewProjectAction(void)
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
     mOgreManager->setPause(true);
 
+    // Clear all painting layers
+    clearHlmsNamesAndRemovePaintLayers();
+
     // Clear the material- and texture browser
     mMaterialBrowser->clearResources();
     mTextureDockWidget->clearResources();
@@ -432,15 +435,11 @@ void MainWindow::doNewProjectAction(void)
     mNodeEditorDockWidget->clear();
     newProjectName();
 
-    // Clear all painting layers
-    mPaintLayerDockWidget->newHlmsCreated();
-
     // Set the datablock of the Item in the Ogre widget to 'default'
     // Also destroy the datablocks in memory; strictly speaking this is not required, but it cleans up a bit
     ogreWidget->setDefaultDatablockItem();
     mHlmsUtilsManager->destroyDatablocks(true); // Exclude the 'special' datablocks
 
-    clearHlmsNamesAndRemovePaintLayers();
     mOgreManager->setPause(false);
 }
 
@@ -487,6 +486,8 @@ void MainWindow::loadProject(const QString& fileName)
     QApplication::setOverrideCursor(Qt::WaitCursor);
     if (!fileName.isEmpty())
     {
+        clearHlmsNamesAndRemovePaintLayers();
+
         //QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
         QFileInfo info(fileName);
         mProjectName = info.baseName();
@@ -547,7 +548,6 @@ void MainWindow::loadProject(const QString& fileName)
                 // materials that are used in the mesh.
                 setDatablocksFromMaterialBrowserInItem();
 
-                clearHlmsNamesAndRemovePaintLayers();
                 mPropertiesDockWidget->clear();
                 mNodeEditorDockWidget->clear();
             }
@@ -571,6 +571,8 @@ void MainWindow::doOpenDatablockMenuAction(void)
 //****************************************************************************/
 void MainWindow::loadDatablockAndSet(const QString jsonFileName)
 {
+    clearHlmsNamesAndRemovePaintLayers();
+
     HlmsUtilsManager::DatablockStruct datablockStruct = mHlmsUtilsManager->loadDatablock(jsonFileName);
     if (!datablockStruct.datablock)
     {
@@ -578,7 +580,6 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
         return;
     }
 
-    clearHlmsNamesAndRemovePaintLayers();
     mHlmsName = jsonFileName;
     appendRecentHlms(jsonFileName);
     setCurrentDatablockNames (datablockStruct.datablockId, datablockStruct.datablockFullName);
@@ -609,8 +610,6 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
         mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(false);
         mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(true);
     }
-
-    mPaintLayerDockWidget->newHlmsCreated(); // Needed to delete the paintlayers, because a new Hlms is created
 }
 
 //****************************************************************************/
