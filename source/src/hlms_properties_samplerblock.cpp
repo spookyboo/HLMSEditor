@@ -737,6 +737,7 @@ void HlmsPropertiesSamplerblock::updateOffsetPropertiesExternal (HlmsNodeSampler
 }
 
 //****************************************************************************/
+/*
 void HlmsPropertiesSamplerblock::updateOffsetPropertiesExternal (const QVector2D& offset, EditorHlmsTypes type)
 {
     Magus::QtXYProperty* xyProperty;
@@ -755,3 +756,4 @@ void HlmsPropertiesSamplerblock::updateOffsetPropertiesExternal (const QVector2D
         xyProperty->setY(offset.y());
     }
 }
+*/

@@ -46,7 +46,7 @@ class HlmsPropertiesSamplerblock : public QWidget
         virtual ~HlmsPropertiesSamplerblock(void);
         void setObject (HlmsNodeSamplerblock* hlmsNodeSamplerblock);
         void updateOffsetPropertiesExternal (HlmsNodeSamplerblock* hlmsNodeSamplerblock); // mHlmsNodeSamplerblock will be updated
-        void updateOffsetPropertiesExternal (const QVector2D& offset, EditorHlmsTypes type);
+        //void updateOffsetPropertiesExternal (const QVector2D& offset, EditorHlmsTypes type);
 
         // Set properties visible/invisible
         void setTextureTypePropertyVisible (bool visible);

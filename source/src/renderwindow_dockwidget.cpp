@@ -847,7 +847,6 @@ void RenderwindowDockWidget::notifyHlmsPropertiesUnlitSamplerblockVisible(bool v
 void RenderwindowDockWidget::notifyOffsetTextureUpdated (float offsetX, float offsetY)
 {
     // The offset was changed by means of the Ogre widget, so the properties widget must be updated
-    /*
     HlmsPropertiesSamplerblock* samplerProperties = mParent->mPropertiesDockWidget->mHlmsPropertiesSamplerblock;
     if (samplerProperties)
     {
@@ -869,8 +868,8 @@ void RenderwindowDockWidget::notifyOffsetTextureUpdated (float offsetX, float of
             samplerProperties->updateOffsetPropertiesExternal(samplerBlock);
         }
     }
-    */
 
+    /*
     HlmsPropertiesSamplerblock* samplerProperties = mParent->mPropertiesDockWidget->mHlmsPropertiesSamplerblock;
     if (samplerProperties)
     {
@@ -882,4 +881,5 @@ void RenderwindowDockWidget::notifyOffsetTextureUpdated (float offsetX, float of
         else if (mCurrentUnlitDatablockBlock)
             samplerProperties->updateOffsetPropertiesExternal(offset, HLMS_UNLIT);
     }
+    */
 }

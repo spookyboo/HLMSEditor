@@ -222,9 +222,9 @@ HlmsNodePbsDatablock* NodeEditorDockWidget::doNewHlmsPbsDatablockAction(void)
     if (!mHlmsPbsDatablockNode)
     {
         mHlmsPbsDatablockNode = mHlmsPbsBuilder->createPbsNode();
+        mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
         mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(true);
-        mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
         mParent->initCurrentDatablockFileName(); // Don't destroy all other datablocks
         if (mHlmsPbsDatablockNode)
             mHlmsPbsDatablockNode->setSelected(true);
@@ -240,8 +240,8 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::doNewHlmsUnlitDatablockAction(void
     // If mHlmsPbsDatablockNode, then just return
     if (mHlmsPbsDatablockNode)
     {
-        mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
         mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(true);
+        mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
         mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
         return mHlmsUnlitDatablockNode;
     }
@@ -271,9 +271,9 @@ HlmsNodeSamplerblock* NodeEditorDockWidget::doNewSamplerblockAction(void)
 
     if (mHlmsPbsDatablockNode)
     {
+        mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
         mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(true);
-        mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
         mHlmsPbsBuilder->connectNodes(mHlmsPbsDatablockNode, sampler);
         nodeConnected(mHlmsPbsDatablockNode, sampler);
         Ogre::IdString id = mHlmsPbsDatablockNode->getName().toStdString();
@@ -334,9 +334,9 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
     // Construct a datablock and set it to the current item in the renderwindow
     if (mHlmsPbsDatablockNode)
     {
+        mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
         mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(true);
-        mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
         mCurrentDatablockName = mHlmsPbsDatablockNode->getName();
         name = mCurrentDatablockName.toStdString();
         Magus::OgreManager* ogreManager = mParent->getOgreManager();
@@ -384,6 +384,7 @@ void NodeEditorDockWidget::nodeToBeDeleted(QtNode* node)
 
     if (node->getType() == NODE_TYPE_SAMPLERBLOCK)
     {
+        mParent->mPropertiesDockWidget->setHlmsPropertiesSamplerblockVisible(false);
         setBackgroundDiffusePropertyVisibleBasedOnSamplerNodes();
         mParent->mRenderwindowDockWidget->notifyHlmsPropertiesPbsSamplerblockVisible(false, "", Ogre::PBSM_DIFFUSE); // Inform the render widget about it
         mParent->mRenderwindowDockWidget->notifyHlmsPropertiesUnlitSamplerblockVisible(false, "", 0); // Inform the render widget about it

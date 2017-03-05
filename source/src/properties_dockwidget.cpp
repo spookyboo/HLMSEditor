@@ -30,8 +30,6 @@ PropertiesDockWidget::PropertiesDockWidget(QString title, MainWindow* parent, Qt
 	mParent(parent)
 {
     mTextViewer = new QPlainTextEdit();
-    //mTextViewer->setMinimumHeight(600);
-    //mTextViewer->setMinimumWidth(800);
     mTextViewer->hide();
     mTextViewer->setReadOnly(true);
     mTextViewer->setWindowFlags(Qt::WindowStaysOnTopHint);
@@ -41,13 +39,14 @@ PropertiesDockWidget::PropertiesDockWidget(QString title, MainWindow* parent, Qt
     mTextViewer->setFont(font);
 
     mInnerMain = new QMainWindow();
-    mInnerMain->setMinimumSize(100,100);
+    mInnerMain->setMinimumSize(100, 100);
     setWidget(mInnerMain);
 
     // Perform standard functions
     createActions();
     createMenus();
     createToolBars();
+
     mHlmsPropertiesPbsDatablock = new HlmsPropertiesPbsDatablock(ICON_PBS_DATABLOCK, this, mInnerMain);
     mHlmsPropertiesUnlitDatablock = new HlmsPropertiesUnlitDatablock(ICON_UNLIT_DATABLOCK, this, mInnerMain);
     mHlmsPropertiesBlendblock = new HlmsPropertiesBlendblock(ICON_BLENDBLOCK, this, mInnerMain);
@@ -58,10 +57,17 @@ PropertiesDockWidget::PropertiesDockWidget(QString title, MainWindow* parent, Qt
     clear();
 
     // Make some space
-    //setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     QRect rec = QApplication::desktop()->screenGeometry();
     setMinimumWidth(0.2 * rec.width());
-    layout()->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    //layout()->setSizeConstraint(QLayout::SetMinAndMaxSize);
+
+    mHlmsPropertiesPbsDatablock->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mHlmsPropertiesPbsDatablock->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mHlmsPropertiesUnlitDatablock->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mHlmsPropertiesBlendblock->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mHlmsPropertiesMacroblock->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    mHlmsPropertiesSamplerblock->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
 
 //****************************************************************************/
@@ -90,53 +96,57 @@ void PropertiesDockWidget::createToolBars(void)
 //****************************************************************************/
 void PropertiesDockWidget::setHlmsPropertiesPbsDatablockVisible(bool visible)
 {
-    setVisible(true);
-    mHlmsPropertiesPbsDatablock->setVisible(visible);
-    if (visible)
-        setWidget(mHlmsPropertiesPbsDatablock);
+    setWidgetVisible (mHlmsPropertiesPbsDatablock, visible);
+    //mHlmsPropertiesPbsDatablock->setVisible(visible);
+    //if (visible)
+      //  setWidget(mHlmsPropertiesPbsDatablock);
 }
 
 //****************************************************************************/
 void PropertiesDockWidget::setHlmsPropertiesUnlitDatablockVisible(bool visible)
 {
-    setVisible(true);
-    mHlmsPropertiesUnlitDatablock->setVisible(visible);
-    if (visible)
-        setWidget(mHlmsPropertiesUnlitDatablock);
+    setWidgetVisible (mHlmsPropertiesUnlitDatablock, visible);
+    //mHlmsPropertiesUnlitDatablock->setVisible(visible);
+    //if (visible)
+      //  setWidget(mHlmsPropertiesUnlitDatablock);
 }
 
 //****************************************************************************/
 void PropertiesDockWidget::setHlmsPropertiesBlendblockVisible(bool visible)
 {
-    setVisible(true);
-    mHlmsPropertiesBlendblock->setVisible(visible);
-    if (visible)
-        setWidget(mHlmsPropertiesBlendblock);
+    setWidgetVisible (mHlmsPropertiesBlendblock, visible);
+    //mHlmsPropertiesBlendblock->setVisible(visible);
+    //if (visible)
+      //  setWidget(mHlmsPropertiesBlendblock);
 }
 
 //****************************************************************************/
 void PropertiesDockWidget::setHlmsPropertiesMacroblockVisible(bool visible)
 {
-    setVisible(true);
-    mHlmsPropertiesMacroblock->setVisible(visible);
-    if (visible)
-        setWidget(mHlmsPropertiesMacroblock);
+    setWidgetVisible (mHlmsPropertiesMacroblock, visible);
+    //mHlmsPropertiesMacroblock->setVisible(visible);
+    //if (visible)
+      //  setWidget(mHlmsPropertiesMacroblock);
 }
 
 //****************************************************************************/
 void PropertiesDockWidget::setHlmsPropertiesSamplerblockVisible(bool visible)
 {
-    setVisible(true);
-    mHlmsPropertiesSamplerblock->setVisible(visible);
-    if (visible)
-        setWidget(mHlmsPropertiesSamplerblock);
+    setWidgetVisible (mHlmsPropertiesSamplerblock, visible);
+    //mHlmsPropertiesSamplerblock->setVisible(visible);
+    //if (visible)
+      //  setWidget(mHlmsPropertiesSamplerblock);
 }
 
 //****************************************************************************/
 void PropertiesDockWidget::clear()
 {
     // Make all property windows invisible
-    setVisible(false);
+    mHlmsPropertiesPbsDatablock->setVisible(false);
+    mHlmsPropertiesUnlitDatablock->setVisible(false);
+    mHlmsPropertiesBlendblock->setVisible(false);
+    mHlmsPropertiesMacroblock->setVisible(false);
+    mHlmsPropertiesSamplerblock->setVisible(false);
 }
 
 //****************************************************************************/
@@ -188,4 +198,21 @@ void PropertiesDockWidget::displayInfo(const QString& fileName, const QString& h
 void PropertiesDockWidget::notifyHlmsChanged(QtProperty* property)
 {
     mParent->notifyHlmsChanged(property);
+}
+
+
+//****************************************************************************/
+void PropertiesDockWidget::setWidgetVisible (QWidget* widget, bool visible)
+{
+    widget->setVisible(visible);
+    if (visible)
+    {
+        QRect rec = QApplication::desktop()->screenGeometry();
+        setMaximumSize(rec.size());
+        setMinimumWidth(0.2 * rec.width());
+        setWidget(widget);
+        widget->showMaximized();
+    }
+    else
+        setMinimumSize(widget->size());
 }

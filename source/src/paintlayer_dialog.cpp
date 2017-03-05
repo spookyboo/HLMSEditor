@@ -264,16 +264,16 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
     mTranslationXProperty->setValue(0.0f);
     mTranslationXProperty->setVisible(true);
 
-    // ******** Jitter translation checkbox  ********
-    mJitterTranslationCheckboxProperty = static_cast<Magus::QtCheckBoxProperty*>
-            (assetWidget->createProperty(6, PROPERTY_JITTER_TRANSLATION_ENABLED, QString("Jitter translation"), Magus::QtProperty::CHECKBOX));
-    mJitterTranslationCheckboxProperty->setValue(false);
-
     mTranslationYProperty = static_cast<Magus::QtSliderDecimalProperty*>
             (assetWidget->createProperty(6, PROPERTY_TRANSLATION_Y, QString("Translation Y"), Magus::QtProperty::SLIDER_DECIMAL));
     mTranslationYProperty->setSliderRange (-1.0f, 1.0f, 0.01f);
     mTranslationYProperty->setValue(0.0f);
     mTranslationYProperty->setVisible(true);
+
+    // ******** Jitter translation checkbox  ********
+    mJitterTranslationCheckboxProperty = static_cast<Magus::QtCheckBoxProperty*>
+            (assetWidget->createProperty(6, PROPERTY_JITTER_TRANSLATION_ENABLED, QString("Jitter translation"), Magus::QtProperty::CHECKBOX));
+    mJitterTranslationCheckboxProperty->setValue(false);
 
     // ******** Jitter translation (min/max X, min.max Y) ********
     mJitterTranslationXMinProperty = static_cast<Magus::QtSliderDecimalProperty*>

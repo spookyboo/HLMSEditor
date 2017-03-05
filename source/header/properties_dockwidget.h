@@ -71,6 +71,9 @@ class PropertiesDockWidget : public QDockWidget
         HlmsPropertiesMacroblock* mHlmsPropertiesMacroblock;
         HlmsPropertiesSamplerblock* mHlmsPropertiesSamplerblock;
 
+    protected:
+        void setWidgetVisible (QWidget* widget, bool visible);
+
 	private slots:
 
 	private:
