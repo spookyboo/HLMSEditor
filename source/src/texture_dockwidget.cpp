@@ -100,6 +100,12 @@ const QString& TextureDockWidget::getCurrentFileName (void)
 }
 
 //****************************************************************************/
+const QPixmap* TextureDockWidget::getCurrentPixmap (void)
+{
+    return mTextureMain->getCurrentPixmap();
+}
+
+//****************************************************************************/
 void TextureDockWidget::handleTextureDoubleClicked(int toplevelId, int parentId, int resourceId, const QString& name, const QString& baseName)
 {
     emit textureDoubleClicked(name, baseName);

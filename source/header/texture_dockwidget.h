@@ -56,6 +56,7 @@ class TextureDockWidget : public QDockWidget
         void addTextureFile (const QString& fileName, const QString& group);
         void deleteTexture (const QString& fileName);
         const QString& getCurrentFileName (void);
+        const QPixmap* getCurrentPixmap (void);
 
         // Empty the texture browser
         void clearResources(void);

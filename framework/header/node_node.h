@@ -165,7 +165,10 @@ namespace Magus
             // Add an image to the node; the image is adjusted to the size of the node and position at the top
             // (under the header)
             void setImage(const QString& fileNameImage);
-            void setImage(const QPixmap& pixMap);
+            void setImage(const QPixmap& pixmap);
+
+            // Add an image to the node; copy fromt the original pixmap*
+            void copyImage(const QPixmap* pixmap);
 
             // Add an image to the node; the node is adjusted to the size of the image
             void createImage(const QString& fileNameImage, QSize size);

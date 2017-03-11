@@ -72,6 +72,12 @@ namespace Magus
     }
 
     //****************************************************************************/
+    const QPixmap* QtDefaultTextureAndText::getPixmap (void)
+    {
+        return mTextureLabel->pixmap();
+    }
+
+    //****************************************************************************/
     //****************************************************************************/
     //****************************************************************************/
     QtDefaultTextureListWidget::QtDefaultTextureListWidget(QWidget* parent) : QListWidget(parent)
@@ -204,6 +210,23 @@ namespace Magus
     //****************************************************************************/
     QtDefaultTextureWidget::~QtDefaultTextureWidget(void)
     {
+    }
+
+    //****************************************************************************/
+    const QPixmap* QtDefaultTextureWidget::getCurrentPixmap (void)
+    {
+        QListWidgetItem* item = mSelectionList->currentItem();
+        if (item)
+        {
+            QWidget* widget = mSelectionList->itemWidget(item);
+            if (widget)
+            {
+                QtDefaultTextureAndText* textureAndText = static_cast<QtDefaultTextureAndText*>(widget);
+                return textureAndText->getPixmap();
+            }
+        }
+
+        return 0;
     }
 
     //****************************************************************************/

@@ -560,7 +560,13 @@ void NodeEditorDockWidget::handleDropped (void)
         HlmsNodeSamplerblock* samplerNode = doNewSamplerblockAction();
         if (samplerNode)
         {
-            samplerNode->setFileNameTexture(fileName);
+            // Reuse the pixmap from the default texture widget if possible (which is faster)
+            // If not possible, provide the filename (results in creating a pixmap from the file)
+            const QPixmap* pixmap = mParent->mTextureDockWidget->getCurrentPixmap();
+            if (pixmap)
+                samplerNode->setFileNameTexture(fileName, pixmap);
+            else
+                samplerNode->setFileNameTexture(fileName);
             nodeSelected(samplerNode);
         }
     }

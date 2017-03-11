@@ -75,7 +75,7 @@ class HlmsNodeSamplerblock : public Magus::QtNode
         QVector2D getAnimationTranslate (void) const {return mAnimationTranslate;} // Unlit only
 
         // Setters
-        void setFileNameTexture(const QString fileNameTexture);
+        void setFileNameTexture(const QString fileNameTexture, const QPixmap* pixmap = 0);
         void setBaseNameTexture(const QString baseNameTexture) {mBaseNameTexture = baseNameTexture;}
         void setPathTexture(const QString pathTexture) {mPathTexture = pathTexture;}
         void setTextureType(unsigned int textureType) {mTextureType = textureType;}

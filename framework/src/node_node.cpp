@@ -688,9 +688,17 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QtNode::setImage(const QPixmap& pixMap)
+    void QtNode::copyImage(const QPixmap* pixmap)
     {
-        mImage = pixMap;
+        QPixmap p = pixmap->copy(0, 0, pixmap->width(), pixmap->height());
+        mImage = p;
+        setImage(mImage);
+    }
+
+    //****************************************************************************/
+    void QtNode::setImage(const QPixmap& pixmap)
+    {
+        mImage = pixmap;
         mPixmapItem->setPixmap(mImage);
 
         if (mAutoSize)

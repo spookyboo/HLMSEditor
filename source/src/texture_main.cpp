@@ -120,7 +120,7 @@ void TextureMain::createDockWindows(void)
 //****************************************************************************/
 void TextureMain::addTextureFile (const QString& fileName)
 {
-    mTextureTreeDockWidget->addTextureFile(fileName);
+    mTextureTreeDockWidget->addTextureFile(fileName, TOOL_SOURCES_LEVEL_X000_TEXTURE);
     mTextureThumbsDockWidget->addTextureFile(fileName);
 }
 
@@ -288,6 +288,12 @@ QMessageBox::StandardButton TextureMain::fileDoesNotExistsWarning(const QString&
 const QString& TextureMain::getCurrentFileName (void)
 {
     return mTextureTreeDockWidget->getCurrentFileName();
+}
+
+//****************************************************************************/
+const QPixmap* TextureMain::getCurrentPixmap (void)
+{
+    return mTextureThumbsDockWidget->getCurrentPixmap();
 }
 
 //****************************************************************************/

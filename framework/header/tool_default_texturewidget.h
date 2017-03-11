@@ -54,6 +54,9 @@ namespace Magus
                              QWidget* parent = 0);
             virtual ~QtDefaultTextureAndText(void);
 
+            // Returns the pixmap
+            const QPixmap* getPixmap (void);
+
         private:
             QLabel* mTextureLabel;
             QLineEdit* mBaseNameEdit;
@@ -160,6 +163,9 @@ namespace Magus
 
             // Checks for a duplicate; added for HLMS Editor
             bool isTextureExisting(const QString& name);
+
+            // Gets the currently selected pixmap
+            const QPixmap* getCurrentPixmap (void);
 
         signals:
             // Emitted when the mouse is pressed

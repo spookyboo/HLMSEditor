@@ -155,6 +155,13 @@ const QString& TextureThumbsDockWidget::getCurrentFileName (void)
 {
     return mTextureWidget->getNameTexture();
 }
+
+//****************************************************************************/
+const QPixmap* TextureThumbsDockWidget::getCurrentPixmap (void)
+{
+    return mTextureWidget->getCurrentPixmap();
+}
+
 //****************************************************************************/
 void TextureThumbsDockWidget::handleAssetDeleted(const QString& name, const QString& baseName)
 {

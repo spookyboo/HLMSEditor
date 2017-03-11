@@ -95,10 +95,13 @@ HlmsNodeSamplerblock::~HlmsNodeSamplerblock(void)
 }
 
 //****************************************************************************/
-void HlmsNodeSamplerblock::setFileNameTexture(const QString fileNameTexture)
+void HlmsNodeSamplerblock::setFileNameTexture(const QString fileNameTexture, const QPixmap* pixmap)
 {
     mFileNameTexture = fileNameTexture;
-    setImage(fileNameTexture);
+    if (pixmap)
+        copyImage(pixmap);
+    else
+        setImage(fileNameTexture);
 }
 
 //****************************************************************************/

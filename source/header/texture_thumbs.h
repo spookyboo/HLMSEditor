@@ -74,6 +74,9 @@ class TextureThumbsDockWidget : public QDockWidget
         // Return the full qualified filename of the currently selected thumb
         const QString& getCurrentFileName (void);
 
+        // Return the pixmap of the selected thumb
+        const QPixmap* getCurrentPixmap (void);
+
         // Clear all content in the underlying widgets
         void clearContent(void);
 
