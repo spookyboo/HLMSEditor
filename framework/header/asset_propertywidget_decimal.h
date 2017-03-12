@@ -52,6 +52,7 @@ namespace Magus
         private:
             QLineEdit* mDecimal;
             int mPrecision;
+            QRegExp mRegularExpression;
     };
 }
 

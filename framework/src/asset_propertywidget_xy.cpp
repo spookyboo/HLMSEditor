@@ -45,8 +45,8 @@ namespace Magus
         mYlabel = new QLabel(QString("Y"));
         mXEdit = new QLineEdit;
         mYEdit = new QLineEdit;
-        QRegExp regularExpression("[+-]?([0-9]+\\.([0-9]+)?|\\.[0-9]+)([eE][+-]?[0-9]+)?"); // floating point
-        QRegExpValidator* validator = new QRegExpValidator(regularExpression);
+        mRegularExpression = QRegExp("[+-]?([0-9]+\\.([0-9]+)?|\\.[0-9]+)([eE][+-]?[0-9]+)?"); // floating point
+        QRegExpValidator* validator = new QRegExpValidator(mRegularExpression);
         mXEdit->setValidator(validator);
         mYEdit->setValidator(validator);
         //setXY(x, y);

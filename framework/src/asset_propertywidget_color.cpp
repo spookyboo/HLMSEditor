@@ -51,10 +51,10 @@ namespace Magus
         mColorFill = new QLabel;
         mColorFill->setAutoFillBackground(true);
         updateColorFill();
-        QRegExp regularExpression1("^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$"); // unsigned integer [0..255]
-        QRegExp regularExpression2("^[0-9-a-fA-F]{0,6}$"); // max 6 characters
-        QRegExpValidator* validator1 = new QRegExpValidator(regularExpression1);
-        QRegExpValidator* validator2 = new QRegExpValidator(regularExpression2);
+        mRegularExpression1 = QRegExp("^([01]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$"); // unsigned integer [0..255]
+        mRegularExpression2 = QRegExp ("^[0-9-a-fA-F]{0,6}$"); // max 6 characters
+        QRegExpValidator* validator1 = new QRegExpValidator(mRegularExpression1);
+        QRegExpValidator* validator2 = new QRegExpValidator(mRegularExpression2);
         mR->setValidator(validator1);
         mG->setValidator(validator1);
         mB->setValidator(validator1);

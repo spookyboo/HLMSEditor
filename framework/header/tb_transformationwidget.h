@@ -80,6 +80,7 @@ namespace Magus
             Transformation mTransformation;
             bool selectionChanged;
             unsigned int mPrecision;
+            QRegExp mRegularExpression;
             unsigned int getLeftStringIndex(const QString& s);
     };
 }

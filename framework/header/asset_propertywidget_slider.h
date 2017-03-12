@@ -55,6 +55,7 @@ namespace Magus
         private:
             QSlider* mSlider;
             QLineEdit* mEdit;
+            QRegExp mRegularExpression;
     };
 }
 

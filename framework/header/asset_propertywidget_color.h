@@ -70,6 +70,8 @@ namespace Magus
             QPushButton* mDialogButton;
             QLabel* mColorFill;
             QLabel* mLabelA;
+            QRegExp mRegularExpression1;
+            QRegExp mRegularExpression2;
             void updateColorFill (void);
     };
 }

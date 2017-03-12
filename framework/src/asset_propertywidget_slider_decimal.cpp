@@ -42,8 +42,8 @@ namespace Magus
         mTitle = new QLabel(title);
         mSlider = new QSlider;
         mEdit = new QLineEdit;
-        QRegExp regularExpression("[+-]?([0-9]+\\.([0-9]+)?|\\.[0-9]+)([eE][+-]?[0-9]+)?"); // floating point
-        QRegExpValidator* validator = new QRegExpValidator(regularExpression);
+        mRegularExpression = QRegExp("[+-]?([0-9]+\\.([0-9]+)?|\\.[0-9]+)([eE][+-]?[0-9]+)?"); // floating point
+        QRegExpValidator* validator = new QRegExpValidator(mRegularExpression);
         mEdit->setValidator(validator);
         mSlider->setOrientation(Qt::Horizontal);
         connect(mSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(void)));

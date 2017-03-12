@@ -64,6 +64,7 @@ namespace Magus
             QLabel* mXlabel;
             QLabel* mYlabel;
             int mPrecision;
+            QRegExp mRegularExpression;
     };
 }
 

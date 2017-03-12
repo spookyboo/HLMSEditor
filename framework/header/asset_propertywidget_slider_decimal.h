@@ -69,6 +69,7 @@ namespace Magus
             int mMaxRange;
             float mStep;
             int mPrecision;
+            QRegExp mRegularExpression;
     };
 }
 

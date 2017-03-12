@@ -56,8 +56,8 @@ namespace Magus
         xLabel->setMaximumWidth(24);
         xLabel->setAutoFillBackground(true);
         xLabel->setStyleSheet("QLabel {background-color : rgb(255, 0, 0); margin-left: 0px; margin-right: 0px; spacing: 0px;}");
-        QRegExp regularExpression("[+-]?([0-9]+\\.([0-9]+)?|\\.[0-9]+)([eE][+-]?[0-9]+)?"); // floating point
-        QRegExpValidator* validator = new QRegExpValidator(regularExpression);
+        mRegularExpression = QRegExp("[+-]?([0-9]+\\.([0-9]+)?|\\.[0-9]+)([eE][+-]?[0-9]+)?"); // floating point
+        QRegExpValidator* validator = new QRegExpValidator(mRegularExpression);
         mXedit = new QLineEdit;
         mXedit->setValidator(validator);
         s = QVariant(mPosition.x()).toString();

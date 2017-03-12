@@ -36,8 +36,8 @@ namespace Magus
         mainLayout->setContentsMargins(5, 0, 5, 0);
         QLabel* label = new QLabel(title);
         mDecimal = new QLineEdit;
-        QRegExp regularExpression("[+-]?([0-9]+\\.([0-9]+)?|\\.[0-9]+)([eE][+-]?[0-9]+)?"); // floating point
-        QRegExpValidator* validator = new QRegExpValidator(regularExpression);
+        mRegularExpression = QRegExp("[+-]?([0-9]+\\.([0-9]+)?|\\.[0-9]+)([eE][+-]?[0-9]+)?"); // floating point
+        QRegExpValidator* validator = new QRegExpValidator(mRegularExpression);
         mDecimal->setValidator(validator);
         connect(mDecimal, SIGNAL(textEdited(QString)), this, SLOT(propertyValueChanged(void)));
 

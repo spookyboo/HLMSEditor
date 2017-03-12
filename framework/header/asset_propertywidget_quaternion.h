@@ -65,6 +65,7 @@ namespace Magus
             QLineEdit* mYEdit;
             QLineEdit* mZEdit;
             int mPrecision;
+            QRegExp mRegularExpression;
     };
 }
 
