@@ -1201,3 +1201,36 @@ Ogre::HlmsTextureManager::TextureMapType HlmsPbsBuilder::getTextureMapTypeFromSa
     }
     return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
 }
+
+//****************************************************************************/
+bool HlmsPbsBuilder::isDetailMapOrDetailNormalMap (Ogre::PbsTextureTypes textureType)
+{
+    switch (textureType)
+    {
+        case Ogre::PBSM_DETAIL0:
+            return true;
+        break;
+        case Ogre::PBSM_DETAIL1:
+            return true;
+        break;
+        case Ogre::PBSM_DETAIL2:
+            return true;
+        break;
+        case Ogre::PBSM_DETAIL3:
+            return true;
+        break;
+        case Ogre::PBSM_DETAIL0_NM:
+            return true;
+        break;
+        case Ogre::PBSM_DETAIL1_NM:
+            return true;
+        break;
+        case Ogre::PBSM_DETAIL2_NM:
+            return true;
+        break;
+        case Ogre::PBSM_DETAIL3_NM:
+            return true;
+        break;
+    }
+    return false;
+}

@@ -92,6 +92,9 @@ class HlmsPbsBuilder : public HlmsBuilder
         // Returns the TextureMapType for a given Pbs textureType
         Ogre::HlmsTextureManager::TextureMapType getTextureMapTypeFromPbsTextureTypes(Ogre::PbsTextureTypes textureType);
 
+        // Returns the TextureMapType for a given Pbs textureType
+        bool isDetailMapOrDetailNormalMap (Ogre::PbsTextureTypes textureType);
+
     private:
         Magus::QtNodeEditor* mNodeEditor;
         Ogre::String mTempOgreString;

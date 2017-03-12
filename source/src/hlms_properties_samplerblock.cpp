@@ -334,9 +334,17 @@ void HlmsPropertiesSamplerblock::setTextureTypePropertyVisible (bool visible)
 void HlmsPropertiesSamplerblock::setDetailMapWOSPropertiesVisible (bool visible)
 {
     // Enable specific detail map properties, except for blend properties
+
+    // Even if 'visible' is set to true, it is only allowed when it is a Pbs detail map or detail normal map
+    if (visible && mHlmsNodeSamplerblock && !isDetailMapOrDetailNormalMap(mHlmsNodeSamplerblock->getTextureType()))
+        visible = false;
+
     Magus::QtSliderDecimalProperty* sliderDecimalProperty;
     sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_MAP_WEIGTH));
     sliderDecimalProperty->setVisible(visible);
+
+    Magus::QtXYProperty* xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_SCALE));
+    xyProperty->setVisible(visible);
 
     sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_OFFSET_U));
     sliderDecimalProperty->setVisible(visible);
@@ -357,9 +365,6 @@ void HlmsPropertiesSamplerblock::setDetailMapAnimationPropertiesVisible (bool vi
     // If not checked, keep the other properties invisible
     if (!checkBoxProperty->getValue())
     {
-        // PROPERTY_SAMPLERBLOCK_SCALE and PROPERTY_SAMPLERBLOCK_ANIM_SCALE are mutual exclusive
-        xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_SCALE));
-        xyProperty->setVisible(true);
         xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_SCALE));
         xyProperty->setVisible(false);
         quaternionProperty = static_cast<Magus::QtQuaternionProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ROTATE));
@@ -371,9 +376,6 @@ void HlmsPropertiesSamplerblock::setDetailMapAnimationPropertiesVisible (bool vi
     }
     else
     {
-        // PROPERTY_SAMPLERBLOCK_SCALE and PROPERTY_SAMPLERBLOCK_ANIM_SCALE are mutual exclusive
-        xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_SCALE));
-        xyProperty->setVisible(!visible);
         xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_SCALE));
         xyProperty->setVisible(visible);
         quaternionProperty = static_cast<Magus::QtQuaternionProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_ROTATE));
@@ -549,6 +551,7 @@ void HlmsPropertiesSamplerblock::propertyValueChanged(QtProperty* property)
         {
             selectProperty = static_cast<Magus::QtSelectProperty*>(property);
             mHlmsNodeSamplerblock->setTextureType(selectProperty->getCurrentIndex());
+            setDetailMapWOSPropertiesVisible(true); // It is a Pbs, because the texture type is changed
         }
         break;
 
@@ -689,6 +692,8 @@ void HlmsPropertiesSamplerblock::propertyValueChanged(QtProperty* property)
         {
             checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(property);
             mHlmsNodeSamplerblock->setAnimationEnabled(checkboxProperty->getValue());
+            setDetailMapAnimationPropertiesVisible (checkboxProperty->getValue());
+            /*
             xyProperty = static_cast<Magus::QtXYProperty*>(mAssetWidget->getPropertyWidget(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS, PROPERTY_SAMPLERBLOCK_ANIM_SCALE));
             xyProperty->setVisible(checkboxProperty->getValue());
             quaternionProperty = static_cast<Magus::QtQuaternionProperty*>(mAssetWidget->getPropertyWidget(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS, PROPERTY_SAMPLERBLOCK_ANIM_ROTATE));
@@ -699,6 +704,7 @@ void HlmsPropertiesSamplerblock::propertyValueChanged(QtProperty* property)
             sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
                                                                                                                  PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE_V));
             sliderDecimalProperty->setVisible(checkboxProperty->getValue());
+            */
         }
         break;
 
@@ -782,3 +788,11 @@ void HlmsPropertiesSamplerblock::updateOffsetPropertiesExternal (HlmsNodeSampler
         sliderDecimalProperty->setValueWithoutEmission(v2.y());
     }
 }
+
+//****************************************************************************/
+bool HlmsPropertiesSamplerblock::isDetailMapOrDetailNormalMap (unsigned int textureTypeIndex)
+{
+    // Must be [5..12]
+    return (textureTypeIndex > 4 && textureTypeIndex < 13);
+}
+

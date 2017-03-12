@@ -53,6 +53,9 @@ class HlmsPropertiesSamplerblock : public QWidget
         void setDetailMapAnimationPropertiesVisible (bool visible);
         HlmsNodeSamplerblock* getHlmsNodeSamplerblock (void) {return mHlmsNodeSamplerblock;}
 
+    protected:
+        bool isDetailMapOrDetailNormalMap (unsigned int textureTypeIndex); // Determine whether a texture type index is a detail (normal) map
+
     private slots:
         void propertyValueChanged(QtProperty* property);
         void infoClicked(void);
