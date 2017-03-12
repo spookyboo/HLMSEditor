@@ -192,8 +192,8 @@ class RenderwindowDockWidget : public QDockWidget
         QMenu* mSkyBoxSubMenu;
         QActionGroup* mActionGroupSkyBox;
         UndoRedoStack mUndoRedoStack;
-        Ogre::HlmsPbsDatablock* mCurrentPbsDatablockBlock;
-        Ogre::HlmsUnlitDatablock* mCurrentUnlitDatablockBlock;
+        Ogre::IdString mCurrentPbsDatablockBlock; // Use the IdString instead of a pointer, because the pointer may change
+        Ogre::IdString mCurrentUnlitDatablockBlock; // Use the IdString instead of a pointer, because the pointer may change
         Ogre::PbsTextureTypes mCurrentPbsTextureType;
         Ogre::uint8 mCurrentUnlitTextureType;
 };

@@ -25,9 +25,6 @@ V 1.0 updates:
 
 V 1.0 Bugs:
 ==========
-- Select and apply Pbs material to mesh. Select detail normal map and move the texture (texture offset). 
-  Change the offset settings by means of the property editor (or do another action on the property editor) and move the texture
-  again with the mouse -> crash (no log message). Is this a bug in Qt?
 - Load a Pbs material, paint on the diffuse texture, save the material (updated texture is also save). Then create a new paintlayer
   an paint again on the texture layer. Painting is still done (see textures in the /temp directory). The TextureLayer::blitTexture
   doesn't work anymore. When loading the material from file again, the texture is updated (but still not possible to paint).

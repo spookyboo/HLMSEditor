@@ -116,12 +116,12 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     mPaintUndoOnIcon(0),
     mPaintRedoOffIcon(0),
     mPaintRedoOnIcon(0),
-    mCurrentPbsDatablockBlock(0),
-    mCurrentUnlitDatablockBlock(0),
     mCurrentPbsTextureType (Ogre::PBSM_DIFFUSE),
     mCurrentUnlitTextureType(0)
 {
-    // Create a context menu
+    mCurrentPbsDatablockBlock = "";
+    mCurrentUnlitDatablockBlock = "";
+
     installEventFilter(this);
     setContextMenuPolicy(Qt::CustomContextMenu);
     mContextMenu = new QMenu(this);
@@ -570,7 +570,7 @@ void RenderwindowDockWidget::handleToggleOffsetTexture(void)
 //****************************************************************************/
 void RenderwindowDockWidget::setOffsetTextureMode(bool enabled, bool showMessage)
 {
-    if (mCurrentPbsDatablockBlock || mCurrentUnlitDatablockBlock)
+    if (mCurrentPbsDatablockBlock != "" || mCurrentUnlitDatablockBlock != "")
     {
         mToggleOffsetTexture = enabled;
         if (enabled)
@@ -591,7 +591,7 @@ void RenderwindowDockWidget::setOffsetTextureMode(bool enabled, bool showMessage
             // Deactivate the 'offset texture' function
             QApplication::restoreOverrideCursor();
             mButtonOffsetTexture->setIcon(*mOffsetTextureOffIcon);
-            mOgreWidget->setOffsetTextureMode(false);
+            mOgreWidget->setOffsetTextureMode(false, "", "");
         }
     }
     else
@@ -806,16 +806,15 @@ void RenderwindowDockWidget::notifyHlmsPropertiesPbsSamplerblockVisible(bool vis
                     textureType == Ogre::PBSM_DETAIL3_NM))
     {
         // It is allowed to set the icon to 'on' (it can only be set to 'on' if the user clicks on it)
-        HlmsUtilsManager* hlmsUtilManager = mParent->getHlmsUtilsManager(); // Use the HlmsUtilsManager of the mainwindow
-        mCurrentPbsDatablockBlock = hlmsUtilManager->getPbsDatablock(datablockId);
+        mCurrentPbsDatablockBlock = datablockId;
         mCurrentPbsTextureType = textureType;
     }
     else
     {
         // Deactivate moving texture
         mButtonOffsetTexture->setIcon(*mOffsetTextureOffIcon);
-        mOgreWidget->setOffsetTextureMode(false);
-        mCurrentPbsDatablockBlock = 0;
+        mOgreWidget->setOffsetTextureMode(false, "", "");
+        mCurrentPbsDatablockBlock = "";
         mCurrentPbsTextureType = Ogre::PBSM_DIFFUSE;
         mToggleOffsetTexture = false;
     }
@@ -829,16 +828,15 @@ void RenderwindowDockWidget::notifyHlmsPropertiesUnlitSamplerblockVisible(bool v
     if (visible)
     {
         // It is allowed to set the icon to 'on' (it can only be set to 'on' if the user clicks on it)
-        HlmsUtilsManager* hlmsUtilManager = mParent->getHlmsUtilsManager(); // Use the HlmsUtilsManager of the mainwindow
-        mCurrentUnlitDatablockBlock = hlmsUtilManager->getUnlitDatablock(datablockId);
+        mCurrentUnlitDatablockBlock = datablockId;
         mCurrentUnlitTextureType = textureType;
     }
     else
     {
         // Deactivate moving texture
         mButtonOffsetTexture->setIcon(*mOffsetTextureOffIcon);
-        mOgreWidget->setOffsetTextureMode(false);
-        mCurrentUnlitDatablockBlock = 0;
+        mOgreWidget->setOffsetTextureMode(false, "", "");
+        mCurrentUnlitDatablockBlock = "";
         mCurrentUnlitTextureType = 0;
     }
 }
@@ -856,11 +854,11 @@ void RenderwindowDockWidget::notifyOffsetTextureUpdated (float offsetX, float of
             QVector2D v2;
             v2.setX(offsetX);
             v2.setY(offsetY);
-            if (mCurrentPbsDatablockBlock)
+            if (mCurrentPbsDatablockBlock != "")
             {
                 samplerBlock->setOffset(v2);
             }
-            else if (mCurrentUnlitDatablockBlock)
+            else if (mCurrentUnlitDatablockBlock != "")
             {
                 samplerBlock->setAnimationTranslate(v2);
                 samplerBlock->setAnimationEnabled(true);

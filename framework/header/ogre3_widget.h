@@ -106,8 +106,8 @@ namespace Magus
             // Determines whether moving tetures (displacement) mode is on or off
             // Either pbsDatablockBlockOffsetTexture is set or unlitDatablockBlockOffsetTexture is set in case enabled is true
             void setOffsetTextureMode(bool enabled,
-                                      Ogre::HlmsPbsDatablock* pbsDatablockBlockOffsetTexture = 0,
-                                      Ogre::HlmsUnlitDatablock* unlitDatablockBlockOffsetTexture = 0,
+                                      const Ogre::IdString& pbsDatablockBlockOffsetTexture,
+                                      const Ogre::IdString& unlitDatablockBlockOffsetTexture,
                                       Ogre::PbsTextureTypes pbsTextureTypeOffsetTexture = Ogre::PBSM_DIFFUSE,
                                       Ogre::uint8 unlitTextureTypeOffsetTexture = 0);
 
@@ -183,8 +183,8 @@ namespace Magus
             QVector<int> helperIndices;
             RenderwindowDockWidget* mRenderwindowDockWidget;
             Ogre::Vector2 helperVector2;
-            Ogre::HlmsPbsDatablock* mPbsDatablockBlockOffsetTexture;
-            Ogre::HlmsUnlitDatablock* mUnlitDatablockBlockOffsetTexture;
+            Ogre::IdString mPbsDatablockBlockOffsetTexture; // Use the IdString instead of a pointer, because the pointer may change
+            Ogre::IdString mUnlitDatablockBlockOffsetTexture; // Use the IdString instead of a pointer, because the pointer may change
             Ogre::PbsTextureTypes mPbsTextureTypeOffsetTexture;
             Ogre::uint8 mUnlitTextureTypeOffsetTexture;
 
@@ -260,7 +260,7 @@ namespace Magus
 
             /* Determine the index of a detail map
              */
-            unsigned int getDetailMapIndexFromTextureTypeForScaleAndOffset (Ogre::PbsTextureTypes textureType);
+            Ogre::uint8 getDetailMapIndexFromTextureTypeForScaleAndOffset (Ogre::PbsTextureTypes textureType);
     };
 }
 

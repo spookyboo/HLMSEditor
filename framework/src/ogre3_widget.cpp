@@ -78,10 +78,10 @@ namespace Magus
         mOffsetTextureMode(false),
         mPaintLayers(0),
         mLatestPaintResult(1),
-        mPbsDatablockBlockOffsetTexture(0),
-        mUnlitDatablockBlockOffsetTexture(0),
         mUnlitTextureTypeOffsetTexture(0)
     {
+        mPbsDatablockBlockOffsetTexture = "";
+        mUnlitDatablockBlockOffsetTexture = "";
         mPbsTextureTypeOffsetTexture = Ogre::PBSM_DIFFUSE;
         mRenderTextureNameHoover = "RenderTargetHlmsEditorTextureHoover";
         mRenderTextureNamePaint = "RenderTargetHlmsEditorTexturePaint";
@@ -1066,8 +1066,8 @@ namespace Magus
 
     //****************************************************************************/
     void QOgreWidget::setOffsetTextureMode(bool enabled,
-                                         Ogre::HlmsPbsDatablock* pbsDatablockBlockOffsetTexture,
-                                         Ogre::HlmsUnlitDatablock* unlitDatablockBlockOffsetTexture,
+                                         const Ogre::IdString& pbsDatablockBlockOffsetTexture,
+                                         const Ogre::IdString& unlitDatablockBlockOffsetTexture,
                                          Ogre::PbsTextureTypes pbsTextureTypeOffsetTexture,
                                          Ogre::uint8 unlitTextureTypeOffsetTexture)
     {
@@ -1598,31 +1598,36 @@ namespace Magus
         Ogre::Vector2 oldPos = mAbsolute;
         mAbsolute = Ogre::Vector2(mouseX, mouseY);
         mRelative = mAbsolute - oldPos;
-        if (mPbsDatablockBlockOffsetTexture)
+        Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+        if (mPbsDatablockBlockOffsetTexture != "")
         {
-            unsigned int index = getDetailMapIndexFromTextureTypeForScaleAndOffset(mPbsTextureTypeOffsetTexture);
+            Ogre::uint8 index = getDetailMapIndexFromTextureTypeForScaleAndOffset(mPbsTextureTypeOffsetTexture);
             if (index < 999)
             {
-                Ogre::Vector4 v4 = mPbsDatablockBlockOffsetTexture->getDetailMapOffsetScale(index);
+                Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
+                Ogre::HlmsPbsDatablock* pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmsPbs->getDatablock(mPbsDatablockBlockOffsetTexture));
+                Ogre::Vector4 v4 = pbsDatablock->getDetailMapOffsetScale(index);
                 v4.x += mRelative.x / (float)width();
                 v4.x = saturate(v4.x);
                 v4.y += mRelative.y / (float)height();
                 v4.y = saturate(v4.y);
-                mPbsDatablockBlockOffsetTexture->setDetailMapOffsetScale((Ogre::uint8)index, v4);
+                pbsDatablock->setDetailMapOffsetScale(index, v4);
                 mRenderwindowDockWidget->notifyOffsetTextureUpdated(v4.x, v4.y);
             }
         }
-        else if (mUnlitDatablockBlockOffsetTexture)
+        else if (mUnlitDatablockBlockOffsetTexture != "")
         {
-            Ogre::Matrix4 m4 = mUnlitDatablockBlockOffsetTexture->getAnimationMatrix(mUnlitTextureTypeOffsetTexture);
+            Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT) );
+            Ogre::HlmsUnlitDatablock* unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(hlmsUnlit->getDatablock(mUnlitDatablockBlockOffsetTexture));
+            Ogre::Matrix4 m4 = unlitDatablock->getAnimationMatrix(mUnlitTextureTypeOffsetTexture);
             Ogre::Vector3 v3 = m4.getTrans();
             v3.x += mRelative.x / (float)width();
             v3.x = saturate (v3.x);
             v3.y += mRelative.y / (float)height();
             v3.y = saturate (v3.y);
             m4.setTrans(v3);
-            mUnlitDatablockBlockOffsetTexture->setAnimationMatrix(mUnlitTextureTypeOffsetTexture, m4);
-            mUnlitDatablockBlockOffsetTexture->setEnableAnimationMatrix(mUnlitTextureTypeOffsetTexture, true);
+            unlitDatablock->setAnimationMatrix(mUnlitTextureTypeOffsetTexture, m4);
+            unlitDatablock->setEnableAnimationMatrix(mUnlitTextureTypeOffsetTexture, true);
             mRenderwindowDockWidget->notifyOffsetTextureUpdated(v3.x, v3.y);
         }
     }
@@ -1635,7 +1640,7 @@ namespace Magus
     }
 
     //****************************************************************************/
-    unsigned int QOgreWidget::getDetailMapIndexFromTextureTypeForScaleAndOffset (Ogre::PbsTextureTypes textureType)
+    Ogre::uint8 QOgreWidget::getDetailMapIndexFromTextureTypeForScaleAndOffset (Ogre::PbsTextureTypes textureType)
     {
         switch (textureType)
         {
