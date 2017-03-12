@@ -45,10 +45,15 @@ namespace Magus
             virtual ~QtSliderDecimalProperty(void) {}
             void setSliderRange (float min, float max, float step);
             void setValue (float value);
+            void setValueWithoutEmission (float value); // Is needed, to prevent overfloading of events, which cause the application to crash
             float getValue (void) const;
             void setTitle(const QString title);
             void setPrecision(int precision);
             int getPrecision(void);
+
+        protected:
+            void editValueChangedWithoutEmission(void);
+            void sliderValueChangedWithoutEmission(void);
 
         private slots:
             void editValueChanged(void);

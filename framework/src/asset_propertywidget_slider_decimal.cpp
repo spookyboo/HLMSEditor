@@ -72,6 +72,21 @@ namespace Magus
     }
 
     //****************************************************************************/
+    void QtSliderDecimalProperty::setValueWithoutEmission (float value)
+    {
+        // Convert to range
+        int intValue = (int)(value/mStep);
+        disconnect(mSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(void)));
+        mSlider->setValue(intValue);
+        connect(mSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(void)));
+        QString s = QString::number(value, 'f', mPrecision);
+        disconnect(mEdit, SIGNAL(textChanged(QString)), this, SLOT(editValueChanged(void)));
+        mEdit->setText(s);
+        connect(mEdit, SIGNAL(textChanged(QString)), this, SLOT(editValueChanged(void)));
+        editValueChangedWithoutEmission();
+    }
+
+    //****************************************************************************/
     void QtSliderDecimalProperty::setValue (float value)
     {
         // Convert to range
@@ -90,22 +105,38 @@ namespace Magus
     //****************************************************************************/
     void QtSliderDecimalProperty::editValueChanged(void)
     {
+        editValueChangedWithoutEmission();
+        emit valueChanged(this);
+    }
+
+    //****************************************************************************/
+    void QtSliderDecimalProperty::editValueChangedWithoutEmission(void)
+    {
         // Synchronize editbox and slider
         float value = QVariant(mEdit->text()).toFloat();
         int intValue = (int)(value/mStep);
+        disconnect(mSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(void)));
         mSlider->setValue(intValue);
-        emit valueChanged(this);
+        connect(mSlider, SIGNAL(valueChanged(int)), this, SLOT(sliderValueChanged(void)));
     }
 
     //****************************************************************************/
     void QtSliderDecimalProperty::sliderValueChanged(void)
     {
+        sliderValueChangedWithoutEmission();
+        emit valueChanged(this);
+    }
+
+    //****************************************************************************/
+    void QtSliderDecimalProperty::sliderValueChangedWithoutEmission(void)
+    {
         // Synchronize editbox and slider
         int intValue = QVariant(mSlider->value()).toInt();
         float value = intValue * mStep;
         QString s = QString::number(value, 'f', mPrecision);
+        disconnect(mEdit, SIGNAL(textChanged(QString)), this, SLOT(editValueChanged(void)));
         mEdit->setText(s);
-        emit valueChanged(this);
+        connect(mEdit, SIGNAL(textChanged(QString)), this, SLOT(editValueChanged(void)));
     }
 
     //****************************************************************************/

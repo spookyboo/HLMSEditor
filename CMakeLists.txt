@@ -86,11 +86,13 @@ set (HEADER_FILES
     framework/header/asset_propertywidget_quaternion.h
     framework/header/asset_propertywidget_select.h
     framework/header/asset_propertywidget_slider.h
+    framework/header/asset_propertywidget_slider_decimal.h
     framework/header/asset_propertywidget_string.h
     framework/header/asset_propertywidget_texture.h
     framework/header/asset_propertywidget_xy.h
     framework/header/asset_propertywidget_xyz.h
     framework/header/magus_core.h
+    framework/header/magus_treewidget.h
     framework/header/node_compound.h
     framework/header/node_connection.h
     framework/header/node_constants.h
@@ -98,55 +100,60 @@ set (HEADER_FILES
     framework/header/node_node.h
     framework/header/node_port.h
     framework/header/node_porttype.h
+    framework/header/node_scene.h
+    framework/header/node_view.h
     framework/header/ogre3_cameraman.h
     framework/header/ogre3_renderman.h
     framework/header/ogre3_widget.h
     framework/header/ogre_prereqs.h
-    framework/header/node_view.h
     framework/header/tb_transformationwidget.h
-    framework/header/magus_treewidget.h
-    framework/header/node_scene.h
     framework/header/tool_default_texturewidget.h
     framework/header/tool_resourcetree_widget.h
-    framework/header/asset_propertywidget_slider_decimal.h
-    source/header/mainwindow.h
-    source/header/renderwindow_dockwidget.h
-    source/header/properties_dockwidget.h
-    source/header/nodeeditor_dockwidget.h
+    source/header/brush_dockwidget.h
+    source/header/brush_widget.h
+    source/header/central_dockwidget.h
+    source/header/config_dialog.h
+    source/header/config_pages.h
+    source/header/constants.h
+    source/header/hlms_builder.h
+    source/header/hlms_editor_plugin.h
+    source/header/hlms_editor_plugin_action.h
+    source/header/hlms_node_blenddblock.h
+    source/header/hlms_node_macroblock.h
     source/header/hlms_node_pbs_datablock.h
     source/header/hlms_node_porttypes.h
-    source/header/constants.h
     source/header/hlms_node_samplerblock.h
-    source/header/hlms_node_macroblock.h
-    source/header/hlms_node_blenddblock.h
+    source/header/hlms_node_unlit_datablock.h
+    source/header/hlms_pbs_builder.h
     source/header/hlms_properties_blenddblock.h
     source/header/hlms_properties_macroblock.h
     source/header/hlms_properties_pbs_datablock.h
     source/header/hlms_properties_samplerblock.h
-    source/header/hlms_pbs_builder.h
-    source/header/hlms_builder.h
     source/header/hlms_properties_unlit_datablock.h
-    source/header/hlms_node_unlit_datablock.h
     source/header/hlms_unlit_builder.h
+    source/header/hlms_utils_manager.h
+    source/header/mainwindow.h
     source/header/material_browser.h
-    source/header/material_tree.h
+    source/header/material_browser_dialog.h
     source/header/material_main.h
     source/header/material_thumbs.h
-    source/header/material_browser_dialog.h
+    source/header/material_tree.h
+    source/header/nodeeditor_dockwidget.h
+    source/header/paintlayer.h
+    source/header/paintlayer_dialog.h
+    source/header/paintlayer_dockwidget.h
+    source/header/paintlayer_manager.h
+    source/header/paintlayer_widget.h
+    source/header/paint_dockwidget.h
+    source/header/properties_dockwidget.h
+    source/header/recent_file_action.h
+    source/header/renderwindow_dockwidget.h
+    source/header/texturelayer.h
+    source/header/texturelayer_manager.h
     source/header/texture_dockwidget.h
     source/header/texture_main.h
     source/header/texture_thumbs.h
     source/header/texture_tree.h
-    source/header/hlms_editor_plugin.h
-    source/header/hlms_editor_plugin_action.h
-    source/header/recent_file_action.h
-    source/header/hlms_utils_manager.h
-    source/header/config_dialog.h
-    source/header/config_pages.h
-    source/header/texturelayer.h
-    source/header/texturelayer_manager.h
-    source/header/paintlayer.h
-    source/header/paintlayer_manager.h
 )
 
 set (SOURCE_FILES
@@ -176,46 +183,52 @@ set (SOURCE_FILES
     framework/src/ogre3_renderman.cpp
     framework/src/ogre3_widget.cpp
     framework/src/tb_transformationwidget.cpp
-    framework/src/magus_treewidget.cpp
-    framework/src/tool_resourcetree_widget.cpp
     framework/src/tool_default_texturewidget.cpp
-    source/src/main.cpp
-    source/src/mainwindow.cpp
-    source/src/renderwindow_dockwidget.cpp 
-    source/src/properties_dockwidget.cpp 
-    source/src/nodeeditor_dockwidget.cpp 
+    framework/src/tool_resourcetree_widget.cpp
+    source/src/brush_dockwidget.cpp
+    source/src/brush_widget.cpp
+    source/src/central_dockwidget.cpp
+    source/src/config_dialog.cpp
+    source/src/config_pages.cpp
+    source/src/hlms_builder.cpp
+    source/src/hlms_editor_plugin_action.cpp
+    source/src/hlms_node_blenddblock.cpp
+    source/src/hlms_node_macroblock.cpp
     source/src/hlms_node_pbs_datablock.cpp
     source/src/hlms_node_porttypes.cpp
     source/src/hlms_node_samplerblock.cpp
-    source/src/hlms_node_macroblock.cpp
-    source/src/hlms_node_blenddblock.cpp
+    source/src/hlms_node_unlit_datablock.cpp
+    source/src/hlms_pbs_builder.cpp
     source/src/hlms_properties_blenddblock.cpp
     source/src/hlms_properties_macroblock.cpp
     source/src/hlms_properties_pbs_datablock.cpp
     source/src/hlms_properties_samplerblock.cpp
-    source/src/hlms_pbs_builder.cpp
-    source/src/hlms_builder.cpp
     source/src/hlms_properties_unlit_datablock.cpp
-    source/src/hlms_node_unlit_datablock.cpp
     source/src/hlms_unlit_builder.cpp
+    source/src/hlms_utils_manager.cpp
+    source/src/main.cpp
+    source/src/mainwindow.cpp
     source/src/material_browser.cpp
-    source/src/material_main.cpp
-    source/src/material_tree.cpp
-    source/src/material_thumbs.cpp
     source/src/material_browser_dialog.cpp
+    source/src/material_main.cpp
+    source/src/material_thumbs.cpp
+    source/src/material_tree.cpp
+    source/src/nodeeditor_dockwidget.cpp
+    source/src/paintlayer.cpp
+    source/src/paintlayer_dialog.cpp
+    source/src/paintlayer_dockwidget.cpp
+    source/src/paintlayer_manager.cpp
+    source/src/paintlayer_widget.cpp
+    source/src/paint_dockwidget.cpp
+    source/src/properties_dockwidget.cpp
+    source/src/recent_file_action.cpp
+    source/src/renderwindow_dockwidget.cpp
+    source/src/texturelayer.cpp
+    source/src/texturelayer_manager.cpp
     source/src/texture_dockwidget.cpp
     source/src/texture_main.cpp
     source/src/texture_thumbs.cpp
     source/src/texture_tree.cpp
-    source/src/hlms_editor_plugin_action.cpp
-    source/src/recent_file_action.cpp
-    source/src/hlms_utils_manager.cpp
-    source/src/config_dialog.cpp
-    source/src/config_pages.cpp
-    source/src/texturelayer.cpp
-    source/src/texturelayer_manager.cpp
-    source/src/paintlayer.cpp
-    source/src/paintlayer_manager.cpp
 )
 
 if(Boost_FOUND)

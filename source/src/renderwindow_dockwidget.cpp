@@ -868,18 +868,4 @@ void RenderwindowDockWidget::notifyOffsetTextureUpdated (float offsetX, float of
             samplerProperties->updateOffsetPropertiesExternal(samplerBlock);
         }
     }
-
-    /*
-    HlmsPropertiesSamplerblock* samplerProperties = mParent->mPropertiesDockWidget->mHlmsPropertiesSamplerblock;
-    if (samplerProperties)
-    {
-        QVector2D offset;
-        offset.setX(offsetX);
-        offset.setY(offsetY);
-        if (mCurrentPbsDatablockBlock)
-            samplerProperties->updateOffsetPropertiesExternal(offset, HLMS_PBS);
-        else if (mCurrentUnlitDatablockBlock)
-            samplerProperties->updateOffsetPropertiesExternal(offset, HLMS_UNLIT);
-    }
-    */
 }
