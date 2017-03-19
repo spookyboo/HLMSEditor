@@ -403,6 +403,7 @@ static const QString ACTION_ADD_TEXTURES = QString("Add texture file(s)");
 static const QString ACTION_EDIT = QString("Edit material");
 
 // Painting
+static const unsigned short PAINT_MAX_MIP_MAPS = 7;
 static const QString ACTION_NEW_PAINTING_LAYER = QString("Create paint layer");
 static const QString ACTION_EDIT_PAINTING_LAYER = QString("Edit paint layer");
 static const QString ACTION_DELETE_CURRENT_PAINTING_LAYERS = QString("Delete selected painting layer");

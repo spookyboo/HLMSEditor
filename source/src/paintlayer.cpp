@@ -133,7 +133,7 @@ bool PaintLayer::isVisible(void)
 void PaintLayer::paint(float u, float v)
 {
     // Apply paint effect if there is a texture
-    if (!mEnabled || !mVisible || !mTextureLayer || mTextureLayer->mTexture.isNull())
+    if (!mEnabled || !mVisible || !mTextureLayer)
         return;
 
     /* If there are jitter effects, they are applied first. This means that certain jitter attributes are set

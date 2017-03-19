@@ -29,8 +29,6 @@
 
 //****************************************************************************/
 TextureLayer::TextureLayer(void) :
-    mDatablock(0),
-    mDatablockPbs(0),
     mTextureOnWhichIsPaintedWidth(0),
     mTextureOnWhichIsPaintedHeight(0),
     mTextureOnWhichIsPaintedHasAlpha(false),
@@ -40,18 +38,12 @@ TextureLayer::TextureLayer(void) :
 {
     mTextureType = Ogre::PBSM_DIFFUSE;
     mDatablockName = "";
-    mTexture.setNull();
-    mBuffers.clear();
     mTextureFileName = "";
 }
 
 //****************************************************************************/
 TextureLayer::~TextureLayer(void)
 {
-    if (!mTexture.isNull())
-    {
-        mTexture.setNull();
-    }
 }
 
 //****************************************************************************/
@@ -62,49 +54,52 @@ void TextureLayer::setDatablockNameAndTexture (const Ogre::IdString& datablockNa
     mDatablockName = datablockName;
     mTextureType = textureType;
     mTextureFileName = textureFileName;
-    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
-    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
-    mDatablock = hlmsPbs->getDatablock(datablockName);
-    if (mDatablock)
-    {
-        mDatablockPbs = static_cast<Ogre::HlmsPbsDatablock*>(mDatablock);
-        try
-        {
-            // Texture on GPU; store the buffers in a vector
-            if (!mDatablockPbs->getTexture(textureType).isNull())
-            {
-                mTextureTypeDefined = true;
-                mTexture = mDatablockPbs->getTexture(textureType); // TextureType MUST exist, otherwise the application crashes
-                mNumMipMaps = mTexture->getNumMipmaps();
-                mBuffers.clear();
-                for (Ogre::uint8 i = 0; i < mNumMipMaps; ++i)
-                    mBuffers.push_back(mTexture->getBuffer(0, i).getPointer());
+    mTextureTypeDefined = true;
 
-                // Load the texture as image; assume it can be loaded, because it was already loaded as part of the material
-                mTextureOnWhichIsPainted.load(textureFileName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-                mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getPixelBox(0, 0);
-                mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
-                mTextureOnWhichIsPaintedWidth = mPixelboxTextureOnWhichIsPainted.getWidth();
-                mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.getHeight();
-            }
-        }
-        catch (Ogre::Exception e)
-        {
-            mTexture.setNull();
-            mBuffers.clear();
-        }
-    }
+    // Load the texture as image; assume it can be loaded, because it was already loaded as part of the material
+    setFirstTextureGeneration();
 }
 
 //****************************************************************************/
 void TextureLayer::blitTexture (void)
 {
+    /* Always get the actual pointers, because they may change. That is the reason why the datablock pointer cannot be cached.
+     * The same seems to apply to the texture pointer.
+     */
+    Ogre::HlmsDatablock* datablock;
+    Ogre::HlmsPbsDatablock* datablockPbs;
+    Ogre::TexturePtr texture;
+    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
+    datablock = hlmsPbs->getDatablock(mDatablockName);
+    if (!datablock)
+        return;
+
+    datablockPbs = static_cast<Ogre::HlmsPbsDatablock*>(datablock);
+    try
+    {
+        // Texture on GPU; store the buffers in a vector
+        if (!datablockPbs->getTexture(mTextureType).isNull())
+        {
+            texture = datablockPbs->getTexture(mTextureType); // TextureType MUST exist, otherwise the application crashes
+            mNumMipMaps = texture->getNumMipmaps();
+        }
+    }
+    catch (Ogre::Exception e){}
+
+    if (texture.isNull())
+        return;
+
+    Ogre::uint8 maxMipMaps = mNumMipMaps + 1; // Increase with one, because there is always one image to blit
+    maxMipMaps = maxMipMaps > PAINT_MAX_MIP_MAPS ? PAINT_MAX_MIP_MAPS : maxMipMaps; // Just paint a few mipmaps (not all)
     size_t w = mTextureOnWhichIsPaintedWidth;
     size_t h = mTextureOnWhichIsPaintedHeight;
     Ogre::Image textureOnWhichIsPaintedScaled = mTextureOnWhichIsPainted; // Define textureOnWhichIsPaintedScaled each time; reusing results in exception
-    for (Ogre::uint8 i = 0; i < mNumMipMaps; ++i)
+    Ogre::v1::HardwarePixelBuffer* buffer;
+    for (Ogre::uint8 i = 0; i < maxMipMaps; ++i)
     {
-        mBuffers.at(i)->blitFromMemory(textureOnWhichIsPaintedScaled.getPixelBox(0,0), Ogre::Box(0, 0, 0, w, h, 1));
+        buffer = texture->getBuffer(0, i).getPointer();
+        buffer->blitFromMemory(textureOnWhichIsPaintedScaled.getPixelBox(0,0), Ogre::Box(0, 0, 0, w, h, 1));
         w*=0.5f; // Mipmaps always are half of the previous one
         h*=0.5f;
         if (w > 1.0f && h > 1.0f)
@@ -135,7 +130,7 @@ void TextureLayer::loadTextureGeneration (Ogre::ushort sequence)
 {
     Ogre::String textureFileNameGeneration = getTextureFileNameGeneration (sequence); // returns full qualified filename
     if (sequence == 0)
-        loadTextureGeneration(textureFileNameGeneration); // Don't check the filename is sequence is 0, because it is without path
+        loadTextureGeneration(textureFileNameGeneration); // Don't check the filename if sequence is 0, because it is without path
     else if (textureFileExists(textureFileNameGeneration))
         loadTextureGeneration(textureFileNameGeneration);
 }

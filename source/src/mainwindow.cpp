@@ -573,6 +573,13 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
 {
     clearHlmsNamesAndRemovePaintLayers();
 
+    // Add the resource location first (for textures)
+    QFileInfo info(jsonFileName);
+    mOgreManager->getOgreRoot()->addResourceLocation(info.absolutePath().toStdString(),
+                                                     "FileSystem",
+                                                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+    // Load the datablock
     HlmsUtilsManager::DatablockStruct datablockStruct = mHlmsUtilsManager->loadDatablock(jsonFileName);
     if (!datablockStruct.datablock)
     {
