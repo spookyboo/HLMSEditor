@@ -78,7 +78,7 @@ void TextureLayer::blitTexture (void)
     datablockPbs = static_cast<Ogre::HlmsPbsDatablock*>(datablock);
     try
     {
-        // Texture on GPU; store the buffers in a vector
+        // Get texture on GPU
         if (!datablockPbs->getTexture(mTextureType).isNull())
         {
             texture = datablockPbs->getTexture(mTextureType); // TextureType MUST exist, otherwise the application crashes

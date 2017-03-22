@@ -129,6 +129,8 @@ class MainWindow : public QMainWindow
         Ogre::DataStreamPtr openFile(Ogre::String source);
         void clearHlmsNamesAndRemovePaintLayers(void);
         void deleteTempPathRecursive(void);
+        void addResourceLocationFile (const QString& fileName);
+        void addResourceLocationPath (const QString& path);
 
 	private slots:
         void doNewProjectAction(void);

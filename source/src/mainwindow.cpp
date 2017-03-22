@@ -498,10 +498,7 @@ void MainWindow::loadProject(const QString& fileName)
         if (file.open(QFile::ReadOnly))
         {
             // Add resource location first; this is in case the textures etc. are not loaded
-            mOgreManager->getOgreRoot()->addResourceLocation(mProjectPath.toStdString(),
-                                                             "FileSystem",
-                                                             Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-
+            addResourceLocationPath(mProjectPath);
             QTextStream readFile(&file);
 
             // Line 1
@@ -574,10 +571,7 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
     clearHlmsNamesAndRemovePaintLayers();
 
     // Add the resource location first (for textures)
-    QFileInfo info(jsonFileName);
-    mOgreManager->getOgreRoot()->addResourceLocation(info.absolutePath().toStdString(),
-                                                     "FileSystem",
-                                                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    addResourceLocationFile(jsonFileName);
 
     // Load the datablock
     HlmsUtilsManager::DatablockStruct datablockStruct = mHlmsUtilsManager->loadDatablock(jsonFileName);
@@ -662,15 +656,12 @@ void MainWindow::loadMesh(const QString meshFileName)
     // 2. Check mesh version
     bool loaded = false;
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
-    Ogre::String dataFolder = info.path().toStdString();
     if (isMeshV1 (meshFileName))
     {
         try
         {
             // Add the resource location first
-            mOgreManager->getOgreRoot()->addResourceLocation(dataFolder,
-                                                             "FileSystem",
-                                                             Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+            addResourceLocationFile(meshFileName);
 
             // Convert v1 mesh to v2 mesh
             Ogre::MeshPtr v2MeshPtr = convertMeshV1ToV2(baseName);
@@ -703,9 +694,7 @@ void MainWindow::loadMesh(const QString meshFileName)
         try
         {
             // Add the resource location first
-            mOgreManager->getOgreRoot()->addResourceLocation(dataFolder,
-                                                             "FileSystem",
-                                                             Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+            addResourceLocationFile(meshFileName);
 
             // Create (by the ogre widget) the V2 mesh, the item and the rtt item
             ogreWidget->createItem(baseName.toStdString(), Ogre::Vector3::UNIT_SCALE);
@@ -2110,4 +2099,21 @@ void MainWindow::deleteTempPathRecursive(void)
                 QFile::remove(info.absoluteFilePath());
         }
     }
+}
+
+//****************************************************************************/
+void MainWindow::addResourceLocationFile (const QString& fileName)
+{
+    QFileInfo info(fileName);
+    mOgreManager->getOgreRoot()->addResourceLocation(info.absolutePath().toStdString(),
+                                                     "FileSystem",
+                                                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+}
+
+//****************************************************************************/
+void MainWindow::addResourceLocationPath (const QString& path)
+{
+    mOgreManager->getOgreRoot()->addResourceLocation(path.toStdString(),
+                                                     "FileSystem",
+                                                     Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 }

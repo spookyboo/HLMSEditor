@@ -405,7 +405,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
             exclude = excludeSpecialDatablocks && (fullName == Magus::AXIS_MATERIAL_NAME ||
                                                    fullName == Magus::HIGHLIGHT_MATERIAL_NAME);
 
-        // If not excluded because of special datablocks, check whether it must be excluded because of the excludeDatablockName
+        // If not excluded because of special datablocks, check whether it must be excluded because of the exclude Datablock
         if (!exclude)
         {
             exclude = !excludeName.isEmpty() && fullName == excludeDatablockFullName;
@@ -457,7 +457,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
             exclude = nameIsNumber;
         }
 
-        // If not excluded because of special datablocks, check whether it must be excluded because of the excludeDatablockName
+        // If not excluded because of special datablocks, check whether it must be excluded because of the exclude Datablock
         if (!exclude)
         {
             exclude = !excludeName.isEmpty() && fullName == excludeDatablockFullName;
