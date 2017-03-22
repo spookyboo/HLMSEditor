@@ -805,12 +805,12 @@ void PaintLayer::determineJitterEffects (void)
 }
 
 //****************************************************************************/
-Ogre::IdString PaintLayer::getDatablockName (void)
+const Ogre::IdString& PaintLayer::getDatablockId (void)
 {
     if (!mTextureLayer)
         return dummyDatablockId;
 
-    return mTextureLayer->mDatablockName;
+    return mTextureLayer->mDatablockId;
 }
 
 //****************************************************************************/

@@ -86,7 +86,7 @@ namespace Magus
         mRenderTextureNameHoover = "RenderTargetHlmsEditorTextureHoover";
         mRenderTextureNamePaint = "RenderTargetHlmsEditorTexturePaint";
         setMinimumSize(100,100);
-        mCurrentDatablockName = "";
+        mCurrentDatablockId = "";
         setAttribute(Qt::WA_OpaquePaintEvent);
         setAttribute(Qt::WA_PaintOnScreen);
         mSize = QSize(100, 100);
@@ -473,12 +473,12 @@ namespace Magus
     {
         try
         {
-            Ogre::String datablockName = "";
+            Ogre::String datablockFullName = "";
 
             // Delete the old item if available
             if (mItem)
             {
-                datablockName = *(mItem->getSubItem(0)->getDatablock()->getFullName());
+                datablockFullName = *(mItem->getSubItem(0)->getDatablock()->getFullName());
                 setDefaultDatablockItem();
                 mSceneNode->detachAllObjects();
                 mSceneManager->destroyItem(mItem);
@@ -606,7 +606,7 @@ namespace Magus
         Ogre::HlmsMacroblock macroblock;
         Ogre::HlmsBlendblock blendblock;
         Ogre::ColourValue colour;
-        Ogre::String datablockName;
+        Ogre::String datablockId;
 
         // Create a new datablock
         size_t numSubItems = mItemRttHoover->getNumSubItems();
@@ -614,17 +614,17 @@ namespace Magus
         for (size_t i = 0; i < numSubItems; ++i)
         {
             subItem = mItemRttHoover->getSubItem(i);
-            datablockName = Ogre::StringConverter::toString(i);
+            datablockId = Ogre::StringConverter::toString(i);
             Ogre::HlmsUnlitDatablock* datablock = static_cast<Ogre::HlmsUnlitDatablock*>(
-                        hlmsUnlit->createDatablock( datablockName,
-                                                    datablockName,
+                        hlmsUnlit->createDatablock( datablockId,
+                                                    datablockId,
                                                     macroblock,
                                                     blendblock,
                                                     Ogre::HlmsParamVec()));
             colour = calculateIndexToColour(i);
             datablock->setUseColour(true);
             datablock->setColour(colour);
-            subItem->setDatablock(datablockName);
+            subItem->setDatablock(datablockId);
         }
     }
 
@@ -1238,10 +1238,10 @@ namespace Magus
             if (mHoover)
             {
                 if (index > -1)
-                    mItem->getSubItem(index)->setDatablock(mCurrentDatablockName);
+                    mItem->getSubItem(index)->setDatablock(mCurrentDatablockId);
             }
             else
-                mItem->setDatablock(mCurrentDatablockName);
+                mItem->setDatablock(mCurrentDatablockId);
         }
     }
 
@@ -1379,13 +1379,13 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QOgreWidget::setCurrentDatablockName(const Ogre::IdString& datablockName)
+    void QOgreWidget::setCurrentDatablockId(const Ogre::IdString& datablockId)
     {
-        mCurrentDatablockName = datablockName;
+        mCurrentDatablockId = datablockId;
     }
 
     //****************************************************************************/
-    const QVector<int>& QOgreWidget::getSubItemIndicesWithDatablock(const Ogre::IdString& datablockName)
+    const QVector<int>& QOgreWidget::getSubItemIndicesWithDatablock(const Ogre::IdString& datablockId)
     {
         helperIndices.clear();
         size_t numSubItems = mItem->getNumSubItems();
@@ -1396,7 +1396,7 @@ namespace Magus
         {
             subItem = mItem->getSubItem(i);
             datablock = subItem->getDatablock();
-            if (datablock->getName() == datablockName)
+            if (datablock->getName() == datablockId)
                 helperIndices.append(i);
         }
 
@@ -1557,19 +1557,19 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QOgreWidget::setDatablockInSubItem(int index, const Ogre::IdString datablockName)
+    void QOgreWidget::setDatablockInSubItem(int index, const Ogre::IdString datablockId)
     {
         if (mItem)
         {
             Ogre::SubItem* subItem = mItem->getSubItem(index);
             if (subItem)
-                subItem->setDatablock(datablockName);
+                subItem->setDatablock(datablockId);
         }
     }
 
     //****************************************************************************/
     void QOgreWidget::setDatablockInSubItems(const QVector<int>& indices,
-                                             const Ogre::IdString& datablockName)
+                                             const Ogre::IdString& datablockId)
     {
         int index;
         Ogre::SubItem* subItem;
@@ -1578,10 +1578,10 @@ namespace Magus
         {
             index = it.next();
             subItem = mItem->getSubItem(index);
-            subItem->setDatablock(datablockName);
+            subItem->setDatablock(datablockId);
         }
 
-        mCurrentDatablockName = datablockName;
+        mCurrentDatablockId = datablockId;
     }
 
     //****************************************************************************/
@@ -1723,7 +1723,7 @@ namespace Magus
                 if (!paintLayer->getTextureLayer() || !paintLayer->getTextureLayer()->mTextureTypeDefined)
                     return 4;
 
-                if (paintLayer->getDatablockName() != datablock->getName())
+                if (paintLayer->getDatablockId() != datablock->getName())
                     return 5;
 
                 // Calculate the uv; we do it here, because it should only be calculated when needed (as late as possible)

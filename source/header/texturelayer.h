@@ -76,14 +76,13 @@ class TextureLayer : public QObject
         TextureLayer(void);
         ~TextureLayer(void);
 
-        /* Set the name of the (current) datablock. This is the datablock internally used for painting.
+        /* Set the id of the (current) datablock. This is the datablock internally used for painting.
          * In addition, the textureType must be set.
-         * textureFileName
-         * Set full qualified filename of the texture, on which is painted
+         * textureFileName - full qualified filename of the texture, on which is painted
          */
-        void setDatablockNameAndTexture (const Ogre::IdString& datablockName,
-                                         Ogre::PbsTextureTypes textureType,
-                                         const Ogre::String& textureFileName);
+        void setDatablockIdAndTexture (const Ogre::IdString& datablockId,
+                                       Ogre::PbsTextureTypes textureType,
+                                       const Ogre::String& textureFileName);
 
         /* Blit the current pixelbox
          */
@@ -123,7 +122,7 @@ class TextureLayer : public QObject
          */
         bool textureFileExists (const Ogre::String& filename);
 
-        Ogre::IdString mDatablockName;
+        Ogre::IdString mDatablockId;
         Ogre::PbsTextureTypes mTextureType;
         Ogre::String mTextureFileName;                          // Full qualified name of the texture file
         Ogre::uint8 mNumMipMaps;                                // Number of mipmaps of texture (on the GPU)

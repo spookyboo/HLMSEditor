@@ -32,7 +32,7 @@ TextureLayerManager::~TextureLayerManager(void)
 }
 
 //****************************************************************************/
-TextureLayer* TextureLayerManager::createOrRetrieveTextureLayer (const Ogre::IdString& datablockName,
+TextureLayer* TextureLayerManager::createOrRetrieveTextureLayer (const Ogre::IdString& datablockId,
                                                                  Ogre::PbsTextureTypes textureType,
                                                                  const Ogre::String& textureFileName)
 {
@@ -44,13 +44,13 @@ TextureLayer* TextureLayerManager::createOrRetrieveTextureLayer (const Ogre::IdS
     for (it = itStart; it != itEnd; ++it)
     {
         tl = *it;
-        if (tl->mDatablockName == datablockName && tl->mTextureType == textureType)
+        if (tl->mDatablockId == datablockId && tl->mTextureType == textureType)
             return tl;
     }
 
     // TextureLayer not found, create a new one
     tl = new TextureLayer();
-    tl->setDatablockNameAndTexture(datablockName, textureType, textureFileName);
+    tl->setDatablockIdAndTexture(datablockId, textureType, textureFileName);
     mTextureLayers.push_back(tl);
     return tl;
 }

@@ -69,7 +69,7 @@ MainWindow::MainWindow(void) :
     newProjectName();
     mHlmsName = QString("");
     mCurrentDatablockFullName = Ogre::String("");
-    mCurrentDatablockName = "";
+    mCurrentDatablockId = "";
     mTempString = QString("");
     mTempOgreString = "";
     mHelperName = "";
@@ -589,7 +589,7 @@ void MainWindow::loadDatablockAndSet(const QString jsonFileName)
 
     mHlmsName = jsonFileName;
     appendRecentHlms(jsonFileName);
-    setCurrentDatablockNames (datablockStruct.datablockId, datablockStruct.datablockFullName);
+    setCurrentDatablockIdAndFullName (datablockStruct.datablockId, datablockStruct.datablockFullName);
 
     // Create the pbs node structure
     if (datablockStruct.type == HLMS_PBS)
@@ -934,7 +934,7 @@ void MainWindow::saveDatablock(bool validatePaintLayers)
     loadMaterialBrowserCfg();
 
     Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
-    Ogre::HlmsDatablock* datablock = hlmsManager->getDatablock(mCurrentDatablockName);
+    Ogre::HlmsDatablock* datablock = hlmsManager->getDatablock(mCurrentDatablockId);
     if (!datablock)
         return;
 
@@ -1937,13 +1937,13 @@ void MainWindow::createSpecialDatablocks (void)
 }
 
 //****************************************************************************/
-void MainWindow::setCurrentDatablockNames(const Ogre::IdString& name, const Ogre::String& fullName)
+void MainWindow::setCurrentDatablockIdAndFullName(const Ogre::IdString& datablockId, const Ogre::String& fullName)
 {
     mCurrentDatablockFullName = fullName;
-    mCurrentDatablockName = name;
+    mCurrentDatablockId = datablockId;
 
     // Pass the datablock name to the ogre widget
-    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setCurrentDatablockName(mCurrentDatablockName);
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setCurrentDatablockId(mCurrentDatablockId);
 }
 
 //****************************************************************************/
@@ -2003,26 +2003,26 @@ void MainWindow::setDatablocksFromMaterialBrowserInItem(void)
 }
 
 //****************************************************************************/
-QVector<int> MainWindow::getSubItemIndicesWithDatablockAndReplaceWithDefault(const Ogre::IdString& datablockName)
+QVector<int> MainWindow::getSubItemIndicesWithDatablockAndReplaceWithDefault(const Ogre::IdString& datablockId)
 {
     // Returns a list of subItem indices from the main Item
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
-    helperIndices = ogreWidget->getSubItemIndicesWithDatablock(datablockName);
+    helperIndices = ogreWidget->getSubItemIndicesWithDatablock(datablockId);
     ogreWidget->setDatablockInSubItems(helperIndices, DEFAULT_DATABLOCK_NAME);
     return helperIndices;
 }
 
 //****************************************************************************/
-void MainWindow::replaceCurrentDatablock(QVector<int> indices, Ogre::IdString datablockName)
+void MainWindow::replaceCurrentDatablock(QVector<int> indices, Ogre::IdString datablockId)
 {
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
-    ogreWidget->setDatablockInSubItems(indices, datablockName);
+    ogreWidget->setDatablockInSubItems(indices, datablockId);
 }
 
 //****************************************************************************/
-void MainWindow::destroyDatablock(const Ogre::IdString& datablockName)
+void MainWindow::destroyDatablock(const Ogre::IdString& datablockId)
 {
-    mHlmsUtilsManager->destroyDatablock(datablockName);
+    mHlmsUtilsManager->destroyDatablock(datablockId);
 }
 
 //****************************************************************************/
@@ -2036,9 +2036,9 @@ void MainWindow::notifyHlmsChanged (QtProperty* property)
 void MainWindow::clearHlmsNamesAndRemovePaintLayers(void)
 {
     mHlmsName = QString("");
-    mCurrentDatablockName = "";
+    mCurrentDatablockId = "";
     mCurrentDatablockFullName = "";
-    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setCurrentDatablockName(mCurrentDatablockName);
+    mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setCurrentDatablockId(mCurrentDatablockId);
     mPaintLayerDockWidget->newHlmsCreated(); // Needed to delete the paintlayers, because a new Hlms is created
     mRenderwindowDockWidget->clearUndoRedoStackEntry();
 }

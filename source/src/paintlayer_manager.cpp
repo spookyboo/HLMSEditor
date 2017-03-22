@@ -36,13 +36,13 @@ PaintLayerManager::~PaintLayerManager(void)
 }
 
 //****************************************************************************/
-PaintLayer* PaintLayerManager::createPaintLayer (const Ogre::IdString& datablockName,
+PaintLayer* PaintLayerManager::createPaintLayer (const Ogre::IdString& datablockId,
                                                  Ogre::PbsTextureTypes textureType,
                                                  const Ogre::String& textureFileName,
                                                  int externalLayerId)
 {
     PaintLayer* paintLayer = new PaintLayer(this, externalLayerId);
-    TextureLayer* textureLayer = mTextureLayerManager.createOrRetrieveTextureLayer(datablockName, textureType, textureFileName);
+    TextureLayer* textureLayer = mTextureLayerManager.createOrRetrieveTextureLayer(datablockId, textureType, textureFileName);
     paintLayer->setTextureLayer(textureLayer);
     mPaintLayers.push_back(paintLayer);
     return paintLayer;
@@ -57,7 +57,7 @@ PaintLayer* PaintLayerManager::createPaintLayer (int externalLayerId)
 }
 
 //****************************************************************************/
-PaintLayer* PaintLayerManager::setTextureLayerInPaintLayer (const Ogre::IdString& datablockName,
+PaintLayer* PaintLayerManager::setTextureLayerInPaintLayer (const Ogre::IdString& datablockId,
                                                             Ogre::PbsTextureTypes textureType,
                                                             const Ogre::String& textureFileName,
                                                             int externalLayerId)
@@ -65,7 +65,7 @@ PaintLayer* PaintLayerManager::setTextureLayerInPaintLayer (const Ogre::IdString
     PaintLayer* paintLayer = getPaintLayer(externalLayerId);
     if (paintLayer)
     {
-        TextureLayer* textureLayer = mTextureLayerManager.createOrRetrieveTextureLayer(datablockName, textureType, textureFileName);
+        TextureLayer* textureLayer = mTextureLayerManager.createOrRetrieveTextureLayer(datablockId, textureType, textureFileName);
         paintLayer->setTextureLayer(textureLayer);
     }
 

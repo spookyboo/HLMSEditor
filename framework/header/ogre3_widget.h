@@ -111,16 +111,16 @@ namespace Magus
                                       Ogre::PbsTextureTypes pbsTextureTypeOffsetTexture = Ogre::PBSM_DIFFUSE,
                                       Ogre::uint8 unlitTextureTypeOffsetTexture = 0);
 
-            void setCurrentDatablockName(const Ogre::IdString& datablockName); // Only set the new datablock name; the new datablock is not set in an item/subitem
-            const Ogre::IdString& getCurrentDatablockName(void) const {return mCurrentDatablockName;}
-            const QVector<int>& getSubItemIndicesWithDatablock(const Ogre::IdString& datablockName); // Get the list of indices of subItems that have 'datablockName'
+            void setCurrentDatablockId(const Ogre::IdString& datablockId); // Only set the new datablock id; the new datablock is not set in an item/subitem
+            const Ogre::IdString& getCurrentDatablockId(void) const {return mCurrentDatablockId;}
+            const QVector<int>& getSubItemIndicesWithDatablock(const Ogre::IdString& datablockId); // Get the list of indices of subItems that have 'datablockId'
             void makeSnapshotOfItemMaterials(void); // Keep a map of all materials per subItem
             void restoreSnapshotOfItemMaterials(void); // Assign the material to each subItem
-            Ogre::MeshPtr getCurrentMeshEnrichedWithItemDatablocksFullName(void); // Returns the mesh associated with mItem, but with the datablocknames of the mItem added to the mesh
+            Ogre::MeshPtr getCurrentMeshEnrichedWithItemDatablocksFullName(void); // Returns the mesh associated with mItem, but with the datablock full names of the mItem added to the mesh
             Ogre::MeshPtr getCurrentMesh(void); // Returns the mesh associated with mItem, but with the original materialnames in the mesh
             const QMap<unsigned short, Ogre::String>& getMaterialNamesFromCurrentMesh(void); // Returns map with index (of subMeash) and its materialname
-            void setDatablockInSubItem(int index, const Ogre::IdString datablockName); // Set the datablock in the subitem, based on the id (datablockName) of the datablock
-            void setDatablockInSubItems(const QVector<int>& indices, const Ogre::IdString& datablockName); // Set the datablock in the subitems, identified by indices
+            void setDatablockInSubItem(int index, const Ogre::IdString datablockId); // Set the datablock in the subitem, based on the id (datablockId) of the datablock
+            void setDatablockInSubItems(const QVector<int>& indices, const Ogre::IdString& datablockId); // Set the datablock in the subitems, identified by indices
             void cleanup(void);
             void setRenderwindowDockWidget(RenderwindowDockWidget* renderwindowDockWidget);
             void assignCurrentDatablock(void); // Set the current datablock in the item or subItem
@@ -169,7 +169,7 @@ namespace Magus
             int mLatestSubItemIndexHighlighted;
             Ogre::HlmsDatablock* mLatestSubItemDatablock;
             QSize mSize;
-            Ogre::IdString mCurrentDatablockName;
+            Ogre::IdString mCurrentDatablockId;
             const size_t RTT_HOOVER_SIZE_X = 256;
             const size_t RTT_HOOVER_SIZE_Y = 144; // 9/16 x RTT_HOOVER_SIZE_X
             const size_t RTT_PAINT_SIZE_X = 1820;

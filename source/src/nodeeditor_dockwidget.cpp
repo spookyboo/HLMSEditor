@@ -348,7 +348,7 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
         if (datablock)
         {
             mParent->replaceCurrentDatablock(indices, datablock->getName());
-            mParent->setCurrentDatablockNames(datablock->getName(), *datablock->getFullName());
+            mParent->setCurrentDatablockIdAndFullName(datablock->getName(), *datablock->getFullName());
             hlmsUtilsManager->addNewDatablockToRegisteredDatablocks(name, jsonFileName);
         }
     }
@@ -368,7 +368,7 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
         if (datablock)
         {
             mParent->replaceCurrentDatablock(indices, datablock->getName());
-            mParent->setCurrentDatablockNames(datablock->getName(), *datablock->getFullName());
+            mParent->setCurrentDatablockIdAndFullName(datablock->getName(), *datablock->getFullName());
             hlmsUtilsManager->addNewDatablockToRegisteredDatablocks(name, jsonFileName);
         }
     }

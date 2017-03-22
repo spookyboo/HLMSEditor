@@ -37,7 +37,7 @@ TextureLayer::TextureLayer(void) :
     mMaxSequence(0)
 {
     mTextureType = Ogre::PBSM_DIFFUSE;
-    mDatablockName = "";
+    mDatablockId = "";
     mTextureFileName = "";
 }
 
@@ -47,11 +47,11 @@ TextureLayer::~TextureLayer(void)
 }
 
 //****************************************************************************/
-void TextureLayer::setDatablockNameAndTexture (const Ogre::IdString& datablockName,
-                                               Ogre::PbsTextureTypes textureType,
-                                               const Ogre::String& textureFileName)
+void TextureLayer::setDatablockIdAndTexture (const Ogre::IdString& datablockId,
+                                             Ogre::PbsTextureTypes textureType,
+                                             const Ogre::String& textureFileName)
 {
-    mDatablockName = datablockName;
+    mDatablockId = datablockId;
     mTextureType = textureType;
     mTextureFileName = textureFileName;
     mTextureTypeDefined = true;
@@ -71,7 +71,7 @@ void TextureLayer::blitTexture (void)
     Ogre::TexturePtr texture;
     Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
     Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
-    datablock = hlmsPbs->getDatablock(mDatablockName);
+    datablock = hlmsPbs->getDatablock(mDatablockId);
     if (!datablock)
         return;
 

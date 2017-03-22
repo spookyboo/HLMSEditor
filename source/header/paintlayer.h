@@ -305,9 +305,9 @@ class PaintLayer
          */
         void resetMirrorVertical (void);
 
-        /* Returns the datablock name (IdString) of the datablock used by this PaintLayer
+        /* Returns the datablock id (IdString) of the datablock used by this PaintLayer
          */
-        Ogre::IdString getDatablockName (void);
+        const Ogre::IdString& getDatablockId (void);
 
         /* Returns the external layer Id
          * Is -1 when not used

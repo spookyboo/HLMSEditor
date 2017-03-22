@@ -76,12 +76,12 @@ class MainWindow : public QMainWindow
         void getListOfResources(void); // Function to test which resources are loaded
         EditorHlmsTypes getCurrentDatablockType(void); // Returns the current hlms type
         void loadTextureBrowserCfg(void);
-        void setCurrentDatablockNames(const Ogre::IdString& name, const Ogre::String& fullName);
-        QVector<int> getSubItemIndicesWithDatablockAndReplaceWithDefault(const Ogre::IdString& datablockName); // Get list of indeces, which have datablock 'datablockName'
-        void replaceCurrentDatablock(QVector<int> indices, Ogre::IdString datablockName); // Set the datablocks in the subItems, identified by 'indices'
+        void setCurrentDatablockIdAndFullName(const Ogre::IdString& datablockId, const Ogre::String& fullName);
+        QVector<int> getSubItemIndicesWithDatablockAndReplaceWithDefault(const Ogre::IdString& datablockId); // Get list of indeces, which have datablock 'datablockId'
+        void replaceCurrentDatablock(QVector<int> indices, Ogre::IdString datablockId); // Set the datablocks in the subItems, identified by 'indices'
         const Ogre::String& getCurrentDatablockFullName (void) {return mCurrentDatablockFullName;}
-        const Ogre::IdString& getCurrentDatablockName (void) {return mCurrentDatablockName;}
-        void destroyDatablock(const Ogre::IdString& datablockName);
+        const Ogre::IdString& getCurrentDatablockId (void) {return mCurrentDatablockId;}
+        void destroyDatablock(const Ogre::IdString& datablockId);
         void notifyHlmsChanged (QtProperty* property); // To be called if the properties of a datablock are changed (which result in rebuilding the material)
         HlmsUtilsManager* getHlmsUtilsManager (void) {return mHlmsUtilsManager;}
         const Ogre::String& getTextureFileNameOfPbs(const Ogre::IdString& datablockId, Ogre::PbsTextureTypes textureType); // Returns the filename of a pbs texture type
@@ -209,7 +209,7 @@ class MainWindow : public QMainWindow
         QString mMaterialFileName;
         QString mTextureFileName;
         QString mHlmsName; // Used to determine whether a hlms was already saved
-        Ogre::IdString mCurrentDatablockName; // The datablock name
+        Ogre::IdString mCurrentDatablockId; // The datablock id
         Ogre::String mCurrentDatablockFullName; // The datablock full name
         bool mSaveTextureBrowserTimerActive;
         struct RecentFileStruct

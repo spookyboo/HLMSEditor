@@ -39,7 +39,7 @@ class PaintLayerManager
 
         /* Create a PaintLayer and add it to the PaintLayerManager administration.
          */
-        PaintLayer* createPaintLayer (const Ogre::IdString& datablockName,
+        PaintLayer* createPaintLayer (const Ogre::IdString& datablockId,
                                       Ogre::PbsTextureTypes textureType,
                                       const Ogre::String& textureFileName,
                                       int externalLayerId = -1);
@@ -53,7 +53,7 @@ class PaintLayerManager
         /* Set the datablock and texture properties (TextureLayer) in an already created PaintLayer.
          * The PaintLayer is identified by the external id. If not found, nothing happens.
          */
-        PaintLayer* setTextureLayerInPaintLayer (const Ogre::IdString& datablockName,
+        PaintLayer* setTextureLayerInPaintLayer (const Ogre::IdString& datablockId,
                                                  Ogre::PbsTextureTypes textureType,
                                                  const Ogre::String& textureFileName,
                                                  int externalLayerId);

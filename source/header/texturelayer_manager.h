@@ -39,7 +39,7 @@ class TextureLayerManager
 
         /* Return a TextureLayer, which is either created or it is already available.
          */
-        TextureLayer* createOrRetrieveTextureLayer (const Ogre::IdString& datablockName,
+        TextureLayer* createOrRetrieveTextureLayer (const Ogre::IdString& datablockId,
                                                     Ogre::PbsTextureTypes textureType,
                                                     const Ogre::String& textureFileName);
 

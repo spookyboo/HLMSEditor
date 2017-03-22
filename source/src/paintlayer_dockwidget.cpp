@@ -73,7 +73,7 @@ void PaintLayerDockWidget::deleteSelectedPaintLayer(void)
 //****************************************************************************/
 bool PaintLayerDockWidget::currentDatablockExists(void)
 {
-    return (mParent->getCurrentDatablockName() != "");
+    return (mParent->getCurrentDatablockId() != "");
 }
 
 //****************************************************************************/
@@ -145,12 +145,12 @@ void PaintLayerDockWidget::setTextureType (int layerId, const QString& textureTy
         return; // Unknown texture type
 
     // Retrieve the texture filename from the parent
-    Ogre::String fileName = mParent->getTextureFileNameOfPbs(mParent->getCurrentDatablockName(), type);
+    Ogre::String fileName = mParent->getTextureFileNameOfPbs(mParent->getCurrentDatablockId(), type);
     if (fileName == "")
         return; // Apparently there is no texture with that name
 
-    // Set the datablockName, texturetype and texturefile name in the Paintlayer
-    mPaintLayerManager->setTextureLayerInPaintLayer(mParent->getCurrentDatablockName(), type, fileName, layerId);
+    // Set the datablockId, texturetype and texturefile name in the Paintlayer
+    mPaintLayerManager->setTextureLayerInPaintLayer(mParent->getCurrentDatablockId(), type, fileName, layerId);
 }
 
 //****************************************************************************/
@@ -217,7 +217,7 @@ QStringList PaintLayerDockWidget::getAvailableTextureTypes(void)
     // Run through the datablock and check which texture types are used
     mAvailableTextureTypes.clear();
 
-    if (mParent->getCurrentDatablockName() == "")
+    if (mParent->getCurrentDatablockId() == "")
         return mAvailableTextureTypes;
 
     // Find the datablock and validate the texture types
@@ -226,7 +226,7 @@ QStringList PaintLayerDockWidget::getAvailableTextureTypes(void)
     Ogre::HlmsDatablock* datablock = 0;
     try
     {
-        datablock = hlmsPbs->getDatablock(mParent->getCurrentDatablockName());
+        datablock = hlmsPbs->getDatablock(mParent->getCurrentDatablockId());
         if (datablock)
         {
             // Get the textures
