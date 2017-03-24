@@ -89,30 +89,22 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
     assetWidget->setHeaderHidden(true); // Don't use a header
 
     // Create containers
-    mContainer1 = assetWidget->createContainer(1, QString("General"));
-    mContainer1->setTitleBold(true);
-    //mContainer1->setHeaderHidden(true);
-    mContainer2 = assetWidget->createContainer(2, QString("Colour painting"));
-    mContainer2->setTitleBold(true);
-    //mContainer2->setHeaderHidden(true);
-    mContainer3 = assetWidget->createContainer(3, QString("Brush scale"));
-    mContainer3->setTitleBold(true);
-    //mContainer3->setHeaderHidden(true);
-    mContainer4 = assetWidget->createContainer(4, QString("Brush force"));
-    mContainer4->setTitleBold(true);
-    //mContainer4->setHeaderHidden(true);
-    mContainer5 = assetWidget->createContainer(5, QString("Brush rotation angle"));
-    mContainer5->setTitleBold(true);
-    //mContainer5->setHeaderHidden(true);
-    mContainer6 = assetWidget->createContainer(6, QString("Brush translation"));
-    mContainer6->setTitleBold(true);
-    //mContainer6->setHeaderHidden(true);
-    mContainer7 = assetWidget->createContainer(7, QString("Brush mirror horizontal"));
-    mContainer7->setTitleBold(true);
-    //mContainer7->setHeaderHidden(true);
-    mContainer8 = assetWidget->createContainer(8, QString("Brush mirror vertical"));
-    mContainer8->setTitleBold(true);
-    //mContainer8->setHeaderHidden(true);
+    mContainerGeneral = assetWidget->createContainer(1, QString("General"));
+    mContainerGeneral->setTitleBold(true);
+    mContainerPaint = assetWidget->createContainer(2, QString("Colour painting"));
+    mContainerPaint->setTitleBold(true);
+    mContainerScale = assetWidget->createContainer(3, QString("Brush scale"));
+    mContainerScale->setTitleBold(true);
+    mContainerForce = assetWidget->createContainer(4, QString("Brush force"));
+    mContainerForce->setTitleBold(true);
+    mContainerRotationAngle = assetWidget->createContainer(5, QString("Brush rotation angle"));
+    mContainerRotationAngle->setTitleBold(true);
+    mContainerTranslation = assetWidget->createContainer(6, QString("Brush translation"));
+    mContainerTranslation->setTitleBold(true);
+    mContainerMirrorHorizontal = assetWidget->createContainer(7, QString("Brush mirror horizontal"));
+    mContainerMirrorHorizontal->setTitleBold(true);
+    mContainerMirrorVertical = assetWidget->createContainer(8, QString("Brush mirror vertical"));
+    mContainerMirrorVertical->setTitleBold(true);
 
     // ******** Texture type ********
     QStringList stringListAvailableTextures = paintLayerWidget->getAvailableTextureTypes();
@@ -124,6 +116,7 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
     // ******** Paint effect ********
     QStringList stringListPaintEffects;
     stringListPaintEffects << PAINT_EFFECT_COLOR_QSTRING <<
+                              PAINT_EFFECT_ERASE_QSTRING <<
                               PAINT_EFFECT_ALPHA_QSTRING <<
                               PAINT_EFFECT_TEXTURE_QSTRING;
     mPaintEffectSelectProperty = static_cast<Magus::QtSelectProperty*>
@@ -391,7 +384,7 @@ void PaintLayerDialog::propertyValueChanged(QtProperty* property)
             selectProperty = static_cast<Magus::QtSelectProperty*>(property);
             if (selectProperty->getCurrentText() == PAINT_EFFECT_COLOR_QSTRING)
             {
-                mContainer2->setVisible(true);
+                mContainerPaint->setVisible(true);
                 mPaintJitterCheckboxProperty->setVisible(true);
                 bool jitter = mPaintJitterCheckboxProperty->getValue();
                 mPaintColourProperty->setVisible(!jitter);
@@ -401,7 +394,7 @@ void PaintLayerDialog::propertyValueChanged(QtProperty* property)
             }
             else
             {
-                mContainer2->setVisible(false);
+                mContainerPaint->setVisible(false);
                 mPaintColourProperty->setVisible(false);
                 mPaintJitterCheckboxProperty->setVisible(false);
                 mPaintJitterCheckboxProperty->setValue(false);

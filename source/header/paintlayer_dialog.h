@@ -95,14 +95,14 @@ class PaintLayerDialog : public QDialog
         void createIcons();
         PaintLayerWidget* mPaintLayerWidget;
         QtLayer* mQtLayer;
-        Magus::QtContainerWidget* mContainer1;
-        Magus::QtContainerWidget* mContainer2;
-        Magus::QtContainerWidget* mContainer3;
-        Magus::QtContainerWidget* mContainer4;
-        Magus::QtContainerWidget* mContainer5;
-        Magus::QtContainerWidget* mContainer6;
-        Magus::QtContainerWidget* mContainer7;
-        Magus::QtContainerWidget* mContainer8;
+        Magus::QtContainerWidget* mContainerGeneral;
+        Magus::QtContainerWidget* mContainerPaint;
+        Magus::QtContainerWidget* mContainerScale;
+        Magus::QtContainerWidget* mContainerForce;
+        Magus::QtContainerWidget* mContainerRotationAngle;
+        Magus::QtContainerWidget* mContainerTranslation;
+        Magus::QtContainerWidget* mContainerMirrorHorizontal;
+        Magus::QtContainerWidget* mContainerMirrorVertical;
 };
 
 #endif

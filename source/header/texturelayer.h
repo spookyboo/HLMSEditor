@@ -126,6 +126,8 @@ class TextureLayer : public QObject
         Ogre::PbsTextureTypes mTextureType;
         Ogre::String mTextureFileName;                          // Full qualified name of the texture file
         Ogre::uint8 mNumMipMaps;                                // Number of mipmaps of texture (on the GPU)
+        Ogre::Image mOriginalTexture;                           // The original texture image
+        Ogre::PixelBox mPixelboxOriginalTexture;                // Pixelbox of the original texture
         Ogre::Image mTextureOnWhichIsPainted;                   // Contains a texture Image; this image is uploaded to the texture layer of the Hlms (on GPU), every time
                                                                 // the applyPaintEffect() function is called. This basically updates the texture layer in the Pbs.
                                                                 // Initially, textureOnWhichIsPainted is the same image from disk, also loaded in the Pbs.

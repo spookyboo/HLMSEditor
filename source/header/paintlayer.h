@@ -55,6 +55,7 @@ class PaintLayer
         enum PaintEffects
         {
             PAINT_EFFECT_COLOR, /// Paint with color
+            PAINT_EFFECT_ERASE, /// Erase what was painted, using the original texture
             PAINT_EFFECT_ALPHA, /// Paint with alpha
             PAINT_EFFECT_TEXTURE, /// Use the colours of the brush
         };

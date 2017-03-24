@@ -287,6 +287,8 @@ void PaintLayerDockWidget::setPaintEffect(int layerId, const QString& paintEffec
     {
         if (paintEffect == PAINT_EFFECT_COLOR_QSTRING)
             paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_COLOR);
+        else if (paintEffect == PAINT_EFFECT_ERASE_QSTRING)
+            paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_ERASE);
         else if (paintEffect == PAINT_EFFECT_ALPHA_QSTRING)
             paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_ALPHA);
         else if (paintEffect == PAINT_EFFECT_TEXTURE_QSTRING)
@@ -305,6 +307,9 @@ const QString& PaintLayerDockWidget::getPaintEffect(int layerId)
         {
             case PaintLayer::PAINT_EFFECT_COLOR:
                 mHelperString = PAINT_EFFECT_COLOR_QSTRING;
+            break;
+            case PaintLayer::PAINT_EFFECT_ERASE:
+                mHelperString = PAINT_EFFECT_ERASE_QSTRING;
             break;
             case PaintLayer::PAINT_EFFECT_ALPHA:
                 mHelperString = PAINT_EFFECT_ALPHA_QSTRING;

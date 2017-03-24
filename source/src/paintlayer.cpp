@@ -197,10 +197,18 @@ void PaintLayer::paint(float u, float v)
                 mFinalColour = (1.0f - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                                              calculatedTexturePositionY,
                                                                                                              0) + mFinalColour;
-                mTextureLayer->mPixelboxTextureOnWhichIsPainted.setColourAt(mFinalColour,
-                                                                            calculatedTexturePositionX,
-                                                                            calculatedTexturePositionY,
-                                                                            0);
+            }
+            else if (mPaintEffect == PAINT_EFFECT_ERASE)
+            {
+                // Erase: Retrieve the colourvalue of the original texture and blend it with the colour value of the texture on which is painted
+                mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
+                Ogre::ColourValue originalColour = mTextureLayer->mPixelboxOriginalTexture.getColourAt(calculatedTexturePositionX,
+                                                                                                       calculatedTexturePositionY,
+                                                                                                       0);
+
+                mFinalColour = (1.0 - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
+                                                                                                            calculatedTexturePositionY,
+                                                                                                            0) + mAlpha * originalColour;
             }
             else if (mPaintEffect == PAINT_EFFECT_ALPHA)
             {
@@ -209,12 +217,7 @@ void PaintLayer::paint(float u, float v)
                 mFinalColour = mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                            calculatedTexturePositionY,
                                                                                            0);
-
                 mFinalColour.a -= mAlpha;
-                mTextureLayer->mPixelboxTextureOnWhichIsPainted.setColourAt(mFinalColour,
-                                                                            calculatedTexturePositionX,
-                                                                            calculatedTexturePositionY,
-                                                                            0);
             }
             else if (mPaintEffect == PAINT_EFFECT_TEXTURE)
             {
@@ -224,12 +227,13 @@ void PaintLayer::paint(float u, float v)
                 mFinalColour = (1.0 - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                                             calculatedTexturePositionY,
                                                                                                             0) + mAlpha * brushColour;
-
-                mTextureLayer->mPixelboxTextureOnWhichIsPainted.setColourAt(mFinalColour,
-                                                                            calculatedTexturePositionX,
-                                                                            calculatedTexturePositionY,
-                                                                            0);
             }
+
+            // Set the final paint colour
+            mTextureLayer->mPixelboxTextureOnWhichIsPainted.setColourAt(mFinalColour,
+                                                                        calculatedTexturePositionX,
+                                                                        calculatedTexturePositionY,
+                                                                        0);
         }
     }
 

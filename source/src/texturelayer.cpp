@@ -58,6 +58,10 @@ void TextureLayer::setDatablockIdAndTexture (const Ogre::IdString& datablockId,
 
     // Load the texture as image; assume it can be loaded, because it was already loaded as part of the material
     setFirstTextureGeneration();
+
+    // Create the pixelbox of the original texture; this MUST be a separate image
+    mOriginalTexture.load(textureFileName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    mPixelboxOriginalTexture = mOriginalTexture.getPixelBox(0, 0);
 }
 
 //****************************************************************************/
