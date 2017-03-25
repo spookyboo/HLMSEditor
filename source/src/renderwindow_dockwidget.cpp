@@ -422,9 +422,8 @@ void RenderwindowDockWidget::createToolBars(void)
 
     // Transformation widget
     mTransformationWidget = new Magus::TransformationWidget(mHToolBar);
-    mTransformationWidget->setMaximumWidth(344);
-    mTransformationWidget->setCurrentIndex(2); // Only scale is visible
-    mTransformationWidget->setListEnabled(false);
+    mTransformationWidget->setMaximumWidth(444);
+    mTransformationWidget->setCurrentIndex(1); // Rotation is default
     mInnerMain->addToolBar(Qt::TopToolBarArea, mHToolBar);
     mHToolBar->setMinimumHeight(32);
     //mHToolBar->setMinimumWidth(8 * 32);
@@ -533,8 +532,9 @@ void RenderwindowDockWidget::setPaintMode(bool enabled)
 void RenderwindowDockWidget::handleMarker(void)
 {
     mOgreWidget->resetCamera();
+    setCameraOrientationChanged (Ogre::Quaternion::IDENTITY);
+    setCameraPositionChanged(Ogre::Vector3::ZERO);
 }
-
 
 //****************************************************************************/
 void RenderwindowDockWidget::setHoover(bool enabled)
@@ -645,18 +645,54 @@ void RenderwindowDockWidget::doTransformationWidgetValueChanged(void)
         return;
 
     // Replace the code in this function with your own code.
+    Ogre::Vector3 v;
     switch (mTransformationWidget->getCurrentTransformation())
     {
         case Magus::TransformationWidget::SCALE:
         {
-            Ogre::Vector3 v;
             v.x = mTransformationWidget->getScale().x();
             v.y = mTransformationWidget->getScale().y();
             v.z = mTransformationWidget->getScale().z();
             mOgreWidget->setItemScale(v);
         }
         break;
+        case Magus::TransformationWidget::ROTATION:
+        {
+            v.x = mTransformationWidget->getRotation().x();
+            v.y = mTransformationWidget->getRotation().y();
+            v.z = mTransformationWidget->getRotation().z();
+            mOgreWidget->setRotation(v);
+        }
+        break;
+        case Magus::TransformationWidget::POSITION:
+        {
+            v.x = mTransformationWidget->getPosition().x();
+            v.y = mTransformationWidget->getPosition().y();
+            v.z = mTransformationWidget->getPosition().z();
+            mOgreWidget->setPosition(v);
+        }
+        break;
     }
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::setCameraOrientationChanged (const Ogre::Quaternion& orientation)
+{
+    QVector3D r;
+    r.setX(orientation.getYaw().valueDegrees());
+    r.setY(orientation.getPitch().valueDegrees());
+    r.setZ(orientation.getRoll().valueDegrees());
+    mTransformationWidget->setRotation(r);
+}
+
+//****************************************************************************/
+void RenderwindowDockWidget::setCameraPositionChanged (const Ogre::Vector3& position)
+{
+    QVector3D p;
+    p.setX(position.x);
+    p.setY(position.y);
+    p.setZ(position.z);
+    mTransformationWidget->setPosition(p);
 }
 
 //****************************************************************************/

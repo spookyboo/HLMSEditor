@@ -78,7 +78,8 @@ namespace Magus
         mOffsetTextureMode(false),
         mPaintLayers(0),
         mLatestPaintResult(1),
-        mUnlitTextureTypeOffsetTexture(0)
+        mUnlitTextureTypeOffsetTexture(0),
+        mResetMousePos(true)
     {
         mPbsDatablockBlockOffsetTexture = "";
         mUnlitDatablockBlockOffsetTexture = "";
@@ -1083,6 +1084,8 @@ namespace Magus
     {
         if(mSystemInitialized)
         {
+            Ogre::Vector2 oldPos = mAbsolute;
+            mAbsolute = Ogre::Vector2(e->pos().x(), e->pos().y());
             if (mMouseDown)
             {
                 if (mPaintMode)
@@ -1097,15 +1100,27 @@ namespace Magus
                     e->accept();
                     return;
                 }
-            }
 
-            Ogre::Vector2 oldPos = mAbsolute;
-            mAbsolute = Ogre::Vector2(e->pos().x(), e->pos().y());
-            mRelative = mAbsolute - oldPos;
-            if (mRotateCameraMode)
-                mCameraManager->injectMouseMove(mRelative);
-            else
-                rotateLight(mRelative);
+                if (mResetMousePos)
+                {
+                    // Prevent that mRelative becomes to large, so rotation/position isn't smooth
+                    mRelative = Ogre::Vector2::ZERO;
+                    mResetMousePos = false;
+                }
+                else
+                {
+                    mRelative = mAbsolute - oldPos;
+                }
+
+                if (mRotateCameraMode)
+                {
+                    mCameraManager->injectMouseMove(mRelative);
+                    mRenderwindowDockWidget->setCameraOrientationChanged (mCameraManager->getOrientationCameraSceneNode());
+                    mRenderwindowDockWidget->setCameraPositionChanged (mCameraManager->getPositionCameraSceneNode());
+                }
+                else
+                    rotateLight(mRelative);
+            }
 
             // Determine over which subItem the mouse hoovers
             if (mHoover)
@@ -1188,6 +1203,7 @@ namespace Magus
         if(mSystemInitialized)
         {
             mCameraManager->injectMouseUp(e);
+            mResetMousePos = true;
             if (e->button() == Qt::LeftButton)
             {
                 mMouseDown = false;
@@ -1257,6 +1273,21 @@ namespace Magus
     {
         if (mItem && mItem->getParentSceneNode())
             mItem->getParentSceneNode()->setScale(scale);
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::setRotation(const Ogre::Vector3& rotation)
+    {
+        // Rotation consists of euler angle rotation
+        mCameraManager->rotate(rotation);
+        mResetMousePos = true; // To prevent that the camera shakes when the mouse is used for rotation
+    }
+
+    //****************************************************************************/
+    void QOgreWidget::setPosition(const Ogre::Vector3& position)
+    {
+        mCameraManager->pan(position);
+        mResetMousePos = true; // To prevent that the camera shakes when the mouse is moved
     }
 
     //****************************************************************************/

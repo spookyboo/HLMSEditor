@@ -118,6 +118,8 @@ class RenderwindowDockWidget : public QDockWidget
                                                            const Ogre::IdString& datablockId,
                                                            Ogre::uint8 textureType); // Called when an unlit samplerblock is visible/invisible
         void notifyOffsetTextureUpdated (float offsetX, float offsetY); // Texture offset is changed
+        void setCameraOrientationChanged (const Ogre::Quaternion& orientation); // Called when the camera in the Ogrewidget rotates around the item
+        void setCameraPositionChanged (const Ogre::Vector3& position); // Called when the camera in the Ogrewidget moves
 
     public slots:
         void handleTogglePaintMode(void); // Must be public, because it is also used by the ogre widget

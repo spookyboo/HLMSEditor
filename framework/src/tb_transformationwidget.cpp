@@ -63,7 +63,7 @@ namespace Magus
         s = QVariant(mPosition.x()).toString();
         s = s.left(getLeftStringIndex(s));
         mXedit->setText(s);
-        mXedit->setStyleSheet("QLineEdit {margin-right: 0px; margin-left: 5px; width: 32px; spacing: 0px;}");
+        mXedit->setStyleSheet("QLineEdit {margin-right: 0px; margin-left: 5px; width: 40px; spacing: 0px;}");
 
         QLabel* yLabel = new QLabel(QString("<b>Y</b>"));
         yLabel->setMaximumWidth(24);
@@ -74,7 +74,7 @@ namespace Magus
         s = QVariant(mPosition.y()).toString();
         s = s.left(getLeftStringIndex(s));
         mYedit->setText(s);
-        mYedit->setStyleSheet("QLineEdit {margin-right: 0px; margin-left: 0px; width: 32px; spacing: 0px;}");
+        mYedit->setStyleSheet("QLineEdit {margin-right: 0px; margin-left: 0px; width: 40px; spacing: 0px;}");
 
         QLabel* zLabel = new QLabel(QString("<b>Z</b>"));
         zLabel->setMaximumWidth(24);
@@ -85,7 +85,7 @@ namespace Magus
         s = QVariant(mPosition.z()).toString();
         s = s.left(getLeftStringIndex(s));
         mZedit->setText(s);
-        mZedit->setStyleSheet("QLineEdit {margin-right: 0px; margin-left: 0px; width: 32px; spacing: 0px;}");
+        mZedit->setStyleSheet("QLineEdit {margin-right: 0px; margin-left: 0px; width: 40px; spacing: 0px;}");
 
         // Layout
         transformationLayout->addWidget(mTransformationCombobox);

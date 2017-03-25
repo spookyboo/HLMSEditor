@@ -75,6 +75,8 @@ namespace Magus
             Ogre::SceneManager* getSceneManager(void) {return mSceneManager;}
             const Ogre::Vector3& getItemScale(void);
             void setItemScale(const Ogre::Vector3& scale);
+            void setRotation(const Ogre::Vector3& rotation);
+            void setPosition(const Ogre::Vector3& position);
             void setDefaultDatablockItem(void);
             void setDefaultDatablockItemRttHoover(void); // Set the mItem to default
             void saveToFile(const Ogre::String& fileName);
@@ -187,6 +189,7 @@ namespace Magus
             Ogre::IdString mUnlitDatablockBlockOffsetTexture; // Use the IdString instead of a pointer, because the pointer may change
             Ogre::PbsTextureTypes mPbsTextureTypeOffsetTexture;
             Ogre::uint8 mUnlitTextureTypeOffsetTexture;
+            bool mResetMousePos; // Used to indicate that diff between current mouse position and previous mouse position must be set to 0 to keep smoothness of mousemovent actions
 
             virtual void createCompositor();
             virtual void createCompositorRenderToTexture();

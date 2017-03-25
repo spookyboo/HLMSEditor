@@ -166,7 +166,7 @@ namespace Magus
             mCamera->moveRelative(Ogre::Vector3(0, 0, dist));
         }
 
-		/*-----------------------------------------------------------------------------
+        /*-----------------------------------------------------------------------------
 		| Sets the movement style of our camera man.
 		-----------------------------------------------------------------------------*/
 		virtual void setMode(CameraMode mode)
@@ -443,18 +443,40 @@ namespace Magus
             mCameraNode->pitch( Ogre::Degree( -y * 0.4f ) );
 		}
 
-		virtual void pan(int x, int y)
+        // A non-mouse version of rotate
+        virtual void rotate(const Ogre::Vector3& yawPitchRoll)
+        {
+            mCameraNode->setOrientation(Ogre::Quaternion::IDENTITY);
+            mCameraNode->yaw(Ogre::Radian(Ogre::Degree(yawPitchRoll.x)), Ogre::Node::TS_PARENT );
+            mCameraNode->pitch(Ogre::Radian(Ogre::Degree(yawPitchRoll.y)), Ogre::Node::TS_PARENT );
+            mCameraNode->roll(Ogre::Radian(Ogre::Degree(yawPitchRoll.z)), Ogre::Node::TS_PARENT );
+        }
+
+        virtual void pan(int x, int y)
 		{
 		    Ogre::Vector3 transVector( -x, y, 0 );
 		    if (mTarget)
 		    {
-            mDistFromTarget = (mCamera->getPosition() - mTarget->_getDerivedPositionUpdated()).length();
-			if (mTarget->getAttachedObject(0))
-                transVector *= mTarget->getAttachedObject(0)->getWorldRadius() * (mDistFromTarget / 10000.0f);
-                //transVector *= mTarget->getAttachedObject(0)->getBoundingRadius() * (mDistFromTarget / 10000.0f);
+                mDistFromTarget = (mCamera->getPosition() - mTarget->_getDerivedPositionUpdated()).length();
+                if (mTarget->getAttachedObject(0))
+                    transVector *= mTarget->getAttachedObject(0)->getWorldRadius() * (mDistFromTarget / 10000.0f);
 		    }
 		    mCameraNode->translate(transVector, Ogre::Node::TS_LOCAL);
 		}
+
+        // A non-mouse version of pan
+        virtual void pan(const Ogre::Vector3& translate)
+        {
+            Ogre::Vector3 transVector = translate;
+            if (mTarget)
+            {
+                mDistFromTarget = (mCamera->getPosition() - mTarget->_getDerivedPositionUpdated()).length();
+                if (mTarget->getAttachedObject(0))
+                    transVector *= mTarget->getAttachedObject(0)->getWorldRadius() * (mDistFromTarget / 10000.0f);
+            }
+            mCameraNode->setPosition(Ogre::Vector3::ZERO);
+            mCameraNode->translate(transVector, Ogre::Node::TS_LOCAL);
+        }
 
         /*-----------------------------------------------------------------------------
         | Set the cameramode to its original position/orientation
@@ -463,8 +485,25 @@ namespace Magus
         {
             mCameraNode->setOrientation(Ogre::Quaternion::IDENTITY);
             mCameraNode->setPosition(0.0, 0.0, 0.0);
+            mTarget->_getDerivedPositionUpdated();
+            mTarget->_getDerivedOrientationUpdated();
         }
 
+        /*-----------------------------------------------------------------------------
+        | Return orientation
+        -----------------------------------------------------------------------------*/
+        const Ogre::Quaternion& getOrientationCameraSceneNode (void)
+        {
+            return mCameraNode->getOrientation();
+        }
+
+        /*-----------------------------------------------------------------------------
+        | Return position
+        -----------------------------------------------------------------------------*/
+        const Ogre::Vector3& getPositionCameraSceneNode (void)
+        {
+            return mCameraNode->getPosition();
+        }
 
     protected:
 		Ogre::Camera* mCamera;
@@ -478,6 +517,7 @@ namespace Magus
 		bool mGoingRight;
 		bool mGoingUp;
 		bool mGoingDown;
+        Ogre::Vector3 mHelperV3;
 
 		Ogre::Real mDistFromTarget;
 		Ogre::Real mTopSpeed;
