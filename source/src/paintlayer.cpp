@@ -103,6 +103,7 @@ PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager, int externalLayerId
     mJitterPaintColourMax = Ogre::ColourValue::White;
     mBrushFileName = "";
     dummyDatablockId = "";
+    mHelperOgreString = "";
     mStartTime = clock();
 }
 
@@ -202,13 +203,13 @@ void PaintLayer::paint(float u, float v)
             {
                 // Erase: Retrieve the colourvalue of the original texture and blend it with the colour value of the texture on which is painted
                 mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
-                Ogre::ColourValue originalColour = mTextureLayer->mPixelboxOriginalTexture.getColourAt(calculatedTexturePositionX,
-                                                                                                       calculatedTexturePositionY,
-                                                                                                       0);
+                mFinalColour = mAlpha * mTextureLayer->mPixelboxOriginalTexture.getColourAt(calculatedTexturePositionX,
+                                                                                            calculatedTexturePositionY,
+                                                                                            0);
 
                 mFinalColour = (1.0 - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                                             calculatedTexturePositionY,
-                                                                                                            0) + mAlpha * originalColour;
+                                                                                                            0) + mFinalColour;
             }
             else if (mPaintEffect == PAINT_EFFECT_ALPHA)
             {
@@ -221,12 +222,27 @@ void PaintLayer::paint(float u, float v)
             }
             else if (mPaintEffect == PAINT_EFFECT_TEXTURE)
             {
-                // Paint with coloured brush
-                Ogre::ColourValue brushColour = mPixelboxBrush.getColourAt(mPosX, mPosY, 0);
-                mAlpha = mForce * brushColour.a;
+                // Paint with textured brush
+                mFinalColour = mPixelboxBrush.getColourAt(mPosX, mPosY, 0);
+                mAlpha = mForce * mFinalColour.a;
+                mFinalColour *= mAlpha;
                 mFinalColour = (1.0 - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
                                                                                                             calculatedTexturePositionY,
-                                                                                                            0) + mAlpha * brushColour;
+                                                                                                            0) + mFinalColour;
+            }
+            else if (mPaintEffect == PAINT_EFFECT_BURN)
+            {
+                // Paint with another texture; this texture has the same dimensions as the target texture
+                // The shape of the brush is used to copy the burn texture on the target texture (similar to carbon copy)
+                mFinalColour = mTextureLayer->mPixelboxBurnTexture.getColourAt(calculatedTexturePositionX,
+                                                                               calculatedTexturePositionY,
+                                                                               0);
+                mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
+                mAlpha *= mFinalColour.a;
+                mFinalColour *= mAlpha;
+                mFinalColour = (1.0 - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(calculatedTexturePositionX,
+                                                                                                            calculatedTexturePositionY,
+                                                                                                            0) + mFinalColour;
             }
 
             // Set the final paint colour
@@ -291,6 +307,23 @@ void PaintLayer::setPaintEffect (PaintEffects paintEffect)
 void PaintLayer::setPaintOverflow (PaintOverflowTypes paintOverflow)
 {
     mPaintOverflow = paintOverflow;
+}
+
+//****************************************************************************/
+void PaintLayer::setBurnTextureFileName (const Ogre::String& textureFileName)
+{
+    if (mTextureLayer)
+        mTextureLayer->setBurnTextureFileName(textureFileName);
+}
+
+//****************************************************************************/
+const Ogre::String& PaintLayer::getBurnTextureFileName (void)
+{
+    mHelperOgreString = "";
+    if (mTextureLayer)
+        mHelperOgreString = mTextureLayer->getBurnTextureFileName();
+
+    return mHelperOgreString;
 }
 
 //****************************************************************************/

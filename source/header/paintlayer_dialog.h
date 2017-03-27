@@ -23,6 +23,7 @@
 
 #include <QDialog>
 #include "asset_propertywidget_select.h"
+#include "asset_propertywidget_texture.h"
 #include "asset_propertywidget_color.h"
 #include "asset_propertywidget_slider_decimal.h"
 #include "asset_propertywidget_checkbox.h"
@@ -46,6 +47,8 @@ class PaintLayerDialog : public QDialog
         QtSelectProperty* mTextureTypeSelectProperty;
         QtSelectProperty* mPaintEffectSelectProperty;
         QtSelectProperty* mPaintOverflowSelectProperty;
+
+        QtTextureProperty* mBurnTextureProperty;
 
         QtColorProperty* mPaintColourProperty;
         QtCheckBoxProperty* mPaintJitterCheckboxProperty;
@@ -91,11 +94,16 @@ class PaintLayerDialog : public QDialog
     private slots:
         void propertyValueChanged(QtProperty* property);
 
+    protected:
+        void enableBurnContainer(bool enabled);
+        void enableColourContainer(bool enabled);
+
     private:
         void createIcons();
         PaintLayerWidget* mPaintLayerWidget;
         QtLayer* mQtLayer;
         Magus::QtContainerWidget* mContainerGeneral;
+        Magus::QtContainerWidget* mContainerBurn;
         Magus::QtContainerWidget* mContainerPaint;
         Magus::QtContainerWidget* mContainerScale;
         Magus::QtContainerWidget* mContainerForce;

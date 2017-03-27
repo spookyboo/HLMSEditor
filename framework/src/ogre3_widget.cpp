@@ -707,7 +707,7 @@ namespace Magus
 
         // Create the datablock with a custom UV texture from file
         // If the file already exist, it is loaded at the start of the application because
-            // it must be in a directory defined in file resources.cfg
+        // it must be in a directory defined in file resources.cfg
         try
         {
             // Create a HLMS Unlit datablock

@@ -650,6 +650,12 @@ void PaintLayerWidget::handleTableDoubleClicked(QModelIndex index)
         mPaintLayerDockWidget->setPaintEffect(layerId, paintLayerDialog.mPaintEffectSelectProperty->getCurrentText());
         mPaintLayerDockWidget->setPaintOverflow(layerId, paintLayerDialog.mPaintOverflowSelectProperty->getCurrentText());
 
+        // Burn Texture
+        if (paintLayerDialog.mBurnTextureProperty->getTextureBaseFileName() != "")
+        {
+            mPaintLayerDockWidget->setBurnTextureFileName (layerId, paintLayerDialog.mBurnTextureProperty->getTextureFileName());
+        }
+
         // Paint Colour
         if (paintLayerDialog.mPaintJitterCheckboxProperty->getValue())
         {
@@ -748,6 +754,9 @@ void PaintLayerWidget::initialisePaintLayerDialog(PaintLayerDialog* paintLayerDi
     paintLayerDialog->mTextureTypeSelectProperty->setCurrentText(mPaintLayerDockWidget->getTextureType(layerId));
     paintLayerDialog->mPaintEffectSelectProperty->setCurrentText(mPaintLayerDockWidget->getPaintEffect(layerId));
     paintLayerDialog->mPaintOverflowSelectProperty->setCurrentText(mPaintLayerDockWidget->getPaintOverflow(layerId));
+
+    // Burn Texture
+    paintLayerDialog->mBurnTextureProperty->setTextureFileName(mPaintLayerDockWidget->getBurnTextureFileName(layerId));
 
     // Paint Colour
     paintLayerDialog->mPaintJitterCheckboxProperty->setValue(mPaintLayerDockWidget->hasJitterPaintEnabled(layerId));

@@ -34,16 +34,21 @@ TextureLayer::TextureLayer(void) :
     mTextureOnWhichIsPaintedHasAlpha(false),
     mNumMipMaps(0),
     mTextureTypeDefined(false),
-    mMaxSequence(0)
+    mMaxSequence(0),
+    mBurndata(0),
+    mBurnTextureScale(1.0f)
 {
     mTextureType = Ogre::PBSM_DIFFUSE;
     mDatablockId = "";
     mTextureFileName = "";
+    mBurnTextureFileName = "";
 }
 
 //****************************************************************************/
 TextureLayer::~TextureLayer(void)
 {
+    if (mBurndata)
+        delete [] mBurndata;
 }
 
 //****************************************************************************/
@@ -148,6 +153,7 @@ void TextureLayer::loadTextureGeneration (const Ogre::String& filename)
     mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
     mTextureOnWhichIsPaintedWidth = mPixelboxTextureOnWhichIsPainted.getWidth();
     mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.getHeight();
+    createBurnTexture();
     blitTexture();
 }
 
@@ -235,4 +241,67 @@ bool TextureLayer::textureFileExists (const Ogre::String& filename)
 {
     std::ifstream infile(filename);
     return infile.good();
+}
+
+//****************************************************************************/
+void TextureLayer::setBurnTextureFileName (const Ogre::String& textureFileName)
+{
+    mBurnTextureFileName = textureFileName;
+    createBurnTexture();
+}
+
+//****************************************************************************/
+const Ogre::String& TextureLayer::getBurnTextureFileName (void)
+{
+    return mBurnTextureFileName;
+}
+
+//****************************************************************************/
+void TextureLayer::createBurnTexture (void)
+{
+    // mBurnTextureFileName is only filled if the effect is actually set
+    if (mBurnTextureFileName == "")
+        return;
+
+    Ogre::Image tempBurnTexture;
+
+    // Load the burn texture; take scaling into account (scaling is implemented as a resize)
+    tempBurnTexture.load(mBurnTextureFileName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    Ogre::uint32 widthLoadedImage = mBurnTextureScale * tempBurnTexture.getWidth();
+    Ogre::uint32 heightLoadedImage = mBurnTextureScale * tempBurnTexture.getHeight();
+    widthLoadedImage = widthLoadedImage  > mTextureOnWhichIsPaintedWidth ? mTextureOnWhichIsPaintedWidth : widthLoadedImage;
+    heightLoadedImage = heightLoadedImage  > mTextureOnWhichIsPaintedHeight ? mTextureOnWhichIsPaintedHeight : heightLoadedImage;
+    tempBurnTexture.resize(widthLoadedImage, heightLoadedImage);
+    Ogre::uint32 xMapped = 0;
+    Ogre::uint32 yMapped = 0;
+
+    // Delete the 'old' data if available
+    if (mBurndata)
+    {
+        delete [] mBurndata;
+        mBurndata = 0;
+    }
+
+    // Create an empty image and fill it with the loaded texture
+    size_t formatSize = Ogre::PixelUtil::getNumElemBytes(Ogre::PF_R8G8B8A8);
+    mBurndata = new uchar[mTextureOnWhichIsPaintedWidth * mTextureOnWhichIsPaintedHeight * formatSize];
+    mBurnTexture.loadDynamicImage(mBurndata, mTextureOnWhichIsPaintedWidth, mTextureOnWhichIsPaintedHeight, Ogre::PF_A8R8G8B8);
+
+    // Copy the loaded burn texture data into the final burn texture
+    // Take the dimensions into account
+    Ogre::PixelBox tempPixelboxBurnTexture = tempBurnTexture.getPixelBox(0, 0);
+    mPixelboxBurnTexture = mBurnTexture.getPixelBox(0, 0);
+    Ogre::ColourValue col;
+    for (Ogre::uint32 y = 0; y < mTextureOnWhichIsPaintedHeight; y++)
+    {
+        yMapped = y % heightLoadedImage;
+        for (Ogre::uint32 x = 0; x < mTextureOnWhichIsPaintedWidth; x++)
+        {
+            // Determine the colour value
+            xMapped = x % widthLoadedImage;
+            col = tempPixelboxBurnTexture.getColourAt(xMapped, yMapped, 0);
+            mPixelboxBurnTexture.setColourAt(col, x, y, 0);
+        }
+    }
+    mBurnTexture.save ("temp.png");
 }

@@ -293,6 +293,8 @@ void PaintLayerDockWidget::setPaintEffect(int layerId, const QString& paintEffec
             paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_ALPHA);
         else if (paintEffect == PAINT_EFFECT_TEXTURE_QSTRING)
             paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_TEXTURE);
+        else if (paintEffect == PAINT_EFFECT_BURN_QSTRING)
+            paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_BURN);
     }
 }
 
@@ -317,6 +319,9 @@ const QString& PaintLayerDockWidget::getPaintEffect(int layerId)
             case PaintLayer::PAINT_EFFECT_TEXTURE:
                 mHelperString = PAINT_EFFECT_TEXTURE_QSTRING;
             break;
+        case PaintLayer::PAINT_EFFECT_BURN:
+            mHelperString = PAINT_EFFECT_BURN_QSTRING;
+        break;
         }
     }
     return mHelperString;
@@ -346,6 +351,32 @@ const QString& PaintLayerDockWidget::getPaintOverflow(int layerId)
             mHelperString = PAINT_OVERFLOW_IGNORE_QSTRING;
         else if (paintLayer->getPaintOverflow() == PaintLayer::PAINT_OVERFLOW_CONTINUE)
             mHelperString = PAINT_OVERFLOW_CONTINUE_QSTRING;
+    }
+
+    return mHelperString;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setBurnTextureFileName (int layerId, const QString& textureFileName)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        // Assume that the resource group doesn't exist yet
+        mParent->addResourceLocationFile(textureFileName);
+        paintLayer->setBurnTextureFileName(textureFileName.toStdString());
+    }
+}
+
+//****************************************************************************/
+const QString& PaintLayerDockWidget::getBurnTextureFileName (int layerId)
+{
+    mHelperString = "";
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+    {
+        Ogre::String s = paintLayer->getBurnTextureFileName();
+        mHelperString = s.c_str();
     }
 
     return mHelperString;

@@ -101,6 +101,11 @@ class PaintLayerDockWidget : public QDockWidget
         void setPaintOverflow(int layerId, const QString& paintOverflow);
         const QString& PaintLayerDockWidget::getPaintOverflow(int layerId);
 
+        /* Set/get the Burn texture
+         */
+        void setBurnTextureFileName (int layerId, const QString& textureFileName);
+        const QString& getBurnTextureFileName (int layerId);
+
         /* Set/get the paint colour
          * This colour is forwarded to the PaintLayer
          */

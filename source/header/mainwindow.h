@@ -89,6 +89,8 @@ class MainWindow : public QMainWindow
         void setBrushInPaintLayer(const QString& name, const QString& baseName); // If a brush is selected, set the new brush in the PaintLayer
         void loadTextureGeneration (Ogre::PbsTextureTypes textureType, Ogre::ushort sequence); // Load a texture, based on the type and sequence (texture is blit to the GPU)
         void notifyNodeDeleted(unsigned int nodeType); // Is called by the node editor if a node is deleted
+        void addResourceLocationFile (const QString& fileName);
+        void addResourceLocationPath (const QString& path);
 
     protected:
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources); // Save the content of a resource vector
@@ -129,8 +131,6 @@ class MainWindow : public QMainWindow
         Ogre::DataStreamPtr openFile(Ogre::String source);
         void clearHlmsNamesAndRemovePaintLayers(void);
         void deleteTempPathRecursive(void);
-        void addResourceLocationFile (const QString& fileName);
-        void addResourceLocationPath (const QString& path);
 
 	private slots:
         void doNewProjectAction(void);
