@@ -58,7 +58,7 @@ class PaintLayer
             PAINT_EFFECT_ERASE, /// Erase what was painted, using the original texture
             PAINT_EFFECT_ALPHA, /// Paint with alpha
             PAINT_EFFECT_TEXTURE, /// Use the colours of the brush
-            PAINT_EFFECT_BURN, /// Use another texture to 'carbon copy' that texture to the destination texture; uses a brush
+            PAINT_EFFECT_CARBON_COPY, /// Use another texture to 'carbon copy' that texture to the destination texture; uses a brush
         };
 
         enum PaintOverflowTypes
@@ -87,10 +87,15 @@ class PaintLayer
          */
         void paint(float u, float v);
 
-        /* Set/get the Burn texture settings
+        /* Set/get the Carbon Copy texture settings
          */
-        void setBurnTextureFileName (const Ogre::String& textureFileName);
-        const Ogre::String& getBurnTextureFileName (void);
+        void setCarbonCopyTextureFileName (const Ogre::String& textureFileName);
+        const Ogre::String& getCarbonCopyTextureFileName (void);
+
+        /* Set/get the Carbon Copye texture scale
+         */
+        void setCarbonCopyScale (float scale);
+        float getCarbonCopyScale (void);
 
         /* Set the name of the brush used for painting.
          */

@@ -230,11 +230,11 @@ void PaintLayer::paint(float u, float v)
                                                                                                             calculatedTexturePositionY,
                                                                                                             0) + mFinalColour;
             }
-            else if (mPaintEffect == PAINT_EFFECT_BURN)
+            else if (mPaintEffect == PAINT_EFFECT_CARBON_COPY)
             {
                 // Paint with another texture; this texture has the same dimensions as the target texture
-                // The shape of the brush is used to copy the burn texture on the target texture (similar to carbon copy)
-                mFinalColour = mTextureLayer->mPixelboxBurnTexture.getColourAt(calculatedTexturePositionX,
+                // The shape of the brush is used to copy the Carbon Copy texture on the target texture (similar to carbon copy)
+                mFinalColour = mTextureLayer->mPixelboxCarbonCopyTexture.getColourAt(calculatedTexturePositionX,
                                                                                calculatedTexturePositionY,
                                                                                0);
                 mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
@@ -310,20 +310,37 @@ void PaintLayer::setPaintOverflow (PaintOverflowTypes paintOverflow)
 }
 
 //****************************************************************************/
-void PaintLayer::setBurnTextureFileName (const Ogre::String& textureFileName)
+void PaintLayer::setCarbonCopyTextureFileName (const Ogre::String& textureFileName)
 {
     if (mTextureLayer)
-        mTextureLayer->setBurnTextureFileName(textureFileName);
+        mTextureLayer->setCarbonCopyTextureFileName(textureFileName);
 }
 
 //****************************************************************************/
-const Ogre::String& PaintLayer::getBurnTextureFileName (void)
+const Ogre::String& PaintLayer::getCarbonCopyTextureFileName (void)
 {
     mHelperOgreString = "";
     if (mTextureLayer)
-        mHelperOgreString = mTextureLayer->getBurnTextureFileName();
+        mHelperOgreString = mTextureLayer->getCarbonCopyTextureFileName();
 
     return mHelperOgreString;
+}
+
+//****************************************************************************/
+void PaintLayer::setCarbonCopyScale (float scale)
+{
+    if (mTextureLayer)
+        mTextureLayer->setCarbonCopyScale(scale);
+}
+
+//****************************************************************************/
+float PaintLayer::getCarbonCopyScale (void)
+{
+    float scale = 1.0f;
+    if (mTextureLayer)
+        scale = mTextureLayer->getCarbonCopyScale();
+
+    return scale;
 }
 
 //****************************************************************************/

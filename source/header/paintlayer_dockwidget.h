@@ -101,10 +101,15 @@ class PaintLayerDockWidget : public QDockWidget
         void setPaintOverflow(int layerId, const QString& paintOverflow);
         const QString& PaintLayerDockWidget::getPaintOverflow(int layerId);
 
-        /* Set/get the Burn texture
+        /* Set/get the Carbon Copy texture
          */
-        void setBurnTextureFileName (int layerId, const QString& textureFileName);
-        const QString& getBurnTextureFileName (int layerId);
+        void setCarbonCopyTextureFileName (int layerId, const QString& textureFileName);
+        const QString& getCarbonCopyTextureFileName (int layerId);
+
+        /* Set/get the Carbon Copy texture scale
+         */
+        void setCarbonCopyScale (int layerId, float scale);
+        float getCarbonCopyScale (int layerId);
 
         /* Set/get the paint colour
          * This colour is forwarded to the PaintLayer

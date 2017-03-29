@@ -122,10 +122,15 @@ class TextureLayer : public QObject
          */
         bool textureFileExists (const Ogre::String& filename);
 
-        /* Set the name of the burn texture. If it is a new filename, a new texture image is loaded
+        /* Set the name of the Carbon Copy texture. If it is a new filename, a new texture image is loaded
          */
-        void setBurnTextureFileName (const Ogre::String&  textureFileName);
-        const Ogre::String& getBurnTextureFileName (void);
+        void setCarbonCopyTextureFileName (const Ogre::String&  textureFileName);
+        const Ogre::String& getCarbonCopyTextureFileName (void);
+
+        /* Set/get the Carbon Copye texture scale
+         */
+        void setCarbonCopyScale (float scale);
+        float getCarbonCopyScale (void);
 
 
         Ogre::IdString mDatablockId;
@@ -147,9 +152,9 @@ class TextureLayer : public QObject
         bool mTextureTypeDefined;                               // If true, a valid texture type is assigned to this layer
         Ogre::ushort mMaxSequence;                              // Max sequence number of the temporary texture file, used for undo/redo functions
 
-        Ogre::Image mBurnTexture;                               // The (final) texture used for the burn effect; its dimensions are the same as mTextureOnWhichIsPainted
+        Ogre::Image mCarbonCopyTexture;                         // The (final) texture used for the Carbon Copy effect; its dimensions are the same as mTextureOnWhichIsPainted
                                                                 // It is build from a loaded texture which may have different dimensions
-        Ogre::PixelBox mPixelboxBurnTexture;                    // Pixelbox of the final burn texture
+        Ogre::PixelBox mPixelboxCarbonCopyTexture;              // Pixelbox of the final Carbon Copy texture
 
     protected:
         /* Returns the filename of a certain generation, defined by the sequence.
@@ -166,16 +171,16 @@ class TextureLayer : public QObject
          */
         const Ogre::String& getTextureFileNameGeneration (int sequence, bool fullQualified = true);
 
-        /* Create the texture used for the burn effect
+        /* Create the texture used for the Carbon Copy effect
          */
-        void createBurnTexture (void);
+        void createCarbonCopyTexture (void);
 
     private:
-        Ogre::String  mBurnTextureFileName;                     // Full qualified name of the texture file used in a burn effect; this attribute is private,
+        Ogre::String  mCarbonCopyTextureFileName;               // Full qualified name of the texture file used in a Carbon Copy effect; this attribute is private,
                                                                 // because the acces must be done by means of the get/set functions, which contain additional actions
-        uchar* mBurndata;                                       // Data used for the burn texture
+        uchar* mCarbonCopydata;                                 // Data used for the Carbon Copy texture
         Ogre::String mHelperString;
-        float mBurnTextureScale;                                // Scaling factor of the loaded burn texture
+        float mCarbonCopyTextureScale;                          // Scaling factor of the loaded Carbon Copy texture
 };
 
 #endif

@@ -35,20 +35,20 @@ TextureLayer::TextureLayer(void) :
     mNumMipMaps(0),
     mTextureTypeDefined(false),
     mMaxSequence(0),
-    mBurndata(0),
-    mBurnTextureScale(1.0f)
+    mCarbonCopydata(0),
+    mCarbonCopyTextureScale(1.0f)
 {
     mTextureType = Ogre::PBSM_DIFFUSE;
     mDatablockId = "";
     mTextureFileName = "";
-    mBurnTextureFileName = "";
+    mCarbonCopyTextureFileName = "";
 }
 
 //****************************************************************************/
 TextureLayer::~TextureLayer(void)
 {
-    if (mBurndata)
-        delete [] mBurndata;
+    if (mCarbonCopydata)
+        delete [] mCarbonCopydata;
 }
 
 //****************************************************************************/
@@ -153,7 +153,7 @@ void TextureLayer::loadTextureGeneration (const Ogre::String& filename)
     mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
     mTextureOnWhichIsPaintedWidth = mPixelboxTextureOnWhichIsPainted.getWidth();
     mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.getHeight();
-    createBurnTexture();
+    createCarbonCopyTexture();
     blitTexture();
 }
 
@@ -244,53 +244,53 @@ bool TextureLayer::textureFileExists (const Ogre::String& filename)
 }
 
 //****************************************************************************/
-void TextureLayer::setBurnTextureFileName (const Ogre::String& textureFileName)
+void TextureLayer::setCarbonCopyTextureFileName (const Ogre::String& textureFileName)
 {
-    mBurnTextureFileName = textureFileName;
-    createBurnTexture();
+    mCarbonCopyTextureFileName = textureFileName;
+    createCarbonCopyTexture();
 }
 
 //****************************************************************************/
-const Ogre::String& TextureLayer::getBurnTextureFileName (void)
+const Ogre::String& TextureLayer::getCarbonCopyTextureFileName (void)
 {
-    return mBurnTextureFileName;
+    return mCarbonCopyTextureFileName;
 }
 
 //****************************************************************************/
-void TextureLayer::createBurnTexture (void)
+void TextureLayer::createCarbonCopyTexture (void)
 {
-    // mBurnTextureFileName is only filled if the effect is actually set
-    if (mBurnTextureFileName == "")
+    // mCarbonCopyTextureFileName is only filled if the effect is actually set
+    if (mCarbonCopyTextureFileName == "")
         return;
 
-    Ogre::Image tempBurnTexture;
+    Ogre::Image tempCarbonCopyTexture;
 
-    // Load the burn texture; take scaling into account (scaling is implemented as a resize)
-    tempBurnTexture.load(mBurnTextureFileName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    Ogre::uint32 widthLoadedImage = mBurnTextureScale * tempBurnTexture.getWidth();
-    Ogre::uint32 heightLoadedImage = mBurnTextureScale * tempBurnTexture.getHeight();
+    // Load the Carbon Copy texture; take scaling into account (scaling is implemented as a resize)
+    tempCarbonCopyTexture.load(mCarbonCopyTextureFileName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    Ogre::uint32 widthLoadedImage = mCarbonCopyTextureScale * tempCarbonCopyTexture.getWidth();
+    Ogre::uint32 heightLoadedImage = mCarbonCopyTextureScale * tempCarbonCopyTexture.getHeight();
     widthLoadedImage = widthLoadedImage  > mTextureOnWhichIsPaintedWidth ? mTextureOnWhichIsPaintedWidth : widthLoadedImage;
     heightLoadedImage = heightLoadedImage  > mTextureOnWhichIsPaintedHeight ? mTextureOnWhichIsPaintedHeight : heightLoadedImage;
-    tempBurnTexture.resize(widthLoadedImage, heightLoadedImage);
+    tempCarbonCopyTexture.resize(widthLoadedImage, heightLoadedImage);
     Ogre::uint32 xMapped = 0;
     Ogre::uint32 yMapped = 0;
 
     // Delete the 'old' data if available
-    if (mBurndata)
+    if (mCarbonCopydata)
     {
-        delete [] mBurndata;
-        mBurndata = 0;
+        delete [] mCarbonCopydata;
+        mCarbonCopydata = 0;
     }
 
     // Create an empty image and fill it with the loaded texture
     size_t formatSize = Ogre::PixelUtil::getNumElemBytes(Ogre::PF_R8G8B8A8);
-    mBurndata = new uchar[mTextureOnWhichIsPaintedWidth * mTextureOnWhichIsPaintedHeight * formatSize];
-    mBurnTexture.loadDynamicImage(mBurndata, mTextureOnWhichIsPaintedWidth, mTextureOnWhichIsPaintedHeight, Ogre::PF_A8R8G8B8);
+    mCarbonCopydata = new uchar[mTextureOnWhichIsPaintedWidth * mTextureOnWhichIsPaintedHeight * formatSize];
+    mCarbonCopyTexture.loadDynamicImage(mCarbonCopydata, mTextureOnWhichIsPaintedWidth, mTextureOnWhichIsPaintedHeight, Ogre::PF_A8R8G8B8);
 
-    // Copy the loaded burn texture data into the final burn texture
+    // Copy the loaded texture data into the final Carbon Copy texture
     // Take the dimensions into account
-    Ogre::PixelBox tempPixelboxBurnTexture = tempBurnTexture.getPixelBox(0, 0);
-    mPixelboxBurnTexture = mBurnTexture.getPixelBox(0, 0);
+    Ogre::PixelBox tempPixelboxCarbonCopyTexture = tempCarbonCopyTexture.getPixelBox(0, 0);
+    mPixelboxCarbonCopyTexture = mCarbonCopyTexture.getPixelBox(0, 0);
     Ogre::ColourValue col;
     for (Ogre::uint32 y = 0; y < mTextureOnWhichIsPaintedHeight; y++)
     {
@@ -299,9 +299,21 @@ void TextureLayer::createBurnTexture (void)
         {
             // Determine the colour value
             xMapped = x % widthLoadedImage;
-            col = tempPixelboxBurnTexture.getColourAt(xMapped, yMapped, 0);
-            mPixelboxBurnTexture.setColourAt(col, x, y, 0);
+            col = tempPixelboxCarbonCopyTexture.getColourAt(xMapped, yMapped, 0);
+            mPixelboxCarbonCopyTexture.setColourAt(col, x, y, 0);
         }
     }
-    mBurnTexture.save ("temp.png");
+}
+
+//****************************************************************************/
+void TextureLayer::setCarbonCopyScale (float scale)
+{
+    mCarbonCopyTextureScale = scale;
+    createCarbonCopyTexture();
+}
+
+//****************************************************************************/
+float TextureLayer::getCarbonCopyScale (void)
+{
+    return mCarbonCopyTextureScale;
 }

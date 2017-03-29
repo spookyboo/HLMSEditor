@@ -36,7 +36,8 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
     mPaintEffectSelectProperty = 0;
     mPaintOverflowSelectProperty = 0;
 
-    mBurnTextureProperty  = 0;
+    mCarbonCopyTextureProperty = 0;
+    mCarbonCopyScaleProperty = 0;
 
     mPaintColourProperty = 0;
     mPaintJitterCheckboxProperty = 0;
@@ -93,8 +94,8 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
     // Create containers
     mContainerGeneral = assetWidget->createContainer(CONTAINER_PAINTLAYER_GENERAL, QString("General"));
     mContainerGeneral->setTitleBold(true);
-    mContainerBurn = assetWidget->createContainer(CONTAINER_PAINTLAYER_BURN, QString("Texture Burn"));
-    mContainerBurn->setTitleBold(true);
+    mContainerCarbonCopy = assetWidget->createContainer(CONTAINER_PAINTLAYER_CARBON_COPY, QString("Carbon Copy"));
+    mContainerCarbonCopy->setTitleBold(true);
     mContainerPaint = assetWidget->createContainer(CONTAINER_PAINTLAYER_COLOUR, QString("Colour painting"));
     mContainerPaint->setTitleBold(true);
     mContainerScale = assetWidget->createContainer(CONTAINER_PAINTLAYER_SCALE, QString("Brush scale"));
@@ -125,7 +126,7 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
                               PAINT_EFFECT_ERASE_QSTRING <<
                               PAINT_EFFECT_ALPHA_QSTRING <<
                               PAINT_EFFECT_TEXTURE_QSTRING <<
-                              PAINT_EFFECT_BURN_QSTRING;
+                              PAINT_EFFECT_CARBON_COPY_QSTRING;
     mPaintEffectSelectProperty = static_cast<Magus::QtSelectProperty*>
             (assetWidget->createProperty(CONTAINER_PAINTLAYER_GENERAL, PROPERTY_PAINT_EFFECT, QString("Paint effect"), Magus::QtProperty::SELECT));
     mPaintEffectSelectProperty->addValues(stringListPaintEffects);
@@ -140,11 +141,16 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
     mPaintOverflowSelectProperty->setCurentIndex(1); // Continue is the default
 
     // *******************************************************************************************************************
-    // ***************************************************** Burn *****************************************************
+    // ************************************************** Carbon Copy ****************************************************
     // *******************************************************************************************************************
-    mBurnTextureProperty = static_cast<Magus::QtTextureProperty*>
-            (assetWidget->createProperty(CONTAINER_PAINTLAYER_BURN, PROPERTY_BURN_TEXTURE, QString("Texture"), Magus::QtProperty::TEXTURE));
-    enableBurnContainer (false);
+    mCarbonCopyTextureProperty = static_cast<Magus::QtTextureProperty*>
+            (assetWidget->createProperty(CONTAINER_PAINTLAYER_CARBON_COPY, PROPERTY_CARBON_COPY_TEXTURE, QString("Texture"), Magus::QtProperty::TEXTURE));
+    mCarbonCopyScaleProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (assetWidget->createProperty(CONTAINER_PAINTLAYER_CARBON_COPY, PROPERTY_CARBON_COPY_SCALE, QString("Scale texture"), Magus::QtProperty::SLIDER_DECIMAL));
+    mCarbonCopyScaleProperty->setSliderRange (0.0f, 2.0f, 0.2f);
+    mCarbonCopyScaleProperty->setValue(1.0f);
+    mCarbonCopyScaleProperty->setVisible(false);
+    enableCarbonCopyContainer (false);
 
     // ************************************************************************************************************************
     // ***************************************************** Paint colour *****************************************************
@@ -412,8 +418,8 @@ void PaintLayerDialog::propertyValueChanged(QtProperty* property)
             selectProperty = static_cast<Magus::QtSelectProperty*>(property);
             if (selectProperty->getCurrentText() == PAINT_EFFECT_COLOR_QSTRING)
             {
-                // Disable Burn container
-                enableBurnContainer (false);
+                // Disable Carbon Copy container
+                enableCarbonCopyContainer (false);
 
                 // Enable colour container
                 mContainerPaint->setVisible(true);
@@ -424,20 +430,18 @@ void PaintLayerDialog::propertyValueChanged(QtProperty* property)
                 mPaintColourJitterMaxProperty->setVisible(jitter);
                 mPaintColourJitterIntervalProperty->setVisible(jitter);
             }
-            else if (selectProperty->getCurrentText() == PAINT_EFFECT_BURN_QSTRING)
+            else if (selectProperty->getCurrentText() == PAINT_EFFECT_CARBON_COPY_QSTRING)
             {
-                // Enable Burn container
-                enableBurnContainer (true);
+                // Enable Carbon Copy container
+                enableCarbonCopyContainer (true);
 
                 // Disable colour container
                 enableColourContainer (false);
-
-                //QMessageBox::information(0, QString("Warning"), QString("Not implemented yet"));
             }
             else
             {
-                // Disable Burn container
-                enableBurnContainer (false);
+                // Disable Carbon Copy container
+                enableCarbonCopyContainer (false);
 
                 // Disable colour container
                 enableColourContainer (false);
@@ -537,8 +541,9 @@ void PaintLayerDialog::enableColourContainer(bool enabled)
 }
 
 //****************************************************************************/
-void PaintLayerDialog::enableBurnContainer(bool enabled)
+void PaintLayerDialog::enableCarbonCopyContainer(bool enabled)
 {
-    mContainerBurn->setVisible(enabled);
-    mBurnTextureProperty->setVisible(enabled);
+    mContainerCarbonCopy->setVisible(enabled);
+    mCarbonCopyTextureProperty->setVisible(enabled);
+    mCarbonCopyScaleProperty->setVisible(enabled);
 }

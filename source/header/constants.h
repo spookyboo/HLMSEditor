@@ -129,7 +129,7 @@ static const QString PAINT_EFFECT_COLOR_QSTRING = QString("Colour");
 static const QString PAINT_EFFECT_ERASE_QSTRING = QString("Erase");
 static const QString PAINT_EFFECT_ALPHA_QSTRING = QString("Alpha");
 static const QString PAINT_EFFECT_TEXTURE_QSTRING = QString("Texture / Normal");
-static const QString PAINT_EFFECT_BURN_QSTRING = QString("Texture Burn");
+static const QString PAINT_EFFECT_CARBON_COPY_QSTRING = QString("Carbon Copy");
 static const QString PAINT_OVERFLOW_IGNORE_QSTRING = QString("Ignore");
 static const QString PAINT_OVERFLOW_CONTINUE_QSTRING = QString("Continue");
 
@@ -350,7 +350,7 @@ static const int PROPERTY_BLENDBLOCK_BLEND_OPERATION_ALPHA = 100;
 
 // Paintlayer properties
 static const int CONTAINER_PAINTLAYER_GENERAL = 1;
-static const int CONTAINER_PAINTLAYER_BURN = 2;
+static const int CONTAINER_PAINTLAYER_CARBON_COPY = 2;
 static const int CONTAINER_PAINTLAYER_COLOUR = 3;
 static const int CONTAINER_PAINTLAYER_SCALE = 4;
 static const int CONTAINER_PAINTLAYER_FORCE = 5;
@@ -363,7 +363,8 @@ static const int PROPERTY_TEXTURE_TYPE = 200;
 static const int PROPERTY_PAINT_EFFECT = 201;
 static const int PROPERTY_PAINT_OVERFLOW = 202;
 
-static const int PROPERTY_BURN_TEXTURE = 210;
+static const int PROPERTY_CARBON_COPY_TEXTURE = 210;
+static const int PROPERTY_CARBON_COPY_SCALE = 211;
 
 static const int PROPERTY_PAINT_COLOUR = 220;
 static const int PROPERTY_JITTER_PAINT_COLOUR_ENABLED = 221;

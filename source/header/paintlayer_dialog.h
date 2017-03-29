@@ -48,7 +48,8 @@ class PaintLayerDialog : public QDialog
         QtSelectProperty* mPaintEffectSelectProperty;
         QtSelectProperty* mPaintOverflowSelectProperty;
 
-        QtTextureProperty* mBurnTextureProperty;
+        QtTextureProperty* mCarbonCopyTextureProperty;
+        QtSliderDecimalProperty* mCarbonCopyScaleProperty;
 
         QtColorProperty* mPaintColourProperty;
         QtCheckBoxProperty* mPaintJitterCheckboxProperty;
@@ -95,7 +96,7 @@ class PaintLayerDialog : public QDialog
         void propertyValueChanged(QtProperty* property);
 
     protected:
-        void enableBurnContainer(bool enabled);
+        void enableCarbonCopyContainer(bool enabled);
         void enableColourContainer(bool enabled);
 
     private:
@@ -103,7 +104,7 @@ class PaintLayerDialog : public QDialog
         PaintLayerWidget* mPaintLayerWidget;
         QtLayer* mQtLayer;
         Magus::QtContainerWidget* mContainerGeneral;
-        Magus::QtContainerWidget* mContainerBurn;
+        Magus::QtContainerWidget* mContainerCarbonCopy;
         Magus::QtContainerWidget* mContainerPaint;
         Magus::QtContainerWidget* mContainerScale;
         Magus::QtContainerWidget* mContainerForce;

@@ -293,8 +293,8 @@ void PaintLayerDockWidget::setPaintEffect(int layerId, const QString& paintEffec
             paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_ALPHA);
         else if (paintEffect == PAINT_EFFECT_TEXTURE_QSTRING)
             paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_TEXTURE);
-        else if (paintEffect == PAINT_EFFECT_BURN_QSTRING)
-            paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_BURN);
+        else if (paintEffect == PAINT_EFFECT_CARBON_COPY_QSTRING)
+            paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_CARBON_COPY);
     }
 }
 
@@ -319,8 +319,8 @@ const QString& PaintLayerDockWidget::getPaintEffect(int layerId)
             case PaintLayer::PAINT_EFFECT_TEXTURE:
                 mHelperString = PAINT_EFFECT_TEXTURE_QSTRING;
             break;
-        case PaintLayer::PAINT_EFFECT_BURN:
-            mHelperString = PAINT_EFFECT_BURN_QSTRING;
+        case PaintLayer::PAINT_EFFECT_CARBON_COPY:
+            mHelperString = PAINT_EFFECT_CARBON_COPY_QSTRING;
         break;
         }
     }
@@ -357,29 +357,48 @@ const QString& PaintLayerDockWidget::getPaintOverflow(int layerId)
 }
 
 //****************************************************************************/
-void PaintLayerDockWidget::setBurnTextureFileName (int layerId, const QString& textureFileName)
+void PaintLayerDockWidget::setCarbonCopyTextureFileName (int layerId, const QString& textureFileName)
 {
     PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
     if (paintLayer)
     {
         // Assume that the resource group doesn't exist yet
         mParent->addResourceLocationFile(textureFileName);
-        paintLayer->setBurnTextureFileName(textureFileName.toStdString());
+        paintLayer->setCarbonCopyTextureFileName(textureFileName.toStdString());
     }
 }
 
 //****************************************************************************/
-const QString& PaintLayerDockWidget::getBurnTextureFileName (int layerId)
+const QString& PaintLayerDockWidget::getCarbonCopyTextureFileName (int layerId)
 {
     mHelperString = "";
     PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
     if (paintLayer)
     {
-        Ogre::String s = paintLayer->getBurnTextureFileName();
+        Ogre::String s = paintLayer->getCarbonCopyTextureFileName();
         mHelperString = s.c_str();
     }
 
     return mHelperString;
+}
+
+//****************************************************************************/
+void PaintLayerDockWidget::setCarbonCopyScale (int layerId, float scale)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setCarbonCopyScale(scale);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getCarbonCopyScale (int layerId)
+{
+    float scale = 1.0f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        scale = paintLayer->getCarbonCopyScale();
+
+    return scale;
 }
 
 //****************************************************************************/
