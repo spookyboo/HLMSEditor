@@ -124,13 +124,13 @@ class TextureLayer : public QObject
 
         /* Set the name of the Carbon Copy texture. If it is a new filename, a new texture image is loaded
          */
-        void setCarbonCopyTextureFileName (const Ogre::String&  textureFileName);
-        const Ogre::String& getCarbonCopyTextureFileName (void);
+        //void setCarbonCopyTextureFileName (const Ogre::String&  textureFileName);
+        //const Ogre::String& getCarbonCopyTextureFileName (void);
 
         /* Set/get the Carbon Copye texture scale
          */
-        void setCarbonCopyScale (float scale);
-        float getCarbonCopyScale (void);
+        //void setCarbonCopyScale (float scale);
+        //float getCarbonCopyScale (void);
 
 
         Ogre::IdString mDatablockId;
@@ -152,9 +152,9 @@ class TextureLayer : public QObject
         bool mTextureTypeDefined;                               // If true, a valid texture type is assigned to this layer
         Ogre::ushort mMaxSequence;                              // Max sequence number of the temporary texture file, used for undo/redo functions
 
-        Ogre::Image mCarbonCopyTexture;                         // The (final) texture used for the Carbon Copy effect; its dimensions are the same as mTextureOnWhichIsPainted
+//        Ogre::Image mCarbonCopyTexture;                         // The (final) texture used for the Carbon Copy effect; its dimensions are the same as mTextureOnWhichIsPainted
                                                                 // It is build from a loaded texture which may have different dimensions
-        Ogre::PixelBox mPixelboxCarbonCopyTexture;              // Pixelbox of the final Carbon Copy texture
+//        Ogre::PixelBox mPixelboxCarbonCopyTexture;              // Pixelbox of the final Carbon Copy texture
 
     protected:
         /* Returns the filename of a certain generation, defined by the sequence.
@@ -173,14 +173,14 @@ class TextureLayer : public QObject
 
         /* Create the texture used for the Carbon Copy effect
          */
-        void createCarbonCopyTexture (void);
+        //void createCarbonCopyTexture (void);
 
     private:
-        Ogre::String  mCarbonCopyTextureFileName;               // Full qualified name of the texture file used in a Carbon Copy effect; this attribute is private,
+        //Ogre::String  mCarbonCopyTextureFileName;               // Full qualified name of the texture file used in a Carbon Copy effect; this attribute is private,
                                                                 // because the acces must be done by means of the get/set functions, which contain additional actions
-        uchar* mCarbonCopydata;                                 // Data used for the Carbon Copy texture
+        //uchar* mCarbonCopydata;                                 // Data used for the Carbon Copy texture
         Ogre::String mHelperString;
-        float mCarbonCopyTextureScale;                          // Scaling factor of the loaded Carbon Copy texture
+        //float mCarbonCopyTextureScale;                          // Scaling factor of the loaded Carbon Copy texture
 };
 
 #endif

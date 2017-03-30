@@ -414,11 +414,22 @@ class PaintLayer
             Ogre::IdString dummyDatablockId;
             Ogre::Vector2 mHelperVector2;
             Ogre::String mHelperOgreString;
+            Ogre::Image mCarbonCopyTexture;                 // The (final) texture used for the Carbon Copy effect
+                                                            // It is build from a loaded texture which may have different dimensions
+            Ogre::PixelBox mPixelboxCarbonCopyTexture;      // Pixelbox of the final Carbon Copy texture
+            Ogre::String  mCarbonCopyTextureFileName;       // Full qualified name of the texture file used in a Carbon Copy effect; this attribute is private,
+                                                            // because the acces must be done by means of the get/set functions, which contain additional actions
+            uchar* mCarbonCopydata;                         // Data used for the Carbon Copy texture
+            float mCarbonCopyTextureScale;                  // Scaling factor of the loaded Carbon Copy texture
 
             // Private functions
             size_t calculateTexturePositionX (float u, size_t brushPositionX);
             size_t calculateTexturePositionY (float v, size_t brushPositionY);
             void determineJitterEffects (void);
+
+            /* Create the texture used for the Carbon Copy effect
+             */
+            void createCarbonCopyTexture (void);
 };
 
 typedef std::vector<PaintLayer*> PaintLayers;

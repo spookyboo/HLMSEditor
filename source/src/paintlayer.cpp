@@ -95,7 +95,9 @@ PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager, int externalLayerId
     mJitterScaleMin(0.0f),
     mJitterScaleMax(1.0f),
     mJitterForceMin(0.1f),
-    mJitterForceMax(1.0f)
+    mJitterForceMax(1.0f),
+    mCarbonCopydata(0),
+    mCarbonCopyTextureScale(1.0f)
 {
     mPaintColour = Ogre::ColourValue::White;
     mFinalColour = Ogre::ColourValue::White;
@@ -104,12 +106,15 @@ PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager, int externalLayerId
     mBrushFileName = "";
     dummyDatablockId = "";
     mHelperOgreString = "";
+    mCarbonCopyTextureFileName = "";
     mStartTime = clock();
 }
 
 //****************************************************************************/
 PaintLayer::~PaintLayer(void)
 {
+    if (mCarbonCopydata)
+        delete [] mCarbonCopydata;
 }
 
 //****************************************************************************/
@@ -234,9 +239,9 @@ void PaintLayer::paint(float u, float v)
             {
                 // Paint with another texture; this texture has the same dimensions as the target texture
                 // The shape of the brush is used to copy the Carbon Copy texture on the target texture (similar to carbon copy)
-                mFinalColour = mTextureLayer->mPixelboxCarbonCopyTexture.getColourAt(calculatedTexturePositionX,
-                                                                               calculatedTexturePositionY,
-                                                                               0);
+                mFinalColour = mPixelboxCarbonCopyTexture.getColourAt(calculatedTexturePositionX,
+                                                                      calculatedTexturePositionY,
+                                                                      0);
                 mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
                 mAlpha *= mFinalColour.a;
                 mFinalColour *= mAlpha;
@@ -312,35 +317,27 @@ void PaintLayer::setPaintOverflow (PaintOverflowTypes paintOverflow)
 //****************************************************************************/
 void PaintLayer::setCarbonCopyTextureFileName (const Ogre::String& textureFileName)
 {
-    if (mTextureLayer)
-        mTextureLayer->setCarbonCopyTextureFileName(textureFileName);
+    mCarbonCopyTextureFileName = textureFileName;
+    createCarbonCopyTexture();
 }
 
 //****************************************************************************/
 const Ogre::String& PaintLayer::getCarbonCopyTextureFileName (void)
 {
-    mHelperOgreString = "";
-    if (mTextureLayer)
-        mHelperOgreString = mTextureLayer->getCarbonCopyTextureFileName();
-
-    return mHelperOgreString;
+    return mCarbonCopyTextureFileName;
 }
 
 //****************************************************************************/
 void PaintLayer::setCarbonCopyScale (float scale)
 {
-    if (mTextureLayer)
-        mTextureLayer->setCarbonCopyScale(scale);
+    mCarbonCopyTextureScale = scale;
+    createCarbonCopyTexture();
 }
 
 //****************************************************************************/
 float PaintLayer::getCarbonCopyScale (void)
 {
-    float scale = 1.0f;
-    if (mTextureLayer)
-        scale = mTextureLayer->getCarbonCopyScale();
-
-    return scale;
+    return mCarbonCopyTextureScale;
 }
 
 //****************************************************************************/
@@ -876,3 +873,58 @@ void PaintLayer::saveTextureGeneration (void)
 
     mTextureLayer->saveTextureGeneration ();
 }
+
+//****************************************************************************/
+void PaintLayer::createCarbonCopyTexture (void)
+{
+    // mCarbonCopyTextureFileName is only filled if the effect is actually set
+    if (mCarbonCopyTextureFileName == "")
+        return;
+
+    if (!mTextureLayer)
+        return;
+
+    Ogre::Image tempCarbonCopyTexture;
+
+    // Load the Carbon Copy texture; take scaling into account (scaling is implemented as a resize)
+    Ogre::uint32 w = mTextureLayer->mTextureOnWhichIsPaintedWidth;
+    Ogre::uint32 h = mTextureLayer->mTextureOnWhichIsPaintedHeight;
+    tempCarbonCopyTexture.load(mCarbonCopyTextureFileName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    Ogre::uint32 widthLoadedImage = mCarbonCopyTextureScale * tempCarbonCopyTexture.getWidth();
+    Ogre::uint32 heightLoadedImage = mCarbonCopyTextureScale * tempCarbonCopyTexture.getHeight();
+    widthLoadedImage = widthLoadedImage  > w ? w : widthLoadedImage;
+    heightLoadedImage = heightLoadedImage  > h ? h : heightLoadedImage;
+    tempCarbonCopyTexture.resize(widthLoadedImage, heightLoadedImage);
+    Ogre::uint32 xMapped = 0;
+    Ogre::uint32 yMapped = 0;
+
+    // Delete the 'old' data if available
+    if (mCarbonCopydata)
+    {
+        delete [] mCarbonCopydata;
+        mCarbonCopydata = 0;
+    }
+
+    // Create an empty image and fill it with the loaded texture
+    size_t formatSize = Ogre::PixelUtil::getNumElemBytes(Ogre::PF_R8G8B8A8);
+    mCarbonCopydata = new uchar[w * h * formatSize];
+    mCarbonCopyTexture.loadDynamicImage(mCarbonCopydata, w, h, Ogre::PF_A8R8G8B8);
+
+    // Copy the loaded texture data into the final Carbon Copy texture
+    // Take the dimensions into account
+    Ogre::PixelBox tempPixelboxCarbonCopyTexture = tempCarbonCopyTexture.getPixelBox(0, 0);
+    mPixelboxCarbonCopyTexture = mCarbonCopyTexture.getPixelBox(0, 0);
+    Ogre::ColourValue col;
+    for (Ogre::uint32 y = 0; y < h; y++)
+    {
+        yMapped = y % heightLoadedImage;
+        for (Ogre::uint32 x = 0; x < w; x++)
+        {
+            // Determine the colour value
+            xMapped = x % widthLoadedImage;
+            col = tempPixelboxCarbonCopyTexture.getColourAt(xMapped, yMapped, 0);
+            mPixelboxCarbonCopyTexture.setColourAt(col, x, y, 0);
+        }
+    }
+}
+
