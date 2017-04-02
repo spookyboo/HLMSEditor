@@ -152,10 +152,6 @@ class TextureLayer : public QObject
         bool mTextureTypeDefined;                               // If true, a valid texture type is assigned to this layer
         Ogre::ushort mMaxSequence;                              // Max sequence number of the temporary texture file, used for undo/redo functions
 
-//        Ogre::Image mCarbonCopyTexture;                         // The (final) texture used for the Carbon Copy effect; its dimensions are the same as mTextureOnWhichIsPainted
-                                                                // It is build from a loaded texture which may have different dimensions
-//        Ogre::PixelBox mPixelboxCarbonCopyTexture;              // Pixelbox of the final Carbon Copy texture
-
     protected:
         /* Returns the filename of a certain generation, defined by the sequence.
          * Assume the filename (mTextureFileName) is 'image.png'. The sequence is a value [0..mMaxSequence].
@@ -176,11 +172,7 @@ class TextureLayer : public QObject
         //void createCarbonCopyTexture (void);
 
     private:
-        //Ogre::String  mCarbonCopyTextureFileName;               // Full qualified name of the texture file used in a Carbon Copy effect; this attribute is private,
-                                                                // because the acces must be done by means of the get/set functions, which contain additional actions
-        //uchar* mCarbonCopydata;                                 // Data used for the Carbon Copy texture
         Ogre::String mHelperString;
-        //float mCarbonCopyTextureScale;                          // Scaling factor of the loaded Carbon Copy texture
 };
 
 #endif

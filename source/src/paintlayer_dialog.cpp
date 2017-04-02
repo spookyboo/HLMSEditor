@@ -126,10 +126,11 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
                               PAINT_EFFECT_ERASE_QSTRING <<
                               PAINT_EFFECT_ALPHA_QSTRING <<
                               PAINT_EFFECT_TEXTURE_QSTRING <<
-                              PAINT_EFFECT_CARBON_COPY_QSTRING;
+                              PAINT_EFFECT_CARBON_COPY_QSTRING <<
+                              PAINT_EFFECT_SMUDGE_QSTRING;
     mPaintEffectSelectProperty = static_cast<Magus::QtSelectProperty*>
             (assetWidget->createProperty(CONTAINER_PAINTLAYER_GENERAL, PROPERTY_PAINT_EFFECT, QString("Paint effect"), Magus::QtProperty::SELECT));
-    mPaintEffectSelectProperty->addValues(stringListPaintEffects);
+    mPaintEffectSelectProperty->addValues(stringListPaintEffects, 6);
 
     // ******** Paint overflow ********
     QStringList stringListPaintOverflow;

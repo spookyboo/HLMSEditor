@@ -59,6 +59,7 @@ class PaintLayer
             PAINT_EFFECT_ALPHA, /// Paint with alpha
             PAINT_EFFECT_TEXTURE, /// Use the colours of the brush
             PAINT_EFFECT_CARBON_COPY, /// Use another texture to 'carbon copy' that texture to the destination texture; uses a brush
+            PAINT_EFFECT_SMUDGE /// Smudge the target texture using the shape of the brush
         };
 
         enum PaintOverflowTypes
@@ -84,8 +85,10 @@ class PaintLayer
         bool isVisible(void);
 
         /* Apply the paint effect.
+         * u and v are the texture coordinates, between [0..1]
+         * 'start' indicates whether the painting was started or ongoing
          */
-        void paint(float u, float v);
+        void paint(float u, float v, bool start);
 
         /* Set/get the Carbon Copy texture settings
          */
@@ -331,6 +334,9 @@ class PaintLayer
          */
         void saveTextureGeneration (void);
 
+        /* Set the smudge image to black, using the dimensions of the brush
+         */
+
     private:
             int mExternaLayerlId;                           // May be used as a reference for external classes; is -1 if no external id is passed
             clock_t mStartTime;
@@ -340,6 +346,8 @@ class PaintLayer
             Ogre::Image mBrush;                             // Image of the brush
             Ogre::String mBrushFileName;                    // Full qualified name of the brush file
             Ogre::PixelBox mPixelboxBrush;                  // Pixelbox of mBrush; for speed purposes, it is created when the brush is set
+            Ogre::Image mBrushSmudge;                       // Image of the smudge brush
+            Ogre::PixelBox mPixelboxBrushSmudge;            // Pixelbox of the target texture, using the shape of the brush; used for smudge effect
             size_t mBrushWidth;                             // Width of mBrush
             size_t mBrushHeight;                            // Height of mBrush
             size_t mHalfBrushWidth;                         // For efficient calculation
@@ -356,9 +364,10 @@ class PaintLayer
             PaintEffects mPaintEffect;                      // Type of paint effect.
             PaintOverflowTypes mPaintOverflow;              // Determine what happens if the brush exceeds the texture areas on which is painted.
             TextureLayer* mTextureLayer;                    // Reference to the texture (can be shared by other PaintLayers)
-            size_t calculatedTexturePositionX;
-            size_t calculatedTexturePositionY;
+            size_t mCalculatedTexturePositionX;
+            size_t mCalculatedTexturePositionY;
             float mAlpha;
+            float mAlphaDecay;
             bool mRotate;                                   // If true, the brush is rotated
             float mRotationAngle;                           // The angle of rotating the brush
             float mSinRotationAngle;                        // Sin of the angle of rotating

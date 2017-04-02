@@ -130,6 +130,7 @@ static const QString PAINT_EFFECT_ERASE_QSTRING = QString("Erase");
 static const QString PAINT_EFFECT_ALPHA_QSTRING = QString("Alpha");
 static const QString PAINT_EFFECT_TEXTURE_QSTRING = QString("Texture / Normal");
 static const QString PAINT_EFFECT_CARBON_COPY_QSTRING = QString("Carbon Copy");
+static const QString PAINT_EFFECT_SMUDGE_QSTRING = QString("Smudge");
 static const QString PAINT_OVERFLOW_IGNORE_QSTRING = QString("Ignore");
 static const QString PAINT_OVERFLOW_CONTINUE_QSTRING = QString("Continue");
 

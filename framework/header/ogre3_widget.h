@@ -245,8 +245,9 @@ namespace Magus
              * 3 - There is no material assigned to the mesh
              * 4 - There is no texture type assigned in the paint layer
              * 5 - Painting is done on a material that is not the current material
+             * The 'start'  argument indicates whether the painting starts
              */
-            int doPaintLayer(int mouseX, int mouseY);
+            int doPaintLayer(int mouseX, int mouseY, bool start = false);
 
             Ogre::HlmsDatablock* getDatablockByFullName(const Ogre::String& fullName);
             PaintLayers* mPaintLayers; // Pointer to vector of PaintLayer objects

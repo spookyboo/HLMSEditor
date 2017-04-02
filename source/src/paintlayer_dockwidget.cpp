@@ -295,6 +295,8 @@ void PaintLayerDockWidget::setPaintEffect(int layerId, const QString& paintEffec
             paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_TEXTURE);
         else if (paintEffect == PAINT_EFFECT_CARBON_COPY_QSTRING)
             paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_CARBON_COPY);
+        else if (paintEffect == PAINT_EFFECT_SMUDGE_QSTRING)
+            paintLayer->setPaintEffect (PaintLayer::PAINT_EFFECT_SMUDGE);
     }
 }
 
@@ -319,9 +321,12 @@ const QString& PaintLayerDockWidget::getPaintEffect(int layerId)
             case PaintLayer::PAINT_EFFECT_TEXTURE:
                 mHelperString = PAINT_EFFECT_TEXTURE_QSTRING;
             break;
-        case PaintLayer::PAINT_EFFECT_CARBON_COPY:
-            mHelperString = PAINT_EFFECT_CARBON_COPY_QSTRING;
-        break;
+            case PaintLayer::PAINT_EFFECT_CARBON_COPY:
+                mHelperString = PAINT_EFFECT_CARBON_COPY_QSTRING;
+            break;
+            case PaintLayer::PAINT_EFFECT_SMUDGE:
+                mHelperString = PAINT_EFFECT_SMUDGE_QSTRING;
+            break;
         }
     }
     return mHelperString;

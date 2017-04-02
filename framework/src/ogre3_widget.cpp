@@ -964,7 +964,7 @@ namespace Magus
 
             // Reset the visibility
             mSceneNode->setVisible(true);
-            mSceneNodeRttHoover->setVisible(false); // Make the hoover and pain nodes invisible AFTER the item node (mSceneNode) itself is set to visible
+            mSceneNodeRttHoover->setVisible(false); // Make the hoover and paint nodes invisible AFTER the item node (mSceneNode) itself is set to visible
                                                     // This order is important to prevent flickering of the renderwindow
             mSceneNodeRttPaint->setVisible(false);
             if (mLightAxisItem)
@@ -1023,10 +1023,10 @@ namespace Magus
             if(ev->key() == Qt::Key_S)
                 mRttHoover->writeContentsToFile("rtt_hoover.png");
 
-            #ifdef CREATE_UV_MAPPING_TEXTURE
+            //#ifdef CREATE_UV_MAPPING_TEXTURE
                 if(ev->key() == Qt::Key_P)
                     mRttPaint->writeContentsToFile("rtt_paint.png");
-            #endif
+            //#endif
         }
     }
 
@@ -1164,7 +1164,7 @@ namespace Magus
                 if (mPaintMode)
                 {
                     Ogre::Vector2 pos = Ogre::Vector2::ZERO;
-                    mLatestPaintResult = doPaintLayer(e->pos().x(), e->pos().y());
+                    mLatestPaintResult = doPaintLayer(e->pos().x(), e->pos().y(), true);
                     switch (mLatestPaintResult)
                     {
                         case 2:
@@ -1710,7 +1710,7 @@ namespace Magus
     }
 
     //****************************************************************************/
-    int QOgreWidget::doPaintLayer(int mouseX, int mouseY)
+    int QOgreWidget::doPaintLayer(int mouseX, int mouseY, bool start)
     {
         // Only paint in case:
         // - The paint layer is enabled
@@ -1768,7 +1768,7 @@ namespace Magus
                     uvCalculated = true;
                 }
 
-                paintLayer->paint(u, v);
+                paintLayer->paint(u, v, start);
             }
         }
 
