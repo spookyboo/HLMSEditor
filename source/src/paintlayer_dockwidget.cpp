@@ -534,6 +534,25 @@ float PaintLayerDockWidget::getJitterPaintColourInterval(int layerId)
 }
 
 //****************************************************************************/
+void PaintLayerDockWidget::setSmudgeDecay(int layerId, float decay)
+{
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        paintLayer->setSmudgeDecay(decay);
+}
+
+//****************************************************************************/
+float PaintLayerDockWidget::getSmudgeDecay(int layerId)
+{
+    float decay = 0.05f;
+    PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);
+    if (paintLayer)
+        decay = paintLayer->getSmudgeDecay();
+
+    return decay;
+}
+
+//****************************************************************************/
 void PaintLayerDockWidget::setBrushForce(int layerId, float force)
 {
     PaintLayer* paintLayer = mPaintLayerManager->getPaintLayer(layerId);

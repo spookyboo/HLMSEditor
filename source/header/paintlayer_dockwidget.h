@@ -137,6 +137,11 @@ class PaintLayerDockWidget : public QDockWidget
         void setJitterPaintColourInterval(int layerId, float interval);
         float getJitterPaintColourInterval(int layerId);
 
+        /* Set/get the smudge decay value
+         */
+        void setSmudgeDecay(int layerId, float decay);
+        float getSmudgeDecay(int layerId);
+
         /* Set/get the brush force
          * This value is forwarded to the PaintLayer
          */

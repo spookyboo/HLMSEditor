@@ -57,6 +57,8 @@ class PaintLayerDialog : public QDialog
         QtColorProperty* mPaintColourJitterMaxProperty;
         QtSliderDecimalProperty* mPaintColourJitterIntervalProperty;
 
+        QtSliderDecimalProperty* mSmudgeDecayProperty;
+
         QtSliderDecimalProperty* mForceProperty;
         QtCheckBoxProperty* mJitterForceCheckboxProperty;
         QtSliderDecimalProperty* mJitterForceMinProperty;
@@ -98,6 +100,7 @@ class PaintLayerDialog : public QDialog
     protected:
         void enableCarbonCopyContainer(bool enabled);
         void enableColourContainer(bool enabled);
+        void enableSmudgeContainer(bool enabled);
 
     private:
         void createIcons();
@@ -106,6 +109,7 @@ class PaintLayerDialog : public QDialog
         Magus::QtContainerWidget* mContainerGeneral;
         Magus::QtContainerWidget* mContainerCarbonCopy;
         Magus::QtContainerWidget* mContainerPaint;
+        Magus::QtContainerWidget* mContainerSmudge;
         Magus::QtContainerWidget* mContainerScale;
         Magus::QtContainerWidget* mContainerForce;
         Magus::QtContainerWidget* mContainerRotationAngle;

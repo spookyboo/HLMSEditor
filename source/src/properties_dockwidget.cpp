@@ -97,45 +97,30 @@ void PropertiesDockWidget::createToolBars(void)
 void PropertiesDockWidget::setHlmsPropertiesPbsDatablockVisible(bool visible)
 {
     setWidgetVisible (mHlmsPropertiesPbsDatablock, visible);
-    //mHlmsPropertiesPbsDatablock->setVisible(visible);
-    //if (visible)
-      //  setWidget(mHlmsPropertiesPbsDatablock);
 }
 
 //****************************************************************************/
 void PropertiesDockWidget::setHlmsPropertiesUnlitDatablockVisible(bool visible)
 {
     setWidgetVisible (mHlmsPropertiesUnlitDatablock, visible);
-    //mHlmsPropertiesUnlitDatablock->setVisible(visible);
-    //if (visible)
-      //  setWidget(mHlmsPropertiesUnlitDatablock);
 }
 
 //****************************************************************************/
 void PropertiesDockWidget::setHlmsPropertiesBlendblockVisible(bool visible)
 {
     setWidgetVisible (mHlmsPropertiesBlendblock, visible);
-    //mHlmsPropertiesBlendblock->setVisible(visible);
-    //if (visible)
-      //  setWidget(mHlmsPropertiesBlendblock);
 }
 
 //****************************************************************************/
 void PropertiesDockWidget::setHlmsPropertiesMacroblockVisible(bool visible)
 {
     setWidgetVisible (mHlmsPropertiesMacroblock, visible);
-    //mHlmsPropertiesMacroblock->setVisible(visible);
-    //if (visible)
-      //  setWidget(mHlmsPropertiesMacroblock);
 }
 
 //****************************************************************************/
 void PropertiesDockWidget::setHlmsPropertiesSamplerblockVisible(bool visible)
 {
     setWidgetVisible (mHlmsPropertiesSamplerblock, visible);
-    //mHlmsPropertiesSamplerblock->setVisible(visible);
-    //if (visible)
-      //  setWidget(mHlmsPropertiesSamplerblock);
 }
 
 //****************************************************************************/

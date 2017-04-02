@@ -45,6 +45,8 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
     mPaintColourJitterMaxProperty = 0;
     mPaintColourJitterIntervalProperty = 0;
 
+    mSmudgeDecayProperty = 0;
+
     mForceProperty = 0;
     mJitterForceCheckboxProperty = 0;
     mJitterForceMinProperty = 0;
@@ -98,6 +100,8 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
     mContainerCarbonCopy->setTitleBold(true);
     mContainerPaint = assetWidget->createContainer(CONTAINER_PAINTLAYER_COLOUR, QString("Colour painting"));
     mContainerPaint->setTitleBold(true);
+    mContainerSmudge = assetWidget->createContainer(CONTAINER_PAINTLAYER_SMUDGE, QString("Smudge"));
+    mContainerSmudge->setTitleBold(true);
     mContainerScale = assetWidget->createContainer(CONTAINER_PAINTLAYER_SCALE, QString("Brush scale"));
     mContainerScale->setTitleBold(true);
     mContainerForce = assetWidget->createContainer(CONTAINER_PAINTLAYER_FORCE, QString("Brush force"));
@@ -179,6 +183,15 @@ PaintLayerDialog::PaintLayerDialog(PaintLayerWidget* paintLayerWidget, QtLayer* 
     mPaintColourJitterIntervalProperty->setSliderRange (0.0f, 1.0f, 0.005f);
     mPaintColourJitterIntervalProperty->setValue(0.0f);
     mPaintColourJitterIntervalProperty->setVisible(false);
+
+    // ************************************************************************************************************************
+    // ******************************************************* Smudge *********************************************************
+    // ************************************************************************************************************************
+    mSmudgeDecayProperty = static_cast<Magus::QtSliderDecimalProperty*>
+            (assetWidget->createProperty(CONTAINER_PAINTLAYER_SMUDGE, PROPERTY_SMUDGE_DECAY, QString("Smudge decay"), Magus::QtProperty::SLIDER_DECIMAL));
+    mSmudgeDecayProperty->setSliderRange (0.0f, 1.0f, 0.05f);
+    mSmudgeDecayProperty->setValue(0.05f);
+    enableSmudgeContainer (false);
 
     // *****************************************************************************************************************
     // ***************************************************** Scale *****************************************************
@@ -419,8 +432,9 @@ void PaintLayerDialog::propertyValueChanged(QtProperty* property)
             selectProperty = static_cast<Magus::QtSelectProperty*>(property);
             if (selectProperty->getCurrentText() == PAINT_EFFECT_COLOR_QSTRING)
             {
-                // Disable Carbon Copy container
+                // Disable carbon copy and smudge containers
                 enableCarbonCopyContainer (false);
+                enableSmudgeContainer (false);
 
                 // Enable colour container
                 mContainerPaint->setVisible(true);
@@ -433,19 +447,32 @@ void PaintLayerDialog::propertyValueChanged(QtProperty* property)
             }
             else if (selectProperty->getCurrentText() == PAINT_EFFECT_CARBON_COPY_QSTRING)
             {
-                // Enable Carbon Copy container
+                // Enable carbon copy container
                 enableCarbonCopyContainer (true);
 
-                // Disable colour container
+                // Disable colour and smudge containers
                 enableColourContainer (false);
+                enableSmudgeContainer (false);
+            }
+            else if (selectProperty->getCurrentText() == PAINT_EFFECT_SMUDGE_QSTRING)
+            {
+                // Enable smudge container
+                enableSmudgeContainer (true);
+
+                // Disable colour and carbon copy containers
+                enableColourContainer (false);
+                enableCarbonCopyContainer (false);
             }
             else
             {
-                // Disable Carbon Copy container
+                // Disable carbon copy container
                 enableCarbonCopyContainer (false);
 
                 // Disable colour container
                 enableColourContainer (false);
+
+                // Disable smudge container
+                enableSmudgeContainer (false);
             }
         }
         break;
@@ -547,4 +574,11 @@ void PaintLayerDialog::enableCarbonCopyContainer(bool enabled)
     mContainerCarbonCopy->setVisible(enabled);
     mCarbonCopyTextureProperty->setVisible(enabled);
     mCarbonCopyScaleProperty->setVisible(enabled);
+}
+
+//****************************************************************************/
+void PaintLayerDialog::enableSmudgeContainer(bool enabled)
+{
+    mContainerSmudge->setVisible(enabled);
+    mSmudgeDecayProperty->setVisible(enabled);
 }

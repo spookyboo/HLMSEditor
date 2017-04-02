@@ -669,6 +669,9 @@ void PaintLayerWidget::handleTableDoubleClicked(QModelIndex index)
             mPaintLayerDockWidget->setPaintColour(layerId, paintLayerDialog.mPaintColourProperty->getColor());
         }
 
+        // Smudge
+        mPaintLayerDockWidget->setSmudgeDecay (layerId, paintLayerDialog.mSmudgeDecayProperty->getValue());
+
         // Force
         if (paintLayerDialog.mJitterForceCheckboxProperty->getValue())
         {
@@ -766,6 +769,9 @@ void PaintLayerWidget::initialisePaintLayerDialog(PaintLayerDialog* paintLayerDi
     paintLayerDialog->mPaintColourJitterMinProperty->setColor(mPaintLayerDockWidget->getJitterPaintColourMin(layerId));
     paintLayerDialog->mPaintColourJitterMaxProperty->setColor(mPaintLayerDockWidget->getJitterPaintColourMax(layerId));
     paintLayerDialog->mPaintColourJitterIntervalProperty->setValue(mPaintLayerDockWidget->getJitterPaintColourInterval(layerId));
+
+    // Smudge
+    paintLayerDialog->mSmudgeDecayProperty->setValue(mPaintLayerDockWidget->getSmudgeDecay(layerId));
 
     // Force
     paintLayerDialog->mJitterForceCheckboxProperty->setValue(mPaintLayerDockWidget->hasJitterForceEnabled(layerId));

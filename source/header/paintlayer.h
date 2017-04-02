@@ -268,6 +268,11 @@ class PaintLayer
          */
         void resetPaintColour (void);
 
+        /* Set/get the smudge decay value
+         */
+        void setSmudgeDecay(float decay) {mSmudgeDecay = decay;}
+        float getSmudgeDecay(void) const {return mSmudgeDecay;}
+
         /* Mirror the brush horizontally
          */
         void setMirrorHorizontal (bool mirrored);
@@ -383,6 +388,7 @@ class PaintLayer
             int mTranslationY;                              // The absolute Y translation value in pixels; can be negative or positive
             bool mMirrorHorizontal;                         // Mirrors a brush horizontally
             bool mMirrorVertical;                           // Mirrors a brush vertically
+            float mSmudgeDecay;                             // Determines how long the smudge effect of one paintstroke lasts
 
             // Jitter attributes
             bool mJitterRotate;                             // If true, a jittering rotation is applied

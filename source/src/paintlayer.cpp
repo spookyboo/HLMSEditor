@@ -98,7 +98,8 @@ PaintLayer::PaintLayer(PaintLayerManager* paintLayerManager, int externalLayerId
     mJitterForceMin(0.1f),
     mJitterForceMax(1.0f),
     mCarbonCopydata(0),
-    mCarbonCopyTextureScale(1.0f)
+    mCarbonCopyTextureScale(1.0f),
+    mSmudgeDecay(0.05f)
 {
     mPaintColour = Ogre::ColourValue::White;
     mFinalColour = Ogre::ColourValue::White;
@@ -154,9 +155,14 @@ void PaintLayer::paint(float u, float v, bool start)
     if (mPaintEffect == PAINT_EFFECT_SMUDGE)
     {
         if (start)
+        {
             mAlphaDecay = 1.0f;
-        if (mAlphaDecay > 0.05f)
-            mAlphaDecay -= 0.05f;
+        }
+        else
+        {
+            mAlphaDecay -= mSmudgeDecay;
+            mAlphaDecay = mAlphaDecay > 0.0f ? mAlphaDecay : 0.0f;
+        }
     }
 
     /* Loop through the pixelbox of the brush and apply the paint effect to the pixelbox of the texture
