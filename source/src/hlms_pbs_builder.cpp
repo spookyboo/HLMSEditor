@@ -341,7 +341,7 @@ void HlmsPbsBuilder::enrichPbsNode(HlmsNodePbsDatablock* pbsnode,
     pbsnode->setBackgroundDiffuseRed(255.0f * datablock->getBackgroundDiffuse().r);
     pbsnode->setBackgroundDiffuseGreen(255.0f * datablock->getBackgroundDiffuse().g);
     pbsnode->setBackgroundDiffuseBlue(255.0f * datablock->getBackgroundDiffuse().b);
-    pbsnode->setBackgroundDiffuseBlue(255.0f * datablock->getBackgroundDiffuse().a);
+    pbsnode->setBackgroundDiffuseAlpha(255.0f * datablock->getBackgroundDiffuse().a);
 
     // ******** Specular ********
     pbsnode->setSpecularRed(255.0f * datablock->getSpecular().x);
