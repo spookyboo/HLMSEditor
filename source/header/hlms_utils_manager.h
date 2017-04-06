@@ -123,10 +123,20 @@ class HlmsUtilsManager
          */
         DatablockStruct getDatablockStructOfFullName (const Ogre::String& datablockFullName);
 
+
+        /* Returns the datablock info of a given json filename
+         * If there is no datablock with this name, a default DatablockStruct is returned
+         */
+        DatablockStruct getDatablockStructOfJsonFileName (const Ogre::String& jsonFileName);
+
         /* Returns a vector with all texturenames from the loaded Pbs/Unlit datablocks
          */
         void getTexturesFromRegisteredPbsDatablocks(std::vector<Ogre::String>* v);
         void getTexturesFromRegisteredUnlitDatablocks(std::vector<Ogre::String>* v);
+
+        /* Returns a vector with all texturenames from a specific datablock
+         */
+        void getFullyQualifiedTextureFileNamesFromRegisteredDatablock (const Ogre::IdString& datablockId, std::vector<Ogre::String>* v);
 
         /* Returns the json file name of a datablock.
          * The name is only filled with a proper value in case the datablock was loaded/saved through a json file
@@ -193,6 +203,10 @@ class HlmsUtilsManager
          */
         void enrichTextureMapFromPbs(DatablockStruct* datablockStruct);
         void enrichTextureMapFromUnlit(DatablockStruct* datablockStruct);
+
+        /* Return the fullie qualified path of a resource (basename)
+         */
+        const Ogre::String& getResourcePath(const Ogre::String& resourceName);
 
     private:
         DatablockStruct helperDatablockStruct;

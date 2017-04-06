@@ -36,7 +36,7 @@
 #include "texture_dockwidget.h"
 #include "nodeeditor_dockwidget.h"
 #include "paint_dockwidget.h"
-#include "brush_dockwidget.h"
+#include "brush_preset_dockwidget.h"
 #include "paintlayer_dockwidget.h"
 #include "central_dockwidget.h"
 #include "material_browser_dialog.h"
@@ -70,7 +70,7 @@ class MainWindow : public QMainWindow
         PropertiesDockWidget* mPropertiesDockWidget; // Make is public for easy access
         TextureDockWidget* mTextureDockWidget; // Make is public for easy access
         PaintDockWidget* mPaintDockWidget; // Make is public for easy access
-        BrushDockWidget* mBrushDockWidget; // Make is public for easy access
+        BrushPresetDockWidget* mBrushPresetDockWidget; // Make is public for easy access
         PaintLayerDockWidget* mPaintLayerDockWidget; // Make is public for easy access
         void initCurrentDatablockFileName(void); // Set the name of the current json file to ""
         void getListOfResources(void); // Function to test which resources are loaded
@@ -91,6 +91,7 @@ class MainWindow : public QMainWindow
         void notifyNodeDeleted(unsigned int nodeType); // Is called by the node editor if a node is deleted
         void addResourceLocationFile (const QString& fileName);
         void addResourceLocationPath (const QString& path);
+        void loadDatablockAndSet(const QString jsonFileName);
 
     protected:
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources); // Save the content of a resource vector
@@ -115,7 +116,6 @@ class MainWindow : public QMainWindow
         void createStatusBar(void);
         void createDockWindows(void);
         void closeEvent(QCloseEvent* event);
-        void loadDatablockAndSet(const QString jsonFileName);
         void loadMesh(const QString meshFileName);
         void loadProject(const QString& fileName);
          // Saves the current datablock; if validatePaintLayers is true, the validation whether there are paintlayers must still be done
@@ -147,6 +147,7 @@ class MainWindow : public QMainWindow
         void doMaterialSetMenuAction(void);
         void doMaterialBrowserOpenMenuAction(void);
         void doMaterialBrowserAddMenuAction(void);
+        void doMaterialPresetMenuAction(void);
         void doQuitMenuAction(void);
         void doTextureBrowserImportMenuAction(void);
         void doTextureBrowserAddImageMenuAction(void);
@@ -191,6 +192,7 @@ class MainWindow : public QMainWindow
         QAction* mSaveAsDatablockMenuAction;
         QAction* mSaveAsMeshMenuAction;
         QAction* mMaterialSetMenuAction;
+        QAction* mMaterialPresetMenuAction;
         QAction* mMaterialBrowserOpenMenuAction;
         QAction* mMaterialBrowserAddMenuAction;
         QAction* mTextureBrowserImportMenuAction;

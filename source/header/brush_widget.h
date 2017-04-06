@@ -28,7 +28,7 @@ QT_BEGIN_NAMESPACE
 
 QT_END_NAMESPACE
 
-class BrushDockWidget;
+class BrushPresetDockWidget;
 
 /****************************************************************************
 Main class for brush widget. This widgets displays brushes.
@@ -38,7 +38,7 @@ class BrushWidget : public QWidget
     Q_OBJECT
 
     public:
-        BrushWidget(const QString& brushDir, BrushDockWidget* brushDockWidget, QWidget* parent = 0);
+        BrushWidget(const QString& brushDir, BrushPresetDockWidget* brushPresetDockWidget, QWidget* parent = 0);
         ~BrushWidget(void);
 
     signals:
@@ -51,7 +51,7 @@ class BrushWidget : public QWidget
         void loadBrushesRecursively(const QString& searchPath);
 
     private:
-        BrushDockWidget* mBrushDockWidget; // Reference to the dockwidget that contains this widget
+        BrushPresetDockWidget* mBrushPresetDockWidget; // Reference to the dockwidget that contains this widget
         Magus::QtDefaultTextureWidget* mTextureWidget;
         QWidget* mParent;
         QString mBrushDir;

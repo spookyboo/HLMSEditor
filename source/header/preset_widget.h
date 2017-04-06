@@ -18,37 +18,46 @@
 **
 ****************************************************************************/
 
-#ifndef BRUSH_DOCKWIDGET_H
-#define BRUSH_DOCKWIDGET_H
+#ifndef PRESET_WIDGET_H
+#define PRESET_WIDGET_H
 
-#include <QtWidgets>
-#include <QDockWidget>
-#include "brush_widget.h"
+#include <QWidget>
+#include "tool_default_texturewidget.h"
 
 QT_BEGIN_NAMESPACE
-class QDockWidget;
+
 QT_END_NAMESPACE
 
-class MainWindow;
+class BrushPresetDockWidget;
 
 /****************************************************************************
- This class represents a DockWidget
- It is a container class to hold the actual BrushWidget
- ***************************************************************************/
-class BrushDockWidget : public QDockWidget
+Main class for preset widget. This widgets displays presets.
+***************************************************************************/
+class PresetWidget : public QWidget
 {
     Q_OBJECT
 
     public:
-        BrushDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags = 0);
-        ~BrushDockWidget(void);
+        PresetWidget(const QString& presetDir, BrushPresetDockWidget* brushPresetDockWidget, QWidget* parent = 0);
+        ~PresetWidget(void);
+
+        // Add a thumb to the widget
+        void addPreset (const QString& path, const QString& thumbName);
+
+    signals:
+        void presetDoubleClicked(const QString& name, const QString& baseName);
 
     private slots:
-        void handleBrushDoubleClicked(const QString& name, const QString& baseName);
+        void handlePresetDoubleClicked(const QString& name, const QString& baseName);
+
+    protected:
+        void loadPresets(const QString& searchPath);
 
     private:
-        MainWindow* mParent;
-        BrushWidget* mBrushWidget;
+        BrushPresetDockWidget* mBrushPresetDockWidget; // Reference to the dockwidget that contains this widget
+        Magus::QtDefaultTextureWidget* mTextureWidget;
+        QWidget* mParent;
+        QString mPresetDir;
 };
 
 #endif

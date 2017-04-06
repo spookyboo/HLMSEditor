@@ -18,37 +18,45 @@
 **
 ****************************************************************************/
 
-#ifndef PAINT_DOCKWIDGET_H
-#define PAINT_DOCKWIDGET_H
+#ifndef BRUSH_PRESET_DOCKWIDGET_H
+#define BRUSH_PRESET_DOCKWIDGET_H
 
 #include <QtWidgets>
-#include <QMessageBox>
 #include <QDockWidget>
+#include <QTabWidget>
+#include "brush_widget.h"
+#include "preset_widget.h"
 
 QT_BEGIN_NAMESPACE
+class QDockWidget;
 QT_END_NAMESPACE
 
 class MainWindow;
 
 /****************************************************************************
  This class represents a DockWidget
- It is the container dockwidget of the PaintLayerDockWidget and the
- BrushPresetDockWidget
+ It is a container class to hold the actual BrushWidget
  ***************************************************************************/
-class PaintDockWidget : public QDockWidget
+class BrushPresetDockWidget : public QDockWidget
 {
     Q_OBJECT
 
     public:
-        PaintDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags = 0);
-        ~PaintDockWidget(void);
-        void addDockWidget(Qt::DockWidgetArea area, QDockWidget* dockWidget);
+        BrushPresetDockWidget(QString title, MainWindow* parent, Qt::WindowFlags flags = 0);
+        ~BrushPresetDockWidget(void);
+
+        // Add a thumb to the preset list
+        void addPreset (const QString& path, const QString& thumbName);
 
     private slots:
+        void handleBrushDoubleClicked(const QString& name, const QString& baseName);
+        void handlePresetDoubleClicked(const QString& name, const QString& baseName);
 
     private:
         MainWindow* mParent;
-        QMainWindow* mInnerMain;
+        BrushWidget* mBrushWidget;
+        PresetWidget* mPresetWidget;
+        QTabWidget* mTabWidget;
 };
 
 #endif

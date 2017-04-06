@@ -1,15 +1,24 @@
 V 1.0 updates:
 =============
+- Menu option to clear all datablock in memory
+- Brushes
+  - Use preset by means of context menu
+- Material presets
+  - Delete preset by means of context menu
+- Update pdf with:
+  - How to import brushes
+  - What is the ..\import directory used for
 - Rotate in all directions
 - Save material with paint applied
 - Export materials (in combination with paint)
 - Paint tools: Smudge tool
 - Paint tools: Cavity modulator (edge detection) for rough edges
+- Paint tools: Stencil
+- Paint tools: Particles
+- Paint tools: Draw straight line
+- Paint tools: Alternating enable/disable force (e.g. to create a stich effect)
 - Paint brushes => tabs per categorie (follow brush dir structure; normal brush, ...)
 - Tooltips over icons (DONE partly)
-- Move texture over the mesh (apply offset by means of the mouse)
-- Offset samplerblock -> by means of slider
-- Scale samplerblock -> by means of slider
 - Use projective texture as paint brush instead of simple cross mousepointer
 - Use resource.cfg per project
 - Remove unused functions in .h/.cpp files in the 'sources' directory
@@ -20,7 +29,7 @@ V 1.0 updates:
 - Forum topic: Would be possible to use the same texture sampler for different textures? I know when exporting, if all textures use the same settings in texture sampler, 
   only one will be written, but inside the edit, still need to set a diferente one for each texture.
 - Use mesh with multiple UV sets
-- Different method to calculate mouse position to uv; current method doesn't work with uv ranges outside [0..1]
+- Different method to calculate mouse position to uv. There is still an issue beteen render to texture and render to screen.
 
 
 V 1.0 Bugs:

@@ -29,25 +29,24 @@
 #include <QDir>
 #include <QFileInfo>
 #include "magus_core.h"
-#include "brush_widget.h"
+#include "preset_widget.h"
 #include "brush_preset_dockwidget.h"
 #include "tool_default_texturewidget.h"
 
 //****************************************************************************/
-BrushWidget::BrushWidget (const QString& brushDir, BrushPresetDockWidget* brushPresetDockWidget, QWidget* parent) :
+PresetWidget::PresetWidget (const QString& presetDir, BrushPresetDockWidget* brushPresetDockWidget, QWidget* parent) :
     QWidget(parent),
     mBrushPresetDockWidget(brushPresetDockWidget)
 {
-    setWindowTitle(QString("Brushes"));
+    setWindowTitle(QString("Presets"));
     QHBoxLayout* mainLayout = new QHBoxLayout;
     QVBoxLayout* tableLayout = new QVBoxLayout;
-    mBrushDir = brushDir;
+    mPresetDir = presetDir;
 
     mTextureWidget = new Magus::QtDefaultTextureWidget(this);
-    mTextureWidget->setTextureSize(QSize(72, 64)); // Add 8 pixels to the width to compensate the frame width
-    //mTextureWidget->setContentsMargins(-8, -8, -8, -8);
-    loadBrushesRecursively (mBrushDir);
-    connect(mTextureWidget, SIGNAL(doubleClicked(QString,QString)), this, SLOT(handleBrushDoubleClicked(QString,QString)));
+    mTextureWidget->setTextureSize(QSize(113, 64)); // Take 16:9 aspect into account and add 8 pixels to the width to compensate the frame width
+    loadPresets (mPresetDir);
+    connect(mTextureWidget, SIGNAL(doubleClicked(QString,QString)), this, SLOT(handlePresetDoubleClicked(QString,QString)));
 
     // Layout
     mainLayout->addWidget(mTextureWidget);
@@ -56,12 +55,12 @@ BrushWidget::BrushWidget (const QString& brushDir, BrushPresetDockWidget* brushP
 }
 
 //****************************************************************************/
-BrushWidget::~BrushWidget (void)
+PresetWidget::~PresetWidget (void)
 {
 }
 
 //****************************************************************************/
-void BrushWidget::loadBrushesRecursively(const QString& searchPath)
+void PresetWidget::loadPresets(const QString& searchPath)
 {
     // Get all texture files from all dirs/subdirs
     QDir dir(searchPath);
@@ -73,16 +72,19 @@ void BrushWidget::loadBrushesRecursively(const QString& searchPath)
         {
             if (info.isDir())
             {
-                loadBrushesRecursively(info.absoluteFilePath());
+                loadPresets(info.absoluteFilePath());
             }
             else
             {
                 QString fileName = info.absoluteFilePath();
                 if (Magus::isTypeBasedOnExtension(fileName, Magus::MAGUS_SUPPORTED_IMAGE_FORMATS, Magus::MAGUS_SUPPORTED_IMAGE_FORMATS_LENGTH))
                 {
-                    // It is an image
-                    QPixmap texturePixmap = QPixmap(info.absoluteFilePath());
-                    mTextureWidget->addTexture(texturePixmap, info.absoluteFilePath(), info.fileName());
+                    // It is an image and must contain a ".json." string, to distinguish them from regular image files (only the thumb image may contain this ".json." string)
+                    if (info.fileName().contains(".json."))
+                    {
+                        QPixmap texturePixmap = QPixmap(info.absoluteFilePath());
+                        mTextureWidget->addTexture(texturePixmap, info.absoluteFilePath(), info.fileName());
+                    }
                 }
             }
         }
@@ -90,7 +92,15 @@ void BrushWidget::loadBrushesRecursively(const QString& searchPath)
 }
 
 //****************************************************************************/
-void BrushWidget::handleBrushDoubleClicked(const QString& name, const QString& baseName)
+void PresetWidget::handlePresetDoubleClicked (const QString& name, const QString& baseName)
 {
-    emit brushDoubleClicked(name, baseName);
+    emit presetDoubleClicked(name, baseName);
+}
+
+//****************************************************************************/
+void PresetWidget::addPreset (const QString& path, const QString& thumbName)
+{
+    QString fileName = path + thumbName;
+    QPixmap texturePixmap = QPixmap(fileName);
+    mTextureWidget->addTexture(texturePixmap, fileName, thumbName);
 }

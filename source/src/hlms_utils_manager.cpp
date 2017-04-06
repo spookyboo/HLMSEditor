@@ -601,6 +601,30 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablockStructOfFullName
 }
 
 //****************************************************************************/
+HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablockStructOfJsonFileName (const Ogre::String& jsonFileName)
+{
+    helperDatablockStruct.datablock = 0;
+    helperDatablockStruct.datablockFullName = "";
+    helperDatablockStruct.datablockId = "";
+    helperDatablockStruct.jsonFileName = "";
+    helperDatablockStruct.type = HLMS_NONE;
+
+    QVectorIterator<DatablockStruct> itRegisteredDatablocks(mRegisteredDatablocks);
+    DatablockStruct datablockStruct;
+    while (itRegisteredDatablocks.hasNext())
+    {
+        datablockStruct = itRegisteredDatablocks.next();
+        if (datablockStruct.jsonFileName == jsonFileName)
+        {
+            helperDatablockStruct = datablockStruct;
+            return helperDatablockStruct;
+        }
+    }
+
+    return helperDatablockStruct;
+}
+
+//****************************************************************************/
 bool HlmsUtilsManager::parseJsonAndRetrieveDetails (HlmsUtilsManager::DatablockStruct* datablockStruct, const char* jsonChar)
 {
     rapidjson::Document d;
@@ -742,6 +766,37 @@ void HlmsUtilsManager::getTexturesFromRegisteredUnlitDatablocks(std::vector<Ogre
                 textureName = itTextures.value();
                 if (!textureName.empty())
                     v->push_back(textureName);
+
+                ++itTextures;
+            }
+        }
+    }
+}
+
+//****************************************************************************/
+void HlmsUtilsManager::getFullyQualifiedTextureFileNamesFromRegisteredDatablock (const Ogre::IdString& datablockId, std::vector<Ogre::String>* v)
+{
+    Ogre::String textureName;
+    Ogre::String path;
+    QVectorIterator<DatablockStruct> itRegisteredDatablocks(mRegisteredDatablocks);
+    while (itRegisteredDatablocks.hasNext())
+    {
+        // If the datablockId matches, append the texturenames to the vector
+        helperDatablockStruct = itRegisteredDatablocks.next();
+        if (helperDatablockStruct.datablockId == datablockId)
+        {
+            QMap <unsigned short, Ogre::String>::iterator itTextures = helperDatablockStruct.textureMap.begin();
+            QMap <unsigned short, Ogre::String>::iterator itTexturesEnd = helperDatablockStruct.textureMap.end();
+            while (itTextures != itTexturesEnd)
+            {
+                textureName = itTextures.value(); // Texture name is the basename
+                if (!textureName.empty())
+                {
+                    // TODO: Get the path
+                    path = getResourcePath(textureName);
+                    textureName = path + textureName;
+                    v->push_back(textureName);
+                }
 
                 ++itTextures;
             }
@@ -1019,4 +1074,42 @@ void HlmsUtilsManager::replaceTextureInPbsDatablock (const Ogre::IdString& datab
         Ogre::HlmsTextureManager::TextureLocation texLocation = hlmsTextureManager->createOrRetrieveTexture(fileNameTexture, textureMapType);
         datablock->setTexture(textureType, texLocation.xIdx, texLocation.texture);
     }
+}
+
+//****************************************************************************/
+const Ogre::String& HlmsUtilsManager::getResourcePath(const Ogre::String& resourceName)
+{
+    Ogre::FileInfoListPtr fileInfoListPtr(Ogre::ResourceGroupManager::getSingleton().findResourceFileInfo(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, resourceName,false));
+    Ogre::FileInfoList* fileInfoList = fileInfoListPtr.getPointer();
+    Ogre::FileInfo &fileInfo = fileInfoList->front();
+    helperString = fileInfo.archive->getName() + + "/" + fileInfo.path;
+
+    /*
+    helperString = "";
+    Ogre::FileInfo fileInfo;
+    Ogre::ResourceGroupManager::LocationList resourceLocations = Ogre::ResourceGroupManager::getSingletonPtr()->
+            getResourceLocationList(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    Ogre::ResourceGroupManager::LocationList::iterator it;
+    Ogre::ResourceGroupManager::LocationList::iterator itStart = resourceLocations.begin();
+    Ogre::ResourceGroupManager::LocationList::iterator itEnd = resourceLocations.end();
+    for (it = itStart; it != itEnd; ++it)
+    {
+        Ogre::ResourceGroupManager::ResourceLocation* location = *it;
+        Ogre::FileInfoListPtr fileInfoList = location->archive->findFileInfo(resourceName);
+        Ogre::FileInfoList::iterator itFileInfo;
+        Ogre::FileInfoList::iterator itFileInfoStart = fileInfoList->begin();
+        Ogre::FileInfoList::iterator itFileInfoEnd = fileInfoList->end();
+        for (itFileInfo = itFileInfoStart; itFileInfo != itFileInfoEnd; ++itFileInfo)
+        {
+            fileInfo = *itFileInfo;
+            if (fileInfo.basename == resourceName)
+            {
+                helperString = archive->getName() + "/" + fileInfo.path;
+                return helperString;
+            }
+        }
+    }
+    */
+
+    return helperString;
 }

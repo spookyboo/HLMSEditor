@@ -133,7 +133,7 @@ static const QString PAINT_EFFECT_CARBON_COPY_QSTRING = QString("Carbon Copy");
 static const QString PAINT_EFFECT_SMUDGE_QSTRING = QString("Smudge");
 static const QString PAINT_OVERFLOW_IGNORE_QSTRING = QString("Ignore");
 static const QString PAINT_OVERFLOW_CONTINUE_QSTRING = QString("Continue");
-
+static const QString PRESET_PATH_QSTRING = "../common/presets/";
 static const QString DEFAULT_BRUSH_AND_PATH_QSTRING = QString("../common/brushes/brush_001.png");
 
 //************************************ Ogre String constants *******************************************/

@@ -224,9 +224,12 @@ void MainWindow::createActions(void)
     mMaterialBrowserOpenMenuAction = new QAction(QString("Open browser"), this);
     mMaterialBrowserOpenMenuAction->setShortcut(QKeySequence(QString("Ctrl+B")));
     connect(mMaterialBrowserOpenMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserOpenMenuAction()));
-    mMaterialBrowserAddMenuAction = new QAction(QString("Add Hlms to browser"), this);
+    mMaterialBrowserAddMenuAction = new QAction(QString("Add material to browser"), this);
     mMaterialBrowserAddMenuAction->setShortcut(QKeySequence(QString("Ctrl+H")));
     connect(mMaterialBrowserAddMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserAddMenuAction()));
+    mMaterialPresetMenuAction = new QAction(QString("Material as preset"), this);
+    mMaterialPresetMenuAction->setShortcut(QKeySequence(QString("Ctrl+C")));
+    connect(mMaterialPresetMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialPresetMenuAction()));
 
     // ******** Texture menu ********
     mTextureBrowserImportMenuAction = new QAction(QString(ACTION_IMPORT_TEXTURES_FROM_DIR), this);
@@ -354,6 +357,7 @@ void MainWindow::createMenus(void)
     mMaterialMenu->addAction(mMaterialSetMenuAction);
     mMaterialMenu->addAction(mMaterialBrowserOpenMenuAction);
     mMaterialMenu->addAction(mMaterialBrowserAddMenuAction);
+    mMaterialMenu->addAction(mMaterialPresetMenuAction);
 
     // ******** Texture browser ********
     mTextureMenu = menuBar()->addMenu(QString("&Textures"));
@@ -407,10 +411,10 @@ void MainWindow::createDockWindows(void)
     // Paint dock widget
     mPaintDockWidget = new PaintDockWidget("Paint", this); // The paint dockwidget uses the paint layer manager
     mPaintLayerDockWidget = new PaintLayerDockWidget(&mPaintLayerManager, "Paint layers", this); // The paintlayer dockwidget uses the paint layer manager
-    mBrushDockWidget = new BrushDockWidget("Brushes", this);
+    mBrushPresetDockWidget = new BrushPresetDockWidget("Brushes", this);
     addDockWidget(Qt::RightDockWidgetArea, mPaintDockWidget);
     mPaintDockWidget->addDockWidget(Qt::RightDockWidgetArea, mPaintLayerDockWidget);
-    mPaintDockWidget->addDockWidget(Qt::RightDockWidgetArea, mBrushDockWidget);
+    mPaintDockWidget->addDockWidget(Qt::RightDockWidgetArea, mBrushPresetDockWidget);
 
     connect(mTextureDockWidget, SIGNAL(textureDoubleClicked(QString,QString)), this, SLOT(handleTextureDoubleClicked(QString,QString)));
     connect(mTextureDockWidget, SIGNAL(customContextMenuItemSelected(QString)), this, SLOT(handleCustomContextMenuItemSelected(QString)));
@@ -1114,6 +1118,70 @@ void MainWindow::doMaterialBrowserAddMenuAction(void)
 }
 
 //****************************************************************************/
+void MainWindow::doMaterialPresetMenuAction (void)
+{
+    if (mHlmsName.isEmpty())
+        QMessageBox::information(0, QString("Error"), QString("No filename. The Hlms must be saved first"));
+    else
+    {
+        // Create the directory under PRESET_PATH_QSTRING
+        QFileInfo info(mHlmsName);
+        QString presetPath = PRESET_PATH_QSTRING + info.baseName();
+        QDir dir(presetPath);
+        if (!dir.exists())
+        {
+          dir.mkdir(".");
+        }
+        presetPath = presetPath + "/";
+
+        // Copy the (saved) hlms
+        QString baseNameJson = mHlmsName;
+        baseNameJson = getBaseFileName(baseNameJson);
+        QFile::copy(mHlmsName, presetPath + baseNameJson);
+
+        // Create the thumb
+        QString thumb = baseNameJson + ".png";
+        mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->saveToFile((presetPath + thumb).toStdString());
+
+        // Copy the textures
+        std::vector<Ogre::String> v;
+        Ogre::String s;
+        QString sourceTextureFileName;
+        QString targetTextureFileName;
+        mHlmsUtilsManager->getFullyQualifiedTextureFileNamesFromRegisteredDatablock(mCurrentDatablockId, &v);
+        std::vector<Ogre::String>::const_iterator it;
+        std::vector<Ogre::String>::const_iterator itStart = v.begin();
+        std::vector<Ogre::String>::const_iterator itEnd = v.end();
+        for (it = itStart; it != itEnd; ++it)
+        {
+            s = *it;
+            sourceTextureFileName = s.c_str();
+            QFileInfo fileInfo(sourceTextureFileName);
+            targetTextureFileName = fileInfo.fileName();
+            targetTextureFileName = targetTextureFileName;
+            QFile::copy(sourceTextureFileName, presetPath + targetTextureFileName);
+        }
+
+        // Add thumb to preset widget
+        mBrushPresetDockWidget->addPreset (presetPath, thumb);
+
+        /* Delete the datablock, otherwise it cannot be loaded if selected as preset.
+         * If not deleted the following happens:
+         * The datablock name was registered with a full qualified jsonfilename.
+         * Once it becomes a preset, the full qualified jsonfilename becomes different, because the path differs.
+         * If the datablock was not deleted, it tries to reload with the new json filename. This is not possible.
+         */
+        Ogre::IdString id = mCurrentDatablockId; // This is needed, because clearHlmsNamesAndRemovePaintLayers() resets mCurrentDatablockId
+        clearHlmsNamesAndRemovePaintLayers();
+        QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
+        ogreWidget->setDefaultDatablockItem();
+        mPropertiesDockWidget->clear();
+        mNodeEditorDockWidget->clear();
+        mHlmsUtilsManager->destroyDatablock(id);
+    }
+}
+
+//****************************************************************************/
 void MainWindow::doTextureBrowserImportMenuAction(void)
 {
     QString textureFolder;
@@ -1217,10 +1285,10 @@ void MainWindow::doResetWindowLayoutMenuAction(void)
     // Paint dock widget
     addDockWidget(Qt::RightDockWidgetArea, mPaintDockWidget);
     mPaintDockWidget->addDockWidget(Qt::RightDockWidgetArea, mPaintLayerDockWidget);
-    mPaintDockWidget->addDockWidget(Qt::RightDockWidgetArea, mBrushDockWidget);
+    mPaintDockWidget->addDockWidget(Qt::RightDockWidgetArea, mBrushPresetDockWidget);
     mPaintDockWidget->show();
     mPaintDockWidget->show();
-    mBrushDockWidget->show();
+    mBrushPresetDockWidget->show();
 }
 
 //****************************************************************************/
