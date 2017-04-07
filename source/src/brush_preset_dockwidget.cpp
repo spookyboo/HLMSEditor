@@ -36,8 +36,10 @@ BrushPresetDockWidget::BrushPresetDockWidget(QString title, MainWindow* parent, 
     mTabWidget->addTab(mBrushWidget, QIcon(ICON_PAINT_ON), QString("Brushes"));
     mTabWidget->addTab(mPresetWidget, QIcon(ICON_HLMS), QString("Presets"));
     connect(mBrushWidget, SIGNAL(brushDoubleClicked(QString,QString)), this, SLOT(handleBrushDoubleClicked(QString,QString)));
-    connect(mPresetWidget, SIGNAL(presetDoubleClicked(QString,QString)), this, SLOT(handlePresetDoubleClicked(QString,QString)));
+    connect(mPresetWidget, SIGNAL(presetCreateMaterial(QString,QString)), this, SLOT(handleCreateMaterial(QString,QString)));
+    connect(mPresetWidget, SIGNAL(presetCreateMaterialAndApply(QString,QString)), this, SLOT(handleCreateMaterialAndApply(QString,QString)));
     setWidget(mTabWidget);
+    mHelperString = "";
 }
 
 //****************************************************************************/
@@ -53,8 +55,35 @@ void BrushPresetDockWidget::handleBrushDoubleClicked(const QString& name, const 
 }
 
 //****************************************************************************/
-void BrushPresetDockWidget::handlePresetDoubleClicked(const QString& name, const QString& baseName)
+void BrushPresetDockWidget::handleCreateMaterial(const QString& name, const QString& baseName)
 {
+    // Create
+    createMaterialFromPreset (name, baseName);
+}
+
+//****************************************************************************/
+void BrushPresetDockWidget::handleCreateMaterialAndApply(const QString& name, const QString& baseName)
+{
+    // First delete the current material
+    mParent->deleteCurrentMaterial();
+
+    // Create...
+    createMaterialFromPreset (name, baseName);
+
+    // ...and apply
+    mParent->applyCurrentMaterialToMesh();
+}
+
+//****************************************************************************/
+void BrushPresetDockWidget::addPreset (const QString& path, const QString& thumbName)
+{
+    mPresetWidget->addPreset (path, thumbName);
+}
+
+//****************************************************************************/
+const QString& BrushPresetDockWidget::createMaterialFromPreset (const QString& name, const QString& baseName)
+{
+    mHelperString = "";
     QFileInfo info(name); // name is the name of the thumb image; it is only use to derive its path
     QDir sourceDir = info.absoluteDir();
 
@@ -96,10 +125,7 @@ void BrushPresetDockWidget::handlePresetDoubleClicked(const QString& name, const
     // Callback to parent
     if (!jsonFileName.isEmpty())
         mParent->loadDatablockAndSet(jsonFileName);
-}
 
-//****************************************************************************/
-void BrushPresetDockWidget::addPreset (const QString& path, const QString& thumbName)
-{
-    mPresetWidget->addPreset (path, thumbName);
+    mHelperString = jsonFileName;
+    return mHelperString;
 }

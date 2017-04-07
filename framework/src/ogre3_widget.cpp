@@ -580,6 +580,43 @@ namespace Magus
     }
 
     //****************************************************************************/
+    void QOgreWidget::setDefaultDatablockSubItem(Ogre::SubItem* subItem)
+    {
+        // If one of the subItems was highlighted, restore it
+        resetHighlight();
+
+        // Set the default datablock
+        Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+        Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
+        Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+
+        bool success = false;
+        try
+        {
+            subItem->setDatablock(hlmsPbs->getDefaultDatablock()->getName());
+            success = true;
+        }
+        catch (Ogre::Exception e) {}
+        if (!success)
+        {
+            try
+            {
+                subItem->setDatablock(DEFAULT_DATABLOCK_NAME);
+                success = true;
+            }
+            catch (Ogre::Exception e) {}
+        }
+        if (!success)
+        {
+            try
+            {
+                subItem->setDatablock(hlmsUnlit->getDefaultDatablock()->getName());
+            }
+            catch (Ogre::Exception e) {}
+        }
+    }
+
+    //****************************************************************************/
     void QOgreWidget::setDefaultDatablockItemRttHoover(void)
     {
         resetHighlight();
@@ -1831,4 +1868,21 @@ namespace Magus
         OGRE_FREE(data, Ogre::MEMCATEGORY_RENDERSYS);
         return mHelpColour;
     }
+
+    //****************************************************************************/
+    void QOgreWidget::removeDatablockFromItem (const Ogre::IdString datablockId)
+    {
+        size_t numSubItems = mItem->getNumSubItems();
+        Ogre::SubItem* subItem;
+        Ogre::HlmsDatablock* datablock;
+
+        for (size_t i = 0; i < numSubItems; ++i)
+        {
+            subItem = mItem->getSubItem(i);
+            datablock = subItem->getDatablock();
+            if (datablock->getName() == datablockId)
+                setDefaultDatablockSubItem(subItem);
+        }
+    }
 }
+

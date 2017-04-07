@@ -230,6 +230,9 @@ void MainWindow::createActions(void)
     mMaterialPresetMenuAction = new QAction(QString("Material as preset"), this);
     mMaterialPresetMenuAction->setShortcut(QKeySequence(QString("Ctrl+C")));
     connect(mMaterialPresetMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialPresetMenuAction()));
+    mMaterialClearMenuAction = new QAction(QString("Clear all materials (from memory)"), this);
+    mMaterialClearMenuAction->setShortcut(QKeySequence(QString("Ctrl+Y")));
+    connect(mMaterialClearMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialClearMenuAction()));
 
     // ******** Texture menu ********
     mTextureBrowserImportMenuAction = new QAction(QString(ACTION_IMPORT_TEXTURES_FROM_DIR), this);
@@ -358,6 +361,7 @@ void MainWindow::createMenus(void)
     mMaterialMenu->addAction(mMaterialBrowserOpenMenuAction);
     mMaterialMenu->addAction(mMaterialBrowserAddMenuAction);
     mMaterialMenu->addAction(mMaterialPresetMenuAction);
+    mMaterialMenu->addAction(mMaterialClearMenuAction);
 
     // ******** Texture browser ********
     mTextureMenu = menuBar()->addMenu(QString("&Textures"));
@@ -427,22 +431,13 @@ void MainWindow::doNewProjectAction(void)
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
     mOgreManager->setPause(true);
 
-    // Clear all painting layers
-    clearHlmsNamesAndRemovePaintLayers();
+    deleteAllMaterials();
 
-    // Clear the material- and texture browser
-    mMaterialBrowser->clearResources();
+    // Clear the texture browser
     mTextureDockWidget->clearResources();
 
-    // Clear the property- and node widgets
-    mPropertiesDockWidget->clear();
-    mNodeEditorDockWidget->clear();
+    // Reset project name
     newProjectName();
-
-    // Set the datablock of the Item in the Ogre widget to 'default'
-    // Also destroy the datablocks in memory; strictly speaking this is not required, but it cleans up a bit
-    ogreWidget->setDefaultDatablockItem();
-    mHlmsUtilsManager->destroyDatablocks(true); // Exclude the 'special' datablocks
 
     mOgreManager->setPause(false);
 }
@@ -535,13 +530,6 @@ void MainWindow::loadProject(const QString& fileName)
                 file.close();
                 setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
                 appendRecentProject(fileName);
-
-                // Just leave the 2 lines below as comment. The benefit is that datablocks of multiple projects can be
-                // used with one mesh. Howver, this gives some side-effects; creating the datablocks from the
-                // materialbrowser does not include the materials of the other project. In some cases this results in
-                // blank subItems.
-                //ogreWidget->setDefaultDatablockItem();
-                //mHlmsUtilsManager->destroyDatablocks(true); // Exclude the 'special' datablocks
 
                 // Enrich the item in the renderwindow with datablocks from the material browser.
                 // This is based on the materialnames in its corresponding mesh.
@@ -1075,8 +1063,13 @@ void MainWindow::doQuitMenuAction(void)
 //****************************************************************************/
 void MainWindow::doMaterialSetMenuAction(void)
 {
+    applyCurrentMaterialToMesh();
+}
+
+//****************************************************************************/
+void MainWindow::applyCurrentMaterialToMesh(void)
+{
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->assignCurrentDatablock();
-    return;
 }
 
 //****************************************************************************/
@@ -1171,14 +1164,56 @@ void MainWindow::doMaterialPresetMenuAction (void)
          * Once it becomes a preset, the full qualified jsonfilename becomes different, because the path differs.
          * If the datablock was not deleted, it tries to reload with the new json filename. This is not possible.
          */
-        Ogre::IdString id = mCurrentDatablockId; // This is needed, because clearHlmsNamesAndRemovePaintLayers() resets mCurrentDatablockId
+        deleteMaterial (mCurrentDatablockId);
+    }
+}
+
+//****************************************************************************/
+void MainWindow::doMaterialClearMenuAction (void)
+{
+    deleteAllMaterials ();
+}
+
+//****************************************************************************/
+void MainWindow::deleteCurrentMaterial(void)
+{
+    deleteMaterial (mCurrentDatablockId);
+}
+
+//****************************************************************************/
+void MainWindow::deleteMaterial(const Ogre::IdString& id)
+{
+    Ogre::IdString idToBeDeleted = id; // Must be locally copied, because clearHlmsNamesAndRemovePaintLayers() resets the current id (mCurrentDatablockId)
+    QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
+    if (idToBeDeleted == mCurrentDatablockId)
+    {
         clearHlmsNamesAndRemovePaintLayers();
-        QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
-        ogreWidget->setDefaultDatablockItem();
         mPropertiesDockWidget->clear();
         mNodeEditorDockWidget->clear();
-        mHlmsUtilsManager->destroyDatablock(id);
     }
+
+    ogreWidget->removeDatablockFromItem(idToBeDeleted);
+    mHlmsUtilsManager->destroyDatablock(idToBeDeleted);
+}
+
+//****************************************************************************/
+void MainWindow::deleteAllMaterials(void)
+{
+    // Clear all painting layers
+    clearHlmsNamesAndRemovePaintLayers();
+
+    // Clear the material browser
+    mMaterialBrowser->clearResources();
+
+    // Clear the property- and node widgets
+    mPropertiesDockWidget->clear();
+    mNodeEditorDockWidget->clear();
+
+    // Set the datablock of the Item in the Ogre widget to 'default'
+    // Also destroy the datablocks in memory
+    QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
+    ogreWidget->setDefaultDatablockItem();
+    mHlmsUtilsManager->destroyDatablocks(true); // Exclude the 'special' datablocks
 }
 
 //****************************************************************************/

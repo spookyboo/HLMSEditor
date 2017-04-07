@@ -50,13 +50,18 @@ class BrushPresetDockWidget : public QDockWidget
 
     private slots:
         void handleBrushDoubleClicked(const QString& name, const QString& baseName);
-        void handlePresetDoubleClicked(const QString& name, const QString& baseName);
+        void handleCreateMaterial(const QString& name, const QString& baseName);
+        void handleCreateMaterialAndApply(const QString& name, const QString& baseName);
+
+    protected:
+        const QString& createMaterialFromPreset (const QString& name, const QString& baseName);
 
     private:
         MainWindow* mParent;
         BrushWidget* mBrushWidget;
         PresetWidget* mPresetWidget;
         QTabWidget* mTabWidget;
+        QString mHelperString;
 };
 
 #endif

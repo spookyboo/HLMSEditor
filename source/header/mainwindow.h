@@ -92,6 +92,10 @@ class MainWindow : public QMainWindow
         void addResourceLocationFile (const QString& fileName);
         void addResourceLocationPath (const QString& path);
         void loadDatablockAndSet(const QString jsonFileName);
+        void applyCurrentMaterialToMesh(void);
+        void deleteCurrentMaterial(void); // Delete the current material
+        void deleteMaterial(const Ogre::IdString& id); // Delete a datablock based on id; takes into account that it is still attached to an item
+        void deleteAllMaterials(void); // Exludes the special materials used in the editor; takes into account that the material is still attached to an item
 
     protected:
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources); // Save the content of a resource vector
@@ -148,6 +152,7 @@ class MainWindow : public QMainWindow
         void doMaterialBrowserOpenMenuAction(void);
         void doMaterialBrowserAddMenuAction(void);
         void doMaterialPresetMenuAction(void);
+        void doMaterialClearMenuAction (void);
         void doQuitMenuAction(void);
         void doTextureBrowserImportMenuAction(void);
         void doTextureBrowserAddImageMenuAction(void);
@@ -193,6 +198,7 @@ class MainWindow : public QMainWindow
         QAction* mSaveAsMeshMenuAction;
         QAction* mMaterialSetMenuAction;
         QAction* mMaterialPresetMenuAction;
+        QAction* mMaterialClearMenuAction;
         QAction* mMaterialBrowserOpenMenuAction;
         QAction* mMaterialBrowserAddMenuAction;
         QAction* mTextureBrowserImportMenuAction;

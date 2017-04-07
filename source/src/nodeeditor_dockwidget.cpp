@@ -328,8 +328,12 @@ void NodeEditorDockWidget::doNewMacroblockAction(void)
 //****************************************************************************/
 void NodeEditorDockWidget::doCogHToolbarAction(void)
 {
-    Ogre::IdString name;
+    Ogre::IdString currentName;
+    Ogre::IdString previousOrCurrentName;
     HlmsUtilsManager* hlmsUtilsManager = mParent->getHlmsUtilsManager();
+    Magus::OgreManager* ogreManager = mParent->getOgreManager();
+    QVector<int> indices;
+    Ogre::String jsonFileName;
 
     // Construct a datablock and set it to the current item in the renderwindow
     if (mHlmsPbsDatablockNode)
@@ -338,18 +342,25 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
         mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(true);
         mCurrentDatablockName = mHlmsPbsDatablockNode->getName();
-        name = mCurrentDatablockName.toStdString();
-        Magus::OgreManager* ogreManager = mParent->getOgreManager();
+        currentName = mCurrentDatablockName.toStdString(); // Current name of the node
 
-        QVector<int> indices = mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
-        Ogre::String jsonFileName = hlmsUtilsManager->searchJsonFileName (name); // The datablock may still refer to a loaded material in the material browser
-        hlmsUtilsManager->destroyDatablock(name);
+        // Check whether the name of the datablock was changed; if it did, use the previous name
+        if (currentName == mParent->getCurrentDatablockId())
+            previousOrCurrentName = currentName; // Current name of the node
+        else
+            previousOrCurrentName = mParent->getCurrentDatablockId(); // Name of the node before the update
+
+        indices = mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(previousOrCurrentName);
+        hlmsUtilsManager->destroyDatablock(previousOrCurrentName);
+        jsonFileName = hlmsUtilsManager->searchJsonFileName (previousOrCurrentName); // The datablock may still refer to a loaded material in the material browser
+
+        // Create the datablock, using the name of the node
         Ogre::HlmsPbsDatablock* datablock = mHlmsPbsBuilder->createPbsDatablock(ogreManager, mHlmsPbsDatablockNode);
         if (datablock)
         {
             mParent->replaceCurrentDatablock(indices, datablock->getName());
             mParent->setCurrentDatablockIdAndFullName(datablock->getName(), *datablock->getFullName());
-            hlmsUtilsManager->addNewDatablockToRegisteredDatablocks(name, jsonFileName);
+            hlmsUtilsManager->addNewDatablockToRegisteredDatablocks(currentName, jsonFileName);
         }
     }
     else if (mHlmsUnlitDatablockNode)
@@ -358,18 +369,24 @@ void NodeEditorDockWidget::doCogHToolbarAction(void)
         mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(false);
         mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(true);
         mCurrentDatablockName = mHlmsUnlitDatablockNode->getName();
-        name = mCurrentDatablockName.toStdString();
-        Magus::OgreManager* ogreManager = mParent->getOgreManager();
+        currentName = mCurrentDatablockName.toStdString();
 
-        QVector<int> indices = mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(name);
-        Ogre::String jsonFileName = hlmsUtilsManager->searchJsonFileName (name); // The datablock may still refer to a loaded material in the material browser
-        hlmsUtilsManager->destroyDatablock(name);
+        // Check whether the name of the datablock was changed; if it did, use the previous name
+        if (currentName == mParent->getCurrentDatablockId())
+            previousOrCurrentName = currentName; // Current name of the node
+        else
+            previousOrCurrentName = mParent->getCurrentDatablockId(); // Name of the node before the update
+
+        indices = mParent->getSubItemIndicesWithDatablockAndReplaceWithDefault(previousOrCurrentName);
+        hlmsUtilsManager->destroyDatablock(previousOrCurrentName);
+        jsonFileName = hlmsUtilsManager->searchJsonFileName (previousOrCurrentName); // The datablock may still refer to a loaded material in the material browser
+
         Ogre::HlmsUnlitDatablock* datablock = mHlmsUnlitBuilder->createUnlitDatablock(ogreManager, mHlmsUnlitDatablockNode);
         if (datablock)
         {
             mParent->replaceCurrentDatablock(indices, datablock->getName());
             mParent->setCurrentDatablockIdAndFullName(datablock->getName(), *datablock->getFullName());
-            hlmsUtilsManager->addNewDatablockToRegisteredDatablocks(name, jsonFileName);
+            hlmsUtilsManager->addNewDatablockToRegisteredDatablocks(currentName, jsonFileName);
         }
     }
 }

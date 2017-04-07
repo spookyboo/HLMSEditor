@@ -47,6 +47,7 @@ PresetWidget::PresetWidget (const QString& presetDir, BrushPresetDockWidget* bru
     mTextureWidget = new Magus::QtDefaultTextureWidget(this);
     mTextureWidget->setTextureSize(QSize(113, 64)); // Take 16:9 aspect into account and add 8 pixels to the width to compensate the frame width
     mTextureWidget->addContextMenuActionText(ACTION_CREATE_PRESET_MATERIAL);
+    mTextureWidget->addContextMenuActionText(ACTION_CREATE_AND_APPLY_PRESET);
     mTextureWidget->addContextMenuActionText(ACTION_DELETE_PRESET);
     loadPresets (mPresetDir);
     connect(mTextureWidget, SIGNAL(doubleClicked(QString,QString)), this, SLOT(handlePresetDoubleClicked(QString,QString)));
@@ -106,7 +107,7 @@ void PresetWidget::addPreset (const QString& path, const QString& thumbName)
 //****************************************************************************/
 void PresetWidget::handlePresetDoubleClicked (const QString& name, const QString& baseName)
 {
-    emit presetDoubleClicked(name, baseName);
+    emit presetCreateMaterial (name, baseName);
 }
 
 //****************************************************************************/
@@ -114,7 +115,11 @@ void PresetWidget::handleContextMenuSelected (QAction* action, const QString& na
 {
     if (action->text() == ACTION_CREATE_PRESET_MATERIAL)
     {
-        emit presetDoubleClicked(name, baseName);
+        emit presetCreateMaterial (name, baseName);
+    }
+    else if (action->text() == ACTION_CREATE_AND_APPLY_PRESET)
+    {
+        emit presetCreateMaterialAndApply (name, baseName);
     }
     else if (action->text() == ACTION_DELETE_PRESET)
     {

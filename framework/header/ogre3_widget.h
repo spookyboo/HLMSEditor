@@ -78,6 +78,7 @@ namespace Magus
             void setRotation(const Ogre::Vector3& rotation);
             void setPosition(const Ogre::Vector3& position);
             void setDefaultDatablockItem(void);
+            void setDefaultDatablockSubItem(Ogre::SubItem* subItem);
             void setDefaultDatablockItemRttHoover(void); // Set the mItem to default
             void saveToFile(const Ogre::String& fileName);
 
@@ -130,6 +131,7 @@ namespace Magus
             void setSkyBoxVisible (bool visible);
             void setPaintLayers(PaintLayers* paintLayers); // Set pointer to vector with PaintLayers
             int getSubItemIndexWithMouseOver(int mouseX, int mouseY); // Returns the subitem index of the subitem where the mouse hoovers over
+            void removeDatablockFromItem (const Ogre::IdString id);
 
         protected:
             Ogre::Root* mRoot;

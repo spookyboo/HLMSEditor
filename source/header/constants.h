@@ -435,6 +435,7 @@ static const QString ACTION_SET_BRUSH = QString("Set brush in current paint laye
 
 // Presets
 static const QString ACTION_CREATE_PRESET_MATERIAL = QString("Create material from preset");
+static const QString ACTION_CREATE_AND_APPLY_PRESET = QString("Create material from preset and apply");
 static const QString ACTION_DELETE_PRESET = QString("Delete preset");
 
 #endif

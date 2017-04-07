@@ -45,7 +45,8 @@ class PresetWidget : public QWidget
         void addPreset (const QString& path, const QString& thumbName);
 
     signals:
-        void presetDoubleClicked(const QString& name, const QString& baseName);
+        void presetCreateMaterial (const QString& name, const QString& baseName);
+        void presetCreateMaterialAndApply (const QString& name, const QString& baseName);
 
     private slots:
         void handlePresetDoubleClicked(const QString& name, const QString& baseName);
