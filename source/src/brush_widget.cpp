@@ -28,6 +28,7 @@
 #include <QMimeData>
 #include <QDir>
 #include <QFileInfo>
+#include "constants.h"
 #include "magus_core.h"
 #include "brush_widget.h"
 #include "brush_preset_dockwidget.h"
@@ -45,9 +46,11 @@ BrushWidget::BrushWidget (const QString& brushDir, BrushPresetDockWidget* brushP
 
     mTextureWidget = new Magus::QtDefaultTextureWidget(this);
     mTextureWidget->setTextureSize(QSize(72, 64)); // Add 8 pixels to the width to compensate the frame width
+    mTextureWidget->addContextMenuActionText(ACTION_SET_BRUSH);
     //mTextureWidget->setContentsMargins(-8, -8, -8, -8);
     loadBrushesRecursively (mBrushDir);
     connect(mTextureWidget, SIGNAL(doubleClicked(QString,QString)), this, SLOT(handleBrushDoubleClicked(QString,QString)));
+    connect(mTextureWidget, SIGNAL(contextMenuSelected(QAction*,QString,QString)), this, SLOT(handleContextMenuSelected(QAction*,QString,QString)));
 
     // Layout
     mainLayout->addWidget(mTextureWidget);
@@ -90,7 +93,16 @@ void BrushWidget::loadBrushesRecursively(const QString& searchPath)
 }
 
 //****************************************************************************/
-void BrushWidget::handleBrushDoubleClicked(const QString& name, const QString& baseName)
+void BrushWidget::handleBrushDoubleClicked (const QString& name, const QString& baseName)
 {
     emit brushDoubleClicked(name, baseName);
+}
+
+//****************************************************************************/
+void BrushWidget::handleContextMenuSelected (QAction* action, const QString& name, const QString& baseName)
+{
+    if (action->text() == ACTION_SET_BRUSH)
+    {
+        emit brushDoubleClicked(name, baseName);
+    }
 }

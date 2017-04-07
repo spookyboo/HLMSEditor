@@ -28,6 +28,7 @@
 #include <QListWidgetItem>
 #include <QDropEvent>
 #include <QProcess>
+#include <QApplication>
 #include "magus_core.h"
 #include "tool_default_texturewidget.h"
 
@@ -183,6 +184,12 @@ namespace Magus
         mOriginIsFile = true;
         QHBoxLayout* mainLayout = new QHBoxLayout;
         QVBoxLayout* textureSelectionLayout = new QVBoxLayout;
+
+        // Contextmenu
+        installEventFilter(this);
+        setContextMenuPolicy(Qt::CustomContextMenu);
+        mContextMenu = new QMenu(this);
+        connect(mContextMenu, SIGNAL(triggered(QAction*)), this, SLOT(handleContextMenuAction(QAction*)));
 
         // Define selection widget (QtDefaultTextureListWidget)
         mSelectionList = new QtDefaultTextureListWidget();
@@ -363,6 +370,13 @@ namespace Magus
             QtDefaultTextureAndText* textureAndText = static_cast<QtDefaultTextureAndText*>(widget);
             mNameTexture = textureAndText->mName;
             mBaseNameTexture = textureAndText->mBaseName;
+
+            Qt::MouseButtons buttons = QApplication::mouseButtons();
+            if (buttons & Qt::RightButton && mContextMenu->actions().size() > 0)
+            {
+                QPoint pos = QCursor::pos();
+                mContextMenu->popup(pos);
+            }
             emit selected(textureAndText->mName, textureAndText->mBaseName);
         }
     }
@@ -512,5 +526,28 @@ namespace Magus
             }
         }
         return false;
+    }
+
+    //****************************************************************************/
+    void QtDefaultTextureWidget::addContextMenuActionText(const QString& actionText)
+    {
+        mContextMenu->addAction(new QAction(actionText));
+    }
+
+    //****************************************************************************/
+    void QtDefaultTextureWidget::handleContextMenuAction(QAction* action)
+    {
+        QListWidgetItem* item = mSelectionList->currentItem();
+        if (item)
+        {
+            QWidget* widget = mSelectionList->itemWidget(item);
+            if (widget)
+            {
+                QtDefaultTextureAndText* textureAndText = static_cast<QtDefaultTextureAndText*>(widget);
+                QString name = textureAndText->mName;
+                QString baseName = textureAndText->mBaseName;
+                emit contextMenuSelected(action, name, baseName);
+            }
+        }
     }
 }

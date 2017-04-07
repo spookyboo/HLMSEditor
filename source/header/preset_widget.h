@@ -49,6 +49,7 @@ class PresetWidget : public QWidget
 
     private slots:
         void handlePresetDoubleClicked(const QString& name, const QString& baseName);
+        void handleContextMenuSelected (QAction* action, const QString& name, const QString& baseName);
 
     protected:
         void loadPresets(const QString& searchPath);

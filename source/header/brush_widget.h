@@ -46,6 +46,7 @@ class BrushWidget : public QWidget
 
     private slots:
         void handleBrushDoubleClicked(const QString& name, const QString& baseName);
+        void handleContextMenuSelected (QAction* action, const QString& name, const QString& baseName);
 
     protected:
         void loadBrushesRecursively(const QString& searchPath);

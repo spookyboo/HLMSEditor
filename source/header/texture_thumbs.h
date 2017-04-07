@@ -92,6 +92,7 @@ class TextureThumbsDockWidget : public QDockWidget
         void handleAssetSelected(const QString& name, const QString& baseName);
         void handleTextureFileDropped(const QString& name, const QString& baseName);
         void handleAssetDoubleClicked(const QString& name, const QString& baseName);
+        void handleContextMenuSelected (QAction* action, const QString& name, const QString& baseName);
 
     private:
         QMainWindow* mParent;

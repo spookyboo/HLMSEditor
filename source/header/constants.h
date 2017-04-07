@@ -420,6 +420,8 @@ static const QString ACTION_IMPORT_TEXTURES_FROM_DIR = QString("Import from dire
 static const QString ACTION_CONFIGURE = QString("Configure");
 static const QString ACTION_ADD_TEXTURES = QString("Add texture file(s)");
 static const QString ACTION_EDIT = QString("Edit material");
+static const QString ACTION_MOVE_TO_NODE_EDITOR = QString("Move to node editor");
+static const QString ACTION_REMOVE_FROM_LIST = QString("Remove from list");
 
 // Painting
 static const unsigned short PAINT_MAX_MIP_MAPS = 7;
@@ -427,5 +429,12 @@ static const QString ACTION_NEW_PAINTING_LAYER = QString("Create paint layer");
 static const QString ACTION_EDIT_PAINTING_LAYER = QString("Edit paint layer");
 static const QString ACTION_DELETE_CURRENT_PAINTING_LAYERS = QString("Delete selected painting layer");
 static const int TEXTURE_FILE_GENERATION_DEPTH = 5; // Determines number of undo's
+
+// Brushes
+static const QString ACTION_SET_BRUSH = QString("Set brush in current paint layer");
+
+// Presets
+static const QString ACTION_CREATE_PRESET_MATERIAL = QString("Create material from preset");
+static const QString ACTION_DELETE_PRESET = QString("Delete preset");
 
 #endif

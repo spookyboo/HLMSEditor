@@ -25,6 +25,7 @@
 #include <QListWidget>
 #include <QLineEdit>
 #include <QLabel>
+#include <QMenu>
 
 QT_BEGIN_NAMESPACE
 
@@ -60,6 +61,7 @@ namespace Magus
         private:
             QLabel* mTextureLabel;
             QLineEdit* mBaseNameEdit;
+            //QMenu* mContextMenu;
     };
 
     //****************************************************************************/
@@ -77,6 +79,9 @@ namespace Magus
             QtDefaultTextureListWidget(QWidget* parent = 0);
             virtual ~QtDefaultTextureListWidget(void);
 
+            // Add an item to the context menu
+            //void addActionText(const QString& actionText);
+
         signals:
             // Emitted when a texture file is dropped
             void textureFileDropped(const QString& name, const QString& baseName);
@@ -89,6 +94,9 @@ namespace Magus
 
             // Emitted when the asset is moved
             void assedDragMoved(const QString& name, const QString& baseName);
+
+            // Emitted when a context menu item is selected
+            //void contextMenuAction (QAction* action, const QString& name, const QString& baseName);
 
         protected:
             virtual void keyPressEvent(QKeyEvent* event);
@@ -167,6 +175,9 @@ namespace Magus
             // Gets the currently selected pixmap
             const QPixmap* getCurrentPixmap (void);
 
+            // Add an item to the context menu
+            void addContextMenuActionText(const QString& actionText);
+
         signals:
             // Emitted when the mouse is pressed
             void mousePressed(const QString& name, const QString& baseName);
@@ -183,6 +194,9 @@ namespace Magus
             // Emitted when an asset is deleted
             void assetDeleted(const QString& name, const QString& baseName);
 
+            // Emitted when an action of the context menu is selected
+            void contextMenuSelected(QAction* action, const QString& name, const QString& baseName);
+
         protected slots:
             void handleSelected(QListWidgetItem* item);
             void handleSelected(const QString& name, const QString& baseName);
@@ -190,6 +204,7 @@ namespace Magus
             void handleTextureFileDropped (const QString& name, const QString& baseName);
             void handleMouseOver(QListWidgetItem* item);
             void handleAssetDeleted(const QString& name, const QString& baseName);
+            void handleContextMenuAction(QAction* action);
 
         private:
             QString mNameTexture; // In case of a filename, this is the fully qualified filename (path + filename)
@@ -198,6 +213,7 @@ namespace Magus
             QtDefaultTextureListWidget* mSelectionList;
             QSize mTextureSize;
             bool mOriginIsFile;
+            QMenu* mContextMenu;
     };
 }
 

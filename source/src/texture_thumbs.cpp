@@ -30,11 +30,15 @@ TextureThumbsDockWidget::TextureThumbsDockWidget(const QString& iconDir, const Q
     mIconDir = iconDir;
     mTextureWidget = new Magus::QtDefaultTextureWidget(this);
     mTextureWidget->setTextureSize(QSize(128, 120)); // Add 8 pixels to the width to compensate the frame width
+    mTextureWidget->addContextMenuActionText(ACTION_MOVE_TO_NODE_EDITOR);
+    mTextureWidget->addContextMenuActionText(ACTION_REMOVE_FROM_LIST);
+
     setWidget(mTextureWidget);
     connect(mTextureWidget, SIGNAL(selected(QString,QString)), this, SLOT(handleAssetSelected(QString,QString)));
     connect(mTextureWidget, SIGNAL(textureFileDropped(QString,QString)), this, SLOT(handleTextureFileDropped(QString,QString)));
     connect(mTextureWidget, SIGNAL(doubleClicked(QString,QString)), this, SLOT(handleAssetDoubleClicked(QString,QString)));
     connect(mTextureWidget, SIGNAL(assetDeleted(QString,QString)), this, SLOT(handleAssetDeleted(QString,QString)));
+    connect(mTextureWidget, SIGNAL(contextMenuSelected(QAction*,QString,QString)), this, SLOT(handleContextMenuSelected(QAction*,QString,QString)));
 
     // Perform standard functions
     createActions();
@@ -187,4 +191,17 @@ void TextureThumbsDockWidget::handleAssetDoubleClicked(const QString& name, cons
 {
     // Note, that these are the thumb image names
     emit assetDoubleClicked(name, baseName);
+}
+
+//****************************************************************************/
+void TextureThumbsDockWidget::handleContextMenuSelected (QAction* action, const QString& name, const QString& baseName)
+{
+    if (action->text() == ACTION_MOVE_TO_NODE_EDITOR)
+    {
+        emit assetDoubleClicked(name, baseName);
+    }
+    else if (action->text() == ACTION_REMOVE_FROM_LIST)
+    {
+        emit assetDeleted(name, baseName);
+    }
 }

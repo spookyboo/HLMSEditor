@@ -29,6 +29,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include "magus_core.h"
+#include "constants.h"
 #include "preset_widget.h"
 #include "brush_preset_dockwidget.h"
 #include "tool_default_texturewidget.h"
@@ -45,8 +46,11 @@ PresetWidget::PresetWidget (const QString& presetDir, BrushPresetDockWidget* bru
 
     mTextureWidget = new Magus::QtDefaultTextureWidget(this);
     mTextureWidget->setTextureSize(QSize(113, 64)); // Take 16:9 aspect into account and add 8 pixels to the width to compensate the frame width
+    mTextureWidget->addContextMenuActionText(ACTION_CREATE_PRESET_MATERIAL);
+    mTextureWidget->addContextMenuActionText(ACTION_DELETE_PRESET);
     loadPresets (mPresetDir);
     connect(mTextureWidget, SIGNAL(doubleClicked(QString,QString)), this, SLOT(handlePresetDoubleClicked(QString,QString)));
+    connect(mTextureWidget, SIGNAL(contextMenuSelected(QAction*,QString,QString)), this, SLOT(handleContextMenuSelected(QAction*,QString,QString)));
 
     // Layout
     mainLayout->addWidget(mTextureWidget);
@@ -92,15 +96,39 @@ void PresetWidget::loadPresets(const QString& searchPath)
 }
 
 //****************************************************************************/
+void PresetWidget::addPreset (const QString& path, const QString& thumbName)
+{
+    QString fileName = path + thumbName;
+    QPixmap texturePixmap = QPixmap(fileName);
+    mTextureWidget->addTexture(texturePixmap, fileName, thumbName);
+}
+
+//****************************************************************************/
 void PresetWidget::handlePresetDoubleClicked (const QString& name, const QString& baseName)
 {
     emit presetDoubleClicked(name, baseName);
 }
 
 //****************************************************************************/
-void PresetWidget::addPreset (const QString& path, const QString& thumbName)
+void PresetWidget::handleContextMenuSelected (QAction* action, const QString& name, const QString& baseName)
 {
-    QString fileName = path + thumbName;
-    QPixmap texturePixmap = QPixmap(fileName);
-    mTextureWidget->addTexture(texturePixmap, fileName, thumbName);
+    if (action->text() == ACTION_CREATE_PRESET_MATERIAL)
+    {
+        emit presetDoubleClicked(name, baseName);
+    }
+    else if (action->text() == ACTION_DELETE_PRESET)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(0, "", "Are you sure you want to delete the preset?\n", QMessageBox::Ok|QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Ok)
+        {
+            mTextureWidget->deleteTexture(name, baseName);
+            QFileInfo info(name);
+            QString presetPath = PRESET_PATH_QSTRING + info.baseName();
+            QDir dir(presetPath);
+            if (dir.exists())
+              dir.removeRecursively();
+        }
+    }
 }
