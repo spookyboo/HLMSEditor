@@ -1,13 +1,11 @@
 V 1.0 updates:
 =============
 - Menu option to clear all datablock in memory
-- Brushes
-  - Use preset by means of context menu
-- Material presets
-  - Delete preset by means of context menu
 - Update pdf with:
   - How to import brushes
   - What is the ..\import directory used for
+  - new context menus (brush, texture thumbs, presets)
+  - Extra main menu item (clear memory)
 - Rotate in all directions
 - Save material with paint applied
 - Export materials (in combination with paint)

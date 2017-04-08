@@ -225,7 +225,7 @@ HlmsNodePbsDatablock* NodeEditorDockWidget::doNewHlmsPbsDatablockAction(void)
         mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(true);
         mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(true);
-        mParent->initCurrentDatablockFileName(); // Don't destroy all other datablocks
+        mParent->initCurrentMaterialFileName(); // Don't destroy all other datablocks
         if (mHlmsPbsDatablockNode)
             mHlmsPbsDatablockNode->setSelected(true);
         nodeSelected(mHlmsPbsDatablockNode);
@@ -253,7 +253,7 @@ HlmsNodeUnlitDatablock* NodeEditorDockWidget::doNewHlmsUnlitDatablockAction(void
         mParent->mPropertiesDockWidget->setTextureTypePropertyVisible(false);
         mParent->mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(false);
         mParent->mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(true);
-        mParent->initCurrentDatablockFileName(); // Don't destroy all other datablocks
+        mParent->initCurrentMaterialFileName(); // Don't destroy all other datablocks
         if (mHlmsUnlitDatablockNode)
             mHlmsUnlitDatablockNode->setSelected(true);
         nodeSelected(mHlmsUnlitDatablockNode);
@@ -420,7 +420,7 @@ void NodeEditorDockWidget::deleteHlmsPbsDatablockNode(void)
     // When the node is deleted from the node-editor, do not destroy the datablock itself
     // It may be still be applied to one of the items.
     mHlmsPbsDatablockNode = 0;
-    mParent->initCurrentDatablockFileName();
+    mParent->initCurrentMaterialFileName();
 }
 
 //****************************************************************************/
@@ -429,7 +429,7 @@ void NodeEditorDockWidget::deleteHlmsUnlitDatablockNode(void)
     // When the node is deleted from the node-editor, do not destroy the datablock itself
     // It may be still be applied to one of the items.
     mHlmsUnlitDatablockNode = 0;
-    mParent->initCurrentDatablockFileName();
+    mParent->initCurrentMaterialFileName();
 }
 
 //****************************************************************************/

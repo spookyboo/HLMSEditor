@@ -67,7 +67,7 @@ MainWindow::MainWindow(void) :
     mOgreManager = new Magus::OgreManager();
     mHlmsUtilsManager = new HlmsUtilsManager();
     newProjectName();
-    mHlmsName = QString("");
+    mCurrentJsonFileName = QString("");
     mCurrentDatablockFullName = Ogre::String("");
     mCurrentDatablockId = "";
     mTempString = QString("");
@@ -86,7 +86,7 @@ MainWindow::MainWindow(void) :
     connect(mMaterialBrowser, SIGNAL(closeClicked()), this, SLOT(doMaterialBrowserClosed()));
     loadMaterialBrowserCfg();
     loadTextureBrowserCfg();
-    loadRecentHlmsFilesCfg();
+    loadRecentMaterialFilesCfg();
     loadRecentProjectFilesCfg();
     mOgreManager->initialize();
 
@@ -175,12 +175,12 @@ void MainWindow::createActions(void)
     mNewProjectAction = new QAction(QString("New Project"), this);
     mNewProjectAction->setShortcut(QKeySequence(QString("Ctrl+Shift+N")));
     connect(mNewProjectAction, SIGNAL(triggered()), this, SLOT(doNewProjectAction()));
-    mNewHlmsPbsAction = new QAction(QString("New Hlms Pbs"), this);
-    mNewHlmsPbsAction->setShortcut(QKeySequence(QString("Ctrl+Alt+N")));
-    connect(mNewHlmsPbsAction, SIGNAL(triggered()), this, SLOT(doNewHlmsPbsAction()));
-    mNewHlmsUnlitAction = new QAction(QString("New Hlms Unlit"), this);
-    mNewHlmsUnlitAction->setShortcut(QKeySequence(QString("Ctrl+N")));
-    connect(mNewHlmsUnlitAction, SIGNAL(triggered()), this, SLOT(doNewHlmsUnlitAction()));
+    mNewPbsMaterialAction = new QAction(QString("New Hlms Pbs"), this);
+    mNewPbsMaterialAction->setShortcut(QKeySequence(QString("Ctrl+Alt+N")));
+    connect(mNewPbsMaterialAction, SIGNAL(triggered()), this, SLOT(doNewPbsMaterialAction()));
+    mNewUnlitMaterialAction = new QAction(QString("New Hlms Unlit"), this);
+    mNewUnlitMaterialAction->setShortcut(QKeySequence(QString("Ctrl+N")));
+    connect(mNewUnlitMaterialAction, SIGNAL(triggered()), this, SLOT(doNewUnlitMaterialAction()));
 
     // Open
     mOpenProjectMenuAction = new QAction(QString("Open Project"), this);
@@ -274,8 +274,8 @@ void MainWindow::createMenus(void)
     // New
     fileMenuAction->addAction(mNewProjectAction);
     fileMenuAction->addSeparator();
-    fileMenuAction->addAction(mNewHlmsPbsAction);
-    fileMenuAction->addAction(mNewHlmsUnlitAction);
+    fileMenuAction->addAction(mNewPbsMaterialAction);
+    fileMenuAction->addAction(mNewUnlitMaterialAction);
 
     // Open
     fileMenuAction = mFileMenu->addMenu("Open");
@@ -347,7 +347,7 @@ void MainWindow::createMenus(void)
     }
 
     // Recent Hlms files
-    mRecentHlmsFilesMenu = mFileMenu->addMenu("Recent Hlms files");
+    mRecentMaterialsFilesMenu = mFileMenu->addMenu("Recent Hlms files");
 
     // Recent Hlms files
     mRecentProjectFilesMenu = mFileMenu->addMenu("Recent Project files");
@@ -428,7 +428,6 @@ void MainWindow::createDockWindows(void)
 //****************************************************************************/
 void MainWindow::doNewProjectAction(void)
 {
-    QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
     mOgreManager->setPause(true);
 
     deleteAllMaterials();
@@ -453,16 +452,16 @@ void MainWindow::newProjectName(void)
 }
 
 //****************************************************************************/
-void MainWindow::doNewHlmsPbsAction(void)
+void MainWindow::doNewPbsMaterialAction(void)
 {
-    clearHlmsNamesAndRemovePaintLayers();
+    clearNamesAndRemovePaintLayers();
     mNodeEditorDockWidget->newHlmsPbs();
 }
 
 //****************************************************************************/
-void MainWindow::doNewHlmsUnlitAction(void)
+void MainWindow::doNewUnlitMaterialAction(void)
 {
-    clearHlmsNamesAndRemovePaintLayers();
+    clearNamesAndRemovePaintLayers();
     mNodeEditorDockWidget->newHlmsUnlit();
 }
 
@@ -485,7 +484,7 @@ void MainWindow::loadProject(const QString& fileName)
     QApplication::setOverrideCursor(Qt::WaitCursor);
     if (!fileName.isEmpty())
     {
-        clearHlmsNamesAndRemovePaintLayers();
+        clearNamesAndRemovePaintLayers();
 
         //QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
         QFileInfo info(fileName);
@@ -529,7 +528,7 @@ void MainWindow::loadProject(const QString& fileName)
                 loadTextureBrowserCfg();
                 file.close();
                 setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
-                appendRecentProject(fileName);
+                appendRecentProjectToRecentlyUsed(fileName);
 
                 // Enrich the item in the renderwindow with datablocks from the material browser.
                 // This is based on the materialnames in its corresponding mesh.
@@ -554,27 +553,35 @@ void MainWindow::doOpenDatablockMenuAction(void)
     fileName = QFileDialog::getOpenFileName(this, QString("Open Hlms file"),
                                             QString(""),
                                             QString("Json material (*.json)"));
-    loadDatablockAndSet(fileName);
+    loadMaterialAndCreateNodeStructure(fileName);
 }
 
 //****************************************************************************/
-void MainWindow::loadDatablockAndSet(const QString jsonFileName)
+void MainWindow::loadMaterialAndCreateNodeStructure(const QString jsonFileName)
 {
-    clearHlmsNamesAndRemovePaintLayers();
+    // Clear paintlayers and reset names
+    clearNamesAndRemovePaintLayers();
 
     // Add the resource location first (for textures)
     addResourceLocationFile(jsonFileName);
+
+    // First check whether the material exists; it is does, delete it
+    // This function actually uses the jsonfile to retrieve the details
+    // If the datablock exist, it is deleted first; otherwise it is not possible to create a datablock with an existing (in memory)name
+    Ogre::IdString datablockId = mHlmsUtilsManager->parseJsonAndRetrieveName(jsonFileName);
+    if (datablockId != "")
+        deleteMaterial(datablockId);
 
     // Load the datablock
     HlmsUtilsManager::DatablockStruct datablockStruct = mHlmsUtilsManager->loadDatablock(jsonFileName);
     if (!datablockStruct.datablock)
     {
-        Ogre::LogManager::getSingleton().logMessage("MainWindow::loadDatablockAndSet -> Cannot continue; datablock is 0\n");
+        Ogre::LogManager::getSingleton().logMessage("MainWindow::loadMaterialAndCreateNodeStructure -> Cannot continue; datablock is 0\n");
         return;
     }
 
-    mHlmsName = jsonFileName;
-    appendRecentHlms(jsonFileName);
+    mCurrentJsonFileName = jsonFileName;
+    appendRecentMaterialToRecentlyUsed(jsonFileName);
     setCurrentDatablockIdAndFullName (datablockStruct.datablockId, datablockStruct.datablockFullName);
 
     // Create the pbs node structure
@@ -837,7 +844,7 @@ void MainWindow::doSaveProjectMenuAction(void)
 
         // Set title
         setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
-        appendRecentProject(fileName);
+        appendRecentProjectToRecentlyUsed(fileName);
     }
     QApplication::restoreOverrideCursor();
 }
@@ -863,7 +870,7 @@ void MainWindow::doSaveAsProjectMenuAction(void)
 //****************************************************************************/
 void MainWindow::doSaveDatablockMenuAction(void)
 {
-    if (mHlmsName.isEmpty())
+    if (mCurrentJsonFileName.isEmpty())
         doSaveAsDatablockMenuAction();
     else
     {
@@ -878,19 +885,19 @@ void MainWindow::doSaveAsDatablockMenuAction(void)
         return;
 
     // Get hlms name
-    mHlmsName = mCurrentDatablockFullName.c_str();
-    mHlmsName = mHlmsName + QString(".material.json");
-    QString fileName = mHlmsName;
+    mCurrentJsonFileName = mCurrentDatablockFullName.c_str();
+    mCurrentJsonFileName = mCurrentJsonFileName + QString(".material.json");
+    QString fileName = mCurrentJsonFileName;
 
     // Save the datablock to one file
     fileName = QFileDialog::getSaveFileName(this,
                                             QString("Save the Hlms"),
-                                            mHlmsName,
+                                            mCurrentJsonFileName,
                                             QString("Json material (*.json)"));
 
     if (!fileName.isEmpty())
     {
-        mHlmsName = fileName;
+        mCurrentJsonFileName = fileName;
         saveDatablock(false);
     }
 }
@@ -905,8 +912,8 @@ void MainWindow::saveDatablock(bool validatePaintLayers)
     if (validatePaintLayers && !continueEvenIfThereArePaintLayers())
         return;
 
-    Ogre::String fname = mHlmsName.toStdString();
-    QString baseNameJson = mHlmsName;
+    Ogre::String fname = mCurrentJsonFileName.toStdString();
+    QString baseNameJson = mCurrentJsonFileName;
     baseNameJson = getBaseFileName(baseNameJson);
     QString thumb = baseNameJson + ".png";
 
@@ -937,7 +944,7 @@ void MainWindow::saveDatablock(bool validatePaintLayers)
             }
         }
         hlmsManager->saveMaterial (datablock, fname);
-        loadDatablockAndSet(fname.c_str()); // Reload, because this also updates everything in the editor
+        loadMaterialAndCreateNodeStructure(fname.c_str()); // Reload, because this also updates everything in the editor
     }
     else
     {
@@ -945,7 +952,7 @@ void MainWindow::saveDatablock(bool validatePaintLayers)
         hlmsManager->saveMaterial (datablock, fname);
     }
 
-    appendRecentHlms(mHlmsName);
+    appendRecentMaterialToRecentlyUsed(mCurrentJsonFileName);
 }
 
 //****************************************************************************/
@@ -1092,19 +1099,19 @@ void MainWindow::saveMaterialBrowserCfg(void)
 //****************************************************************************/
 void MainWindow::doMaterialBrowserAddMenuAction(void)
 {
-    if (mHlmsName.isEmpty())
+    if (mCurrentJsonFileName.isEmpty())
         QMessageBox::information(0, QString("Error"), QString("No filename. The Hlms must be saved first"));
     else
     {
-        QString baseNameJson = mHlmsName;
+        QString baseNameJson = mCurrentJsonFileName;
         baseNameJson = getBaseFileName(baseNameJson);
         QString thumb = baseNameJson + ".png";
         mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->saveToFile(THUMBS_PATH + thumb.toStdString());
 
         if (getCurrentDatablockType() == HLMS_PBS)
-            mMaterialBrowser->addMaterial(baseNameJson, mHlmsName, thumb, HLMS_PBS);
+            mMaterialBrowser->addMaterial(baseNameJson, mCurrentJsonFileName, thumb, HLMS_PBS);
         else if (getCurrentDatablockType() == HLMS_UNLIT)
-            mMaterialBrowser->addMaterial(baseNameJson, mHlmsName, thumb, HLMS_UNLIT);
+            mMaterialBrowser->addMaterial(baseNameJson, mCurrentJsonFileName, thumb, HLMS_UNLIT);
 
         saveMaterialBrowserCfg();
     }
@@ -1113,12 +1120,12 @@ void MainWindow::doMaterialBrowserAddMenuAction(void)
 //****************************************************************************/
 void MainWindow::doMaterialPresetMenuAction (void)
 {
-    if (mHlmsName.isEmpty())
+    if (mCurrentJsonFileName.isEmpty())
         QMessageBox::information(0, QString("Error"), QString("No filename. The Hlms must be saved first"));
     else
     {
         // Create the directory under PRESET_PATH_QSTRING
-        QFileInfo info(mHlmsName);
+        QFileInfo info(mCurrentJsonFileName);
         QString presetPath = PRESET_PATH_QSTRING + info.baseName();
         QDir dir(presetPath);
         if (!dir.exists())
@@ -1128,9 +1135,9 @@ void MainWindow::doMaterialPresetMenuAction (void)
         presetPath = presetPath + "/";
 
         // Copy the (saved) hlms
-        QString baseNameJson = mHlmsName;
+        QString baseNameJson = mCurrentJsonFileName;
         baseNameJson = getBaseFileName(baseNameJson);
-        QFile::copy(mHlmsName, presetPath + baseNameJson);
+        QFile::copy(mCurrentJsonFileName, presetPath + baseNameJson);
 
         // Create the thumb
         QString thumb = baseNameJson + ".png";
@@ -1183,11 +1190,11 @@ void MainWindow::deleteCurrentMaterial(void)
 //****************************************************************************/
 void MainWindow::deleteMaterial(const Ogre::IdString& id)
 {
-    Ogre::IdString idToBeDeleted = id; // Must be locally copied, because clearHlmsNamesAndRemovePaintLayers() resets the current id (mCurrentDatablockId)
+    Ogre::IdString idToBeDeleted = id; // Must be locally copied, because clearNamesAndRemovePaintLayers() resets the current id (mCurrentDatablockId)
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
     if (idToBeDeleted == mCurrentDatablockId)
     {
-        clearHlmsNamesAndRemovePaintLayers();
+        clearNamesAndRemovePaintLayers();
         mPropertiesDockWidget->clear();
         mNodeEditorDockWidget->clear();
     }
@@ -1200,7 +1207,7 @@ void MainWindow::deleteMaterial(const Ogre::IdString& id)
 void MainWindow::deleteAllMaterials(void)
 {
     // Clear all painting layers
-    clearHlmsNamesAndRemovePaintLayers();
+    clearNamesAndRemovePaintLayers();
 
     // Clear the material browser
     mMaterialBrowser->clearResources();
@@ -1477,9 +1484,9 @@ void MainWindow::update(void)
 }
 
 //****************************************************************************/
-void MainWindow::initCurrentDatablockFileName(void)
+void MainWindow::initCurrentMaterialFileName(void)
 {
-    clearHlmsNamesAndRemovePaintLayers();
+    clearNamesAndRemovePaintLayers();
     mPropertiesDockWidget->clear();
 }
 
@@ -1801,11 +1808,11 @@ void MainWindow::constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data)
 }
 
 //****************************************************************************/
-void MainWindow::appendRecentHlms(const QString fileName)
+void MainWindow::appendRecentMaterialToRecentlyUsed(const QString fileName)
 {
     // Check on duplicate
-    QList<RecentFileStruct>::const_iterator it = mRecentHlmsFiles.begin();
-    QList<RecentFileStruct>::const_iterator itEnd = mRecentHlmsFiles.end();
+    QList<RecentFileStruct>::const_iterator it = mRecentMaterialsFiles.begin();
+    QList<RecentFileStruct>::const_iterator itEnd = mRecentMaterialsFiles.end();
     RecentFileStruct rc;
     while(it != itEnd)
     {
@@ -1819,26 +1826,26 @@ void MainWindow::appendRecentHlms(const QString fileName)
     RecentFileStruct recentFiles;
     recentFiles.action = new RecentFileAction(fileName, this);
     recentFiles.fileName = fileName;
-    if (mRecentHlmsFiles.size() > MAX_RECENT_HLMS_FILES)
+    if (mRecentMaterialsFiles.size() > MAX_RECENT_HLMS_FILES)
     {
         // Remove oldest (= first) from menu
-        RecentFileStruct firstEntry = mRecentHlmsFiles.at(0);
+        RecentFileStruct firstEntry = mRecentMaterialsFiles.at(0);
         QAction* action = firstEntry.action;
-        mRecentHlmsFilesMenu->removeAction(action);
+        mRecentMaterialsFilesMenu->removeAction(action);
         delete action;
-        mRecentHlmsFiles.removeAt(0);
+        mRecentMaterialsFiles.removeAt(0);
     }
 
-    mRecentHlmsFiles.append(recentFiles);
-    mRecentHlmsFilesMenu->addAction(recentFiles.action);
-    connect(recentFiles.action, SIGNAL(recentFileActionTriggered(QString)), this, SLOT(doRecentHlmsFileAction(QString)));
+    mRecentMaterialsFiles.append(recentFiles);
+    mRecentMaterialsFilesMenu->addAction(recentFiles.action);
+    connect(recentFiles.action, SIGNAL(recentFileActionTriggered(QString)), this, SLOT(doRecentMaterialFileAction(QString)));
 
     // Save the recent list to a file (and load it at startup)
-    saveRecentHlmsFilesCfg();
+    saveRecentMaterialFilesCfg();
 }
 
 //****************************************************************************/
-void MainWindow::appendRecentProject(const QString fileName)
+void MainWindow::appendRecentProjectToRecentlyUsed(const QString fileName)
 {
     // Check on duplicate
     QList<RecentFileStruct>::const_iterator it = mRecentProjectFiles.begin();
@@ -1875,9 +1882,9 @@ void MainWindow::appendRecentProject(const QString fileName)
 }
 
 //****************************************************************************/
-void MainWindow::doRecentHlmsFileAction(const QString& fileName)
+void MainWindow::doRecentMaterialFileAction(const QString& fileName)
 {
-    loadDatablockAndSet(fileName);
+    loadMaterialAndCreateNodeStructure(fileName);
 }
 
 //****************************************************************************/
@@ -1887,7 +1894,7 @@ void MainWindow::doRecentProjectFileAction(const QString& fileName)
 }
 
 //****************************************************************************/
-void MainWindow::loadRecentHlmsFilesCfg(void)
+void MainWindow::loadRecentMaterialFilesCfg(void)
 {
     QFile file(FILE_RECENT_HLMS_FILES);
     QString line;
@@ -1897,17 +1904,17 @@ void MainWindow::loadRecentHlmsFilesCfg(void)
         while (!readFile.atEnd())
         {
             line = readFile.readLine();
-            appendRecentHlms(line);
+            appendRecentMaterialToRecentlyUsed(line);
         }
        file.close();
     }
 }
 
 //****************************************************************************/
-void MainWindow::saveRecentHlmsFilesCfg(void)
+void MainWindow::saveRecentMaterialFilesCfg(void)
 {
-    QList<RecentFileStruct>::const_iterator it = mRecentHlmsFiles.begin();
-    QList<RecentFileStruct>::const_iterator itEnd = mRecentHlmsFiles.end();
+    QList<RecentFileStruct>::const_iterator it = mRecentMaterialsFiles.begin();
+    QList<RecentFileStruct>::const_iterator itEnd = mRecentMaterialsFiles.end();
     RecentFileStruct rc;
     QFile file(FILE_RECENT_HLMS_FILES);
     if (file.open(QFile::WriteOnly|QFile::Truncate))
@@ -1935,7 +1942,7 @@ void MainWindow::loadRecentProjectFilesCfg(void)
         while (!readFile.atEnd())
         {
             line = readFile.readLine();
-            appendRecentProject(line);
+            appendRecentProjectToRecentlyUsed(line);
         }
        file.close();
     }
@@ -1967,7 +1974,7 @@ void MainWindow::doMaterialBrowserAccepted(const QString& fileName)
 {
     // A change is made in the material browser and accepted with ok or double click on an item
     if (!fileName.isEmpty())
-        loadDatablockAndSet(fileName);
+        loadMaterialAndCreateNodeStructure(fileName);
 
     // Save all current settings
     saveMaterialBrowserCfg();
@@ -2112,22 +2119,16 @@ void MainWindow::replaceCurrentDatablock(QVector<int> indices, Ogre::IdString da
 }
 
 //****************************************************************************/
-void MainWindow::destroyDatablock(const Ogre::IdString& datablockId)
-{
-    mHlmsUtilsManager->destroyDatablock(datablockId);
-}
-
-//****************************************************************************/
-void MainWindow::notifyHlmsChanged (QtProperty* property)
+void MainWindow::notifyMaterialChanged (QtProperty* property)
 {
     // Create a new datablock
     mNodeEditorDockWidget->generateDatablock();
 }
 
 //****************************************************************************/
-void MainWindow::clearHlmsNamesAndRemovePaintLayers(void)
+void MainWindow::clearNamesAndRemovePaintLayers(void)
 {
-    mHlmsName = QString("");
+    mCurrentJsonFileName = QString("");
     mCurrentDatablockId = "";
     mCurrentDatablockFullName = "";
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setCurrentDatablockId(mCurrentDatablockId);

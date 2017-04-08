@@ -179,6 +179,11 @@ class HlmsUtilsManager
                                              Ogre::PbsTextureTypes textureType,
                                              const Ogre::String& fileNameTexture);
 
+          /* Parse the json file (partly) and return only the name of the material
+           */
+          const Ogre::IdString& parseJsonAndRetrieveName (const QString& jsonFileName);
+
+
     protected:
         bool isInRegisteredDatablocksVec (const Ogre::String& datablockFullName);
 
@@ -214,6 +219,7 @@ class HlmsUtilsManager
         QVector<DatablockStruct> mRegisteredDatablocks;
         DatablockStruct mRegisteredDatablockStruct;
         Ogre::String helperString;
+        Ogre::IdString mHelperIdString;
 };
 
 #endif

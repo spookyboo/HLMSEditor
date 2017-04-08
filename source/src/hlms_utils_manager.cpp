@@ -625,6 +625,53 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablockStructOfJsonFile
 }
 
 //****************************************************************************/
+const Ogre::IdString& HlmsUtilsManager::parseJsonAndRetrieveName (const QString& jsonFileName)
+{
+    mHelperIdString = "";
+
+    QFile file(jsonFileName);
+    file.open(QFile::ReadOnly | QFile::Text);
+    QTextStream readFile(&file);
+    QString jsonString = readFile.readAll();
+    QByteArray ba = jsonString.toLatin1();
+    char* jsonChar = ba.data();
+
+    rapidjson::Document d;
+    d.Parse( jsonChar );
+    if( d.HasParseError() )
+    {
+        Ogre::LogManager::getSingleton().logMessage("HlmsUtilsManager::parseJsonAndRetrieveName: Cannot parse " + jsonFileName.toStdString());
+        return mHelperIdString;
+    }
+
+    rapidjson::Value::ConstMemberIterator itorPbs = d.FindMember("pbs");
+    if( itorPbs != d.MemberEnd() && itorPbs->value.IsObject() )
+    {
+        rapidjson::Value::ConstMemberIterator itorDatablock = itorPbs->value.MemberBegin();
+        if (itorDatablock != itorPbs->value.MemberEnd() && itorDatablock->value.IsObject() )
+        {
+            Ogre::IdString name(itorDatablock->name.GetString());
+            mHelperIdString = name;
+        }
+    }
+    else
+    {
+        rapidjson::Value::ConstMemberIterator itorUnlit = d.FindMember("unlit");
+        if( itorUnlit != d.MemberEnd() && itorUnlit->value.IsObject() )
+        {
+            rapidjson::Value::ConstMemberIterator itorDatablock = itorUnlit->value.MemberBegin();
+            if (itorDatablock != itorUnlit->value.MemberEnd() && itorDatablock->value.IsObject() )
+            {
+                Ogre::IdString name(itorDatablock->name.GetString());
+                mHelperIdString = name;
+            }
+        }
+    }
+
+    return mHelperIdString;
+}
+
+//****************************************************************************/
 bool HlmsUtilsManager::parseJsonAndRetrieveDetails (HlmsUtilsManager::DatablockStruct* datablockStruct, const char* jsonChar)
 {
     rapidjson::Document d;

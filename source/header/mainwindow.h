@@ -51,7 +51,10 @@ QT_BEGIN_NAMESPACE
 QT_END_NAMESPACE
 
 /****************************************************************************
- MainWindow is the main container window
+ MainWindow is the main container window.
+ Note, that most public function refer to materials as materials, while in the
+ underlying functions and other class the name 'datablock' is used. They mean
+ the same, but 'material' is also more of a concept than the actual implementatino
  ***************************************************************************/
 class MainWindow : public QMainWindow
 {
@@ -65,14 +68,17 @@ class MainWindow : public QMainWindow
 		bool mIsClosing;
         PaintLayerManager mPaintLayerManager;
 
-        Magus::OgreManager* getOgreManager(void) const {return mOgreManager;}
+        // Public DockWidgets
         RenderwindowDockWidget* mRenderwindowDockWidget; // Make is public for easy access
         PropertiesDockWidget* mPropertiesDockWidget; // Make is public for easy access
         TextureDockWidget* mTextureDockWidget; // Make is public for easy access
         PaintDockWidget* mPaintDockWidget; // Make is public for easy access
         BrushPresetDockWidget* mBrushPresetDockWidget; // Make is public for easy access
         PaintLayerDockWidget* mPaintLayerDockWidget; // Make is public for easy access
-        void initCurrentDatablockFileName(void); // Set the name of the current json file to ""
+
+        // Public functions
+        Magus::OgreManager* getOgreManager(void) const {return mOgreManager;}
+        void initCurrentMaterialFileName(void); // Set the name of the current json file to ""
         void getListOfResources(void); // Function to test which resources are loaded
         EditorHlmsTypes getCurrentDatablockType(void); // Returns the current hlms type
         void loadTextureBrowserCfg(void);
@@ -81,28 +87,31 @@ class MainWindow : public QMainWindow
         void replaceCurrentDatablock(QVector<int> indices, Ogre::IdString datablockId); // Set the datablocks in the subItems, identified by 'indices'
         const Ogre::String& getCurrentDatablockFullName (void) {return mCurrentDatablockFullName;}
         const Ogre::IdString& getCurrentDatablockId (void) {return mCurrentDatablockId;}
-        void destroyDatablock(const Ogre::IdString& datablockId);
-        void notifyHlmsChanged (QtProperty* property); // To be called if the properties of a datablock are changed (which result in rebuilding the material)
+        void notifyMaterialChanged (QtProperty* property); // To be called if the properties of a datablock are changed (which result in rebuilding the material)
         HlmsUtilsManager* getHlmsUtilsManager (void) {return mHlmsUtilsManager;}
         const Ogre::String& getTextureFileNameOfPbs(const Ogre::IdString& datablockId, Ogre::PbsTextureTypes textureType); // Returns the filename of a pbs texture type
-        PaintLayers* getPaintLayers(void); // Returns pointer to the paintlayers, managed by the PainLayerManager
-        void setBrushInPaintLayer(const QString& name, const QString& baseName); // If a brush is selected, set the new brush in the PaintLayer
-        void loadTextureGeneration (Ogre::PbsTextureTypes textureType, Ogre::ushort sequence); // Load a texture, based on the type and sequence (texture is blit to the GPU)
         void notifyNodeDeleted(unsigned int nodeType); // Is called by the node editor if a node is deleted
         void addResourceLocationFile (const QString& fileName);
         void addResourceLocationPath (const QString& path);
-        void loadDatablockAndSet(const QString jsonFileName);
-        void applyCurrentMaterialToMesh(void);
-        void deleteCurrentMaterial(void); // Delete the current material
-        void deleteMaterial(const Ogre::IdString& id); // Delete a datablock based on id; takes into account that it is still attached to an item
-        void deleteAllMaterials(void); // Exludes the special materials used in the editor; takes into account that the material is still attached to an item
+        void loadMaterialAndCreateNodeStructure(const QString jsonFileName); // Load the material and create the node structure (the material is not applied to the mesh (item))
+        void applyCurrentMaterialToMesh(void); // Apply the material to the whole mItem (so also all subitems)
+
+        // Public Paint functions
+        PaintLayers* getPaintLayers(void); // Returns pointer to the paintlayers, managed by the PainLayerManager
+        void setBrushInPaintLayer(const QString& name, const QString& baseName); // If a brush is selected, set the new brush in the PaintLayer
+        void loadTextureGeneration (Ogre::PbsTextureTypes textureType, Ogre::ushort sequence); // Load a texture, based on the type and sequence (texture is blit to the GPU)
+
+        // Public Delete material functions
+        void deleteCurrentMaterial(void); // Delete the current material; takes into account that the material is still attached to an item
+        void deleteMaterial(const Ogre::IdString& id); // Delete a datablock based on id; takes into account that the material is still attached to an item
+        void deleteAllMaterials(void); // Delete all materials, but excludes the special materials used in the editor; takes into account that the material is still attached to an item
 
     protected:
         void saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources); // Save the content of a resource vector
         QMessageBox::StandardButton fileDoesNotExistsWarning(const QString& fileName);
         void newProjectName(void);
-        void appendRecentHlms(const QString fileName); // Used for recent Hlms files in menu
-        void appendRecentProject(const QString fileName); // Used for recent Project files in menu
+        void appendRecentMaterialToRecentlyUsed(const QString fileName); // Used for recent Material files in menu
+        void appendRecentProjectToRecentlyUsed(const QString fileName); // Used for recent Project files in menu
         bool isMeshV1(const QString meshFileName);
         bool isMeshV2(const QString meshFileName);
         unsigned int getMeshVersion(const QString meshFileName);
@@ -128,18 +137,18 @@ class MainWindow : public QMainWindow
 
         void loadMaterialBrowserCfg(void);
         void saveMaterialBrowserCfg(void);
-        void loadRecentHlmsFilesCfg(void);
-        void saveRecentHlmsFilesCfg(void);
+        void loadRecentMaterialFilesCfg(void);
+        void saveRecentMaterialFilesCfg(void);
         void loadRecentProjectFilesCfg(void);
         void saveRecentProjectFilesCfg(void);
         Ogre::DataStreamPtr openFile(Ogre::String source);
-        void clearHlmsNamesAndRemovePaintLayers(void);
+        void clearNamesAndRemovePaintLayers (void);
         void deleteTempPathRecursive(void);
 
 	private slots:
         void doNewProjectAction(void);
-        void doNewHlmsPbsAction(void);
-        void doNewHlmsUnlitAction(void);
+        void doNewPbsMaterialAction(void);
+        void doNewUnlitMaterialAction(void);
         void doOpenProjectMenuAction(void);
         void doOpenDatablockMenuAction(void);
         void doOpenMeshMenuAction(void);
@@ -168,7 +177,7 @@ class MainWindow : public QMainWindow
         void doImport(Ogre::HlmsEditorPlugin* plugin);
         void doExport(Ogre::HlmsEditorPlugin* plugin);
         void constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data);
-        void doRecentHlmsFileAction(const QString& fileName);
+        void doRecentMaterialFileAction(const QString& fileName);
         void doRecentProjectFileAction(const QString& fileName);
         void doMaterialBrowserAccepted(const QString& fileName);
         void doMaterialBrowserRejected(void);
@@ -183,11 +192,11 @@ class MainWindow : public QMainWindow
         QMenu* mMaterialMenu;
         QMenu* mTextureMenu;
         QMenu* mWindowMenu;
-        QMenu* mRecentHlmsFilesMenu;
+        QMenu* mRecentMaterialsFilesMenu;
         QMenu* mRecentProjectFilesMenu;
         QAction* mNewProjectAction;
-        QAction* mNewHlmsPbsAction;
-        QAction* mNewHlmsUnlitAction;
+        QAction* mNewPbsMaterialAction;
+        QAction* mNewUnlitMaterialAction;
         QAction* mOpenProjectMenuAction;
         QAction* mOpenDatablockMenuAction;
         QAction* mOpenMeshMenuAction;
@@ -207,7 +216,7 @@ class MainWindow : public QMainWindow
         QAction* mDeleteSelectedPaintingLayersAction;
         QAction* mConfigureMenuAction;
         QAction* mTextureBrowserAddImageMenuAction;
-        QAction* mRecentHlmsFilesMenuAction;
+        QAction* mRecentMaterialsFilesMenuAction;
         QAction* mRecentProjectFilesMenuAction;
         QAction* mQuitMenuAction;
         QAction* mResetWindowLayoutMenuAction;
@@ -218,7 +227,7 @@ class MainWindow : public QMainWindow
         QString mProjectPath;
         QString mMaterialFileName;
         QString mTextureFileName;
-        QString mHlmsName; // Used to determine whether a hlms was already saved
+        QString mCurrentJsonFileName; // Used to determine whether a material was already saved; contains the json filename of the currently active material
         Ogre::IdString mCurrentDatablockId; // The datablock id
         Ogre::String mCurrentDatablockFullName; // The datablock full name
         bool mSaveTextureBrowserTimerActive;
@@ -227,7 +236,7 @@ class MainWindow : public QMainWindow
             RecentFileAction* action;
             QString fileName;
         };
-        QList<RecentFileStruct> mRecentHlmsFiles; // Used for recent Hlms files in menu
+        QList<RecentFileStruct> mRecentMaterialsFiles; // Used for recent Material files in menu
         QList<RecentFileStruct> mRecentProjectFiles; // Used for recent Project files in menu
         QPoint mMaterialBrowserPosition;
         QSize mMaterialBrowserSize;

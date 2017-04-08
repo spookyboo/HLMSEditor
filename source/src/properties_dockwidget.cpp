@@ -180,9 +180,9 @@ void PropertiesDockWidget::displayInfo(const QString& fileName, const QString& h
 }
 
 //****************************************************************************/
-void PropertiesDockWidget::notifyHlmsChanged(QtProperty* property)
+void PropertiesDockWidget::notifyMaterialChanged(QtProperty* property)
 {
-    mParent->notifyHlmsChanged(property);
+    mParent->notifyMaterialChanged(property);
 }
 
 

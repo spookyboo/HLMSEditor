@@ -482,7 +482,7 @@ void HlmsPropertiesPbsDatablock::propertyValueChanged(QtProperty* property)
     }
 
     // Inform the propertiesDockWidget that a property is changed, so the material is rebuild
-    mPropertiesDockWidget->notifyHlmsChanged(property);
+    mPropertiesDockWidget->notifyMaterialChanged(property);
 }
 
 //****************************************************************************/

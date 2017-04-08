@@ -124,7 +124,7 @@ const QString& BrushPresetDockWidget::createMaterialFromPreset (const QString& n
 
     // Callback to parent
     if (!jsonFileName.isEmpty())
-        mParent->loadDatablockAndSet(jsonFileName);
+        mParent->loadMaterialAndCreateNodeStructure(jsonFileName);
 
     mHelperString = jsonFileName;
     return mHelperString;
