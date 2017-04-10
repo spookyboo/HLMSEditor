@@ -1133,7 +1133,8 @@ namespace Magus
                 }
                 else if (mOffsetTextureMode)
                 {
-                    doOffsetTexture(e->pos().x(), e->pos().y());
+                    mRelative = mAbsolute - oldPos;
+                    doOffsetTexture(mRelative.x, mRelative.y);
                     e->accept();
                     return;
                 }
@@ -1661,11 +1662,8 @@ namespace Magus
 
 
     //****************************************************************************/
-    void QOgreWidget::doOffsetTexture(int mouseX, int mouseY)
+    void QOgreWidget::doOffsetTexture(float relativeMouseX, float relativeMouseY)
     {
-        Ogre::Vector2 oldPos = mAbsolute;
-        mAbsolute = Ogre::Vector2(mouseX, mouseY);
-        mRelative = mAbsolute - oldPos;
         Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
         if (mPbsDatablockBlockOffsetTexture != "")
         {
@@ -1675,9 +1673,9 @@ namespace Magus
                 Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
                 Ogre::HlmsPbsDatablock* pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(hlmsPbs->getDatablock(mPbsDatablockBlockOffsetTexture));
                 Ogre::Vector4 v4 = pbsDatablock->getDetailMapOffsetScale(index);
-                v4.x += mRelative.x / (float)width();
+                v4.x += relativeMouseX / (float)width();
                 v4.x = saturate(v4.x);
-                v4.y += mRelative.y / (float)height();
+                v4.y += relativeMouseY / (float)height();
                 v4.y = saturate(v4.y);
                 pbsDatablock->setDetailMapOffsetScale(index, v4);
                 mRenderwindowDockWidget->notifyOffsetTextureUpdated(v4.x, v4.y);
@@ -1689,9 +1687,9 @@ namespace Magus
             Ogre::HlmsUnlitDatablock* unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(hlmsUnlit->getDatablock(mUnlitDatablockBlockOffsetTexture));
             Ogre::Matrix4 m4 = unlitDatablock->getAnimationMatrix(mUnlitTextureTypeOffsetTexture);
             Ogre::Vector3 v3 = m4.getTrans();
-            v3.x += mRelative.x / (float)width();
+            v3.x += relativeMouseX / (float)width();
             v3.x = saturate (v3.x);
-            v3.y += mRelative.y / (float)height();
+            v3.y += relativeMouseY / (float)height();
             v3.y = saturate (v3.y);
             m4.setTrans(v3);
             unlitDatablock->setAnimationMatrix(mUnlitTextureTypeOffsetTexture, m4);

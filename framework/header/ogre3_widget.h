@@ -258,7 +258,7 @@ namespace Magus
 
             /* Functions used moving the texture with the mouse (creating offset)
              */
-            void doOffsetTexture(int mouseX, int mouseY);
+            void doOffsetTexture(float relativeMouseX, float relativeMouseY);
 
             /* Clamp argument 'val' between [0..1]
              */

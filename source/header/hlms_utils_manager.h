@@ -213,6 +213,16 @@ class HlmsUtilsManager
          */
         const Ogre::String& getResourcePath(const Ogre::String& resourceName);
 
+        /* Destroys all the textures of a datablock
+         * Note, that if the datablock is deleted, the textures are not automatically deleted
+         * (at least, this used to be the case in 2016)
+         */
+        void destroyAllTexturesOfDatablock(const Ogre::IdString& datablockId);
+        void destroyAllTexturesOfPbsDatablock(const Ogre::IdString& datablockId);
+        void destroyAllTexturesOfPbsDatablock(Ogre::HlmsPbsDatablock* pbsDatablock);
+        void destroyAllTexturesOfUnlitDatablock(const Ogre::IdString& datablockId);
+        void destroyAllTexturesOfUnlitDatablock(Ogre::HlmsUnlitDatablock* unlitDatablock);
+
     private:
         DatablockStruct helperDatablockStruct;
         QVector<DatablockStruct> mSnapshot;

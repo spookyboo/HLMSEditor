@@ -335,6 +335,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithRegistere
                     {
                         try
                         {
+                            // Only destroy the datablocks. In principle The textures should also be destroyed (using destroyAllTextures...), but this only causes large wait times
                             hlmsPbs->destroyDatablock(diffStruct.datablockId);
                         }
                         catch (Ogre::Exception e) {}
@@ -345,6 +346,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithRegistere
                     {
                         try
                         {
+                            // Only destroy the datablocks. In principle The textures should also be destroyed (using destroyAllTextures...), but this only causes large wait times
                             hlmsUnlit->destroyDatablock(diffStruct.datablockId);
                         }
                         catch (Ogre::Exception e) {}
@@ -489,6 +491,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
         if (pbsDatablock)
         {
             //Ogre::LogManager::getSingleton().logMessage("Destroying Pbs: " + *pbsDatablock->getFullName()); // DEBUG
+            // Only destroy the datablocks. In principle The textures should also be destroyed (using destroyAllTextures...), but this only causes large wait times
             hlmsPbs->destroyDatablock(pbsDatablock->getName());
         }
     }
@@ -501,6 +504,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
         if (unlitDatablock)
         {
             //Ogre::LogManager::getSingleton().logMessage("Destroying Unlit: " + *unlitDatablock->getFullName()); // DEBUG
+            // Only destroy the datablocks. In principle The textures should also be destroyed (using destroyAllTextures...), but this only causes large wait times
             hlmsUnlit->destroyDatablock(unlitDatablock->getName());
         }
     }
@@ -509,6 +513,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
     // Note: Do not clear mRegisteredDatablocks completely in case excludeDatablockFullName has a value and is available in mRegisteredDatablocks
     bool available =    excludeDatablockFullNameStruct.datablock &&
                         isInRegisteredDatablocksVec(excludeDatablockFullNameStruct.datablockFullName);
+
     if (!keepVecRegisteredDatablock)
     {
         mRegisteredDatablocks.clear();
@@ -532,6 +537,7 @@ void HlmsUtilsManager::destroyDatablock(const Ogre::IdString& datablockId)
         datablock = hlmsPbs->getDatablock(datablockId);
         if (datablock)
         {
+            // Only destroy the datablocks. In principle The textures should also be destroyed (using destroyAllTextures...), but this only causes large wait times
             hlmsPbs->destroyDatablock(datablockId);
             destroyed = true;
         }
@@ -544,6 +550,7 @@ void HlmsUtilsManager::destroyDatablock(const Ogre::IdString& datablockId)
         datablock = hlmsUnlit->getDatablock(datablockId);
         if (datablock)
         {
+            // Only destroy the datablocks. In principle The textures should also be destroyed (using destroyAllTextures...), but this only causes large wait times
             hlmsUnlit->destroyDatablock(datablockId);
             destroyed = true;
         }
@@ -839,7 +846,6 @@ void HlmsUtilsManager::getFullyQualifiedTextureFileNamesFromRegisteredDatablock 
                 textureName = itTextures.value(); // Texture name is the basename
                 if (!textureName.empty())
                 {
-                    // TODO: Get the path
                     path = getResourcePath(textureName);
                     textureName = path + textureName;
                     v->push_back(textureName);
@@ -1159,4 +1165,117 @@ const Ogre::String& HlmsUtilsManager::getResourcePath(const Ogre::String& resour
     */
 
     return helperString;
+}
+
+//****************************************************************************/
+void HlmsUtilsManager::destroyAllTexturesOfDatablock(const Ogre::IdString& datablockId)
+{
+    destroyAllTexturesOfPbsDatablock (datablockId);
+    destroyAllTexturesOfUnlitDatablock (datablockId);
+}
+
+//****************************************************************************/
+void HlmsUtilsManager::destroyAllTexturesOfPbsDatablock(const Ogre::IdString& datablockId)
+{
+    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+    Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
+    Ogre::HlmsDatablock* datablock = 0;
+    try
+    {
+        datablock = hlmsPbs->getDatablock(datablockId);
+        if (datablock)
+        {
+            // It is a Pbs datablock; run through all textures
+            Ogre::HlmsPbsDatablock* pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(datablock);
+            destroyAllTexturesOfPbsDatablock (pbsDatablock);
+        }
+    }
+    catch (Ogre::Exception e) {}
+}
+
+//****************************************************************************/
+void HlmsUtilsManager::destroyAllTexturesOfPbsDatablock(Ogre::HlmsPbsDatablock* pbsDatablock)
+{
+    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+    Ogre::HlmsTextureManager* hlmsTextureManager = hlmsManager->getTextureManager();
+    Ogre::IdString alias;
+
+    for (size_t index = 0; index < Ogre::PbsTextureTypes::NUM_PBSM_TEXTURE_TYPES; ++index)
+    {
+        try
+        {
+            if (!pbsDatablock->getTexture(index).isNull())
+            {
+                Ogre::HlmsTextureManager::TextureLocation texLocation;
+                texLocation.texture = pbsDatablock->getTexture(index);
+                if( !texLocation.texture.isNull() )
+                {
+                    texLocation.xIdx = pbsDatablock->_getTextureIdx((Ogre::PbsTextureTypes)index);
+                    texLocation.yIdx = 0;
+                    texLocation.divisor = 1;
+                    const Ogre::String *texName = hlmsTextureManager->findAliasName(texLocation);
+
+                    if(texName)
+                    {
+                        alias = *texName;
+                        hlmsTextureManager->destroyTexture(alias);
+                    }
+                }
+            }
+        }
+        catch (Ogre::Exception e) {}
+    }
+}
+
+//****************************************************************************/
+void HlmsUtilsManager::destroyAllTexturesOfUnlitDatablock(const Ogre::IdString& datablockId)
+{
+    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+    Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
+    Ogre::HlmsDatablock* datablock = 0;
+    try
+    {
+        datablock = hlmsUnlit->getDatablock(datablockId);
+        if (datablock)
+        {
+            // It is an unlit datablock; run through all textures
+            Ogre::HlmsUnlitDatablock* unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(datablock);
+            destroyAllTexturesOfUnlitDatablock (unlitDatablock);
+        }
+    }
+    catch (Ogre::Exception e) {}
+}
+
+//****************************************************************************/
+void HlmsUtilsManager::destroyAllTexturesOfUnlitDatablock(Ogre::HlmsUnlitDatablock* unlitDatablock)
+{
+    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
+    Ogre::HlmsTextureManager* hlmsTextureManager = hlmsManager->getTextureManager();
+    Ogre::IdString alias;
+
+    for (size_t index = 0; index < Ogre::UnlitTextureTypes::NUM_UNLIT_TEXTURE_TYPES; ++index)
+    {
+        try
+        {
+            if (!unlitDatablock->getTexture(index).isNull())
+            {
+                Ogre::HlmsTextureManager::TextureLocation texLocation;
+                texLocation.texture = unlitDatablock->getTexture(index);
+                if( !texLocation.texture.isNull() )
+                {
+                    texLocation.xIdx = unlitDatablock->_getTextureIdx(index);
+                    texLocation.yIdx = 0;
+                    texLocation.divisor = 1;
+                    const Ogre::String *texName = hlmsTextureManager->findAliasName(texLocation);
+
+                    if(texName)
+                    {
+                        alias = *texName;
+                        hlmsTextureManager->destroyTexture(alias);
+                    }
+                }
+            }
+        }
+        catch (Ogre::Exception e) {}
+    }
 }
