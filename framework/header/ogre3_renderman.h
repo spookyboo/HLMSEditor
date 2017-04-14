@@ -38,7 +38,7 @@ namespace Ogre
         public:
             virtual CompositorPassDef* addPassDef( CompositorPassType passType,
                                                    IdString customId,
-                                                   uint32 rtIndex,
+                                                   CompositorTargetDef *parentTargetDef,
                                                    CompositorNodeDef *parentNodeDef )
         {
             return 0;

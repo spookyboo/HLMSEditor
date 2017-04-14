@@ -369,7 +369,7 @@ void HlmsPbsBuilder::enrichPbsNode(HlmsNodePbsDatablock* pbsnode,
 
     // ******** Metalness ********
     if (workflow == 2)
-        pbsnode->setMetalness(datablock->getMetallness());
+        pbsnode->setMetalness(datablock->getMetalness());
 
     // ******** Fresnel ********
     if (workflow != 2)
@@ -693,7 +693,7 @@ void HlmsPbsBuilder::enrichPbsDatablock(Ogre::HlmsPbsDatablock* datablock,
 
     // ******** Metalness ********
     if (workflow == Ogre::HlmsPbsDatablock::MetallicWorkflow)
-        datablock->setMetallness(pbsnode->getMetalness());
+        datablock->setMetalness(pbsnode->getMetalness());
 
     // ******** Fresnel ********
     if (workflow != Ogre::HlmsPbsDatablock::MetallicWorkflow)
@@ -1111,13 +1111,16 @@ Ogre::HlmsTextureManager::TextureMapType HlmsPbsBuilder::getTextureMapTypeFromPb
             return Ogre::HlmsTextureManager::TEXTURE_TYPE_NORMALS;
         break;
         case Ogre::PBSM_SPECULAR:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL;
+            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
         break;
         //case Ogre::PBSM_METALLIC:
             //return Ogre::HlmsTextureManager::TEXTURE_TYPE_MONOCHROME;
         //break;
         case Ogre::PBSM_ROUGHNESS:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL;
+            return Ogre::HlmsTextureManager::TEXTURE_TYPE_MONOCHROME;
+        break;
+        case Ogre::PBSM_DETAIL_WEIGHT:
+            return Ogre::HlmsTextureManager::TEXTURE_TYPE_NON_COLOR_DATA;
         break;
         case Ogre::PBSM_DETAIL0:
             return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL;
@@ -1163,13 +1166,13 @@ Ogre::HlmsTextureManager::TextureMapType HlmsPbsBuilder::getTextureMapTypeFromSa
             return Ogre::HlmsTextureManager::TEXTURE_TYPE_NORMALS;
         break;
         case 2:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL;
+            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
         break;
         case 3:
             return Ogre::HlmsTextureManager::TEXTURE_TYPE_MONOCHROME;
         break;
         case 4:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL;
+            return Ogre::HlmsTextureManager::TEXTURE_TYPE_NON_COLOR_DATA;
         break;
         case 5:
             return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL;

@@ -701,7 +701,7 @@ bool HlmsUtilsManager::parseJsonAndRetrieveDetails (HlmsUtilsManager::DatablockS
             parsePbsTextureType(datablockStruct, itorDatablock->value, "diffuse", Ogre::PBSM_DIFFUSE);
             parsePbsTextureType(datablockStruct, itorDatablock->value, "normal", Ogre::PBSM_NORMAL);
             parsePbsTextureType(datablockStruct, itorDatablock->value, "specular", Ogre::PBSM_SPECULAR);
-            parsePbsTextureType(datablockStruct, itorDatablock->value, "metallness", Ogre::PBSM_METALLIC);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "metalness", Ogre::PBSM_METALLIC);
             parsePbsTextureType(datablockStruct, itorDatablock->value, "roughness", Ogre::PBSM_ROUGHNESS);
             parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_weight", Ogre::PBSM_DETAIL_WEIGHT);
             parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_diffuse0", Ogre::PBSM_DETAIL0);
