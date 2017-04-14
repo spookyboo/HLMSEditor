@@ -328,6 +328,7 @@ namespace Magus
         mLightNode = mCameraManager->mCameraNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
         mLightNode->attachObject( mLight );
         mLight->setPowerScale(Ogre::Math::PI ); // Since we don't do HDR, counter the PBS' division by PI
+        mLight->setAttenuation(1000, 2.0f, 2.0f, 1.0f);
         mLight->setType( Ogre::Light::LT_DIRECTIONAL );
         mLight->setDiffuseColour( Ogre::ColourValue::White );
         mLight->setSpecularColour( Ogre::ColourValue::White );
