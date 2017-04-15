@@ -1,0 +1,1 @@
+HLMS Editor is distributed under the terms of the MIT Licence Agrement (https://opensource.org/licenses/MIT)
