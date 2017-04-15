@@ -90,6 +90,8 @@ qt5_use_modules( HLMSEditor Multimedia)
 if(UNIX)
 	target_link_libraries( HLMSEditor ${GTK2_LIBRARIES} )
 	target_link_libraries( HLMSEditor ${OPENGL_LIBRARIES} )
+	file(COPY ${OGRE_MEDIA_DIR}/../plugins.cfg DESTINATION ${CMAKE_BINARY_DIR})
+	file(COPY ${OGRE_MEDIA_DIR}/../plugins_d.cfg DESTINATION ${CMAKE_BINARY_DIR})
 endif()
 
 # MSVC debugging
