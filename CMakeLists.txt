@@ -92,6 +92,10 @@ if(UNIX)
 	target_link_libraries( HLMSEditor ${OPENGL_LIBRARIES} )
 	file(COPY ${OGRE_MEDIA_DIR}/../plugins.cfg DESTINATION ${CMAKE_BINARY_DIR})
 	file(COPY ${OGRE_MEDIA_DIR}/../plugins_d.cfg DESTINATION ${CMAKE_BINARY_DIR})
+
+	#install resources from /bin
+	file(COPY ${PROJECT_SOURCE_DIR}/bin/resources.cfg ${PROJECT_SOURCE_DIR}/bin/resources_d.cfg ${PROJECT_SOURCE_DIR}/bin/resources_default.cfg
+			DESTINATION ${CMAKE_BINARY_DIR})
 endif()
 
 # MSVC debugging
