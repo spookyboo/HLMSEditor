@@ -19,7 +19,7 @@
 ****************************************************************************/
 
 // Include
-#include <QVBoxLayout>mview
+#include <QVBoxLayout>
 #include <QMessageBox>
 #include <QLabel>
 #include <QGraphicsSceneMouseEvent>

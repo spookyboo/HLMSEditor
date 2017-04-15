@@ -99,7 +99,7 @@ class PaintLayerDockWidget : public QDockWidget
         /* Set/get the overflow type.
          */
         void setPaintOverflow(int layerId, const QString& paintOverflow);
-        const QString& PaintLayerDockWidget::getPaintOverflow(int layerId);
+        const QString& getPaintOverflow(int layerId);
 
         /* Set/get the Carbon Copy texture
          */
