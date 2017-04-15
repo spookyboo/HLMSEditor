@@ -47,7 +47,9 @@ set(CMAKE_DEBUG_POSTFIX "_d")
 
 project(HLMSEditor)
 
-set(CMAKE_MODULE_PATH ${OGRE_HOME}/CMake)
+if(WIN32)
+    set(CMAKE_MODULE_PATH ${OGRE_HOME}/CMake)
+endif()
     
 
 if(WIN32 OR APPLE)
