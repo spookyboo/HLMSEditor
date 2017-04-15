@@ -492,7 +492,7 @@ namespace Magus
         /*-----------------------------------------------------------------------------
         | Return orientation
         -----------------------------------------------------------------------------*/
-        const Ogre::Quaternion& getOrientationCameraSceneNode (void)
+        const Ogre::Quaternion getOrientationCameraSceneNode (void)
         {
             return mCameraNode->getOrientation();
         }
@@ -500,7 +500,7 @@ namespace Magus
         /*-----------------------------------------------------------------------------
         | Return position
         -----------------------------------------------------------------------------*/
-        const Ogre::Vector3& getPositionCameraSceneNode (void)
+        const Ogre::Vector3 getPositionCameraSceneNode (void)
         {
             return mCameraNode->getPosition();
         }
