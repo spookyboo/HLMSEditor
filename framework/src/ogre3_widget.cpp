@@ -1301,10 +1301,13 @@ namespace Magus
     }
 
     //****************************************************************************/
-    const Ogre::Vector3& QOgreWidget::getItemScale(void)
+    const Ogre::Vector3 QOgreWidget::getItemScale(void)
     {
         if (mItem && mItem->getParentSceneNode())
             return mItem->getParentSceneNode()->getScale();
+
+        //Need to return on all code paths
+        return Ogre::Vector3::UNIT_SCALE; //vec3{1,1,1}
     }
 
     //****************************************************************************/
