@@ -3,7 +3,7 @@
 # free to make use of it in any way you like.
 #-------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.0.2)
 
 # Use relative paths
 if(WIN32)
@@ -67,6 +67,7 @@ include_directories( "${CMAKE_CURRENT_SOURCE_DIR}/source/header/" )
 include_directories( "${CMAKE_CURRENT_SOURCE_DIR}/framework/header" )
 
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 find_package(Qt5 REQUIRED COMPONENTS Widgets OpenGL Multimedia)
 find_package(OpenGL REQUIRED)
 
@@ -97,7 +98,11 @@ if(UNIX)
 	file(COPY ${OGRE_MEDIA_DIR}/../plugins_d.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
 	#install resources from /bin
-	file(COPY ${PROJECT_SOURCE_DIR}/bin/resources.cfg ${PROJECT_SOURCE_DIR}/bin/resources_d.cfg ${PROJECT_SOURCE_DIR}/bin/resources_default.cfg
+	file(COPY ${PROJECT_SOURCE_DIR}/bin/resources.cfg ${PROJECT_SOURCE_DIR}/bin/resources_d.cfg
+			${PROJECT_SOURCE_DIR}/bin/resources_default.cfg ${PROJECT_SOURCE_DIR}/bin/settings.cfg
+			${PROJECT_SOURCE_DIR}/bin/settings_default.cfg ${PROJECT_SOURCE_DIR}/bin/models.cfg
+			#QSS
+			${PROJECT_SOURCE_DIR}/bin/dark.qss
 			DESTINATION ${CMAKE_BINARY_DIR})
 endif()
 
