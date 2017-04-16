@@ -38,7 +38,7 @@ namespace Magus
         mCompositorPassProvider = 0;
         mPause = true;
 
-        #ifdef _DEBUG
+        #if _DEBUG || DEBUG
             mResourcesCfg = "resources_d.cfg";
             mPluginsCfg = "plugins_d.cfg";
         #else

@@ -44,7 +44,7 @@ class TextureSaveWorker : public QObject
     Q_OBJECT
 
     public:
-        TextureSaveWorker::TextureSaveWorker (const Ogre::Image& image, const Ogre::String& filename) :
+        TextureSaveWorker (const Ogre::Image& image, const Ogre::String& filename) :
             mImage(image)
         {
             mImage = image;
