@@ -10,6 +10,7 @@
 //diffuseCol always has some colour and is multiplied against material.kD in PixelShader_ps.
 @piece( kD )diffuseCol@end
 
+@property( !hlms_prepass )
 @property( !metallic_workflow )
 	@property( specular_map && !fresnel_workflow )
 		@piece( SampleSpecularMap )	specularCol = texture( textureMaps[@value( specular_map_idx )], vec3(inPs.uv@value(uv_specular).xy, specularIdx) ).xyz * material.kS.xyz;@end
@@ -37,6 +38,7 @@
 
 	@piece( kS )material.kS.xyz@end
 @end
+@end
 
 @property( roughness_map )
 	@piece( SampleRoughnessMap )ROUGHNESS = material.kS.w * texture( textureMaps[@value( roughness_map_idx )], vec3(inPs.uv@value(uv_roughness).xy, roughnessIdx) ).x;
@@ -52,7 +54,7 @@ ROUGHNESS = max( ROUGHNESS, 0.001f );@end
 @end
 
 @property( envmap_scale )
-	@piece( ApplyEnvMapScale )* pass.ambientUpperHemi.w@end
+	@piece( ApplyEnvMapScale )* passBuf.ambientUpperHemi.w@end
 @end
 
 @property( (envprobe_map && envprobe_map != target_envprobe_map) || parallax_correct_cubemaps )
@@ -61,7 +63,7 @@ ROUGHNESS = max( ROUGHNESS, 0.001f );@end
 	@property( !envprobe_map || envprobe_map == target_envprobe_map )
 		/// "No cubemap"? Then we're in auto mode or...
 		/// We're rendering to the cubemap probe we're using as manual. Use the auto mode as fallback.
-		@piece( pccProbeSource )pass.autoProbe@end
+		@piece( pccProbeSource )passBuf.autoProbe@end
 		@set( use_parallax_correct_cubemaps, 1 )
 	@end
 	@property( envprobe_map && envprobe_map != target_envprobe_map && use_parallax_correct_cubemaps )

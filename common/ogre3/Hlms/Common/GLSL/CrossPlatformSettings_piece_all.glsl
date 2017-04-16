@@ -1,6 +1,6 @@
 @piece( SetCrossPlatformSettings )
-@property( GL430 )#version 430 core
-@end @property( !GL430 )
+@property( GL3+ >= 430 )#version 430 core
+@end @property( GL3+ < 430 )
 #version 330 core
 #extension GL_ARB_shading_language_420pack: require
 @end
@@ -19,4 +19,7 @@
 
 #define float3x3 mat3
 #define float4x4 mat4
+
+#define mul( x, y ) ((x) * (y))
+#define INLINE
 @end

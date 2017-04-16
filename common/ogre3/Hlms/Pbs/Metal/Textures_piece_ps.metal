@@ -6,13 +6,24 @@
 	@add( texUnit, 2 )
 @end
 
+@property( hlms_use_prepass )
+	@set( gBuf_normals, texUnit )
+	@add( gBuf_shadowRoughness, texUnit, 1 )
+	@add( texUnit, 2 )
+
+	@property( hlms_use_ssr )
+		@set( ssrTexture, texUnit )
+		@add( texUnit, 1 )
+	@end
+@end
+
 @property( irradiance_volumes )
 	@set( irradianceVolumeTexUnit, texUnit )
 	@add( texUnit, 1 )
 @end
 
 @set( textureRegShadowMapStart, texUnit )
-@add( texUnit, hlms_num_shadow_maps )
+@add( texUnit, hlms_num_shadow_map_textures )
 
 @property( parallax_correct_cubemaps )
 	@set( globaPccTexUnit, texUnit )
@@ -32,7 +43,7 @@
 	@property( !envprobe_map || envprobe_map == target_envprobe_map )
 		/// "No cubemap"? Then we're in auto mode or...
 		/// We're rendering to the cubemap probe we're using as manual. Use the auto mode as fallback.
-		@piece( pccProbeSource )pass.autoProbe@end
+		@piece( pccProbeSource )passBuf.autoProbe@end
 		@set( use_parallax_correct_cubemaps, 1 )
 		/// Auto cubemap textures are set at the beginning. Manual cubemaps are the end.
 		@set( envMapReg, globaPccTexUnit )
@@ -61,6 +72,7 @@
 //diffuseCol always has some colour and is multiplied against material.kD in PixelShader_ps.
 @piece( kD )diffuseCol@end
 
+@property( !hlms_prepass )
 @property( !metallic_workflow )
 	@property( specular_map && !fresnel_workflow )
 		@piece( SampleSpecularMap )	specularCol = textureMaps@value( specular_map_idx ).sample( samplerStates@value(specular_map_idx), inPs.uv@value(uv_specular).xy, specularIdx ).xyz * material.kS.xyz;@end
@@ -94,6 +106,7 @@
 	@piece( metallicExtraParamDef ), float3 F0@end
 	@piece( metallicExtraParam ), F0@end
 @end
+@end
 
 @property( roughness_map )
 	@piece( SampleRoughnessMap )	ROUGHNESS = material.kS.w * textureMaps@value( roughness_map_idx ).sample( samplerStates@value( roughness_map_idx ), inPs.uv@value(uv_roughness).xy, roughnessIdx ).x;
@@ -114,5 +127,16 @@
 @end
 
 @property( envmap_scale )
-	@piece( ApplyEnvMapScale )* pass.ambientUpperHemi.w@end
+	@piece( ApplyEnvMapScale )* passBuf.ambientUpperHemi.w@end
+@end
+
+@property( !hlms_render_depth_only && !hlms_shadowcaster && hlms_prepass )
+	@undefpiece( DeclOutputType )
+	@piece( DeclOutputType )
+		struct PS_OUTPUT
+		{
+			float4 normals			[[ color(0) ]];
+			float2 shadowRoughness	[[ color(1) ]];
+		};
+	@end
 @end
