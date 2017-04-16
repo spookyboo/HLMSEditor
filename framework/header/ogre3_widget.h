@@ -73,7 +73,7 @@ namespace Magus
             Ogre::Item* getItem(void) {return mItem;}
             Ogre::RenderWindow* getRenderWindow(void) {return mOgreRenderWindow;}
             Ogre::SceneManager* getSceneManager(void) {return mSceneManager;}
-            const Ogre::Vector3& getItemScale(void);
+            const Ogre::Vector3 getItemScale(void);
             void setItemScale(const Ogre::Vector3& scale);
             void setRotation(const Ogre::Vector3& rotation);
             void setPosition(const Ogre::Vector3& position);
