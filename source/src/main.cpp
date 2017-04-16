@@ -24,14 +24,26 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
-    MainWindow mainWin;
-    mainWin.show();
-    while (!mainWin.mIsClosing)
-    {
-        app.processEvents();
-        mainWin.update();
-        QThread::msleep(10);
-    }
+#ifdef _WIN32
+	/*Help Qt find the "./platforms/qwindows.dll" library a little bit, by making it look next to the executable first.
+	 *
+	 *From Qt documentation :
+	 *
+	 *  The default path list consists of a single entry,
+	 *  the installation directory for plugins. The default
+	 *  installation directory for plugins is INSTALL/plugins,
+	 *  where INSTALL is the directory where Qt was installed.
+	 */
+	QCoreApplication::addLibraryPath(".");
+#endif
+	QApplication app(argc, argv);
+	MainWindow mainWin;
+	mainWin.show();
+	while (!mainWin.mIsClosing)
+	{
+		app.processEvents();
+		mainWin.update();
+		QThread::msleep(10);
+	}
 	return 0;
 }
