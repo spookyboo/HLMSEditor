@@ -87,7 +87,9 @@ HEADERS       = \
     source/header/paintlayer_dialog.h \
     source/header/brush_widget.h \
     source/header/brush_preset_dockwidget.h \
-    source/header/preset_widget.h
+    source/header/preset_widget.h \
+    framework/header/tool_generic_assetwidget.h \
+    source/header/clipboard_widget.h
 
 
 SOURCES       = \
@@ -163,7 +165,9 @@ SOURCES       = \
     source/src/paintlayer_dialog.cpp \
     source/src/brush_widget.cpp \
     source/src/brush_preset_dockwidget.cpp \
-    source/src/preset_widget.cpp
+    source/src/preset_widget.cpp \
+    framework/src/tool_generic_assetwidget.cpp \
+    source/src/clipboard_widget.cpp
 
 
 INCLUDEPATH += "../HLMSEditor/source/header/"

@@ -46,7 +46,6 @@ V 1.0 Bugs:
 
 Implement later (V2.0):
 ======================
-- Bug?: Context menu node editor: Delete selected nodes when the canvas doesn't contain nodes => crash application
 - Bug?: Move texture group with textures in it, sometimes crashes
 - Plugin support
   - Implement isFileDialog needed => Hlms editor ask the plugin for this and sets it to the HlmsEditorPluginData (filename or directory)
