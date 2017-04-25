@@ -74,6 +74,7 @@ static const QString ICON_UNDO_OFF = QString("../common/icons/undo_off.png");
 static const QString ICON_REDO_OFF = QString("../common/icons/redo_off.png");
 static const QString ICON_REDO_ON = QString("../common/icons/redo_on.png");
 static const QString ICON_SAMPLER_CLIPBOARD = QString("../common/icons/samplerblock_banner.png");
+static const QString ICON_PIN = QString("../common/icons/pin.png");
 
 static const QString ICON_HLMS = QString("../common/icons/HLMSEditor.png");
 static const QString ICON_PBS_DATABLOCK_NO_PATH = QString("pbs.png");
@@ -82,7 +83,6 @@ static const QString ICON_UNLIT_DATABLOCK_NO_PATH = QString("unlit.png");
 static const QString ICON_UNLIT_DATABLOCK_SMALL_NO_PATH = QString("unlit_small.png");
 static const QString ICON_TEXTURE_NO_PATH = QString("samplerblock.png");
 static const QString ICON_TEXTURE_SMALL_NO_PATH = QString("samplerblock_small.png");
-static const QString ICON_PIN = QString("pin.png");
 static const QString HLMS_GROUP = "[Hlms]\n";
 static const QString HLMS_DO_NOT_USE_AS_RESOURCE = "DoNotUseAsResource = ../common/ogre3\n"; // This must be the location where the HLMS templates are
 static const QString INFO_PBS = QString("../common/info/hlms_pbs.inf");
