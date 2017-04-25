@@ -30,7 +30,6 @@
 #include <QProcess>
 #include <QDrag>
 #include <QMimeData>
-
 #include "tool_generic_assetwidget.h"
 
 namespace Magus
@@ -84,8 +83,9 @@ namespace Magus
         // Start drag
         QDrag* drag = new QDrag(this);
         QMimeData* mimeData = new QMimeData;
-        drag->setMimeData(mimeData);
         mimeData->setText(mName);
+        mimeData->setObjectName("QtGenericAssetAndText");
+        drag->setMimeData(mimeData);
         drag->exec(Qt::CopyAction | Qt::MoveAction);
     }
 

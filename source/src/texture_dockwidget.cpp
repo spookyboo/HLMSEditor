@@ -94,9 +94,9 @@ void TextureDockWidget::deleteTexture (const QString& fileName)
 }
 
 //****************************************************************************/
-const QString& TextureDockWidget::getCurrentFileName (void)
+const QString& TextureDockWidget::getDraggedFileName (void)
 {
-    return mTextureMain->getCurrentFileName();
+    return mTextureMain->getDraggedFileName();
 }
 
 //****************************************************************************/

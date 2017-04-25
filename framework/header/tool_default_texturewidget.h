@@ -54,6 +54,7 @@ namespace Magus
                              const QSize& size,
                              QWidget* parent = 0);
             virtual ~QtDefaultTextureAndText(void);
+            virtual void mouseMoveEvent(QMouseEvent *event);
 
             // Returns the pixmap
             const QPixmap* getPixmap (void);

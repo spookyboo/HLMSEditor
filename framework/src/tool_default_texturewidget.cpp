@@ -29,6 +29,8 @@
 #include <QDropEvent>
 #include <QProcess>
 #include <QApplication>
+#include <QDrag>
+#include <QMimeData>
 #include "magus_core.h"
 #include "tool_default_texturewidget.h"
 
@@ -70,6 +72,22 @@ namespace Magus
     //****************************************************************************/
     QtDefaultTextureAndText::~QtDefaultTextureAndText(void)
     {
+    }
+
+    //****************************************************************************/
+    void QtDefaultTextureAndText::mouseMoveEvent(QMouseEvent *event)
+    {
+        // If not left button - return
+        if (!(event->buttons() & Qt::LeftButton))
+            return;
+
+        // Start drag
+        QDrag* drag = new QDrag(this);
+        QMimeData* mimeData = new QMimeData;
+        mimeData->setText(mName);
+        mimeData->setObjectName("QtDefaultTextureAndText");
+        drag->setMimeData(mimeData);
+        drag->exec(Qt::CopyAction | Qt::MoveAction);
     }
 
     //****************************************************************************/

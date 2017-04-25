@@ -476,25 +476,17 @@ void TextureTreeDockWidget::setResources(const QVector<Magus::QtResourceInfo*>& 
 }
 
 //****************************************************************************/
-const QString& TextureTreeDockWidget::getCurrentFileName (void)
+const QString& TextureTreeDockWidget::getDraggedFileName (void)
 {
-    mTempString = QString("");
-    int resourceId = mResourceTreeWidget->getSelectedResource();
+    return mResourceTreeWidget->getDraggedFullQualifiedResourceName();
+}
 
-    QMap<int, QtSourcesInfo>::iterator iter;
-    QMap<int, QtSourcesInfo>::iterator iterStart = mSourceInfo.begin();
-    QMap<int, QtSourcesInfo>::iterator iterEnd = mSourceInfo.end();
-    for (iter = iterStart; iter != iterEnd; ++iter)
-    {
-        QtSourcesInfo info = iter.value();
-        if (resourceId == info.resourceId && info.resourceType == Magus::TOOL_RESOURCETREE_KEY_TYPE_ASSET)
-        {
-            // Found it
-            mTempString = info.fileName;
-            return mTempString;
-        }
-    }
-
+//****************************************************************************/
+const QString& TextureTreeDockWidget::getCurrentResourceName (void)
+{
+    mTempString = "";
+    int id = mResourceTreeWidget->getSelectedResource();
+    mTempString = mResourceTreeWidget->getFullQualifiedName(id);
     return mTempString;
 }
 

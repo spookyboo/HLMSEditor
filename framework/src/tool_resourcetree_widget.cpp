@@ -27,14 +27,17 @@
 #include <QImage>
 #include <QPixmap>
 #include <QTreeWidgetItem>
+#include <QDrag>
 #include <QMimeData>
 #include "tool_resourcetree_widget.h"
+#include "OgreLogManager.h"
 
 namespace Magus
 {
     //****************************************************************************/
     QtResourceTreeWidget::QtResourceTreeWidget(const QString& iconDir, QWidget* parent) : QWidget(parent)
     {
+        mDraggedResourceName = "";
         assetIconWidth = TOOL_RESOURCETREE_DEFAULT_ICON_WIDTH;
         assetIconHeight = TOOL_RESOURCETREE_DEFAULT_ICON_HEIGHT;
         mActionCreateToplevelGroupText = TOOL_RESOURCETREE_ACTION_CREATE_TOPLEVEL_GROUP;
@@ -166,7 +169,11 @@ namespace Magus
                 mouseDoubleClickHandler(mouseEvent);
             break;
 
-        case QEvent::Drop:
+            case QEvent::MouseMove:
+                mouseMoveHandler(mouseEvent);
+            break;
+
+            case QEvent::Drop:
                 dropHandler(object, event);
             break;
         }
@@ -290,7 +297,7 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QtResourceTreeWidget::dropHandler(QObject* object, QEvent* event)
+    void QtResourceTreeWidget::dropHandler (QObject* object, QEvent* event)
     {
         event->accept();
 
@@ -336,6 +343,24 @@ namespace Magus
         }
         else
             QMessageBox::information(0, "Warning", TOOL_RESOURCETREE_WARNING_4);
+    }
+
+    //****************************************************************************/
+    void QtResourceTreeWidget::mouseMoveHandler (QMouseEvent* event)
+    {
+        // If not left button - return
+        if (!(event->buttons() & Qt::LeftButton))
+            return;
+
+        // This is the dragged item; store it in mDraggedResourceName, otherwise it cannot be determined later on
+        QTreeWidgetItem* item = mResourceTree->currentItem();
+        mDraggedResourceName = getFullQualifiedNameFromItem(item);
+    }
+
+    //****************************************************************************/
+    const QString& QtResourceTreeWidget::getDraggedFullQualifiedResourceName(void)
+    {
+        return mDraggedResourceName;
     }
 
     //****************************************************************************/

@@ -98,7 +98,7 @@ class NodeEditorDockWidget : public QDockWidget
 
         // Additional slots
         void nodeToBeDeleted(QtNode* node);
-        void handleDropped (unsigned int type, const QString& name);
+        void handleDropped (const QString& objectName, const QString& name);
         void handleCopiedToClipboard (QtNode* node);
 
     private:

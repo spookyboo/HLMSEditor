@@ -255,6 +255,9 @@ namespace Magus
             int getSelectedResource (void);
             QTreeWidgetItem* getSelectedResourceItem (void);
 
+            // Return the dragged resource (name)
+            const QString& getDraggedFullQualifiedResourceName (void);
+
             // Return the first resource of a parent. If resourceId == 0, the first top-level resource is returned
             int getFirstInParent (int parentId);
 
@@ -461,8 +464,8 @@ namespace Magus
             QAction* getContextMenuAction(const QString& menuItemText);
             void mouseClickHandler(QMouseEvent* event);
             void mouseDoubleClickHandler(QMouseEvent* event);
-            void dragMoveHandler(QObject* object, QEvent* event);
             void dropHandler(QObject* object, QEvent* event);
+            void mouseMoveHandler(QMouseEvent* event);
             void resetSearch(void);
             void findAndShowItems(const QString& searchPattern);
             void hideParentIfChildrenAreHidden(int parentId);
@@ -507,6 +510,7 @@ namespace Magus
             bool mCollapsed;
             int assetIconWidth;
             int assetIconHeight;
+            QString mDraggedResourceName; // Contains the resource that is dragged
     };
 }
 

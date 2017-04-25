@@ -50,7 +50,7 @@ NodeEditorDockWidget::NodeEditorDockWidget(QString title, MainWindow* parent, Qt
     connect(mNodeEditor, SIGNAL(nodeToBeRemoved(QtNode*)), this, SLOT(nodeToBeDeleted(QtNode*)));
     connect(mNodeEditor, SIGNAL(nodeSelected(QtNode*)), this, SLOT(nodeSelected(QtNode*)));
     connect(mNodeEditor, SIGNAL(nodeConnected(QtNode*,QtNode*)), this, SLOT(nodeConnected(QtNode*,QtNode*)));
-    connect(mNodeEditor, SIGNAL(dropped(uint,QString)), this, SLOT(handleDropped(uint,QString)));
+    connect(mNodeEditor, SIGNAL(dropped(QString,QString)), this, SLOT(handleDropped(QString,QString)));
     connect(mNodeEditor, SIGNAL(copiedToClipboard(QtNode*)), this, SLOT(handleCopiedToClipboard(QtNode*)));
     mInnerMain->setCentralWidget(mNodeEditor);
     mHlmsPbsDatablockNode = 0;
@@ -577,17 +577,29 @@ EditorHlmsTypes NodeEditorDockWidget::getCurrentDatablockType(void)
 }
 
 //****************************************************************************/
-void NodeEditorDockWidget::handleDropped (unsigned int type, const QString& name)
+void NodeEditorDockWidget::handleDropped (const QString& objectName, const QString& name)
 {
     // Something was dropped on the node editor. This must be either the texture thumb, an item from the texture tree
     // or something from the clipboard.
-    // In case of a texture: Use the currently selected item in the tree and create a texture/sampler node
+    // In case of a texture from the texture tree: Use the dragged item filename in the tree and create a texture/sampler node
+    // In case of a texture from the texture thumbs: Use the name from the mimedata and create a texture/sampler node
+    // In case of asset from the clipboard: Use the name from the mimedata and create a texture/sampler node
     // nB: When a file from the file explorer is dropped, this function will not take that into account
     // It currently assumes that it came from the texture tree-, thumbs widget or clipboard
-    if (type == 0)
+    if (objectName == "QtGenericAssetAndText")
+    {
+        // It was something from the clipboard; assume it was a samplerblock clip
+        mParent->useFromClipboard(name);
+    }
+    else
     {
         // It is a texture
-        QString fileName = mParent->mTextureDockWidget->getCurrentFileName();
+        QString fileName;
+        if (objectName == "QtDefaultTextureAndText")
+            fileName = name;
+        else
+            fileName = mParent->mTextureDockWidget->getDraggedFileName();
+
         if (Magus::fileExist(fileName))
         {
             HlmsNodeSamplerblock* samplerNode = doNewSamplerblockAction();
@@ -611,11 +623,6 @@ void NodeEditorDockWidget::handleDropped (unsigned int type, const QString& name
                 mParent->mTextureDockWidget->deleteTexture(fileName);
             }
         }
-    }
-    else if (type == 1)
-    {
-        // It was something from the clipboard; assume it was a samplerblock clip
-        mParent->useFromClipboard(name);
     }
 
     // Rebuid the datablock again

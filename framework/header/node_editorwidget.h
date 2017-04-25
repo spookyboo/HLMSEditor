@@ -147,7 +147,7 @@ namespace Magus
             void contextMenuItemSelected(QAction* action);
 
             // Activated when something was dropped
-            void handleDropped (unsigned int type, const QString& name);
+            void handleDropped (const QString& objectName, const QString& name);
 
         signals:
             // Emitted when a node is added to the node editor
@@ -169,9 +169,7 @@ namespace Magus
             void selectedNodesToBeAddedToCompound(void);
 
             // Emitted when something is dropped
-            // type = 0 ==> it was a texture; name is not filled
-            // type = 1 ==> it was a samplerblock from the clipboard; name is filename json clip
-            void dropped (unsigned int type, const QString& name);
+            void dropped (const QString& objectName, const QString& name);
 
             // Emitted when a user wants to copy the last selected node to a clipboard (which is handled outside of the editor)
             void copiedToClipboard(QtNode*);

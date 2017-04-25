@@ -38,7 +38,7 @@ namespace Magus
     {
         QVBoxLayout* mainLayout = new QVBoxLayout;
         mView = new QtNodeGraphicsView(this);
-        connect(mView, SIGNAL(dropped(uint,QString)), this, SLOT(handleDropped(uint,QString))); // Check if something is dropped
+        connect(mView, SIGNAL(dropped(QString,QString)), this, SLOT(handleDropped(QString,QString))); // Check if something is dropped
 
         QRect rcontent = mView->contentsRect();
         //mView->setSceneRect(0, 0, rcontent.width() + 500, rcontent.height() + 500); // Prevent unwanted jumping and scrollbars
@@ -1467,9 +1467,9 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QtNodeEditor::handleDropped (unsigned int type, const QString& name)
+    void QtNodeEditor::handleDropped (const QString& objectName, const QString& name)
     {
-        emit dropped(type, name);
+        emit dropped(objectName, name);
     }
 
     //****************************************************************************/

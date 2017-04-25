@@ -68,10 +68,13 @@ class TextureTreeDockWidget : public QDockWidget
         bool isResourceExisting(const QString& fileName);
 
         void expand (int resourceId);
-        const QString& getCurrentFileName (void);
+        const QString& getDraggedFileName (void);
         const QString& getCurrentThumb (void);
         const QString& setSelectAssetQuiet(const QString& fileName); // This differs from the one in material_tree.h
         int getResourceId(const QString& fileName);
+
+        // Get the selected resource
+        const QString& getCurrentResourceName (void);
 
         // Clear all content in the resourcetree
         void clearContent(void);

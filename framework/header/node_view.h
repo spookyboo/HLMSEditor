@@ -48,16 +48,16 @@ namespace Magus
 
         signals:
             // Emitted when something is dropped
-            void dropped(unsigned int type, const QString& name);
+            // ObjectName is the class name of the object
+            // name is the identifier of the object, for example a filename
+            void dropped(const QString& objectName, const QString& name);
 
         protected:
             virtual void dropEvent(QDropEvent* event)
             {
                 QString name = event->mimeData()->text();
-                if (name == "")
-                    emit dropped (0, name); // 0 = texture
-                else
-                    emit dropped (1, name); // 1 = samplerblock from clipboard
+                QString objectName = event->mimeData()->objectName();
+                emit dropped (objectName, name);
                 event->acceptProposedAction();
             }
 

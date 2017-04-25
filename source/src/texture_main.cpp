@@ -179,7 +179,7 @@ void TextureMain::handleTextureSelected(int toplevelId,
         mTextureThumbsDockWidget->filter(names); // Also resets the filter
 
         // Set the thumb of the selected item in the tree
-        QString selectedThumb = mTextureTreeDockWidget->getCurrentFileName();
+        QString selectedThumb = mTextureTreeDockWidget->getCurrentResourceName();
         mTextureThumbsDockWidget->setSelectThumb(selectedThumb);
     }
 }
@@ -285,9 +285,9 @@ QMessageBox::StandardButton TextureMain::fileDoesNotExistsWarning(const QString&
 }
 
 //****************************************************************************/
-const QString& TextureMain::getCurrentFileName (void)
+const QString& TextureMain::getDraggedFileName (void)
 {
-    return mTextureTreeDockWidget->getCurrentFileName();
+    return mTextureTreeDockWidget->getDraggedFileName();
 }
 
 //****************************************************************************/
