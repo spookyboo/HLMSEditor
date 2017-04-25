@@ -106,18 +106,23 @@ void TextureLayer::blitTexture (void)
 
     Ogre::uint8 maxMipMaps = mNumMipMaps + 1; // Increase with one, because there is always one image to blit
     maxMipMaps = maxMipMaps > PAINT_MAX_MIP_MAPS ? PAINT_MAX_MIP_MAPS : maxMipMaps; // Just paint a few mipmaps (not all)
+    Ogre::Image textureOnWhichIsPaintedScaled = mTextureOnWhichIsPainted; // Temporary image must be used, otherwise painting doesn't work
     size_t w = mTextureOnWhichIsPaintedWidth;
     size_t h = mTextureOnWhichIsPaintedHeight;
     Ogre::v1::HardwarePixelBuffer* buffer;
     for (Ogre::uint8 i = 0; i < maxMipMaps; ++i)
     {
         buffer = texture->getBuffer(0, i).getPointer();
-        buffer->blitFromMemory(mTextureOnWhichIsPainted.getPixelBox(0, 0), Ogre::Box(0, 0, 0, w, h, 1));
+        buffer->blitFromMemory(textureOnWhichIsPaintedScaled.getPixelBox(0, 0), Ogre::Box(0, 0, 0, w, h, 1));
         w*=0.5f; // Mipmaps always are half of the previous one
         h*=0.5f;
         if (w < 1.0f || h < 1.0f)
             break; // Stop when the mipmaps are too small
+
+        textureOnWhichIsPaintedScaled.resize(w, h);
+
     }
+    textureOnWhichIsPaintedScaled.freeMemory();
 }
 
 //****************************************************************************/
