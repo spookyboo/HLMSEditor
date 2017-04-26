@@ -38,16 +38,17 @@ ClipboardWidget::ClipboardWidget (const QString& clipboardDir, BrushPresetDockWi
     mClipboardDir = clipboardDir;
 
     QPixmap scriptPixmap(ICON_PIN);
-    mQtGenericAssetWidget = new Magus::QtGenericAssetWidget(scriptPixmap, true, this);
-    mQtGenericAssetWidget->setTextureSize(QSize(216, 48)); // Add 8 pixels to the width to compensate the frame width
-    mQtGenericAssetWidget->setViewEnabled(false); // Don't display the context of the asset when doubleclicked
-    //mQtGenericAssetWidget->addContextMenuActionText(ACTION_USE);
-    //loadClipsRecursively (clipboardDir);
-    connect(mQtGenericAssetWidget, SIGNAL(doubleClicked(QString,QString)), this, SLOT(handleDoubleClicked(QString,QString)));
-    //connect(mQtGenericAssetWidget, SIGNAL(contextMenuSelected(QAction*,QString,QString)), this, SLOT(handleContextMenuSelected(QAction*,QString,QString)));
+    mGenericAssetWidget = new Magus::QtGenericAssetWidget(scriptPixmap, true, this);
+    mGenericAssetWidget->setTextureSize(QSize(216, 48)); // Add 8 pixels to the width to compensate the frame width
+    mGenericAssetWidget->setViewEnabled(false); // Don't display the context of the asset when doubleclicked
+    mGenericAssetWidget->addContextMenuActionText(ACTION_USE_CURRENT_CLIP);
+    mGenericAssetWidget->addContextMenuActionText(ACTION_DELETE_CURRENT_CLIP);
+    loadClips (clipboardDir);
+    connect(mGenericAssetWidget, SIGNAL(doubleClicked(QString,QString)), this, SLOT(handleDoubleClicked(QString,QString)));
+    connect(mGenericAssetWidget, SIGNAL(contextMenuSelected(QAction*,QString,QString)), this, SLOT(handleContextMenuSelected(QAction*,QString,QString)));
 
     // Layout
-    mainLayout->addWidget(mQtGenericAssetWidget);
+    mainLayout->addWidget(mGenericAssetWidget);
     mainLayout->addLayout(tableLayout);
     setLayout(mainLayout);
 }
@@ -58,20 +59,69 @@ ClipboardWidget::~ClipboardWidget (void)
 }
 
 //****************************************************************************/
+void ClipboardWidget::loadClips (const QString& searchPath)
+{
+    // Get all texture files from all dirs/subdirs
+    QDir dir(searchPath);
+    dir.makeAbsolute();
+    QString fileName;
+
+    if (dir.exists())
+    {
+        Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst))
+        {
+            if (info.isDir())
+            {
+                loadClips(info.absoluteFilePath());
+            }
+            else
+            {
+                // A clip is a json file, so its extension is .json
+                if (info.suffix() == "json")
+                {
+                    fileName = info.absoluteFilePath();
+                    addToClipboard(fileName);
+                }
+            }
+        }
+    }
+}
+
+//****************************************************************************/
 void ClipboardWidget::addToClipboard (const QString& filename)
 {
     // Do not add duplicates
-    if (mQtGenericAssetWidget->assetExists(filename))
+    if (mGenericAssetWidget->assetExists(filename))
         return;
 
     // Assume that only samplerblocks can be added to the clipbloard
     QFileInfo info(filename);
     QPixmap scriptPixmap(ICON_SAMPLER_CLIPBOARD);
-    mQtGenericAssetWidget->addAsset(scriptPixmap, filename, info.baseName());
+    mGenericAssetWidget->addAsset(scriptPixmap, filename, info.baseName());
 }
 
 //****************************************************************************/
 void ClipboardWidget::handleDoubleClicked (const QString& fileName, const QString& baseName)
 {
     mBrushPresetDockWidget->useFromClipboard(fileName, baseName);
+}
+
+//****************************************************************************/
+void ClipboardWidget::handleContextMenuSelected (QAction* action, const QString& name, const QString& baseName)
+{
+    if (action->text() == ACTION_USE_CURRENT_CLIP)
+    {
+        mBrushPresetDockWidget->useFromClipboard(name, baseName);
+    }
+    else if (action->text() == ACTION_DELETE_CURRENT_CLIP)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(0, "", "Are you sure you want to delete the clip?\n", QMessageBox::Ok|QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Ok)
+        {
+            mGenericAssetWidget->deleteAsset(name);
+            QFile::remove(name);
+        }
+    }
 }

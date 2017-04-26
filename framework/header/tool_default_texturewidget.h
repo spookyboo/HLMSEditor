@@ -62,7 +62,6 @@ namespace Magus
         private:
             QLabel* mTextureLabel;
             QLineEdit* mBaseNameEdit;
-            //QMenu* mContextMenu;
     };
 
     //****************************************************************************/
@@ -80,9 +79,6 @@ namespace Magus
             QtDefaultTextureListWidget(QWidget* parent = 0);
             virtual ~QtDefaultTextureListWidget(void);
 
-            // Add an item to the context menu
-            //void addActionText(const QString& actionText);
-
         signals:
             // Emitted when a texture file is dropped
             void textureFileDropped(const QString& name, const QString& baseName);
@@ -95,9 +91,6 @@ namespace Magus
 
             // Emitted when the asset is moved
             void assedDragMoved(const QString& name, const QString& baseName);
-
-            // Emitted when a context menu item is selected
-            //void contextMenuAction (QAction* action, const QString& name, const QString& baseName);
 
         protected:
             virtual void keyPressEvent(QKeyEvent* event);

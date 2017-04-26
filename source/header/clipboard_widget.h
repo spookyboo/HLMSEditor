@@ -48,14 +48,14 @@ class ClipboardWidget : public QWidget
 
     private slots:
         void handleDoubleClicked(const QString& fileName, const QString& baseName);
-        //void handleContextMenuSelected (QAction* action, const QString& name, const QString& baseName);
+        void handleContextMenuSelected (QAction* action, const QString& name, const QString& baseName);
 
     protected:
-        void loadSamplersRecursively(const QString& searchPath);
+        void loadClips (const QString& searchPath);
 
     private:
         BrushPresetDockWidget* mBrushPresetDockWidget; // Reference to the dockwidget that contains this widget
-        Magus::QtGenericAssetWidget* mQtGenericAssetWidget;
+        Magus::QtGenericAssetWidget* mGenericAssetWidget;
         QWidget* mParent;
         QString mClipboardDir;
 };

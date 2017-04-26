@@ -249,7 +249,7 @@ void MainWindow::createActions(void)
     mEditPaintingLayerAction = new QAction(QString(ACTION_EDIT_PAINTING_LAYER), this);
     mEditPaintingLayerAction->setShortcut(QKeySequence(QString("Ctrl+E")));
     connect(mEditPaintingLayerAction, SIGNAL(triggered()), this, SLOT(doNewEditLayerMenuAction()));
-    mDeleteSelectedPaintingLayersAction = new QAction(QString(ACTION_DELETE_CURRENT_PAINTING_LAYERS), this);
+    mDeleteSelectedPaintingLayersAction = new QAction(QString(ACTION_DELETE_CURRENT_PAINT_LAYERS), this);
     mDeleteSelectedPaintingLayersAction->setShortcut(QKeySequence(QString("Ctrl+D")));
     connect(mDeleteSelectedPaintingLayersAction, SIGNAL(triggered()), this, SLOT(doSelectedPaintingLayersMenuAction()));
 

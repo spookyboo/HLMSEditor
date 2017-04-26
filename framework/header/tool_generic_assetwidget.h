@@ -27,6 +27,7 @@
 #include <QLabel>
 #include <QPixmap>
 #include <QPlainTextEdit>
+#include <QMenu>
 #include "magus_core.h"
 
 QT_BEGIN_NAMESPACE
@@ -162,6 +163,9 @@ namespace Magus
             void setViewEnabled (bool enabled) {mViewEnabled = enabled;}
             bool isViewEnabled (void) {return mViewEnabled;}
 
+            // Add an item to the context menu
+            void addContextMenuActionText(const QString& actionText);
+
         signals:
             // Emitted when an asset is selected (via the mouse)
             void selected(const QString& name, const QString& baseName);
@@ -175,12 +179,16 @@ namespace Magus
             // Emitted when an asset is deleted
             void assetDeleted(const QString& name, const QString& baseName);
 
+            // Emitted when an action of the context menu is selected
+            void contextMenuSelected(QAction* action, const QString& name, const QString& baseName);
+
         protected slots:
             void handleSelected(QListWidgetItem* item);
             void handleDoubleClicked(QListWidgetItem* item);
             void handleFileDropped (const QString& name, const QString& baseName);
             void handleMouseOver(QListWidgetItem* item);
             void handleAssetDeleted(const QString& name, const QString& baseName);
+            void handleContextMenuAction(QAction* action);
 
         protected:
             void loadFileInViewer(const QString& fileName, const QString& baseFileName);
@@ -195,6 +203,7 @@ namespace Magus
             QSize mTextureSize;
             bool mOriginIsFile;
             bool mViewEnabled;
+            QMenu* mContextMenu;
     };
 }
 

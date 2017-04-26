@@ -547,12 +547,6 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QtDefaultTextureWidget::addContextMenuActionText(const QString& actionText)
-    {
-        mContextMenu->addAction(new QAction(actionText));
-    }
-
-    //****************************************************************************/
     void QtDefaultTextureWidget::handleContextMenuAction(QAction* action)
     {
         QListWidgetItem* item = mSelectionList->currentItem();
@@ -567,5 +561,11 @@ namespace Magus
                 emit contextMenuSelected(action, name, baseName);
             }
         }
+    }
+
+    //****************************************************************************/
+    void QtDefaultTextureWidget::addContextMenuActionText(const QString& actionText)
+    {
+        mContextMenu->addAction(new QAction(actionText));
     }
 }

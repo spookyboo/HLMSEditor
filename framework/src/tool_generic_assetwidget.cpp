@@ -28,6 +28,7 @@
 #include <QTextStream>
 #include <QListWidgetItem>
 #include <QProcess>
+#include <QApplication>
 #include <QDrag>
 #include <QMimeData>
 #include "tool_generic_assetwidget.h"
@@ -190,11 +191,17 @@ namespace Magus
         mBaseNameAsset = QString("");
         mSystemCommandEditAsset = QString("");
         mDefaultPixmapAsset = defaultPixmap;
-        setWindowTitle(QString("Texture selection"));
+        //setWindowTitle(QString("Texture selection"));
         mTextureSize = QSize(128, 128);
         mOriginIsFile = true;
         QHBoxLayout* mainLayout = new QHBoxLayout;
         QVBoxLayout* textureSelectionLayout = new QVBoxLayout;
+
+        // Contextmenu
+        installEventFilter(this);
+        setContextMenuPolicy(Qt::CustomContextMenu);
+        mContextMenu = new QMenu(this);
+        connect(mContextMenu, SIGNAL(triggered(QAction*)), this, SLOT(handleContextMenuAction(QAction*)));
 
         // Define selection widget (QtGenericAssetListWidget)
         mSelectionList = new QtGenericAssetListWidget();
@@ -206,7 +213,8 @@ namespace Magus
         mSelectionList->setMovement(QListView::Snap);
         mSelectionList->setFlow(QListView::LeftToRight);
         connect(mSelectionList, SIGNAL(fileDropped(QString,QString)), this, SLOT(handleFileDropped(QString,QString)));
-        connect(mSelectionList, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(handleSelected(QListWidgetItem*)));
+         // Use itemPressed instead of itemClicked, because otherwise the contextmenu is not activated
+        connect(mSelectionList, SIGNAL(itemPressed(QListWidgetItem*)), this, SLOT(handleSelected(QListWidgetItem*)));
         connect(mSelectionList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(handleDoubleClicked(QListWidgetItem*)));
         connect(mSelectionList, SIGNAL(itemEntered(QListWidgetItem*)), this, SLOT(handleMouseOver(QListWidgetItem*)));
         connect(mSelectionList, SIGNAL(assetDeleted(QString,QString)), this, SLOT(handleAssetDeleted(QString,QString)));
@@ -340,6 +348,12 @@ namespace Magus
             QtGenericAssetAndText* assetAndText = static_cast<QtGenericAssetAndText*>(widget);
             mNameAsset = assetAndText->mName;
             mBaseNameAsset = assetAndText->mBaseName;
+            Qt::MouseButtons buttons = QApplication::mouseButtons();
+            if (buttons & Qt::RightButton && mContextMenu->actions().size() > 0)
+            {
+                QPoint pos = QCursor::pos();
+                mContextMenu->popup(pos);
+            }
             emit selected(assetAndText->mName, assetAndText->mBaseName);
         }
     }
@@ -390,6 +404,29 @@ namespace Magus
     void QtGenericAssetWidget::handleAssetDeleted(const QString& name, const QString& baseName)
     {
         emit assetDeleted(name, baseName);
+    }
+
+    //****************************************************************************/
+    void QtGenericAssetWidget::handleContextMenuAction(QAction* action)
+    {
+        QListWidgetItem* item = mSelectionList->currentItem();
+        if (item)
+        {
+            QWidget* widget = mSelectionList->itemWidget(item);
+            if (widget)
+            {
+                QtGenericAssetAndText* assetAndText = static_cast<QtGenericAssetAndText*>(widget);
+                QString name = assetAndText->mName;
+                QString baseName = assetAndText->mBaseName;
+                emit contextMenuSelected(action, name, baseName);
+            }
+        }
+    }
+
+    //****************************************************************************/
+    void QtGenericAssetWidget::addContextMenuActionText(const QString& actionText)
+    {
+        mContextMenu->addAction(new QAction(actionText));
     }
 
     //****************************************************************************/
