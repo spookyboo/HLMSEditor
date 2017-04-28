@@ -817,9 +817,18 @@ void HlmsPropertiesSamplerblock::loadProperties (const QString& propertiesName, 
     Magus::QtColorProperty* colorProperty;
     Magus::QtXYProperty* xyProperty;
     Magus::QtQuaternionProperty* quaternionProperty;
-    rapidjson::Value::ConstMemberIterator it = d.MemberBegin();
-    rapidjson::Value::ConstMemberIterator itEnd = d.MemberEnd();
 
+    rapidjson::Value::ConstMemberIterator itSampler = d.FindMember("sampler");
+    if (itSampler == d.MemberEnd() || !itSampler->value.IsObject() )
+    {
+        QMessageBox::information(0, QString("Error"), QString("Cannot load sampler properties"));
+        Ogre::LogManager::getSingleton().logMessage("HlmsPropertiesSamplerblock::loadProperties: File " +
+                                                    fileName.toStdString() +
+                                                    " is not a sampler");
+    }
+
+    rapidjson::Value::ConstMemberIterator it = itSampler->value.MemberBegin();
+    rapidjson::Value::ConstMemberIterator itEnd = itSampler->value.MemberEnd();
     while( it != itEnd )
     {
         Ogre::String name(it->name.GetString());
@@ -1011,16 +1020,21 @@ const QString& HlmsPropertiesSamplerblock::saveProperties (const QString& proper
     }
 
     // Create the json structure
-    QString jsonString = "{\n";
+    QString jsonString;
+    jsonString += "{\n";
+    jsonString += TAB_QSTRING;
+    jsonString += "\"sampler\" : \n";
+    jsonString += TAB_QSTRING;
+    jsonString += "{\n";
 
     // ******** Texture ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"texture\" : \"";
     jsonString += mHlmsNodeSamplerblock->getFileNameTexture();
     jsonString += "\",\n";
 
     // ******** Enabled ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"enabled\" : ";
     if (mHlmsNodeSamplerblock->getSamplerblockEnabled())
         jsonString += "true";
@@ -1029,79 +1043,79 @@ const QString& HlmsPropertiesSamplerblock::saveProperties (const QString& proper
     jsonString += ",\n";
 
     // ******** Texture type ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"type\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getTextureType()).toString();
     jsonString += ",\n";
 
     // ******** Min filter ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"min\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getTextureMinFilter()).toString();
     jsonString += ",\n";
 
     // ******** Mag filter ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"mag\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getTextureMagFilter()).toString();
     jsonString += ",\n";
 
     // ******** Mip filter ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"mip\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getTextureMipFilter()).toString();
     jsonString += ",\n";
 
     // ******** Texture Addressing Mode U ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"u\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getTextureAddressingModeU()).toString();
     jsonString += ",\n";
 
     // ******** Texture Addressing Mode V ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"v\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getTextureAddressingModeV()).toString();
     jsonString += ",\n";
 
     // ******** Texture Addressing Mode W ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"w\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getTextureAddressingModeW()).toString();
     jsonString += ",\n";
 
     // ******** Mip LOD Bias ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"miplodbias\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getMipLodBias()).toString();
     jsonString += ",\n";
 
     // ******** Max Anisotropy ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"max_anisotropic\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getMaxAnisotropy()).toString();
     jsonString += ",\n";
 
      // ******** Compare Function ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"compare_function\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getCompareFunction()).toString();
     jsonString += ",\n";
 
     // ******** Min LOD ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"min_lod\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getMinLod()).toString();
     jsonString += ",\n";
 
     // ******** Max LOD ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"max_lod\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getMaxLod()).toString();
     jsonString += ",\n";
 
     // ******** Border colour ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"border\" : [";
     jsonString += QVariant(mHlmsNodeSamplerblock->getBorderColourRed()).toString();
     jsonString += ",";
@@ -1111,25 +1125,25 @@ const QString& HlmsPropertiesSamplerblock::saveProperties (const QString& proper
     jsonString += "],\n";
 
     // ******** UV set ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"uv\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getUvSet()).toString();
     jsonString += ",\n";
 
     // ******** Detail: Blend mode ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"blend_mode\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getBlendMode()).toString();
     jsonString += ",\n";
 
     // ******** Detail: Map weight ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"map_weight\" : ";
     jsonString += QVariant(mHlmsNodeSamplerblock->getMapWeight()).toString();
     jsonString += ",\n";
 
     // ******** Detail: Offset ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"offset\" : [";
     QVector2D v2 = mHlmsNodeSamplerblock->getOffset();
     jsonString += QVariant(v2.x()).toString();
@@ -1138,7 +1152,7 @@ const QString& HlmsPropertiesSamplerblock::saveProperties (const QString& proper
     jsonString += "],\n";
 
     // ******** Detail: Scale ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"scale\" : [";
     v2 = mHlmsNodeSamplerblock->getScale();
     jsonString += QVariant(v2.x()).toString();
@@ -1147,7 +1161,7 @@ const QString& HlmsPropertiesSamplerblock::saveProperties (const QString& proper
     jsonString += "],\n";
 
     // ******** Animation Matrix (unlit only) ********
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"anim_enabled\" : ";
     if (mHlmsNodeSamplerblock->getAnimationEnabled())
         jsonString += "true";
@@ -1156,7 +1170,7 @@ const QString& HlmsPropertiesSamplerblock::saveProperties (const QString& proper
     jsonString += ",\n";
 
     // Scale
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"anim_scale\" : [";
     v2 = mHlmsNodeSamplerblock->getAnimationScale();
     jsonString += QVariant(v2.x()).toString();
@@ -1165,7 +1179,7 @@ const QString& HlmsPropertiesSamplerblock::saveProperties (const QString& proper
     jsonString += "],\n";
 
     // Rotate
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"anim_rotate\" : [";
     QQuaternion q = mHlmsNodeSamplerblock->getAnimationOrientation();
     jsonString += QVariant(q.scalar()).toString();
@@ -1178,7 +1192,7 @@ const QString& HlmsPropertiesSamplerblock::saveProperties (const QString& proper
     jsonString += "],\n";
 
     // Translate
-    jsonString += TAB_QSTRING;
+    jsonString += TWO_TAB_QSTRING;
     jsonString += "\"anim_translate\" : [";
     v2 = mHlmsNodeSamplerblock->getAnimationTranslate();
     jsonString += QVariant(v2.x()).toString();
@@ -1187,6 +1201,8 @@ const QString& HlmsPropertiesSamplerblock::saveProperties (const QString& proper
     jsonString += "]\n";
 
     // End tag
+    jsonString += TAB_QSTRING;
+    jsonString += "}\n";
     jsonString += "}";
 
     // Write the file

@@ -1476,7 +1476,6 @@ namespace Magus
     void QtNodeEditor::copyToClipboard (void)
     {
         QtNode* node = getLastSelectedNode();
-        if (node)
-            emit copiedToClipboard(node);
+        emit copiedToClipboard(node);
     }
 }

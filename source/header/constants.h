@@ -139,6 +139,7 @@ static const QString PRESET_PATH_QSTRING = "../common/presets/";
 static const QString DEFAULT_BRUSH_AND_PATH_QSTRING = QString("../common/brushes/brush_001.png");
 static const QString CLIPBOARD_PATH_QSTRING = "../common/clipboard/";
 static const QString TAB_QSTRING = "    ";
+static const QString TWO_TAB_QSTRING = "       ";
 
 //************************************ Ogre String constants *******************************************/
 static const Ogre::String DEFAULT_DATABLOCK_NAME = "[Default]";

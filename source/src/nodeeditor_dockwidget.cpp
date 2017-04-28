@@ -557,11 +557,22 @@ void NodeEditorDockWidget::nodeConnected(QtNode* baseNode, QtNode* targetNode)
 //****************************************************************************/
 void NodeEditorDockWidget::handleCopiedToClipboard (QtNode* node)
 {
+    if (!node)
+    {
+        // It is not a node
+        QMessageBox::information(0, QString("Error"), QString("Connections cannot be copied to the clipboard"));
+        return;
+    }
+
     // Currently onlye samplerblocks can be copied to the clipboard
     if (node->getType() == NODE_TYPE_SAMPLERBLOCK)
     {
         // Inform the mainwindow. Don't bother to pass the node, it is the current samplerblock node
         mParent->notifyCopiedToClipboard();
+    }
+    else
+    {
+        QMessageBox::information(0, QString("Error"), QString("Currently, only samplerblocks can be copied to the clipboard"));
     }
 }
 
