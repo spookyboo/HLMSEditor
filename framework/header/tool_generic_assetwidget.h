@@ -117,7 +117,7 @@ namespace Magus
 
             // Returns true if the asset exists. Use the full qualified name as search criterium if nameIsFullName = true;
             // else use the baseName as search criterium.
-            bool QtGenericAssetWidget::assetExists(const QString& name, bool nameIsFullName = true);
+            bool assetExists(const QString& name, bool nameIsFullName = true);
 
             // Delete an item from the QtGenericAssetWidget. Use the full qualified name as search criterium if nameIsFullName = true;
             // else use the baseName as search criterium.
