@@ -201,7 +201,7 @@ win32 {
 }
 
 win32:LIBS += -lopengl32
-else:unix:LIBS += -lGL -lGLU -L/usr/local/lib -L/usr/lib
+else:unix:LIBS += -lGL -lGLU
 
 CONFIG(debug, debug|release):LIBS += \
     -lOgreMain_d \
@@ -219,3 +219,5 @@ Release:DESTDIR = ../HLMSEditor/bin
 Debug:DESTDIR = ../HLMSEditor/bin
 target.path = $$[QTDIR]/
 INSTALLS += target
+
+DISTFILES +=
