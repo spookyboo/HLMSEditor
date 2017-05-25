@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	QCoreApplication::addLibraryPath(".");
 #endif
 	QApplication app(argc, argv);
-    app.setWindowIcon(QIcon("../../common/icons/HLMSEditor.png"));
+    app.setWindowIcon(QIcon("common/icons/HLMSEditor.png"));
 	MainWindow mainWin;
 	mainWin.show();
 	while (!mainWin.mIsClosing)

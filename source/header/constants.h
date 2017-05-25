@@ -29,6 +29,12 @@
 #include "ogre3_widget.h"
 
 //************************************ QString constants *******************************************/
+#ifdef __linux__
+    static const QString BASE_PATH = QString("./");
+#else
+    static const QString BASE_PATH = QString("../");
+#endif
+static const std::string BASE_PATH_STD = BASE_PATH.toStdString();
 static const QString WINDOW_TITLE = QString("HLMS editor");
 static const int OGRE_WIDGET_RENDERWINDOW = 1;
 static const int TB_ICON_AND_SPACING = 32;
@@ -47,36 +53,36 @@ static const unsigned int MAX_MACROBLOCKS = 1;
 static const unsigned int MAX_BLENDBLOCKS = 1;
 static const unsigned int MAX_RECENT_HLMS_FILES = 9;
 static const unsigned int MAX_RECENT_PROJECT_FILES = 9;
-static const QString ICON_PATH = QString("../common/icons/");
-static const QString ASSET_ICON_COLLAPSE = QString("../common/icons/collapse.png");
-static const QString ASSET_ICON_EXPAND = QString("../common/icons/expand.png");
-static const QString ICON_PBS_DATABLOCK = QString("../common/icons/pbs.png");
-static const QString ICON_UNLIT_DATABLOCK = QString("../common/icons/unlit.png");
-static const QString ICON_SAMPLERBLOCK = QString("../common/icons/samplerblock.png");
-static const QString ICON_MACROBLOCK = QString("../common/icons/macroblock.png");
-static const QString ICON_BLENDBLOCK = QString("../common/icons/blendblock.png");
-static const QString ICON_GENERATE = QString("../common/icons/generate.png");
-static const QString ICON_MINMAX = QString("../common/icons/minmax.png");
-static const QString ICON_CLOSE = QString("../common/icons/close.png");
-static const QString ICON_COLOUR = QString("../common/icons/colour.png");
-static const QString ICON_INFO = QString("../common/icons/info.png");
-static const QString ICON_MODEL = QString("../common/icons/model.png");
-static const QString ICON_LIGHT = QString("../common/icons/lightbulb.png");
-static const QString ICON_MOVE_TEXTURE_ON = QString("../common/icons/move_on.png");
-static const QString ICON_MOVE_TEXTURE_OFF = QString("../common/icons/move_off.png");
-static const QString ICON_PAINT_ON = QString("../common/icons/paint_on.png");
-static const QString ICON_PAINT_OFF = QString("../common/icons/paint_off.png");
-static const QString ICON_MARKER = QString("../common/icons/marker.png");
-static const QString ICON_HOOVER_ON = QString("../common/icons/hoover_on.png");
-static const QString ICON_HOOVER_OFF = QString("../common/icons/hoover_off.png");
-static const QString ICON_UNDO_ON = QString("../common/icons/undo_on.png");
-static const QString ICON_UNDO_OFF = QString("../common/icons/undo_off.png");
-static const QString ICON_REDO_OFF = QString("../common/icons/redo_off.png");
-static const QString ICON_REDO_ON = QString("../common/icons/redo_on.png");
-static const QString ICON_SAMPLER_CLIPBOARD = QString("../common/icons/samplerblock_banner.png");
-static const QString ICON_PIN = QString("../common/icons/pin.png");
+static const QString ICON_PATH = QString(BASE_PATH + "/common/icons/");
+static const QString ASSET_ICON_COLLAPSE = QString(BASE_PATH + "/common/icons/collapse.png");
+static const QString ASSET_ICON_EXPAND = QString(BASE_PATH + "/common/icons/expand.png");
+static const QString ICON_PBS_DATABLOCK = QString(BASE_PATH + "/common/icons/pbs.png");
+static const QString ICON_UNLIT_DATABLOCK = QString(BASE_PATH + "/common/icons/unlit.png");
+static const QString ICON_SAMPLERBLOCK = QString(BASE_PATH + "/common/icons/samplerblock.png");
+static const QString ICON_MACROBLOCK = QString(BASE_PATH + "/common/icons/macroblock.png");
+static const QString ICON_BLENDBLOCK = QString(BASE_PATH + "/common/icons/blendblock.png");
+static const QString ICON_GENERATE = QString(BASE_PATH + "/common/icons/generate.png");
+static const QString ICON_MINMAX = QString(BASE_PATH + "/common/icons/minmax.png");
+static const QString ICON_CLOSE = QString(BASE_PATH + "/common/icons/close.png");
+static const QString ICON_COLOUR = QString(BASE_PATH + "/common/icons/colour.png");
+static const QString ICON_INFO = QString(BASE_PATH + "/common/icons/info.png");
+static const QString ICON_MODEL = QString(BASE_PATH + "/common/icons/model.png");
+static const QString ICON_LIGHT = QString(BASE_PATH + "/common/icons/lightbulb.png");
+static const QString ICON_MOVE_TEXTURE_ON = QString(BASE_PATH + "/common/icons/move_on.png");
+static const QString ICON_MOVE_TEXTURE_OFF = QString(BASE_PATH + "/common/icons/move_off.png");
+static const QString ICON_PAINT_ON = QString(BASE_PATH + "/common/icons/paint_on.png");
+static const QString ICON_PAINT_OFF = QString(BASE_PATH + "/common/icons/paint_off.png");
+static const QString ICON_MARKER = QString(BASE_PATH + "/common/icons/marker.png");
+static const QString ICON_HOOVER_ON = QString(BASE_PATH + "/common/icons/hoover_on.png");
+static const QString ICON_HOOVER_OFF = QString(BASE_PATH + "/common/icons/hoover_off.png");
+static const QString ICON_UNDO_ON = QString(BASE_PATH + "/common/icons/undo_on.png");
+static const QString ICON_UNDO_OFF = QString(BASE_PATH + "/common/icons/undo_off.png");
+static const QString ICON_REDO_OFF = QString(BASE_PATH + "/common/icons/redo_off.png");
+static const QString ICON_REDO_ON = QString(BASE_PATH + "/common/icons/redo_on.png");
+static const QString ICON_SAMPLER_CLIPBOARD = QString(BASE_PATH + "/common/icons/samplerblock_banner.png");
+static const QString ICON_PIN = QString(BASE_PATH + "/common/icons/pin.png");
 
-static const QString ICON_HLMS = QString("../common/icons/HLMSEditor.png");
+static const QString ICON_HLMS = QString(BASE_PATH + "/common/icons/HLMSEditor.png");
 static const QString ICON_PBS_DATABLOCK_NO_PATH = QString("pbs.png");
 static const QString ICON_PBS_DATABLOCK_SMALL_NO_PATH = QString("pbs_small.png");
 static const QString ICON_UNLIT_DATABLOCK_NO_PATH = QString("unlit.png");
@@ -85,25 +91,25 @@ static const QString ICON_TEXTURE_NO_PATH = QString("samplerblock.png");
 static const QString ICON_TEXTURE_SMALL_NO_PATH = QString("samplerblock_small.png");
 static const QString HLMS_GROUP = "[Hlms]\n";
 static const QString HLMS_DO_NOT_USE_AS_RESOURCE = "DoNotUseAsResource = ../common/ogre3\n"; // This must be the location where the HLMS templates are
-static const QString INFO_PBS = QString("../common/info/hlms_pbs.inf");
-static const QString INFO_UNLIT = QString("../common/info/hlms_unlit.inf");
-static const QString INFO_SAMPLERBLOCK = QString("../common/info/samplerblock.inf");
-static const QString INFO_MACROBLOCK = QString("../common/info/macroblock.inf");
-static const QString INFO_BLENDBLOCK = QString("../common/info/blendblock.inf");
+static const QString INFO_PBS = QString(BASE_PATH + "/common/info/hlms_pbs.inf");
+static const QString INFO_UNLIT = QString(BASE_PATH + "/common/info/hlms_unlit.inf");
+static const QString INFO_SAMPLERBLOCK = QString(BASE_PATH + "/common/info/samplerblock.inf");
+static const QString INFO_MACROBLOCK = QString(BASE_PATH + "/common/info/macroblock.inf");
+static const QString INFO_BLENDBLOCK = QString(BASE_PATH + "/common/info/blendblock.inf");
 static const QString DEFAULT_PROJECT_NAME = QString("project1");
 static const QString HEADER_PROJECT = QString("hlmsEditor v1.0");
 static const QString FILE_MATERIAL_BROWSER = QString("materials.cfg");
 static const QString FILE_TEXTURE_BROWSER = QString("textures.cfg");
 static const QString FILE_RECENT_HLMS_FILES = QString("rhlms.cfg");
 static const QString FILE_RECENT_PROJECT_FILES = QString("rprojects.cfg");
-static const QString FILE_NO_IMAGE = QString("../common/icons/noImage.png");
+static const QString FILE_NO_IMAGE = QString(BASE_PATH + "/common/icons/noImage.png");
 static const QString FILE_RESOURCES_D = QString("resources_d.cfg");
 static const QString FILE_RESOURCES = QString("resources.cfg");
 static const QString FILE_RESOURCES_DEFAULT = QString("resources_default.cfg");
 static const QString FILE_SETTINGS = QString("settings.cfg");
 static const QString FILE_SETTINGS_DEFAULT = QString("settings_default.cfg");
-static const QString PROJECT_PATH = "../project/";
-static const QString DEFAULT_IMPORT_PATH = "../import/";
+static const QString PROJECT_PATH = BASE_PATH + "/project/";
+static const QString DEFAULT_IMPORT_PATH = BASE_PATH + "/import/";
 static const QString SETTINGS_GROUP_GENERAL = "General";
 static const QString SETTINGS_IMPORT_PATH = "importPath";
 static const QString SETTINGS_SAMPLERBLOCK_FILTER_INDEX = "samplerblockFilterIndex";
@@ -135,19 +141,19 @@ static const QString PAINT_EFFECT_CARBON_COPY_QSTRING = QString("Carbon Copy");
 static const QString PAINT_EFFECT_SMUDGE_QSTRING = QString("Smudge");
 static const QString PAINT_OVERFLOW_IGNORE_QSTRING = QString("Ignore");
 static const QString PAINT_OVERFLOW_CONTINUE_QSTRING = QString("Continue");
-static const QString PRESET_PATH_QSTRING = "../common/presets/";
-static const QString DEFAULT_BRUSH_AND_PATH_QSTRING = QString("../common/brushes/brush_001.png");
-static const QString CLIPBOARD_PATH_QSTRING = "../common/clipboard/";
+static const QString PRESET_PATH_QSTRING = BASE_PATH + "/common/presets/";
+static const QString DEFAULT_BRUSH_AND_PATH_QSTRING = QString(BASE_PATH + "/common/brushes/brush_001.png");
+static const QString CLIPBOARD_PATH_QSTRING = BASE_PATH + "/common/clipboard/";
 static const QString TAB_QSTRING = "    ";
 static const QString TWO_TAB_QSTRING = "       ";
 
 //************************************ Ogre String constants *******************************************/
 static const Ogre::String DEFAULT_DATABLOCK_NAME = "[Default]";
 static const Ogre::String DATABLOCK_DEBUG_CUBE = "DebugCube";
-static const Ogre::String THUMBS_PATH = "../common/thumbs/";
-static const Ogre::String BRUSH_PATH = "../common/brushes/";
+static const Ogre::String THUMBS_PATH = BASE_PATH_STD + "/common/thumbs/";
+static const Ogre::String BRUSH_PATH = BASE_PATH_STD + "/common/brushes/";
 static const Ogre::String DEFAULT_BRUSH = "brush_001.png";
-static const Ogre::String TEMP_PATH = "../temp/";
+static const Ogre::String TEMP_PATH = BASE_PATH_STD + "/temp/";
 
 //******************************************************************************************************/
 // Static function to determine the 'resources' file
