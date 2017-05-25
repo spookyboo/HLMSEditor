@@ -48,6 +48,7 @@ Step 7a. Edit 'HLMSEditor.pro' file; change OGREHOME = "C:/Users/Henry/Documents
 Step 8a. Run the HLMSEditor application  
 Step 9a. Note, that you don't need the Qt dll files in your HLMSEditor/bin directory, unless the HLMSEditor application is used as stand-alone (outside Qt Creator).  
 
+Or...  
 Step 5b. Start CMake (download gui version on https://cmake.org/)  
 Step 6b. Browse location 'Where is the source code' and 'Where to build the binaries' and click 'Configure'  
 Step 7b. Click 'Generate'  
