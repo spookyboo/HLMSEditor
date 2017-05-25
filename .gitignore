@@ -1,0 +1,9 @@
+*.pro.user
+*.directory
+bin/*.o
+bin/*.cpp
+bin/*.h
+bin/.qmake.stash
+bin/HLMSEditor
+bin/Makefile
+bin/Ogre.log
