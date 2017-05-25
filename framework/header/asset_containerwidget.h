@@ -49,7 +49,7 @@ namespace Magus
 
         public:
             QtContainerWidget(const QString& title, bool line = true, QWidget* parent = 0);
-            virtual ~QtContainerWidget(void){};
+            virtual ~QtContainerWidget(void){}
 
             // Hide or display the header of a container. If the header is hidden, only the properties are
             // visible, so it is not possible to collapse or expand the container.

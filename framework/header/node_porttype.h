@@ -63,7 +63,7 @@ namespace Magus
     {
         public:
             QtInputPortType(void);
-            ~QtInputPortType(void){};
+            ~QtInputPortType(void){}
     };
 
     /****************************************************************************
@@ -73,7 +73,7 @@ namespace Magus
     {
         public:
             QtOutputPortType(void);
-            ~QtOutputPortType(void){};
+            ~QtOutputPortType(void){}
     };
 }
 
