@@ -219,5 +219,3 @@ Release:DESTDIR = ../HLMSEditor/bin
 Debug:DESTDIR = ../HLMSEditor/bin
 target.path = $$[QTDIR]/
 INSTALLS += target
-
-DISTFILES +=
