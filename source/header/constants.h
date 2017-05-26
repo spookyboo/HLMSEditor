@@ -90,7 +90,7 @@ static const QString ICON_UNLIT_DATABLOCK_SMALL_NO_PATH = QString("unlit_small.p
 static const QString ICON_TEXTURE_NO_PATH = QString("samplerblock.png");
 static const QString ICON_TEXTURE_SMALL_NO_PATH = QString("samplerblock_small.png");
 static const QString HLMS_GROUP = "[Hlms]\n";
-static const QString HLMS_DO_NOT_USE_AS_RESOURCE = "DoNotUseAsResource = ../common/ogre3\n"; // This must be the location where the HLMS templates are
+static const QString HLMS_DO_NOT_USE_AS_RESOURCE = "DoNotUseAsResource = " + BASE_PATH + "/common/ogre3\n"; // This must be the location where the HLMS templates are
 static const QString INFO_PBS = QString(BASE_PATH + "/common/info/hlms_pbs.inf");
 static const QString INFO_UNLIT = QString(BASE_PATH + "/common/info/hlms_unlit.inf");
 static const QString INFO_SAMPLERBLOCK = QString(BASE_PATH + "/common/info/samplerblock.inf");
