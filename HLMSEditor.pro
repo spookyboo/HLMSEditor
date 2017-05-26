@@ -1,7 +1,9 @@
 QT += widgets opengl multimedia
 
-OGREHOME = "C:/Users/Henry/Documents/Visual Studio 2015/Projects/ogre2.1"
-win32:RC_ICONS += "common/icons/HLMSEditor.ico"
+win32 {
+    OGREHOME = "C:/Users/Henry/Documents/Visual Studio 2015/Projects/ogre2.1"
+    RC_ICONS += "common/icons/HLMSEditor.ico"
+}
 
 HEADERS       = \
     source/header/mainwindow.h \
@@ -170,8 +172,8 @@ SOURCES       = \
     source/src/clipboard_widget.cpp
 
 
-INCLUDEPATH += "../HLMSEditor/source/header/"
-INCLUDEPATH += "../HLMSEditor/framework/header"
+INCLUDEPATH += "source/header/"
+INCLUDEPATH += "framework/header"
 INCLUDEPATH += .
 win32 {
     INCLUDEPATH += "$$OGREHOME/OgreMain/include"
@@ -203,16 +205,18 @@ win32 {
 win32:LIBS += -lopengl32
 else:unix:LIBS += -lGL -lGLU
 
-CONFIG(debug, debug|release):LIBS += \
+CONFIG(debug, debug|release) {
+    LIBS += \
     -lOgreMain_d \
     -lOgreHlmsPbs_d \
     -lOgreHlmsUnlit_d
+    DEFINES += DEBUG
+}
 
 CONFIG(release, debug|release):LIBS += \
     -lOgreMain \
     -lOgreHlmsPbs \
     -lOgreHlmsUnlit
-
 
 
 Release:DESTDIR = ../HLMSEditor/bin
