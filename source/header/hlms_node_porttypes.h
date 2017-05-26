@@ -35,7 +35,7 @@ class HlmsPbsDatablockSamplerblockPortType : public Magus::QtPortType
 {
     public:
         HlmsPbsDatablockSamplerblockPortType(void);
-        ~HlmsPbsDatablockSamplerblockPortType(void){};
+        ~HlmsPbsDatablockSamplerblockPortType(void){}
 };
 
 //****************************************************************************/
@@ -43,7 +43,7 @@ class HlmsPbsDatablockMacroblockPortType : public Magus::QtPortType
 {
     public:
         HlmsPbsDatablockMacroblockPortType(void);
-        ~HlmsPbsDatablockMacroblockPortType(void){};
+        ~HlmsPbsDatablockMacroblockPortType(void){}
 };
 
 //****************************************************************************/
@@ -51,7 +51,7 @@ class HlmsPbsDatablockBlendblockPortType : public Magus::QtPortType
 {
     public:
         HlmsPbsDatablockBlendblockPortType(void);
-        ~HlmsPbsDatablockBlendblockPortType(void){};
+        ~HlmsPbsDatablockBlendblockPortType(void){}
 };
 
 /****************************************************************************
@@ -62,7 +62,7 @@ class HlmsUnlitDatablockSamplerblockPortType : public Magus::QtPortType
 {
     public:
         HlmsUnlitDatablockSamplerblockPortType(void);
-        ~HlmsUnlitDatablockSamplerblockPortType(void){};
+        ~HlmsUnlitDatablockSamplerblockPortType(void){}
 };
 
 //****************************************************************************/
@@ -70,7 +70,7 @@ class HlmsUnlitDatablockMacroblockPortType : public Magus::QtPortType
 {
     public:
         HlmsUnlitDatablockMacroblockPortType(void);
-        ~HlmsUnlitDatablockMacroblockPortType(void){};
+        ~HlmsUnlitDatablockMacroblockPortType(void){}
 };
 
 //****************************************************************************/
@@ -78,7 +78,7 @@ class HlmsUnlitDatablockBlendblockPortType : public Magus::QtPortType
 {
     public:
         HlmsUnlitDatablockBlendblockPortType(void);
-        ~HlmsUnlitDatablockBlendblockPortType(void){};
+        ~HlmsUnlitDatablockBlendblockPortType(void){}
 };
 
 /****************************************************************************
@@ -89,7 +89,7 @@ class HlmsSamplerblockDatablockPortType : public Magus::QtPortType
 {
     public:
         HlmsSamplerblockDatablockPortType(void);
-        ~HlmsSamplerblockDatablockPortType(void){};
+        ~HlmsSamplerblockDatablockPortType(void){}
 };
 
 /****************************************************************************
@@ -100,7 +100,7 @@ class HlmsMacroblockDatablockPortType : public Magus::QtPortType
 {
     public:
         HlmsMacroblockDatablockPortType(void);
-        ~HlmsMacroblockDatablockPortType(void){};
+        ~HlmsMacroblockDatablockPortType(void){}
 };
 
 /****************************************************************************
@@ -111,7 +111,7 @@ class HlmsBlendblockDatablockPortType : public Magus::QtPortType
 {
     public:
         HlmsBlendblockDatablockPortType(void);
-        ~HlmsBlendblockDatablockPortType(void){};
+        ~HlmsBlendblockDatablockPortType(void){}
 };
 
 #endif

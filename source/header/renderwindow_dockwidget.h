@@ -125,7 +125,7 @@ class RenderwindowDockWidget : public QDockWidget
         void handleTogglePaintMode(void); // Must be public, because it is also used by the ogre widget
 
 	private slots:
-        void doChangeMeshAction(QAction* action);
+        void doChangeMeshAction(QString *actionText);
         void handleToggleModelAndLight(void);
         void handleMarker(void);
         void handleToggleHoover(void);

@@ -52,7 +52,7 @@ namespace Magus
             virtual bool dropMimeData (QTreeWidgetItem* parent, int index, const QMimeData * data, Qt::DropAction action)
             {
                 return true;
-            };
+            }
 
         private:
             QStringList mTypes;

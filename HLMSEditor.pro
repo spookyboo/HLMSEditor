@@ -1,7 +1,9 @@
 QT += widgets opengl multimedia
 
-OGREHOME = "C:/Users/Henry/Documents/Visual Studio 2015/Projects/ogre2.1"
-win32:RC_ICONS += "common/icons/HLMSEditor.ico"
+win32 {
+    OGREHOME = "C:/Users/Henry/Documents/Visual Studio 2015/Projects/ogre2.1"
+    RC_ICONS += "common/icons/HLMSEditor.ico"
+}
 
 HEADERS       = \
     source/header/mainwindow.h \
@@ -170,32 +172,51 @@ SOURCES       = \
     source/src/clipboard_widget.cpp
 
 
-INCLUDEPATH += "../HLMSEditor/source/header/"
-INCLUDEPATH += "../HLMSEditor/framework/header"
-INCLUDEPATH += "$$OGREHOME/OgreMain/include"
-INCLUDEPATH += "$$OGREHOME/Components/Hlms/Common/include"
-INCLUDEPATH += "$$OGREHOME/Components/Hlms/Pbs/include"
-INCLUDEPATH += "$$OGREHOME/Components/Hlms/Unlit/include"
-INCLUDEPATH += "$$OGREHOME/VCBuild/include"
-INCLUDEPATH += "$$OGREHOME/Dependencies"
-INCLUDEPATH += "$$OGREHOME/Dependencies/src/rapidjson"
+INCLUDEPATH += "source/header/"
+INCLUDEPATH += "framework/header"
 INCLUDEPATH += .
+win32 {
+    INCLUDEPATH += "$$OGREHOME/OgreMain/include"
+    INCLUDEPATH += "$$OGREHOME/Components/Hlms/Common/include"
+    INCLUDEPATH += "$$OGREHOME/Components/Hlms/Pbs/include"
+    INCLUDEPATH += "$$OGREHOME/Components/Hlms/Unlit/include"
+    INCLUDEPATH += "$$OGREHOME/VCBuild/include"
+    INCLUDEPATH += "$$OGREHOME/Dependencies"
+    INCLUDEPATH += "$$OGREHOME/Dependencies/src/rapidjson"
+} unix {
+    exists( "/usr/local/include/OGRE" ) {
+        INCLUDEPATH += "/usr/local/include/OGRE"
+        INCLUDEPATH += "/usr/local/include/OGRE/Hlms/Pbs"
+        INCLUDEPATH += "/usr/local/include/OGRE/Hlms/Unlit"
+    } else:exists( "/usr/include/OGRE" ) {
+        INCLUDEPATH += "/usr/include/OGRE"
+        INCLUDEPATH += "/usr/include/OGRE/Hlms/Pbs"
+        INCLUDEPATH += "/usr/include/OGRE/Hlms/Unlit"
+    } else {
+        error("Could not find Ogre.")
+    }
+}
 
-Debug:LIBS += -L"$$OGREHOME/VCBuild/lib/Debug"
-Release:LIBS += -L"$$OGREHOME/VCBuild/lib/Release"
+win32 {
+    Debug:LIBS += -L"$$OGREHOME/VCBuild/lib/Debug"
+    Release:LIBS += -L"$$OGREHOME/VCBuild/lib/Release"
+}
 
-CONFIG(debug, debug|release):LIBS += \
-    -lopengl32 \
+win32:LIBS += -lopengl32
+else:unix:LIBS += -lGL -lGLU
+
+CONFIG(debug, debug|release) {
+    LIBS += \
     -lOgreMain_d \
     -lOgreHlmsPbs_d \
     -lOgreHlmsUnlit_d
+    DEFINES += DEBUG
+}
 
 CONFIG(release, debug|release):LIBS += \
-    -lopengl32 \
     -lOgreMain \
     -lOgreHlmsPbs \
     -lOgreHlmsUnlit
-
 
 
 Release:DESTDIR = ../HLMSEditor/bin
