@@ -311,7 +311,7 @@ void HlmsUnlitBuilder::enrichUnlitNode(HlmsNodeUnlitDatablock* unlitnode,
                                        Ogre::HlmsUnlitDatablock* datablock)
 {
     // ******** Name ********
-    unlitnode->setName(datablock->getFullName()->c_str());
+    unlitnode->setName(datablock->getNameStr()->c_str());
 
     // ******** Colour ********
     QColor colour;

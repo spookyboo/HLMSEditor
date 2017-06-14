@@ -135,7 +135,7 @@ void HlmsUtilsManager::makeSnapshotDatablocks(void)
     {
         pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itorPbs->second.datablock);
         helperDatablockStruct.datablock = pbsDatablock;
-        helperDatablockStruct.datablockFullName = *pbsDatablock->getFullName();
+        helperDatablockStruct.datablockFullName = *pbsDatablock->getNameStr();
         helperDatablockStruct.datablockId = pbsDatablock->getName();
         helperDatablockStruct.jsonFileName = "";
         helperDatablockStruct.type = HLMS_PBS;
@@ -155,7 +155,7 @@ void HlmsUtilsManager::makeSnapshotDatablocks(void)
     {
         unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itorUnlit->second.datablock);
         helperDatablockStruct.datablock = unlitDatablock;
-        helperDatablockStruct.datablockFullName = *unlitDatablock->getFullName();
+        helperDatablockStruct.datablockFullName = *unlitDatablock->getNameStr();
         helperDatablockStruct.datablockId = unlitDatablock->getName();
         helperDatablockStruct.jsonFileName = "";
         helperDatablockStruct.type = HLMS_UNLIT;
@@ -199,7 +199,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithRegistere
     {
         pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itorPbs->second.datablock);
         ogreDatablockStruct.datablock = pbsDatablock;
-        ogreDatablockStruct.datablockFullName = *pbsDatablock->getFullName();
+        ogreDatablockStruct.datablockFullName = *pbsDatablock->getNameStr();
         ogreDatablockStruct.datablockId = pbsDatablock->getName();
         ogreDatablockStruct.jsonFileName = "";
         ogreDatablockStruct.type = HLMS_PBS;
@@ -237,7 +237,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithRegistere
     {
         unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itorUnlit->second.datablock);
         ogreDatablockStruct.datablock = unlitDatablock;
-        ogreDatablockStruct.datablockFullName = *unlitDatablock->getFullName();
+        ogreDatablockStruct.datablockFullName = *unlitDatablock->getNameStr();
         ogreDatablockStruct.datablockId = unlitDatablock->getName();
         ogreDatablockStruct.jsonFileName = "";
         ogreDatablockStruct.type = HLMS_UNLIT;
@@ -397,7 +397,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
     while( itorPbs != endPbs)
     {
         pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itorPbs->second.datablock);
-        fullName = *pbsDatablock->getFullName();
+        fullName = *pbsDatablock->getNameStr();
 
         // Default datablocks are NEVER detroyed
         exclude = pbsDatablock == hlmsPbs->getDefaultDatablock() || pbsDatablock == hlmsUnlit->getDefaultDatablock();
@@ -438,7 +438,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
     while( itorUnlit != endUnlit)
     {
         unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itorUnlit->second.datablock);
-        fullName = *unlitDatablock->getFullName();
+        fullName = *unlitDatablock->getNameStr();
 
         // Default datablocks are NEVER detroyed
         exclude = unlitDatablock == hlmsPbs->getDefaultDatablock() || unlitDatablock == hlmsUnlit->getDefaultDatablock();
@@ -490,7 +490,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
         pbsDatablock = itPbsToBeDestroyed.next();
         if (pbsDatablock)
         {
-            //Ogre::LogManager::getSingleton().logMessage("Destroying Pbs: " + *pbsDatablock->getFullName()); // DEBUG
+            //Ogre::LogManager::getSingleton().logMessage("Destroying Pbs: " + *pbsDatablock->getNameStr()); // DEBUG
             // Only destroy the datablocks. In principle The textures should also be destroyed (using destroyAllTextures...), but this only causes large wait times
             hlmsPbs->destroyDatablock(pbsDatablock->getName());
         }
@@ -503,7 +503,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
         unlitDatablock = itUnlitToBeDestroyed.next();
         if (unlitDatablock)
         {
-            //Ogre::LogManager::getSingleton().logMessage("Destroying Unlit: " + *unlitDatablock->getFullName()); // DEBUG
+            //Ogre::LogManager::getSingleton().logMessage("Destroying Unlit: " + *unlitDatablock->getNameStr()); // DEBUG
             // Only destroy the datablocks. In principle The textures should also be destroyed (using destroyAllTextures...), but this only causes large wait times
             hlmsUnlit->destroyDatablock(unlitDatablock->getName());
         }
@@ -952,7 +952,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablock(const Ogre::IdS
         if (pbsDatablock->getName() == datablockId)
         {
             helperDatablockStruct.datablock = pbsDatablock;
-            helperDatablockStruct.datablockFullName = *pbsDatablock->getFullName();
+            helperDatablockStruct.datablockFullName = *pbsDatablock->getNameStr();
             helperDatablockStruct.datablockId = pbsDatablock->getName();
             helperDatablockStruct.jsonFileName = "";
             helperDatablockStruct.type = HLMS_PBS;
@@ -972,7 +972,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablock(const Ogre::IdS
         if (unlitDatablock->getName() == datablockId)
         {
             helperDatablockStruct.datablock = unlitDatablock;
-            helperDatablockStruct.datablockFullName = *unlitDatablock->getFullName();
+            helperDatablockStruct.datablockFullName = *unlitDatablock->getNameStr();
             helperDatablockStruct.datablockId = unlitDatablock->getName();
             helperDatablockStruct.jsonFileName = "";
             helperDatablockStruct.type = HLMS_UNLIT;

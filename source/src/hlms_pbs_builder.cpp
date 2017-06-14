@@ -330,7 +330,7 @@ void HlmsPbsBuilder::enrichPbsNode(HlmsNodePbsDatablock* pbsnode,
                                    Ogre::HlmsPbsDatablock* datablock)
 {
     // ******** Name ********
-    pbsnode->setName(datablock->getFullName()->c_str());
+    pbsnode->setName(datablock->getNameStr()->c_str());
 
     // ******** Diffuse ********
     pbsnode->setDiffuseRed(255.0f * datablock->getDiffuse().x);
