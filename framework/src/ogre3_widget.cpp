@@ -480,7 +480,7 @@ namespace Magus
             // Delete the old item if available
             if (mItem)
             {
-                datablockFullName = *(mItem->getSubItem(0)->getDatablock()->getFullName());
+                datablockFullName = *(mItem->getSubItem(0)->getDatablock()->getNameStr());
                 setDefaultDatablockItem();
                 mSceneNode->detachAllObjects();
                 mSceneManager->destroyItem(mItem);
@@ -1494,7 +1494,7 @@ namespace Magus
             datablock = subItem->getDatablock();
             if (datablock)
             {
-                datablockFullName = *datablock->getFullName();
+                datablockFullName = *datablock->getNameStr();
                 // Exclude special datablocks
                 if (    datablock != hlmsPbs->getDefaultDatablock() &&
                         datablock != hlmsUnlit->getDefaultDatablock() &&
@@ -1531,7 +1531,7 @@ namespace Magus
                 {
                     try
                     {
-                        //Ogre::LogManager::getSingleton().logMessage("make snaphot: " +  *datablock->getFullName()); // DEBUG
+                        //Ogre::LogManager::getSingleton().logMessage("make snaphot: " +  *datablock->getNameStr()); // DEBUG
                         subItem->setDatablock(datablock->getName());
                     }
                     catch (Ogre::Exception e){}
@@ -1555,7 +1555,7 @@ namespace Magus
         while (itorPbs != endPbs)
         {
             datablock = itorPbs->second.datablock;
-            if (datablock && *datablock->getFullName() == fullName)
+            if (datablock && *datablock->getNameStr() == fullName)
                 return datablock;
 
             ++itorPbs;
@@ -1566,7 +1566,7 @@ namespace Magus
         while (itorUnlit != endUnlit)
         {
             datablock = itorUnlit->second.datablock;
-            if (datablock && *datablock->getFullName() == fullName)
+            if (datablock && *datablock->getNameStr() == fullName)
                 return datablock;
 
             ++itorUnlit;
@@ -1591,7 +1591,7 @@ namespace Magus
             datablock = subItem->getDatablock();
             if (datablock)
             {
-                datablockFullName = *datablock->getFullName();
+                datablockFullName = *datablock->getNameStr();
                 meshPtr->getSubMesh(i)->setMaterialName(datablockFullName);
             }
         }
