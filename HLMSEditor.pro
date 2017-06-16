@@ -194,7 +194,7 @@ CONFIG(release, debug|release):LIBS += \
     -lOgreHlmsPbs \
     -lOgreHlmsUnlit
 
-windows {
+win32 {
     CONFIG(debug, debug|release):LIBS += \
         -lopengl32
 
