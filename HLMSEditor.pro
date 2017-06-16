@@ -185,18 +185,37 @@ Debug:LIBS += -L"$$OGREHOME/VCBuild/lib/Debug"
 Release:LIBS += -L"$$OGREHOME/VCBuild/lib/Release"
 
 CONFIG(debug, debug|release):LIBS += \
-    -lopengl32 \
     -lOgreMain_d \
     -lOgreHlmsPbs_d \
     -lOgreHlmsUnlit_d
 
 CONFIG(release, debug|release):LIBS += \
-    -lopengl32 \
     -lOgreMain \
     -lOgreHlmsPbs \
     -lOgreHlmsUnlit
 
+windows {
+    CONFIG(debug, debug|release):LIBS += \
+        -lopengl32
 
+    CONFIG(release, debug|release):LIBS += \
+        -lopengl32
+}
+
+
+linux {
+    CONFIG(debug, debug|release):LIBS += \
+        -lGL
+
+    CONFIG(release, debug|release):LIBS += \
+        -lGL
+
+    CONFIG(debug, debug|release):DEFINES += \
+        DEBUG=1
+
+    INCLUDEPATH += "$$OGREHOME/build/include"
+    LIBS += -L"$$OGREHOME/build/lib"
+}
 
 Release:DESTDIR = ../HLMSEditor/bin
 Debug:DESTDIR = ../HLMSEditor/bin
