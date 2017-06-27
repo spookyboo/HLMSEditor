@@ -82,10 +82,10 @@ class MainWindow : public QMainWindow
         void getListOfResources(void); // Function to test which resources are loaded
         EditorHlmsTypes getCurrentDatablockType(void); // Returns the current hlms type
         void loadTextureBrowserCfg(void);
-        void setCurrentDatablockIdAndFullName(const Ogre::IdString& datablockId, const Ogre::String& fullName);
+        void setCurrentDatablockIdAndNameStr(const Ogre::IdString& datablockId, const Ogre::String& nameStr);
         QVector<int> getSubItemIndicesWithDatablockAndReplaceWithDefault(const Ogre::IdString& datablockId); // Get list of indeces, which have datablock 'datablockId'
         void replaceCurrentDatablock(QVector<int> indices, Ogre::IdString datablockId); // Set the datablocks in the subItems, identified by 'indices'
-        const Ogre::String& getCurrentDatablockFullName (void) {return mCurrentDatablockFullName;}
+        const Ogre::String& getCurrentDatablockNameStr (void) {return mCurrentDatablockNameStr;}
         const Ogre::IdString& getCurrentDatablockId (void) {return mCurrentDatablockId;}
         void notifyMaterialChanged (QtProperty* property); // To be called if the properties of a datablock are changed (which result in rebuilding the material)
         HlmsUtilsManager* getHlmsUtilsManager (void) {return mHlmsUtilsManager;}
@@ -124,7 +124,7 @@ class MainWindow : public QMainWindow
         void createSpecialDatablocks (void);
         void destroySpecialDatablocks(void);
         void setDatablocksFromMaterialBrowserInItem(void);
-        const Ogre::String& getJsonFileNameFromMaterialBrowser(const Ogre::String& fullName);
+        const Ogre::String& getJsonFileNameFromMaterialBrowser(const Ogre::String& nameStr);
         void createActions(void);
         void createMenus(void);
         void createToolBars(void);
@@ -231,7 +231,7 @@ class MainWindow : public QMainWindow
         QString mTextureFileName;
         QString mCurrentJsonFileName; // Used to determine whether a material was already saved; contains the json filename of the currently active material
         Ogre::IdString mCurrentDatablockId; // The datablock id
-        Ogre::String mCurrentDatablockFullName; // The datablock full name
+        Ogre::String mCurrentDatablockNameStr; // The datablocks' name
         bool mSaveTextureBrowserTimerActive;
         struct RecentFileStruct
         {

@@ -475,12 +475,12 @@ namespace Magus
     {
         try
         {
-            Ogre::String datablockFullName = "";
+            Ogre::String datablockNameStr = "";
 
             // Delete the old item if available
             if (mItem)
             {
-                datablockFullName = *(mItem->getSubItem(0)->getDatablock()->getFullName());
+                datablockNameStr = *(mItem->getSubItem(0)->getDatablock()->getNameStr());
                 setDefaultDatablockItem();
                 mSceneNode->detachAllObjects();
                 mSceneManager->destroyItem(mItem);
@@ -1486,7 +1486,7 @@ namespace Magus
         size_t numSubItems = mItem->getNumSubItems();
         Ogre::SubItem* subItem;
         Ogre::HlmsDatablock* datablock;
-        Ogre::String datablockFullName;
+        Ogre::String datablockNameStr;
 
         for (size_t i = 0; i < numSubItems; ++i)
         {
@@ -1494,16 +1494,16 @@ namespace Magus
             datablock = subItem->getDatablock();
             if (datablock)
             {
-                datablockFullName = *datablock->getFullName();
+                datablockNameStr = *datablock->getNameStr();
                 // Exclude special datablocks
                 if (    datablock != hlmsPbs->getDefaultDatablock() &&
                         datablock != hlmsUnlit->getDefaultDatablock() &&
-                        datablockFullName != DEFAULT_DATABLOCK_NAME &&
-                        datablockFullName != Magus::AXIS_MATERIAL_NAME &&
-                        datablockFullName != Magus::HIGHLIGHT_MATERIAL_NAME &&
-                        datablockFullName != Magus::UV_MAPPING_MATERIAL_NAME)
+                        datablockNameStr != DEFAULT_DATABLOCK_NAME &&
+                        datablockNameStr != Magus::AXIS_MATERIAL_NAME &&
+                        datablockNameStr != Magus::HIGHLIGHT_MATERIAL_NAME &&
+                        datablockNameStr != Magus::UV_MAPPING_MATERIAL_NAME)
                 {
-                    mSnapshotDatablocks[i] = datablockFullName;
+                    mSnapshotDatablocks[i] = datablockNameStr;
                 }
             }
         }
@@ -1515,14 +1515,14 @@ namespace Magus
         QMap <size_t, Ogre::String>::iterator it = mSnapshotDatablocks.begin();
         QMap <size_t, Ogre::String>::iterator itEnd = mSnapshotDatablocks.end();
         size_t index;
-        Ogre::String datablockFullName;
+        Ogre::String datablockNameStr;
         Ogre::HlmsDatablock* datablock;
 
         while (it != itEnd)
         {
-            datablockFullName = it.value();
+            datablockNameStr = it.value();
             index = it.key();
-            datablock = getDatablockByFullName(datablockFullName);
+            datablock = getDatablockByNameStr(datablockNameStr);
             Ogre::SubItem* subItem;
             if (mItem && datablock)
             {
@@ -1531,19 +1531,19 @@ namespace Magus
                 {
                     try
                     {
-                        //Ogre::LogManager::getSingleton().logMessage("make snaphot: " +  *datablock->getFullName()); // DEBUG
+                        //Ogre::LogManager::getSingleton().logMessage("make snaphot: " +  *datablock->getNameStr()); // DEBUG
                         subItem->setDatablock(datablock->getName());
                     }
                     catch (Ogre::Exception e){}
                 }
-                //Ogre::LogManager::getSingleton().logMessage("restore snaphot: " +  datablockFullName); // DEBUG
+                //Ogre::LogManager::getSingleton().logMessage("restore snaphot: " +  datablockNameStr); // DEBUG
             }
             ++it;
         }
     }
 
     //****************************************************************************/
-    Ogre::HlmsDatablock* QOgreWidget::getDatablockByFullName(const Ogre::String& fullName)
+    Ogre::HlmsDatablock* QOgreWidget::getDatablockByNameStr(const Ogre::String& nameStr)
     {
         Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
         Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
@@ -1555,7 +1555,7 @@ namespace Magus
         while (itorPbs != endPbs)
         {
             datablock = itorPbs->second.datablock;
-            if (datablock && *datablock->getFullName() == fullName)
+            if (datablock && *datablock->getNameStr() == nameStr)
                 return datablock;
 
             ++itorPbs;
@@ -1566,7 +1566,7 @@ namespace Magus
         while (itorUnlit != endUnlit)
         {
             datablock = itorUnlit->second.datablock;
-            if (datablock && *datablock->getFullName() == fullName)
+            if (datablock && *datablock->getNameStr() == nameStr)
                 return datablock;
 
             ++itorUnlit;
@@ -1576,14 +1576,14 @@ namespace Magus
     }
 
     //****************************************************************************/
-    Ogre::MeshPtr QOgreWidget::getCurrentMeshEnrichedWithItemDatablocksFullName(void)
+    Ogre::MeshPtr QOgreWidget::getCurrentMeshEnrichedWithItemDatablocksNameStr(void)
     {
         Ogre::MeshPtr mesh = mItem->getMesh();
         Ogre::Mesh* meshPtr = mesh.getPointer();
         size_t numSubItems = mItem->getNumSubItems();
         Ogre::SubItem* subItem;
         Ogre::HlmsDatablock* datablock;
-        Ogre::String datablockFullName;
+        Ogre::String datablockNameStr;
 
         for (size_t i = 0; i < numSubItems; ++i)
         {
@@ -1591,8 +1591,8 @@ namespace Magus
             datablock = subItem->getDatablock();
             if (datablock)
             {
-                datablockFullName = *datablock->getFullName();
-                meshPtr->getSubMesh(i)->setMaterialName(datablockFullName);
+                datablockNameStr = *datablock->getNameStr();
+                meshPtr->getSubMesh(i)->setMaterialName(datablockNameStr);
             }
         }
 

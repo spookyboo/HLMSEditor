@@ -68,7 +68,7 @@ MainWindow::MainWindow(void) :
     mHlmsUtilsManager = new HlmsUtilsManager();
     newProjectName();
     mCurrentJsonFileName = QString("");
-    mCurrentDatablockFullName = Ogre::String("");
+    mCurrentDatablockNameStr = Ogre::String("");
     mCurrentDatablockId = "";
     mTempString = QString("");
     mTempOgreString = "";
@@ -582,7 +582,7 @@ void MainWindow::loadMaterialAndCreateNodeStructure(const QString jsonFileName)
 
     mCurrentJsonFileName = jsonFileName;
     appendRecentMaterialToRecentlyUsed(jsonFileName);
-    setCurrentDatablockIdAndFullName (datablockStruct.datablockId, datablockStruct.datablockFullName);
+    setCurrentDatablockIdAndNameStr (datablockStruct.datablockId, datablockStruct.datablockNameStr);
 
     // Create the pbs node structure
     if (datablockStruct.type == HLMS_PBS)
@@ -885,7 +885,7 @@ void MainWindow::doSaveAsDatablockMenuAction(void)
         return;
 
     // Get hlms name
-    mCurrentJsonFileName = mCurrentDatablockFullName.c_str();
+    mCurrentJsonFileName = mCurrentDatablockNameStr.c_str();
     mCurrentJsonFileName = mCurrentJsonFileName + QString(".material.json");
     QString fileName = mCurrentJsonFileName;
 
@@ -977,7 +977,7 @@ void MainWindow::doSaveAsMeshMenuAction(void)
 {
     // Save the mesh
     QString meshFileName = "*.mesh";
-    Ogre::MeshPtr v2MeshPtr = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getCurrentMeshEnrichedWithItemDatablocksFullName();
+    Ogre::MeshPtr v2MeshPtr = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->getCurrentMeshEnrichedWithItemDatablocksNameStr();
     QFileInfo info(meshFileName);
     QString fileName = QFileDialog::getSaveFileName(this,
                                                     QString("Save the mesh"),
@@ -2036,9 +2036,9 @@ void MainWindow::createSpecialDatablocks (void)
 }
 
 //****************************************************************************/
-void MainWindow::setCurrentDatablockIdAndFullName(const Ogre::IdString& datablockId, const Ogre::String& fullName)
+void MainWindow::setCurrentDatablockIdAndNameStr(const Ogre::IdString& datablockId, const Ogre::String& nameStr)
 {
-    mCurrentDatablockFullName = fullName;
+    mCurrentDatablockNameStr = nameStr;
     mCurrentDatablockId = datablockId;
 
     // Pass the datablock name to the ogre widget
@@ -2060,7 +2060,7 @@ void MainWindow::setDatablocksFromMaterialBrowserInItem(void)
 
     // Check the current mesh and determine which materials it uses (based on its mesh)
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
-    QMap<unsigned short, Ogre::String> indicesAndfullNames = ogreWidget->getMaterialNamesFromCurrentMesh();
+    QMap<unsigned short, Ogre::String> indicesAndNameStrs = ogreWidget->getMaterialNamesFromCurrentMesh();
 
     // Load all materials of the material browser (unfortunately), because the relation between the materialname
     // of the mesh and the jsonfilename / datablock name can only be made when a resource is loaded.
@@ -2078,17 +2078,17 @@ void MainWindow::setDatablocksFromMaterialBrowserInItem(void)
     }
 
     // Iterate through the map with materialnames/full datablock names and assign the datablocks to the subItems
-    QMap <unsigned short, Ogre::String>::iterator it = indicesAndfullNames.begin();
-    QMap <unsigned short, Ogre::String>::iterator itEnd = indicesAndfullNames.end();
+    QMap <unsigned short, Ogre::String>::iterator it = indicesAndNameStrs.begin();
+    QMap <unsigned short, Ogre::String>::iterator itEnd = indicesAndNameStrs.end();
     Ogre::IdString name; // This is the hashed name of the datablock
-    Ogre::String fullName; // This is the full name of the datablock
+    Ogre::String nameStr; // This is the full name of the datablock
     unsigned short index;
     HlmsUtilsManager::DatablockStruct datablockStruct;
     while (it != itEnd)
     {
-        fullName = it.value();
+        nameStr = it.value();
         index = it.key();
-        datablockStruct = mHlmsUtilsManager->getDatablockStructOfFullName(fullName);
+        datablockStruct = mHlmsUtilsManager->getDatablockStructOfNameStr(nameStr);
 
         // Only set the datablock in the item if it exists
         if (datablockStruct.type != HLMS_NONE)
@@ -2130,7 +2130,7 @@ void MainWindow::clearNamesAndRemovePaintLayers(void)
 {
     mCurrentJsonFileName = QString("");
     mCurrentDatablockId = "";
-    mCurrentDatablockFullName = "";
+    mCurrentDatablockNameStr = "";
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->setCurrentDatablockId(mCurrentDatablockId);
     mPaintLayerDockWidget->newHlmsCreated(); // Needed to delete the paintlayers, because a new Hlms is created
     mRenderwindowDockWidget->clearUndoRedoStackEntry();

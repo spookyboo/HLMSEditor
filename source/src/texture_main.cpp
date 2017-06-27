@@ -99,7 +99,7 @@ void TextureMain::createDockWindows(void)
     connect(mTextureTreeDockWidget, SIGNAL(resourceSelected(int,int,int,QString,QString,int)), this, SLOT(handleTextureSelected(int,int,int,const QString&,const QString&, int)));
     connect(mTextureTreeDockWidget, SIGNAL(resourceDoubleClicked(int,int,int,QString,QString)), this, SLOT(handleTextureDoubleClicked(int,int,int,const QString&,const QString&)));
     connect(mTextureTreeDockWidget, SIGNAL(resourceDeleted(int,int,int,QString,QString)), this, SLOT(handleTextureDeleted(int,int,int,QString,QString)));
-    connect(mTextureTreeDockWidget, SIGNAL(resourcesDeleted()), this, SLOT(handleTexturesDeleted()));
+    //connect(mTextureTreeDockWidget, SIGNAL(resourcesDeleted()), this, SLOT(handleTexturesDeleted()));
     connect(mTextureTreeDockWidget, SIGNAL(resourceSearched(QString)), this, SLOT(handleTextureSearched(QString)));
     connect(mTextureTreeDockWidget, SIGNAL(resourceSearchReset()), this, SLOT(handleTextureSearchReset()));
     connect(mTextureTreeDockWidget, SIGNAL(customContextMenuItemSelected(QString)), this, SLOT(handleCustomContextMenuItemSelected(QString)));

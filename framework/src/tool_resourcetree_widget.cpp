@@ -688,7 +688,7 @@ namespace Magus
         resourceItem->setData(TOOL_RESOURCETREE_KEY_RESOURCEID, Qt::UserRole, QVariant(resourceId));
         resourceItem->setData(TOOL_RESOURCETREE_KEY_PARENTID, Qt::UserRole, QVariant(parentId));
         resourceItem->setData(TOOL_RESOURCETREE_KEY_ICONNAME, Qt::UserRole, QVariant(iconName));
-        resourceItem->setData(TOOL_RESOURCETREE_KEY_FULLNAME, Qt::UserRole, QVariant(fullQualifiedName));
+        resourceItem->setData(TOOL_RESOURCETREE_KEY_NAMESTR, Qt::UserRole, QVariant(fullQualifiedName));
 
         int type;
         if (isAsset)
@@ -1244,7 +1244,7 @@ namespace Magus
     {
         mTempString = QString("");
         if (item)
-            mTempString = item->data(TOOL_RESOURCETREE_KEY_FULLNAME, Qt::UserRole).toString();
+            mTempString = item->data(TOOL_RESOURCETREE_KEY_NAMESTR, Qt::UserRole).toString();
 
         return mTempString;
     }
@@ -1446,13 +1446,13 @@ namespace Magus
             {
                 int parentId = getParentIdFromItem(item);
                 int toplevelId = getToplevelParentIdFromItem(item);
-                QString fullName = getFullQualifiedNameFromItem(item);
+                QString nameStr = getFullQualifiedNameFromItem(item);
                 int duplicateResourceId = generateUniqueResourceId();
                 addResource (toplevelId,
                              duplicateResourceId,
                              parentId,
                              QString("Copy of ") + item->text(0),
-                             fullName,
+                             nameStr,
                              QString(""),
                              true);
                 emit assetDuplicated(duplicateResourceId);

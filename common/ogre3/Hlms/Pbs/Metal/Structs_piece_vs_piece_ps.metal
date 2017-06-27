@@ -2,6 +2,9 @@
 struct ShadowReceiverData
 {
 	float4x4 texViewProj;
+@property( exponential_shadow_maps )
+	float4 texViewZRow;
+@end
 	float2 shadowDepthRange;
 	float2 padding;
 	float4 invShadowMapSize;
@@ -9,7 +12,7 @@ struct ShadowReceiverData
 
 struct Light
 {
-	float3 position;
+	float4 position; //.w contains the objLightMask
 	float3 diffuse;
 	float3 specular;
 @property( hlms_num_shadow_map_lights )
@@ -26,6 +29,10 @@ struct PassData
 {
 	//Vertex shader (common to both receiver and casters)
 	float4x4 viewProj;
+
+@property( hlms_global_clip_distances )
+	float4 clipPlane0;
+@end
 
 @property( hlms_shadowcaster_point )
 	float4 cameraPosWS;	//Camera position in world space
@@ -62,6 +69,7 @@ struct PassData
 	@property( hlms_lights_spot )Light lights[@value(hlms_lights_spot)];@end
 @end @property( hlms_shadowcaster )
 	//Vertex shader
+	@property( exponential_shadow_maps )float4 viewZRow;@end
 	float2 depthRange;
 @end
 
@@ -85,6 +93,8 @@ struct PassData
 		float4 fwdScreenToGrid;
 	@end
 @end
+
+	@insertpiece( DeclPlanarReflUniforms )
 
 @property( parallax_correct_cubemaps )
 	CubemapProbe autoProbe;
@@ -170,6 +180,12 @@ struct Material
 		@property( !lower_gpu_overhead )
 			ushort materialId [[flat]];
 		@end
+		@property( hlms_fine_light_mask || hlms_forwardplus_fine_light_mask )
+			uint objLightMask [[flat]];
+		@end
+		@property( use_planar_reflections )
+			ushort planarReflectionIdx [[flat]];
+		@end
 		@property( hlms_normal || hlms_qtangent )
 			float3 pos;
 			float3 normal;
@@ -193,12 +209,14 @@ struct Material
 			@foreach( hlms_uv_count, n )
 				float@value( hlms_uv_count@n ) uv@n;@end
 		@end
-		@property( !hlms_shadow_uses_depth_texture && !hlms_shadowcaster_point )
+		@property( (!hlms_shadow_uses_depth_texture || exponential_shadow_maps) && !hlms_shadowcaster_point )
 			float depth;
 		@end
 		@property( hlms_shadowcaster_point )
 			float3 toCameraWS;
-			float constBias [[flat]];
+			@property( !exponential_shadow_maps )
+				float constBias [[flat]];
+			@end
 		@end
 	@end
 

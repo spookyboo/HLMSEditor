@@ -50,11 +50,14 @@ class TextureSaveWorker : public QObject
             mImage = image;
             mFilename = filename;
         }
+    signals:
+        void finished (void);
 
     public slots:
         void saveImage (void)
         {
             mImage.save(mFilename);
+            emit finished();
         }
 
     private:

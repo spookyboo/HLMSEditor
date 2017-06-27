@@ -273,7 +273,7 @@ namespace Magus
     }
 
     //****************************************************************************/
-    void QtDefaultTextureWidget::deleteTexture(const QString& name, bool nameIsFullName)
+    void QtDefaultTextureWidget::deleteTexture(const QString& name, bool nameIsNameStr)
     {
         QtDefaultTextureAndText* textureAndText;
         QWidget* widget;
@@ -285,8 +285,8 @@ namespace Magus
             if (widget)
             {
                 textureAndText = static_cast<QtDefaultTextureAndText*>(widget);
-                if ((textureAndText->mName == name && nameIsFullName) ||
-                    (textureAndText->mBaseName == name && !nameIsFullName))
+                if ((textureAndText->mName == name && nameIsNameStr) ||
+                    (textureAndText->mBaseName == name && !nameIsNameStr))
                 {
                     row = mSelectionList->row(item);
                     mSelectionList->removeItemWidget(item);

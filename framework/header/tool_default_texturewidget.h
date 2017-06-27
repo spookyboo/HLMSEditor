@@ -117,9 +117,9 @@ namespace Magus
             // E.g. baseName = "info.png"
             void addTexture(const QPixmap& pixmap, const QString& name, const QString& baseName, bool replace = false);
 
-            // Delete an item from the QtDefaultTextureWidget. Use the full qualified name as search criterium if nameIsFullName = true;
+            // Delete an item from the QtDefaultTextureWidget. Use the full qualified name as search criterium if nameIsNameStr = true;
             // else use the baseName as search criterium.
-            void deleteTexture(const QString& name, bool nameIsFullName = true);
+            void deleteTexture(const QString& name, bool nameIsNameStr = true);
 
             // Set a texture selected (based on name (fully qualified) or the basebame
             void setTextureSelected(const QString& name, bool isFullQualifiedName = false);

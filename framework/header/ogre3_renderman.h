@@ -57,6 +57,7 @@ namespace Magus
 {
     static const Ogre::String OGRE_RENDERSYSTEM_DIRECTX11 = "Direct3D11 Rendering Subsystem";
     static const Ogre::String OGRE_RENDERSYSTEM_OPENGL3PLUS = "OpenGL 3+ Rendering Subsystem";
+    static const Ogre::String OGRE_RENDERSYSTEM_METAL = "Metal Rendering Subsystem";
 
     /****************************************************************************
      * This class manages the rendering of the Ogre widgets

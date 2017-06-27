@@ -25,6 +25,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 -----------------------------------------------------------------------------
 */
+
 #ifndef __HLMS_EDITOR_PLUGIN_H__
 #define __HLMS_EDITOR_PLUGIN_H__
 

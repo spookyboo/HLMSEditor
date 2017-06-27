@@ -43,7 +43,7 @@ namespace Magus
     static const int TOOL_RESOURCETREE_KEY_PARENTID = 2;
     static const int TOOL_RESOURCETREE_KEY_ICONNAME = 3;
     static const int TOOL_RESOURCETREE_KEY_TYPE = 4;
-    static const int TOOL_RESOURCETREE_KEY_FULLNAME = 5;
+    static const int TOOL_RESOURCETREE_KEY_NAMESTR = 5;
     static const int TOOL_RESOURCETREE_KEY_TYPE_TOPLEVEL_GROUP = 1;
     static const int TOOL_RESOURCETREE_KEY_TYPE_GROUP = 2;
     static const int TOOL_RESOURCETREE_KEY_TYPE_ASSET = 3;
