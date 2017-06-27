@@ -118,6 +118,10 @@ if(UNIX)
 	file(COPY ${OGRE_MEDIA_DIR}/../plugins.cfg DESTINATION ${CMAKE_BINARY_DIR})
 	file(COPY ${OGRE_MEDIA_DIR}/../plugins_d.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
+        #install resources
+        file(COPY ${PROJECT_SOURCE_DIR}/common
+            DESTINATION ${CMAKE_BINARY_DIR}/../)
+
 	#install resources from /bin
 	file(COPY ${PROJECT_SOURCE_DIR}/bin/resources.cfg ${PROJECT_SOURCE_DIR}/bin/resources_d.cfg
 			${PROJECT_SOURCE_DIR}/bin/resources_default.cfg ${PROJECT_SOURCE_DIR}/bin/settings.cfg
