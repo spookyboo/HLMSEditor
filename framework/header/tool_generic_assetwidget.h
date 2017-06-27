@@ -115,13 +115,13 @@ namespace Magus
             // assetPixmap defines the pixmap of the icon with which the asset is presented
             void addAsset(const QPixmap& assetPixmap, const QString& name, const QString& baseName);
 
-            // Returns true if the asset exists. Use the full qualified name as search criterium if nameIsFullName = true;
+            // Returns true if the asset exists. Use the full qualified name as search criterium if nameIsNameStr = true;
             // else use the baseName as search criterium.
             bool assetExists(const QString& name, bool nameIsFullName = true);
 
-            // Delete an item from the QtGenericAssetWidget. Use the full qualified name as search criterium if nameIsFullName = true;
+            // Delete an item from the QtGenericAssetWidget. Use the full qualified name as search criterium if nameIsNameStr = true;
             // else use the baseName as search criterium.
-            void deleteAsset(const QString& name, bool nameIsFullName = true);
+            void deleteAsset(const QString& name, bool nameIsNameStr = true);
 
             // Delete an item from the QtGenericAssetWidget. Both name (full qualified name) and baseName must match
             void deleteAsset(const QString& name, const QString& baseName);

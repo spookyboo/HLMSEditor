@@ -190,31 +190,31 @@ void MaterialThumbsDockWidget::setSelectThumb(int toplevelId, const QString& bas
 }
 
 //****************************************************************************/
-void MaterialThumbsDockWidget::deleteAsset(const QString& name, bool nameIsFullName)
+void MaterialThumbsDockWidget::deleteAsset(const QString& name, bool nameIsNameStr)
 {
     // Delete from mPbsSelection
-    mPbsSelection->deleteTexture(name, nameIsFullName);
+    mPbsSelection->deleteTexture(name, nameIsNameStr);
 
     // Delete from mUnlitSelection
-    mUnlitSelection->deleteTexture(name, nameIsFullName);
+    mUnlitSelection->deleteTexture(name, nameIsNameStr);
 }
 
 //****************************************************************************/
-void MaterialThumbsDockWidget::deleteAsset(int toplevelId, const QString& name, bool nameIsFullName)
+void MaterialThumbsDockWidget::deleteAsset(int toplevelId, const QString& name, bool nameIsNameStr)
 {
     switch (toplevelId)
     {
         case TOOL_SOURCES_LEVEL_X000_PBS:
         {
             // Delete from mPbsSelection
-            mPbsSelection->deleteTexture(name, nameIsFullName);
+            mPbsSelection->deleteTexture(name, nameIsNameStr);
         }
         break;
 
         case TOOL_SOURCES_LEVEL_X000_UNLIT:
         {
             // Delete from mUnlitSelection
-            mUnlitSelection->deleteTexture(name, nameIsFullName);
+            mUnlitSelection->deleteTexture(name, nameIsNameStr);
         }
         break;
     }

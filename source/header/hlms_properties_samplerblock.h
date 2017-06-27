@@ -55,9 +55,9 @@ class HlmsPropertiesSamplerblock : public QWidget
 
         // Load and save functions used to create reusable samplers
         // The loadProperties function loads the proerties from a file;
-        // if fullName is true, propertiesName is a full-qualified filename
-        // if fullName is false, propertiesName is a base filename
-        void loadProperties (const QString& propertiesName, bool fullName = true);
+        // if nameStr is true, propertiesName is a full-qualified filename
+        // if nameStr is false, propertiesName is a base filename
+        void loadProperties (const QString& propertiesName, bool nameStr = true);
 
         // The saveProperties function returns the filename with which it is saved; if propertiesBaseName is empty,
         // the function generates its own filename.

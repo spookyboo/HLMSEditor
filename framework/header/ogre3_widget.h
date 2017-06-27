@@ -119,7 +119,7 @@ namespace Magus
             const QVector<int>& getSubItemIndicesWithDatablock(const Ogre::IdString& datablockId); // Get the list of indices of subItems that have 'datablockId'
             void makeSnapshotOfItemMaterials(void); // Keep a map of all materials per subItem
             void restoreSnapshotOfItemMaterials(void); // Assign the material to each subItem
-            Ogre::MeshPtr getCurrentMeshEnrichedWithItemDatablocksFullName(void); // Returns the mesh associated with mItem, but with the datablock full names of the mItem added to the mesh
+            Ogre::MeshPtr getCurrentMeshEnrichedWithItemDatablocksNameStr(void); // Returns the mesh associated with mItem, but with the datablock namestring of the mItem added to the mesh
             Ogre::MeshPtr getCurrentMesh(void); // Returns the mesh associated with mItem, but with the original materialnames in the mesh
             const QMap<unsigned short, Ogre::String>& getMaterialNamesFromCurrentMesh(void); // Returns map with index (of subMeash) and its materialname
             void setDatablockInSubItem(int index, const Ogre::IdString datablockId); // Set the datablock in the subitem, based on the id (datablockId) of the datablock
@@ -251,7 +251,7 @@ namespace Magus
              */
             int doPaintLayer(int mouseX, int mouseY, bool start = false);
 
-            Ogre::HlmsDatablock* getDatablockByFullName(const Ogre::String& fullName);
+            Ogre::HlmsDatablock* getDatablockByNameStr(const Ogre::String& nameStr);
             PaintLayers* mPaintLayers; // Pointer to vector of PaintLayer objects
             int mLatestPaintResult; // This value is used to determines what the result of a painting action was
 

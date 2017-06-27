@@ -40,7 +40,7 @@ class HlmsUtilsManager
         struct DatablockStruct
         {
             Ogre::HlmsDatablock* datablock; // Pointer to datablock
-            Ogre::String datablockFullName; // Full mame of the datablock
+            Ogre::String datablockNameStr; // Name of the datablock
             Ogre::IdString datablockId;
             EditorHlmsTypes type; // Type of the datablock
             Ogre::String jsonFileName; // Json file that contains the description of the datablock
@@ -92,36 +92,36 @@ class HlmsUtilsManager
         DatablockStruct compareSnapshotWithRegisteredDatablocksAndAdminister(const QString& jsonFileName, const char* jsonChar);
 
         /* Destroy datablocks, depending on the arguments.
-         * excludeSpecialDatablocks == true and excludeDatablockFullName == ""
+         * excludeSpecialDatablocks == true and excludeDatablockNameStr == ""
          * - Exclude the default datablocks from destroying
          * - Exclude Axis and Highlight materials from destroying
          * - Exclude the unlit materials associated with the 'render-texture'  item from destroying (defined by 0, 1, 2, 3, ...)
          *
-         * excludeSpecialDatablocks == true and excludeDatablockFullName is filled with a valid datablock name (full name)
+         * excludeSpecialDatablocks == true and excludeDatablockNameStr is filled with a valid datablock name (full name)
          * - Exclude the default datablocks from destroying
          * - Exclude Axis and Highlight materials from destroying
          * - Exclude the unlit materials associated with the 'render-texture'  item  from destroying (defined by name 0, 1, 2, 3, ...)
-         * - Exclude the datablock with the same name as 'excludeDatablockFullName' from destroying
+         * - Exclude the datablock with the same name as 'excludeDatablockNameStr' from destroying
          *
-         * excludeSpecialDatablocks == false and excludeDatablockFullName == ""
+         * excludeSpecialDatablocks == false and excludeDatablockNameStr == ""
          * - All datablocks are destroyed
          *
-         * excludeSpecialDatablocks == false and excludeDatablockFullName is filled with a valid datablock name (full name)
-         * - Exclude the datablock with the same name as 'excludeDatablockFullName' from destroying
+         * excludeSpecialDatablocks == false and excludeDatablockNameStr is filled with a valid datablock name (full name)
+         * - Exclude the datablock with the same name as 'excludeDatablockNameStr' from destroying
          */
         void destroyDatablocks(bool excludeSpecialDatablocks = true,
                                bool keepVecRegisteredDatablock = false,
-                               const Ogre::String& excludeDatablockFullName = "");
+                               const Ogre::String& excludeDatablockNameStr = "");
 
 
         /* Delete a particular datablock
          */
         void destroyDatablock(const Ogre::IdString& datablockId);
 
-        /* Returns the datablock info of a given full name (datablockFullName)
+        /* Returns the datablock info of a given full name (datablockNameStr)
          * If there is no datablock with this name, a default DatablockStruct is returned
          */
-        DatablockStruct getDatablockStructOfFullName (const Ogre::String& datablockFullName);
+        DatablockStruct getDatablockStructOfNameStr (const Ogre::String& datablockNameStr);
 
 
         /* Returns the datablock info of a given json filename
@@ -185,7 +185,7 @@ class HlmsUtilsManager
 
 
     protected:
-        bool isInRegisteredDatablocksVec (const Ogre::String& datablockFullName);
+        bool isInRegisteredDatablocksVec (const Ogre::String& datablockNameStr);
 
         /* Parse a json string and get the details (texture names) from the string. This function was
          * added because it is easier to retrieve texture names from the json file instead of  using

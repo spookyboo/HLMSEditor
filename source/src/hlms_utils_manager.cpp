@@ -33,14 +33,14 @@
 HlmsUtilsManager::HlmsUtilsManager(void)
 {
     mRegisteredDatablockStruct.datablock = 0;
-    mRegisteredDatablockStruct.datablockFullName = "";
+    mRegisteredDatablockStruct.datablockNameStr = "";
     mRegisteredDatablockStruct.datablockId = "";
     mRegisteredDatablockStruct.jsonFileName = "";
     mRegisteredDatablockStruct.type = HLMS_NONE;
     mRegisteredDatablockStruct.textureMap.clear();
 
     helperDatablockStruct.datablock = 0;
-    helperDatablockStruct.datablockFullName = "";
+    helperDatablockStruct.datablockNameStr = "";
     helperDatablockStruct.datablockId = "";
     helperDatablockStruct.jsonFileName = "";
     helperDatablockStruct.type = HLMS_NONE;
@@ -60,7 +60,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::loadDatablock(const QString&
                                                                   bool makeSnaphot)
 {
     mRegisteredDatablockStruct.datablock = 0;
-    mRegisteredDatablockStruct.datablockFullName = "";
+    mRegisteredDatablockStruct.datablockNameStr = "";
     mRegisteredDatablockStruct.datablockId = "";
     mRegisteredDatablockStruct.jsonFileName = jsonFileName.toStdString();
     mRegisteredDatablockStruct.type = HLMS_NONE;
@@ -135,7 +135,7 @@ void HlmsUtilsManager::makeSnapshotDatablocks(void)
     {
         pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itorPbs->second.datablock);
         helperDatablockStruct.datablock = pbsDatablock;
-        helperDatablockStruct.datablockFullName = *pbsDatablock->getFullName();
+        helperDatablockStruct.datablockNameStr = *pbsDatablock->getNameStr();
         helperDatablockStruct.datablockId = pbsDatablock->getName();
         helperDatablockStruct.jsonFileName = "";
         helperDatablockStruct.type = HLMS_PBS;
@@ -155,7 +155,7 @@ void HlmsUtilsManager::makeSnapshotDatablocks(void)
     {
         unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itorUnlit->second.datablock);
         helperDatablockStruct.datablock = unlitDatablock;
-        helperDatablockStruct.datablockFullName = *unlitDatablock->getFullName();
+        helperDatablockStruct.datablockNameStr = *unlitDatablock->getNameStr();
         helperDatablockStruct.datablockId = unlitDatablock->getName();
         helperDatablockStruct.jsonFileName = "";
         helperDatablockStruct.type = HLMS_UNLIT;
@@ -199,7 +199,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithRegistere
     {
         pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itorPbs->second.datablock);
         ogreDatablockStruct.datablock = pbsDatablock;
-        ogreDatablockStruct.datablockFullName = *pbsDatablock->getFullName();
+        ogreDatablockStruct.datablockNameStr = *pbsDatablock->getNameStr();
         ogreDatablockStruct.datablockId = pbsDatablock->getName();
         ogreDatablockStruct.jsonFileName = "";
         ogreDatablockStruct.type = HLMS_PBS;
@@ -214,7 +214,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithRegistere
             if (helperDatablockStruct.datablockId == ogreDatablockStruct.datablockId)
             {
                 found = true;
-                //Ogre::LogManager::getSingleton().logMessage("HlmsUtilsManager::loadDatablock: " + helperDatablockStruct.datablockFullName + " available in snapshot"); //DEBUG
+                //Ogre::LogManager::getSingleton().logMessage("HlmsUtilsManager::loadDatablock: " + helperDatablockStruct.datablockNameStr + " available in snapshot"); //DEBUG
                 break;
             }
         }
@@ -223,7 +223,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithRegistere
         if (!found)
         {
             diff.append(ogreDatablockStruct);
-            //Ogre::LogManager::getSingleton().logMessage("HlmsUtilsManager::loadDatablock: " + ogreDatablockStruct.datablockFullName + " not available in snapshot"); // DEBUG
+            //Ogre::LogManager::getSingleton().logMessage("HlmsUtilsManager::loadDatablock: " + ogreDatablockStruct.datablockNameStr + " not available in snapshot"); // DEBUG
         }
 
         ++itorPbs;
@@ -237,7 +237,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithRegistere
     {
         unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itorUnlit->second.datablock);
         ogreDatablockStruct.datablock = unlitDatablock;
-        ogreDatablockStruct.datablockFullName = *unlitDatablock->getFullName();
+        ogreDatablockStruct.datablockNameStr = *unlitDatablock->getNameStr();
         ogreDatablockStruct.datablockId = unlitDatablock->getName();
         ogreDatablockStruct.jsonFileName = "";
         ogreDatablockStruct.type = HLMS_UNLIT;
@@ -290,7 +290,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithRegistere
 
         // Not found
         helperDatablockStruct.datablock = 0;
-        helperDatablockStruct.datablockFullName = "";
+        helperDatablockStruct.datablockNameStr = "";
         helperDatablockStruct.datablockId = "";
         helperDatablockStruct.jsonFileName = jsonFileName.toStdString();
         helperDatablockStruct.type = HLMS_NONE;
@@ -301,20 +301,20 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithRegistere
     {
         // There is at least one entry in 'diff'
         helperDatablockStruct.datablock = diff[0].datablock;
-        helperDatablockStruct.datablockFullName = diff[0].datablockFullName;
+        helperDatablockStruct.datablockNameStr = diff[0].datablockNameStr;
         helperDatablockStruct.datablockId = diff[0].datablockId;
         helperDatablockStruct.jsonFileName = jsonFileName.toStdString();
         helperDatablockStruct.type = diff[0].type;
         helperDatablockStruct.textureMap.clear();
 
-        if (!isInRegisteredDatablocksVec(helperDatablockStruct.datablockFullName))
+        if (!isInRegisteredDatablocksVec(helperDatablockStruct.datablockNameStr))
         {
             // Enrich the helperDatablockStruct with texture names
             parseJsonAndRetrieveDetails(&helperDatablockStruct, jsonChar);
 
             // Add it to the vector with registered datablocks
             mRegisteredDatablocks.append(helperDatablockStruct); // Add it to the vector
-            Ogre::LogManager::getSingleton().logMessage("HlmsUtilsManager::loadDatablock: " + helperDatablockStruct.datablockFullName + " added to snapshot"); // DEBUG
+            Ogre::LogManager::getSingleton().logMessage("HlmsUtilsManager::loadDatablock: " + helperDatablockStruct.datablockNameStr + " added to snapshot"); // DEBUG
         }
 
         // Destroy any datablock when there is more than one entry in 'diff'
@@ -365,7 +365,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::compareSnapshotWithRegistere
 //****************************************************************************/
 void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
                                          bool keepVecRegisteredDatablock,
-                                         const Ogre::String& excludeDatablockFullName)
+                                         const Ogre::String& excludeDatablockNameStr)
 {
     // If excludeSpecialDatablocks == true
     // - Exclude the default datablocks
@@ -375,15 +375,15 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
     Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
     Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
     Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
-    QString excludeName = excludeDatablockFullName.c_str();
-    DatablockStruct excludeDatablockFullNameStruct;
-    excludeDatablockFullNameStruct.datablock = 0;
-    excludeDatablockFullNameStruct.datablockFullName = "";
-    excludeDatablockFullNameStruct.datablockId = "";
-    excludeDatablockFullNameStruct.jsonFileName = "";
-    excludeDatablockFullNameStruct.type = HLMS_NONE;
+    QString excludeName = excludeDatablockNameStr.c_str();
+    DatablockStruct excludeDatablockNameStrStruct;
+    excludeDatablockNameStrStruct.datablock = 0;
+    excludeDatablockNameStrStruct.datablockNameStr = "";
+    excludeDatablockNameStrStruct.datablockId = "";
+    excludeDatablockNameStrStruct.jsonFileName = "";
+    excludeDatablockNameStrStruct.type = HLMS_NONE;
     QString numericString;
-    Ogre::String fullName;
+    Ogre::String nameStr;
     int value;
     bool nameIsNumber = false;
     bool exclude = false;
@@ -397,34 +397,34 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
     while( itorPbs != endPbs)
     {
         pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(itorPbs->second.datablock);
-        fullName = *pbsDatablock->getFullName();
+        nameStr = *pbsDatablock->getNameStr();
 
         // Default datablocks are NEVER detroyed
         exclude = pbsDatablock == hlmsPbs->getDefaultDatablock() || pbsDatablock == hlmsUnlit->getDefaultDatablock();
 
         // Check to see whether special datablocks are excluded
         if (!exclude)
-            exclude = excludeSpecialDatablocks && (fullName == Magus::AXIS_MATERIAL_NAME ||
-                                                   fullName == Magus::HIGHLIGHT_MATERIAL_NAME);
+            exclude = excludeSpecialDatablocks && (nameStr == Magus::AXIS_MATERIAL_NAME ||
+                                                   nameStr == Magus::HIGHLIGHT_MATERIAL_NAME);
 
         // If not excluded because of special datablocks, check whether it must be excluded because of the exclude Datablock
         if (!exclude)
         {
-            exclude = !excludeName.isEmpty() && fullName == excludeDatablockFullName;
+            exclude = !excludeName.isEmpty() && nameStr == excludeDatablockNameStr;
             if (exclude)
             {
-                excludeDatablockFullNameStruct.datablock = pbsDatablock;
-                excludeDatablockFullNameStruct.datablockFullName = excludeDatablockFullName;
-                excludeDatablockFullNameStruct.datablockId = pbsDatablock->getName();
-                excludeDatablockFullNameStruct.jsonFileName = "";
-                excludeDatablockFullNameStruct.type = HLMS_PBS;
+                excludeDatablockNameStrStruct.datablock = pbsDatablock;
+                excludeDatablockNameStrStruct.datablockNameStr = excludeDatablockNameStr;
+                excludeDatablockNameStrStruct.datablockId = pbsDatablock->getName();
+                excludeDatablockNameStrStruct.jsonFileName = "";
+                excludeDatablockNameStrStruct.type = HLMS_PBS;
             }
         }
 
         // If not excluded, mark it to be destroyed
         if (!exclude)
         {
-            //Ogre::LogManager::getSingleton().logMessage("To be destroyed: " + fullName); // DEBUG
+            //Ogre::LogManager::getSingleton().logMessage("To be destroyed: " + nameStr); // DEBUG
             pbsDatablocksToBeDestroyed.append(pbsDatablock);
         }
 
@@ -438,23 +438,23 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
     while( itorUnlit != endUnlit)
     {
         unlitDatablock = static_cast<Ogre::HlmsUnlitDatablock*>(itorUnlit->second.datablock);
-        fullName = *unlitDatablock->getFullName();
+        nameStr = *unlitDatablock->getNameStr();
 
         // Default datablocks are NEVER detroyed
         exclude = unlitDatablock == hlmsPbs->getDefaultDatablock() || unlitDatablock == hlmsUnlit->getDefaultDatablock();
 
         // Check to see whether special datablocks are excluded
         if (!exclude)
-            exclude = excludeSpecialDatablocks && (fullName == Magus::AXIS_MATERIAL_NAME ||
-                                                   fullName == Magus::HIGHLIGHT_MATERIAL_NAME ||
-                                                   fullName == Magus::UV_MAPPING_MATERIAL_NAME);
+            exclude = excludeSpecialDatablocks && (nameStr == Magus::AXIS_MATERIAL_NAME ||
+                                                   nameStr == Magus::HIGHLIGHT_MATERIAL_NAME ||
+                                                   nameStr == Magus::UV_MAPPING_MATERIAL_NAME);
 
         // If not excluded because of generic special datablocks, check whether it must be excluded because of
         // the other special datablocks. These are the ones with a numberic value as name and used for the
         // render-texture
         if (!exclude)
         {
-            numericString = fullName.c_str();
+            numericString = nameStr.c_str();
             value = numericString.toInt(&nameIsNumber);
             exclude = nameIsNumber;
         }
@@ -462,21 +462,21 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
         // If not excluded because of special datablocks, check whether it must be excluded because of the exclude Datablock
         if (!exclude)
         {
-            exclude = !excludeName.isEmpty() && fullName == excludeDatablockFullName;
+            exclude = !excludeName.isEmpty() && nameStr == excludeDatablockNameStr;
             if (exclude)
             {
-                excludeDatablockFullNameStruct.datablock = unlitDatablock;
-                excludeDatablockFullNameStruct.datablockFullName = excludeDatablockFullName;
-                excludeDatablockFullNameStruct.datablockId = unlitDatablock->getName();
-                excludeDatablockFullNameStruct.jsonFileName = "";
-                excludeDatablockFullNameStruct.type = HLMS_UNLIT;
+                excludeDatablockNameStrStruct.datablock = unlitDatablock;
+                excludeDatablockNameStrStruct.datablockNameStr = excludeDatablockNameStr;
+                excludeDatablockNameStrStruct.datablockId = unlitDatablock->getName();
+                excludeDatablockNameStrStruct.jsonFileName = "";
+                excludeDatablockNameStrStruct.type = HLMS_UNLIT;
             }
         }
 
         // If not excluded, mark it to be destroyed
         if (!exclude)
         {
-            //Ogre::LogManager::getSingleton().logMessage("To be destroyed: " + fullName); // DEBUG
+            //Ogre::LogManager::getSingleton().logMessage("To be destroyed: " + nameStr); // DEBUG
             unlitDatablocksToBeDestroyed.append(unlitDatablock);
         }
 
@@ -490,7 +490,7 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
         pbsDatablock = itPbsToBeDestroyed.next();
         if (pbsDatablock)
         {
-            //Ogre::LogManager::getSingleton().logMessage("Destroying Pbs: " + *pbsDatablock->getFullName()); // DEBUG
+            //Ogre::LogManager::getSingleton().logMessage("Destroying Pbs: " + *pbsDatablock->getNameStr()); // DEBUG
             // Only destroy the datablocks. In principle The textures should also be destroyed (using destroyAllTextures...), but this only causes large wait times
             hlmsPbs->destroyDatablock(pbsDatablock->getName());
         }
@@ -503,22 +503,22 @@ void HlmsUtilsManager::destroyDatablocks(bool excludeSpecialDatablocks,
         unlitDatablock = itUnlitToBeDestroyed.next();
         if (unlitDatablock)
         {
-            //Ogre::LogManager::getSingleton().logMessage("Destroying Unlit: " + *unlitDatablock->getFullName()); // DEBUG
+            //Ogre::LogManager::getSingleton().logMessage("Destroying Unlit: " + *unlitDatablock->getNameStr()); // DEBUG
             // Only destroy the datablocks. In principle The textures should also be destroyed (using destroyAllTextures...), but this only causes large wait times
             hlmsUnlit->destroyDatablock(unlitDatablock->getName());
         }
     }
 
     // Do not forget to clear the vector with registered datablocks
-    // Note: Do not clear mRegisteredDatablocks completely in case excludeDatablockFullName has a value and is available in mRegisteredDatablocks
-    bool available =    excludeDatablockFullNameStruct.datablock &&
-                        isInRegisteredDatablocksVec(excludeDatablockFullNameStruct.datablockFullName);
+    // Note: Do not clear mRegisteredDatablocks completely in case excludeDatablockNameStr has a value and is available in mRegisteredDatablocks
+    bool available =    excludeDatablockNameStrStruct.datablock &&
+                        isInRegisteredDatablocksVec(excludeDatablockNameStrStruct.datablockNameStr);
 
     if (!keepVecRegisteredDatablock)
     {
         mRegisteredDatablocks.clear();
         if (available)
-            mRegisteredDatablocks.append(excludeDatablockFullNameStruct);
+            mRegisteredDatablocks.append(excludeDatablockNameStrStruct);
     }
 }
 
@@ -572,22 +572,22 @@ void HlmsUtilsManager::destroyDatablock(const Ogre::IdString& datablockId)
 
 
 //****************************************************************************/
-bool HlmsUtilsManager::isInRegisteredDatablocksVec (const Ogre::String& datablockFullName)
+bool HlmsUtilsManager::isInRegisteredDatablocksVec (const Ogre::String& datablockNameStr)
 {
     QVectorIterator<DatablockStruct> itRegisteredDatablocks(mRegisteredDatablocks);
     while (itRegisteredDatablocks.hasNext())
     {
-        if (itRegisteredDatablocks.next().datablockFullName == datablockFullName)
+        if (itRegisteredDatablocks.next().datablockNameStr == datablockNameStr)
             return true;
     }
     return false;
 }
 
 //****************************************************************************/
-HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablockStructOfFullName (const Ogre::String& datablockFullName)
+HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablockStructOfNameStr (const Ogre::String& datablockNameStr)
 {
     helperDatablockStruct.datablock = 0;
-    helperDatablockStruct.datablockFullName = "";
+    helperDatablockStruct.datablockNameStr = "";
     helperDatablockStruct.datablockId = "";
     helperDatablockStruct.jsonFileName = "";
     helperDatablockStruct.type = HLMS_NONE;
@@ -597,7 +597,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablockStructOfFullName
     while (itRegisteredDatablocks.hasNext())
     {
         datablockStruct = itRegisteredDatablocks.next();
-        if (datablockStruct.datablockFullName == datablockFullName)
+        if (datablockStruct.datablockNameStr == datablockNameStr)
         {
             helperDatablockStruct = datablockStruct;
             return helperDatablockStruct;
@@ -611,7 +611,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablockStructOfFullName
 HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablockStructOfJsonFileName (const Ogre::String& jsonFileName)
 {
     helperDatablockStruct.datablock = 0;
-    helperDatablockStruct.datablockFullName = "";
+    helperDatablockStruct.datablockNameStr = "";
     helperDatablockStruct.datablockId = "";
     helperDatablockStruct.jsonFileName = "";
     helperDatablockStruct.type = HLMS_NONE;
@@ -952,7 +952,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablock(const Ogre::IdS
         if (pbsDatablock->getName() == datablockId)
         {
             helperDatablockStruct.datablock = pbsDatablock;
-            helperDatablockStruct.datablockFullName = *pbsDatablock->getFullName();
+            helperDatablockStruct.datablockNameStr = *pbsDatablock->getNameStr();
             helperDatablockStruct.datablockId = pbsDatablock->getName();
             helperDatablockStruct.jsonFileName = "";
             helperDatablockStruct.type = HLMS_PBS;
@@ -972,7 +972,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::getDatablock(const Ogre::IdS
         if (unlitDatablock->getName() == datablockId)
         {
             helperDatablockStruct.datablock = unlitDatablock;
-            helperDatablockStruct.datablockFullName = *unlitDatablock->getFullName();
+            helperDatablockStruct.datablockNameStr = *unlitDatablock->getNameStr();
             helperDatablockStruct.datablockId = unlitDatablock->getName();
             helperDatablockStruct.jsonFileName = "";
             helperDatablockStruct.type = HLMS_UNLIT;
