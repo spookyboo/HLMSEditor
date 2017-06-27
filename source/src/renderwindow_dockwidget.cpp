@@ -447,12 +447,13 @@ void RenderwindowDockWidget::createToolBars(void)
 }
 
 //****************************************************************************/
-void RenderwindowDockWidget::doChangeMeshAction(const QString &actionText)
+void RenderwindowDockWidget::doChangeMeshAction(QAction* action)
 {
     QMap<QString, MeshStruct>::iterator it;
     QMap<QString, MeshStruct>::iterator itStart = mMeshMap.begin();
     QMap<QString, MeshStruct>::iterator itEnd = mMeshMap.end();
     MeshStruct meshStruct;
+    QString actionText = action->text();
     for (it = itStart; it != itEnd; ++it)
     {
         if (actionText == it.key())
@@ -824,7 +825,7 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
     }
 
     // Action is not recognized; it is probably a selected mesh
-    doChangeMeshAction(actionText);
+    doChangeMeshAction(action);
 }
 
 //****************************************************************************/
