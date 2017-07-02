@@ -1,7 +1,5 @@
 # HLMS Editor
-HLMS Editor
-
-Editor to create Ogre3D High Level Material Shader materials (Ogre 2.0+)
+Editor to create Ogre3D High Level Material Shader materials (Ogre 2.0+). The editor supports fast creation of PBS and Unlit type materials and offers layered painting of materials, using different brushes and various painting effects (colour painting, alpha painting, carbon copy, smudge, etc...). A plugin system provides import- and export functions, which makes it possible to export the materials and textures to a zip file, which can be directly used in an Ogre-based application.
 
 ![HLMS Editor](/HLMSEditor.png)
 
