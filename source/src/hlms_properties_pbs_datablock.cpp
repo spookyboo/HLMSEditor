@@ -159,13 +159,13 @@ HlmsPropertiesPbsDatablock::HlmsPropertiesPbsDatablock(const QString& fileNameIc
     QStringList stringListBrdf;
     stringListBrdf << QString("Default") <<
                       QString("Cook Torrance") <<
-                      QString("Blihn Phong") <<
+                      QString("Blinn Phong") <<
                       QString("Default uncorrelated") <<
                       QString("Def. separate diffuse fresnel") <<
                       QString("CT separate diffuse fresnel") <<
                       QString("BP separate diffuse fresnel") <<
-                      QString("Blihn Phong legacy math") <<
-                      QString("Blihn Phong full legacy");
+                      QString("Blinn Phong legacy math") <<
+                      QString("Blinn Phong full legacy");
     selectProperty = static_cast<Magus::QtSelectProperty*>
             (mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
                                           PROPERTY_PBS_DATABLOCK_BRDF,
