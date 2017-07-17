@@ -984,13 +984,25 @@ Ogre::PbsBrdf::PbsBrdf HlmsPbsBuilder::getBrdfFromIndex (unsigned int index)
             return Ogre::PbsBrdf::CookTorrance;
         break;
         case 2:
-            return Ogre::PbsBrdf::DefaultUncorrelated;
+            return Ogre::PbsBrdf::BlinnPhong;
         break;
         case 3:
-            return Ogre::PbsBrdf::DefaultSeparateDiffuseFresnel;
+            return Ogre::PbsBrdf::DefaultUncorrelated;
         break;
         case 4:
+            return Ogre::PbsBrdf::DefaultSeparateDiffuseFresnel;
+        break;
+        case 5:
             return Ogre::PbsBrdf::CookTorranceSeparateDiffuseFresnel;
+        break;
+        case 6:
+            return Ogre::PbsBrdf::BlinnPhongSeparateDiffuseFresnel;
+        break;
+        case 7:
+            return Ogre::PbsBrdf::BlinnPhongLegacyMath;
+        break;
+        case 8:
+            return Ogre::PbsBrdf::BlinnPhongFullLegacy;
         break;
     }
     return Ogre::PbsBrdf::Default;

@@ -93,9 +93,9 @@ MainWindow::MainWindow(void) :
     // Disable shaderfile generation
     Ogre::HlmsManager* hlmsManager = mOgreManager->getOgreRoot()->getHlmsManager();
     Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS));
-    hlmsPbs->setDebugOutputPath(false);
+    hlmsPbs->setDebugOutputPath(false, false);
     Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT));
-    hlmsUnlit->setDebugOutputPath(false);
+    hlmsUnlit->setDebugOutputPath(false, false);
 
     // Set the title
     setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);

@@ -159,15 +159,19 @@ HlmsPropertiesPbsDatablock::HlmsPropertiesPbsDatablock(const QString& fileNameIc
     QStringList stringListBrdf;
     stringListBrdf << QString("Default") <<
                       QString("Cook Torrance") <<
+                      QString("Blihn Phong") <<
                       QString("Default uncorrelated") <<
                       QString("Def. separate diffuse fresnel") <<
-                      QString("CT separate diffuse fresnel");
+                      QString("CT separate diffuse fresnel") <<
+                      QString("BP separate diffuse fresnel") <<
+                      QString("Blihn Phong legacy math") <<
+                      QString("Blihn Phong full legacy");
     selectProperty = static_cast<Magus::QtSelectProperty*>
             (mAssetWidget->createProperty(CONTAINER_PBS_DATABLOCK_GENERAL,
                                           PROPERTY_PBS_DATABLOCK_BRDF,
                                           QString("Brdf"),
                                           Magus::QtProperty::SELECT));
-    selectProperty->addValues(stringListBrdf);
+    selectProperty->addValues(stringListBrdf, 9);
 
     // ******** Alpha test ********
     // CMPF_ALWAYS_FAIL
@@ -193,7 +197,7 @@ HlmsPropertiesPbsDatablock::HlmsPropertiesPbsDatablock(const QString& fileNameIc
                                           PROPERTY_PBS_DATABLOCK_ALPHATEST,
                                           QString("Alpha test"),
                                           Magus::QtProperty::SELECT));
-    selectAlphaTestProperty->addValues(stringListCompareFunction);
+    selectAlphaTestProperty->addValues(stringListCompareFunction, 9);
 
     // ******** Alpha test threshold ********
     sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>
