@@ -41,7 +41,8 @@ class ClipboardWidget : public QWidget
     public:
         ClipboardWidget(const QString& ClipboardDir, BrushPresetDockWidget* brushPresetDockWidget, QWidget* parent = 0);
         ~ClipboardWidget(void);
-        void addToClipboard (const QString& filename); // Add a json file to the clipboard
+        void addSamplerblockToClipboard (const QString& filename); // Add a samplerblock json file to the clipboard
+        void addPbsDatablockToClipboard (const QString& filename); // Add a pbs json file to the clipboard
 
     signals:
         void clipboardDoubleClicked(const QString& name, const QString& baseName);
@@ -51,6 +52,8 @@ class ClipboardWidget : public QWidget
         void handleContextMenuSelected (QAction* action, const QString& name, const QString& baseName);
 
     protected:
+        bool isSamplerClip(const QString& filename); // Determine clip type
+        bool isPbsClip(const QString& filename); // Determine clip type
         void loadClips (const QString& searchPath);
 
     private:

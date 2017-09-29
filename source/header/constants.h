@@ -74,6 +74,7 @@ static const QString ICON_UNDO_OFF = QString("../common/icons/undo_off.png");
 static const QString ICON_REDO_OFF = QString("../common/icons/redo_off.png");
 static const QString ICON_REDO_ON = QString("../common/icons/redo_on.png");
 static const QString ICON_SAMPLER_CLIPBOARD = QString("../common/icons/samplerblock_banner.png");
+static const QString ICON_PBS_CLIPBOARD = QString("../common/icons/pbs_banner.png");
 static const QString ICON_PIN = QString("../common/icons/pin.png");
 
 static const QString ICON_HLMS = QString("../common/icons/HLMSEditor.png");
@@ -143,7 +144,7 @@ static const QString TWO_TAB_QSTRING = "       ";
 
 //************************************ Ogre String constants *******************************************/
 static const Ogre::String DEFAULT_DATABLOCK_NAME = "[Default]";
-static const Ogre::String DATABLOCK_DEBUG_CUBE = "DebugCube";
+//static const Ogre::String DATABLOCK_DEBUG_CUBE = "DebugCube";
 static const Ogre::String THUMBS_PATH = "../common/thumbs/";
 static const Ogre::String BRUSH_PATH = "../common/brushes/";
 static const Ogre::String DEFAULT_BRUSH = "brush_001.png";

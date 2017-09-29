@@ -568,7 +568,12 @@ void NodeEditorDockWidget::handleCopiedToClipboard (QtNode* node)
     if (node->getType() == NODE_TYPE_SAMPLERBLOCK)
     {
         // Inform the mainwindow. Don't bother to pass the node, it is the current samplerblock node
-        mParent->notifyCopiedToClipboard();
+        mParent->notifyCopiedSamplerblockToClipboard();
+    }
+    else if (node->getType() == NODE_TYPE_PBS_DATABLOCK)
+    {
+        // Copy Pbs node to clipboard
+        mParent->notifyCopiedPbsDatablockToClipboard();
     }
     else
     {

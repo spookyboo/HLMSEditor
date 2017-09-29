@@ -125,6 +125,7 @@ namespace Magus
         updateRGBAWithCurrentColor();
         updateHexWithCurrentColor();
         updateColorFill();
+        emit valueChanged(this);
     }
 
     //****************************************************************************/
@@ -134,6 +135,7 @@ namespace Magus
         updateRGBAWithCurrentColor();
         updateHexWithCurrentColor();
         updateColorFill();
+        emit valueChanged(this);
     }
 
     //****************************************************************************/
@@ -197,6 +199,7 @@ namespace Magus
         mColorValue = c;
         updateHexWithCurrentColor();
         propertyValueChangedHex();
+        updateRGBAWithCurrentColor();
     }
 
     //****************************************************************************/

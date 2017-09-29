@@ -787,6 +787,30 @@ bool HlmsPropertiesSamplerblock::isDetailMapOrDetailNormalMap (unsigned int text
 }
 
 //****************************************************************************/
+bool HlmsPropertiesSamplerblock::isSamplerProperties (const QString& propertiesName, bool fullName)
+{
+    QString fileName;
+    if (fullName)
+        fileName = propertiesName;
+    else
+        fileName = CLIPBOARD_PATH_QSTRING + propertiesName;
+    QFile file(fileName);
+    file.open(QFile::ReadOnly | QFile::Text);
+    QTextStream readFile(&file);
+    QString jsonString = readFile.readAll();
+    QByteArray ba = jsonString.toLatin1();
+    char* jsonChar = ba.data();
+
+    rapidjson::Document d;
+    d.Parse( jsonChar );
+    if( d.HasParseError() )
+        return false;
+
+    rapidjson::Value::ConstMemberIterator itSampler = d.FindMember("sampler");
+    return (itSampler != d.MemberEnd() && itSampler->value.IsObject());
+}
+
+//****************************************************************************/
 void HlmsPropertiesSamplerblock::loadProperties (const QString& propertiesName, bool fullName)
 {
     QString fileName;

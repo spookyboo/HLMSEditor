@@ -80,7 +80,14 @@ void ClipboardWidget::loadClips (const QString& searchPath)
                 if (info.suffix() == "json")
                 {
                     fileName = info.absoluteFilePath();
-                    addToClipboard(fileName);
+
+                    // Determine clipboard type
+                    if (isSamplerClip(fileName))
+                        addSamplerblockToClipboard(fileName);
+                    else if (isPbsClip(fileName))
+                    {
+                        addPbsDatablockToClipboard(fileName);
+                    }
                 }
             }
         }
@@ -88,15 +95,40 @@ void ClipboardWidget::loadClips (const QString& searchPath)
 }
 
 //****************************************************************************/
-void ClipboardWidget::addToClipboard (const QString& filename)
+bool ClipboardWidget::isSamplerClip(const QString& filename)
+{
+    return mBrushPresetDockWidget->isSamplerClip(filename);
+}
+
+//****************************************************************************/
+void ClipboardWidget::addSamplerblockToClipboard (const QString& filename)
 {
     // Do not add duplicates
     if (mGenericAssetWidget->assetExists(filename))
         return;
 
-    // Assume that only samplerblocks can be added to the clipbloard
+    // Add to the clipbloard
     QFileInfo info(filename);
     QPixmap scriptPixmap(ICON_SAMPLER_CLIPBOARD);
+    mGenericAssetWidget->addAsset(scriptPixmap, filename, info.baseName());
+}
+
+//****************************************************************************/
+bool ClipboardWidget::isPbsClip(const QString& filename)
+{
+    return mBrushPresetDockWidget->isPbsClip(filename);
+}
+
+//****************************************************************************/
+void ClipboardWidget::addPbsDatablockToClipboard (const QString& filename)
+{
+    // Do not add duplicates
+    if (mGenericAssetWidget->assetExists(filename))
+        return;
+
+    // Add to the clipbloard
+    QFileInfo info(filename);
+    QPixmap scriptPixmap(ICON_PBS_CLIPBOARD);
     mGenericAssetWidget->addAsset(scriptPixmap, filename, info.baseName());
 }
 

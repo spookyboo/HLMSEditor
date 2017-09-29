@@ -221,10 +221,10 @@ void MainWindow::createActions(void)
     mMaterialSetMenuAction = new QAction(QString("Apply current material to (sub)mesh"), this);
     mMaterialSetMenuAction->setShortcut(QKeySequence(QString("Ctrl+M")));
     connect(mMaterialSetMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialSetMenuAction()));
-    mMaterialBrowserOpenMenuAction = new QAction(QString("Open browser"), this);
+    mMaterialBrowserOpenMenuAction = new QAction(QString("Open materialbrowser"), this);
     mMaterialBrowserOpenMenuAction->setShortcut(QKeySequence(QString("Ctrl+B")));
     connect(mMaterialBrowserOpenMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserOpenMenuAction()));
-    mMaterialBrowserAddMenuAction = new QAction(QString("Add material to browser"), this);
+    mMaterialBrowserAddMenuAction = new QAction(QString("Add material to materialbrowser"), this);
     mMaterialBrowserAddMenuAction->setShortcut(QKeySequence(QString("Ctrl+H")));
     connect(mMaterialBrowserAddMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserAddMenuAction()));
     mMaterialPresetMenuAction = new QAction(QString("Material as preset"), this);
@@ -1561,14 +1561,14 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
     QApplication::restoreOverrideCursor();
     if (result)
     {
-        if (!plugin->getActionFlag() & Ogre::PAF_POST_ACTION_SUPPRESS_OK_MESSAGE)
+        if (!(plugin->getActionFlag() & Ogre::PAF_POST_ACTION_SUPPRESS_OK_MESSAGE))
         {
             // Check whether a new datablock was created
             newDatablock = data.mInOutCurrentDatablock;
             if (newDatablock && oldDatablock != newDatablock)
             {
                 // Set the newDatablock to the Item?
-                // TODO: Not sure what to do here
+                // TODO: Not sure what to do here (16 sept 2017: Remove it, because the pointer cannot be trusted; use the id string)
             }
             text = data.mOutSuccessText.c_str();
             if (text.isEmpty())
@@ -2182,24 +2182,58 @@ void MainWindow::notifyNodeDeleted(unsigned int nodeType)
 }
 
 //****************************************************************************/
-void MainWindow::notifyCopiedToClipboard (void)
+void MainWindow::notifyCopiedSamplerblockToClipboard (void)
 {
     // Only the current samplerblock is copied
     // Save the properties and put a reference to the samplerblock clipboard (tab) in BrushPresetDockWidget
     QString filename = mPropertiesDockWidget->saveHlmsPropertiesSamplerblock();
 
-    // Add to samplerblock clipboard
-    mBrushPresetDockWidget->addToClipboard(filename);
+    // Add to clipboard
+    mBrushPresetDockWidget->addSamplerblockToClipboard(filename);
+}
+
+//****************************************************************************/
+void MainWindow::notifyCopiedPbsDatablockToClipboard (void)
+{
+    // TODO
+    QString filename = mPropertiesDockWidget->saveHlmsPropertiesPbsDatablock();
+
+    // Add to clipboard
+    mBrushPresetDockWidget->addPbsDatablockToClipboard(filename);
+}
+
+//****************************************************************************/
+bool MainWindow::isSamplerClip(const QString& filename)
+{
+    return mPropertiesDockWidget->isSamplerProperties(filename);
+}
+
+//****************************************************************************/
+bool MainWindow::isPbsClip(const QString& filename)
+{
+    return mPropertiesDockWidget->isPbsProperties(filename);
 }
 
 //****************************************************************************/
 void MainWindow::useFromClipboard (const QString& fileName)
 {
-    // Create a new samplerblock in the NodeEditor
-    mNodeEditorDockWidget->newSamplerblockNode();
+    // Is it a pbs or a sampler?
+    if (mPropertiesDockWidget->isSamplerProperties(fileName))
+    {
+        // Create a new samplerblock in the NodeEditor
+        mNodeEditorDockWidget->newSamplerblockNode();
 
-    // Load its properties; the new node is created, has focus and its properties are set and displayed in the mPropertiesDockWidget
-    mPropertiesDockWidget->loadHlmsPropertiesSamplerblock(fileName);
+        // Load its properties; the new node is created, has focus and its properties are set and displayed in the mPropertiesDockWidget
+        mPropertiesDockWidget->loadHlmsPropertiesSamplerblock(fileName);
+    }
+    else if (mPropertiesDockWidget->isPbsProperties(fileName))
+    {
+        // Create a new pbs datablock in the NodeEditor
+        mNodeEditorDockWidget->newHlmsPbs();
+
+        // Load its properties; the new node is created, has focus and its properties are set and displayed in the mPropertiesDockWidget
+        mPropertiesDockWidget->loadHlmsPropertiesPbsDatablock(fileName);
+    }
 }
 
 //****************************************************************************/

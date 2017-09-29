@@ -50,7 +50,12 @@ class BrushPresetDockWidget : public QDockWidget
         void addPreset (const QString& path, const QString& thumbName);
 
         // Add a clip to the clipboard
-        void addToClipboard (const QString& filename);
+        void addSamplerblockToClipboard (const QString& filename);
+        void addPbsDatablockToClipboard (const QString& filename);
+
+        // Determines the type of clip
+        bool isSamplerClip(const QString& filename);
+        bool isPbsClip(const QString& filename);
 
         // Use a selected clip from the clipboard
         void useFromClipboard (const QString& fileName, const QString& baseName);

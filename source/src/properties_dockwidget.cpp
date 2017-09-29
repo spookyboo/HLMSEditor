@@ -203,13 +203,37 @@ void PropertiesDockWidget::setWidgetVisible (QWidget* widget, bool visible)
 }
 
 //****************************************************************************/
-const QString& PropertiesDockWidget::saveHlmsPropertiesSamplerblock(void)
+const QString& PropertiesDockWidget::saveHlmsPropertiesSamplerblock (void)
 {
     return mHlmsPropertiesSamplerblock->saveProperties(""); // Let mHlmsPropertiesSamplerblock determine its own filename
 }
 
 //****************************************************************************/
-void PropertiesDockWidget::loadHlmsPropertiesSamplerblock(const QString& fileName)
+const QString& PropertiesDockWidget::saveHlmsPropertiesPbsDatablock (void)
+{
+    return mHlmsPropertiesPbsDatablock->saveProperties(""); // Let mHlmsPropertiesPbsDatablock determine its own filename
+}
+
+//****************************************************************************/
+void PropertiesDockWidget::loadHlmsPropertiesSamplerblock (const QString& fileName)
 {
     mHlmsPropertiesSamplerblock->loadProperties(fileName); // The fileName is fully qualified
+}
+
+//****************************************************************************/
+void PropertiesDockWidget::loadHlmsPropertiesPbsDatablock (const QString& fileName)
+{
+    mHlmsPropertiesPbsDatablock->loadProperties(fileName); // The fileName is fully qualified
+}
+
+//****************************************************************************/
+bool PropertiesDockWidget::isSamplerProperties (const QString& fileName)
+{
+    return mHlmsPropertiesSamplerblock->isSamplerProperties(fileName); // The fileName is fully qualified
+}
+
+//****************************************************************************/
+bool PropertiesDockWidget::isPbsProperties (const QString& fileName)
+{
+    return mHlmsPropertiesPbsDatablock->isPbsProperties(fileName); // The fileName is fully qualified
 }

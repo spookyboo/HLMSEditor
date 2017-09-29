@@ -64,7 +64,11 @@ class PropertiesDockWidget : public QDockWidget
         void displayInfo(const QString& fileName, const QString& headerText); // Used for displaying info files
         void notifyMaterialChanged(QtProperty* property); // Called when a property is changed; the property determines the latest property that has been changed
         const QString& saveHlmsPropertiesSamplerblock(void);
+        const QString& saveHlmsPropertiesPbsDatablock(void);
+        bool isSamplerProperties (const QString& fileName);
+        bool isPbsProperties (const QString& fileName);
         void loadHlmsPropertiesSamplerblock(const QString& fileName);
+        void loadHlmsPropertiesPbsDatablock (const QString& fileName);
 
         // Make the properties widgets public for easy access
         HlmsPropertiesPbsDatablock* mHlmsPropertiesPbsDatablock;

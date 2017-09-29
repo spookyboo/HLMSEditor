@@ -91,7 +91,10 @@ class MainWindow : public QMainWindow
         HlmsUtilsManager* getHlmsUtilsManager (void) {return mHlmsUtilsManager;}
         const Ogre::String& getTextureFileNameOfPbs(const Ogre::IdString& datablockId, Ogre::PbsTextureTypes textureType); // Returns the filename of a pbs texture type
         void notifyNodeDeleted (unsigned int nodeType); // Is called by the node editor if a node is deleted
-        void notifyCopiedToClipboard (void); // Is called by the node editor if something is put on the clipboard
+        void notifyCopiedSamplerblockToClipboard (void); // Is called by the node editor if a samplerblock is put on the clipboard
+        void notifyCopiedPbsDatablockToClipboard (void); // Is called by the node editor if a pbs datablock is put on the clipboard
+        bool isSamplerClip(const QString& filename); // Returns true is a filename is a sampler clip
+        bool isPbsClip(const QString& filename); // Returns true is a filename is a pbs clip
         void useFromClipboard (const QString& fileName); // Is called if something from the clipboard must be used
         void addResourceLocationFile (const QString& fileName);
         void addResourceLocationPath (const QString& path);

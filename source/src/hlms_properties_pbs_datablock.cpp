@@ -31,6 +31,7 @@
 #include "properties_dockwidget.h"
 #include "hlms_node_pbs_datablock.h"
 #include "properties_dockwidget.h"
+#include "rapidjson/document.h"
 
 //****************************************************************************/
 HlmsPropertiesPbsDatablock::HlmsPropertiesPbsDatablock(const QString& fileNameIcon,
@@ -502,4 +503,364 @@ void HlmsPropertiesPbsDatablock::setBackgroundDiffusePropertyVisible(bool visibl
     Magus::QtColorProperty* colorProperty;
     colorProperty = static_cast<Magus::QtColorProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_BACKGROUND));
     colorProperty->setVisible(visible);
+}
+
+//****************************************************************************/
+bool HlmsPropertiesPbsDatablock::isPbsProperties (const QString& propertiesName, bool fullName)
+{
+    QString fileName;
+    if (fullName)
+        fileName = propertiesName;
+    else
+        fileName = CLIPBOARD_PATH_QSTRING + propertiesName;
+    QFile file(fileName);
+    file.open(QFile::ReadOnly | QFile::Text);
+    QTextStream readFile(&file);
+    QString jsonString = readFile.readAll();
+    QByteArray ba = jsonString.toLatin1();
+    char* jsonChar = ba.data();
+
+    rapidjson::Document d;
+    d.Parse( jsonChar );
+    if( d.HasParseError() )
+        return false;
+
+    rapidjson::Value::ConstMemberIterator itSampler = d.FindMember("pbs");
+    return (itSampler != d.MemberEnd() && itSampler->value.IsObject());
+}
+
+//****************************************************************************/
+void HlmsPropertiesPbsDatablock::loadProperties (const QString& propertiesName, bool fullName)
+{
+    QString fileName;
+    if (fullName)
+        fileName = propertiesName;
+    else
+        fileName = CLIPBOARD_PATH_QSTRING + propertiesName;
+    QFile file(fileName);
+    file.open(QFile::ReadOnly | QFile::Text);
+    QTextStream readFile(&file);
+    QString jsonString = readFile.readAll();
+    QByteArray ba = jsonString.toLatin1();
+    char* jsonChar = ba.data();
+
+    rapidjson::Document d;
+    d.Parse( jsonChar );
+    if( d.HasParseError() )
+    {
+        QMessageBox::information(0, QString("Error"), QString("Cannot load pbs properties"));
+        Ogre::LogManager::getSingleton().logMessage("HlmsPropertiesPbsDatablock::loadProperties: Cannot parse " + fileName.toStdString());
+    }
+
+    Magus::QtCheckBoxProperty* checkboxProperty;
+    Magus::QtSelectProperty* selectProperty;
+    Magus::QtSliderDecimalProperty* sliderDecimalProperty;
+    Magus::QtColorProperty* colorProperty;
+
+    rapidjson::Value::ConstMemberIterator itSampler = d.FindMember("pbs");
+    if (itSampler == d.MemberEnd() || !itSampler->value.IsObject() )
+    {
+        QMessageBox::information(0, QString("Error"), QString("Cannot load pbs properties"));
+        Ogre::LogManager::getSingleton().logMessage("HlmsPropertiesPbsDatablock::loadProperties: File " +
+                                                    fileName.toStdString() +
+                                                    " is not a pbs");
+    }
+
+    rapidjson::Value::ConstMemberIterator it = itSampler->value.MemberBegin();
+    rapidjson::Value::ConstMemberIterator itEnd = itSampler->value.MemberEnd();
+    while( it != itEnd )
+    {
+        Ogre::String name(it->name.GetString());
+        if (name == "workflow" && it->value.IsInt())
+        {
+            // ******** Workflow ********
+            selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_WORKFLOW));
+            selectProperty->setCurentIndex(it->value.GetInt());
+        }
+        if (name == "roughness" && it->value.IsNumber())
+        {
+            // ******** Roughness ********
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_ROUGHNESS));
+            sliderDecimalProperty->setValue(static_cast<float>(it->value.GetDouble()));
+        }
+        if (name == "metalness" && it->value.IsNumber())
+        {
+            // ******** Metalness ********
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_METALNESS));
+            sliderDecimalProperty->setValue(static_cast<float>(it->value.GetDouble()));
+        }
+        if (name == "separate_fresnel" && it->value.IsBool())
+        {
+            // ******** Separate fresnel ********
+            checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_SEPARATE_FRESNEL));
+            checkboxProperty->setValue(it->value.GetBool());
+        }
+        if (name == "fresnel_red" && it->value.IsNumber())
+        {
+            // ******** Fresnel (red) ********
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_FRESNEL_R));
+            sliderDecimalProperty->setValue(static_cast<float>(it->value.GetDouble()));
+        }
+        if (name == "fresnel_green" && it->value.IsNumber())
+        {
+            // ******** Fresnel (green) ********
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_FRESNEL_G));
+            sliderDecimalProperty->setValue(static_cast<float>(it->value.GetDouble()));
+        }
+        if (name == "fresnel_blue" && it->value.IsNumber())
+        {
+            // ******** Fresnel (blue) ********
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_FRESNEL_B));
+            sliderDecimalProperty->setValue(static_cast<float>(it->value.GetDouble()));
+        }
+        if (name == "transparency" && it->value.IsNumber())
+        {
+            // ******** Amount of transparency ********
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_TRANPARENCEY_VALUE));
+            sliderDecimalProperty->setValue(static_cast<float>(it->value.GetDouble()));
+        }
+        if (name == "tranparency_mode" && it->value.IsInt())
+        {
+            // ******** Transparency mode ********
+            selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_TRANPARENCY_MODE));
+            selectProperty->setCurentIndex(it->value.GetInt());
+        }
+        if (name == "two_sided" && it->value.IsBool())
+        {
+            // ******** Two-sided lighting ********
+            checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_TWO_SIDED_LIGHTING));
+            checkboxProperty->setValue(it->value.GetBool());
+        }
+        if (name == "use_alpha_from_textures" && it->value.IsBool())
+        {
+            // ******** Use alpha from textures ********
+            checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_USE_ALPHA_FROM_TEXTURES));
+            checkboxProperty->setValue(it->value.GetBool());
+        }
+        if (name == "brdf" && it->value.IsInt())
+        {
+            // ******** Brdf ********
+            selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_BRDF));
+            selectProperty->setCurentIndex(it->value.GetInt());
+        }
+        if (name == "alpha_test" && it->value.IsInt())
+        {
+            // ******** Alpha test ********
+            selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_ALPHATEST));
+            selectProperty->setCurentIndex(it->value.GetInt());
+        }
+        if (name == "alpha_test_threshold" && it->value.IsNumber())
+        {
+            // ******** Alpha test threshold ********
+            sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_ALPHATEST_THRESHOLD));
+            sliderDecimalProperty->setValue(static_cast<float>(it->value.GetDouble()));
+        }
+        if (name == "diffuse" && it->value.IsArray())
+        {
+            // ******** Diffuse ********
+            colorProperty = static_cast<Magus::QtColorProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_DIFFUSE));
+            const rapidjson::Value& array = it->value;
+            float red = static_cast<float>(array[0].GetDouble());
+            float green = static_cast<float>(array[1].GetDouble());
+            float blue = static_cast<float>(array[2].GetDouble());
+            colorProperty->setColor(red, green, blue, 255.0f);
+        }
+        if (name == "background" && it->value.IsArray())
+        {
+            // ******** Background diffuse ********
+            colorProperty = static_cast<Magus::QtColorProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_BACKGROUND));
+            const rapidjson::Value& array = it->value;
+            float red = static_cast<float>(array[0].GetDouble());
+            float green = static_cast<float>(array[1].GetDouble());
+            float blue = static_cast<float>(array[2].GetDouble());
+            float alpha= static_cast<float>(array[3].GetDouble());
+            colorProperty->setColor(red, green, blue, alpha);
+        }
+        if (name == "specular" && it->value.IsArray())
+        {
+            // ******** Specular ********
+            colorProperty = static_cast<Magus::QtColorProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_PBS_DATABLOCK_SPECULAR));
+            const rapidjson::Value& array = it->value;
+            float red = static_cast<float>(array[0].GetDouble());
+            float green = static_cast<float>(array[1].GetDouble());
+            float blue = static_cast<float>(array[2].GetDouble());
+            colorProperty->setColor(red, green, blue, 255.0f);
+        }
+
+        ++it;
+    }
+}
+
+//****************************************************************************/
+const QString& HlmsPropertiesPbsDatablock::saveProperties (const QString& propertiesBaseName)
+{
+    mHelperString = "";
+
+    if (!mHlmsNodePbsDatablock)
+    {
+        QMessageBox::information(0, QString("Error"), QString("Cannot save pbs properties"));
+        Ogre::LogManager::getSingleton().logMessage("HlmsPropertiesPbsDatablock::saveProperties: mHlmsNodePbsDatablock = 0");
+        return mHelperString;
+    }
+
+    // Create the json structure
+    QString jsonString;
+    jsonString += "{\n";
+    jsonString += TAB_QSTRING;
+    jsonString += "\"pbs\" : \n";
+    jsonString += TAB_QSTRING;
+    jsonString += "{\n";
+
+    // ******** Workflow ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"workflow\" : ";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getWorkflow()).toString();
+    jsonString += ",\n";
+
+    // ******** Roughness ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"roughness\" : ";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getRoughness()).toString();
+    jsonString += ",\n";
+
+    // ******** Metalness ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"metalness\" : ";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getMetalness()).toString();
+    jsonString += ",\n";
+
+    // ******** Separate fresnel ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"separate_fresnel\" : ";
+    if (mHlmsNodePbsDatablock->isSeparateFresnel())
+        jsonString += "true";
+    else
+        jsonString += "false";
+    jsonString += ",\n";
+
+    // ******** Fresnel ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"fresnel_red\" : ";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getFresnelRed()).toString();
+    jsonString += ",\n";
+
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"fresnel_green\" : ";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getFresnelGreen()).toString();
+    jsonString += ",\n";
+
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"fresnel_blue\" : ";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getFresnelBlue()).toString();
+    jsonString += ",\n";
+
+    // ******** Amount of transparency ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"transparency\" : ";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getTransparencyValue()).toString();
+    jsonString += ",\n";
+
+    // ******** Transparency mode ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"tranparency_mode\" : ";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getTransparencyMode()).toString();
+    jsonString += ",\n";
+
+    // ******** Two-sided lighting ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"two_sided\" : ";
+    if (mHlmsNodePbsDatablock->isTwoSidedLighting())
+        jsonString += "true";
+    else
+        jsonString += "false";
+    jsonString += ",\n";
+
+    // ******** Use alpha from textures ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"use_alpha_from_textures\" : ";
+    if (mHlmsNodePbsDatablock->isUseAlphaFromTexture())
+        jsonString += "true";
+    else
+        jsonString += "false";
+    jsonString += ",\n";
+
+    // ******** Brdf ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"brdf\" : ";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getBrdf()).toString();
+    jsonString += ",\n";
+
+    // ******** Alpha test ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"alpha_test\" : ";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getAlphaTest()).toString();
+    jsonString += ",\n";
+
+    // ******** Alpha test threshold ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"alpha_test_threshold\" : ";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getAlphaTestThreshold()).toString();
+    jsonString += ",\n";
+
+    // ******** Diffuse ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"diffuse\" : [";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getDiffuseRed()).toString();
+    jsonString += ",";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getDiffuseGreen()).toString();
+    jsonString += ",";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getDiffuseBlue()).toString();
+    jsonString += "],\n";
+
+    // ******** Background diffuse ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"background\" : [";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getBackgroundDiffuseRed()).toString();
+    jsonString += ",";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getBackgroundDiffuseGreen()).toString();
+    jsonString += ",";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getBackgroundDiffuseBlue()).toString();
+    jsonString += ",";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getBackgroundDiffuseAlpha()).toString();
+    jsonString += "],\n";
+
+    // ******** Specular ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"specular\" : [";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getSpecularRed()).toString();
+    jsonString += ",";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getSpecularGreen()).toString();
+    jsonString += ",";
+    jsonString += QVariant(mHlmsNodePbsDatablock->getSpecularBlue()).toString();
+    jsonString += "]\n";
+
+    // End tag
+    jsonString += TAB_QSTRING;
+    jsonString += "}\n";
+    jsonString += "}";
+
+    // Write the file
+    QString baseName = propertiesBaseName;
+    if (propertiesBaseName == "")
+    {
+        QString type = "pbs_";
+        baseName = type + mHlmsNodePbsDatablock->getName() + ".json";
+    }
+
+    mHelperString = CLIPBOARD_PATH_QSTRING + baseName;
+    QFile file(mHelperString);
+    if (file.open(QFile::WriteOnly|QFile::Truncate))
+    {
+        QTextStream stream(&file);
+        stream << jsonString;
+        file.close();
+    }
+    else
+    {
+        QMessageBox::information(0, QString("Error"), QString("Cannot save pbs properties"));
+        Ogre::LogManager::getSingleton().logMessage("HlmsPropertiesPbsDatablock::saveProperties: Cannot save " + mHelperString.toStdString());
+        mHelperString = "";
+    }
+
+    return mHelperString;
 }

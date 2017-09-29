@@ -44,6 +44,20 @@ class HlmsPropertiesPbsDatablock : public QWidget
         void setObject (HlmsNodePbsDatablock* hlmsNodePbsDatablock);
         void setBackgroundDiffusePropertyVisible (bool visible);
 
+        // Returns true if the property file is a pbs property file
+        bool isPbsProperties (const QString& propertiesName, bool fullName = true);
+
+        // Load and save functions used to create a reusable pbs
+        // The loadProperties function loads the properties from a file;
+        // if fullName is true, propertiesName is a full-qualified filename
+        // if fullName is false, propertiesName is a base filename
+        void loadProperties (const QString& propertiesName, bool fullName = true);
+
+        // Saves the properties of a pbs datablock to a Json file
+        // The saveProperties function returns the filename with which it is saved; if propertiesBaseName is empty,
+        // the function generates its own filename.
+        const QString& saveProperties (const QString& propertiesBaseName);
+
     private slots:
         void propertyValueChanged(QtProperty* property);
         void infoClicked(void);
@@ -52,6 +66,7 @@ class HlmsPropertiesPbsDatablock : public QWidget
         HlmsNodePbsDatablock* mHlmsNodePbsDatablock;
         Magus::QtAssetWidget* mAssetWidget;
         PropertiesDockWidget* mPropertiesDockWidget;
+        QString mHelperString;
 };
 
 #endif

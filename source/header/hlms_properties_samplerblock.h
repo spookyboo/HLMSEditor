@@ -53,12 +53,16 @@ class HlmsPropertiesSamplerblock : public QWidget
         void setDetailMapAnimationPropertiesVisible (bool visible);
         HlmsNodeSamplerblock* getHlmsNodeSamplerblock (void) {return mHlmsNodeSamplerblock;}
 
-        // Load and save functions used to create reusable samplers
-        // The loadProperties function loads the proerties from a file;
-        // if nameStr is true, propertiesName is a full-qualified filename
-        // if nameStr is false, propertiesName is a base filename
-        void loadProperties (const QString& propertiesName, bool nameStr = true);
+        // Returns true if the property file is a sampler property file
+        bool isSamplerProperties (const QString& propertiesName, bool fullName = true);
 
+        // Load and save functions used to create reusable samplers
+        // The loadProperties function loads the properties from a file;
+        // if fullName is true, propertiesName is a full-qualified filename
+        // if fullName is false, propertiesName is a base filename
+        void loadProperties (const QString& propertiesName, bool fullName = true);
+
+        // Saves the properties of a samplerblock to a Json file
         // The saveProperties function returns the filename with which it is saved; if propertiesBaseName is empty,
         // the function generates its own filename.
         const QString& saveProperties (const QString& propertiesBaseName);

@@ -83,9 +83,27 @@ void BrushPresetDockWidget::addPreset (const QString& path, const QString& thumb
 }
 
 //****************************************************************************/
-void BrushPresetDockWidget::addToClipboard (const QString& filename)
+void BrushPresetDockWidget::addSamplerblockToClipboard (const QString& filename)
 {
-    mClipboardWidget->addToClipboard(filename);
+    mClipboardWidget->addSamplerblockToClipboard(filename);
+}
+
+//****************************************************************************/
+void BrushPresetDockWidget::addPbsDatablockToClipboard( const QString& filename)
+{
+    mClipboardWidget->addPbsDatablockToClipboard(filename);
+}
+
+//****************************************************************************/
+bool BrushPresetDockWidget::isSamplerClip(const QString& filename)
+{
+    return mParent->isSamplerClip(filename);
+}
+
+//****************************************************************************/
+bool BrushPresetDockWidget::isPbsClip(const QString& filename)
+{
+    return mParent->isPbsClip(filename);
 }
 
 //****************************************************************************/

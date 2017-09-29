@@ -311,8 +311,10 @@ namespace Magus
         mCameraManager->setTarget(mSceneNode);
 
         // Create an item
-        Ogre::Vector3 scale(20.0f, 20.0f, 20.0f);
-        createItem ("cube.mesh", scale);
+        //Ogre::Vector3 scale(20.0f, 20.0f, 20.0f);
+        //createItem ("cube.mesh", scale);
+        Ogre::Vector3 scale(5.0f, 5.0f, 5.0f);
+        createItem ("materialball.mesh", scale);
 
         // Remove the datablock currently set on this item
         Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
@@ -320,8 +322,8 @@ namespace Magus
 
         setDefaultDatablockItem();
 
-        if (hlmsPbs->getDatablock(DATABLOCK_DEBUG_CUBE))
-            hlmsPbs->destroyDatablock(DATABLOCK_DEBUG_CUBE);
+        //if (hlmsPbs->getDatablock(DATABLOCK_DEBUG_CUBE))
+            //hlmsPbs->destroyDatablock(DATABLOCK_DEBUG_CUBE);
 
         // Create light
         mLight = mSceneManager->createLight();
