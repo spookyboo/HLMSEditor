@@ -180,7 +180,10 @@ class MainWindow : public QMainWindow
         void handleTextureMutationOccured(void);
         void saveTextureBrowserCfg(void);
         void doImport(Ogre::HlmsEditorPlugin* plugin);
+        void doImportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data);
         void doExport(Ogre::HlmsEditorPlugin* plugin);
+        void doExportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data);
+        void doImportExportPropertiesDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data);
         void constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data);
         void doRecentMaterialFileAction(const QString& fileName);
         void doRecentProjectFileAction(const QString& fileName);

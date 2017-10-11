@@ -30,6 +30,7 @@ THE SOFTWARE.
 #define __HLMS_EDITOR_PLUGIN_H__
 
 #include "OgreString.h"
+#include "OgreIdString.h"
 
 static const Ogre::String GENERAL_HLMS_PLUGIN_NAME = "HlmsEditorPlugin";
 
@@ -71,14 +72,46 @@ namespace Ogre
         PAF_POST_EXPORT_DELETE_ALL_DATABLOCKS = 1 << 8,
 
         // Do not display the 'ok' message after a succesful import or export
-        PAF_POST_ACTION_SUPPRESS_OK_MESSAGE = 1 << 9
-    };
+        PAF_POST_ACTION_SUPPRESS_OK_MESSAGE = 1 << 9,
+
+        // Displays a settings dialog before the import or export begins
+        // Use the properties map to pass settings to the plugin
+        PAF_PRE_ACTION_SETTINGS_DIALOG = 1 << 10
+};
 
     /** Class to pass data from Hlms editor to plugins */
     class HlmsEditorPluginData
     {
         public:
             // Public Hlms Editor data, exposed to the plugin
+            enum PLUGIN_TYPES
+            {
+                UNSIGNED_SHORT,
+                INT,
+                FLOAT,
+                STRING,
+                BOOL
+            };
+
+            struct PLUGIN_PROPERTY
+            {
+                std::string propertyName;
+                std::string labelName;
+                std::string info;
+                PLUGIN_TYPES type;
+                bool boolValue;                      // If type is BOOL, this is the value
+                float floatValue;                    // If type is FLOAT, this is the value
+                float floatValueMin = 0.0f;          // If type is FLOAT, this is the minimum value
+                float floatValueMax = 1.0f;          // If type is FLOAT, this is the maximum value
+                unsigned short shortValue = 0;       // If type is UNSIGNED_SHORT, this is the value
+                unsigned short shortValueMin = 0;    // If type is UNSIGNED_SHORT, this is the minimum value
+                unsigned short shortValueMax = 1;    // If type is UNSIGNED_SHORT, this is the maximum value
+                int intValue = 0;                    // If type is INT, this is the minimum value
+                int intValueMin = 0;                 // If type is INT, this is the minimum value
+                int intValueMax = 1;                 // If type is INT, this is the maximum value
+                std::string stringValue = "";        // If type is STRING, this is the value
+                unsigned int maxStringLength;        // If type is STRING, this is the maximum length
+            };
 
             // Input (input for the plugin, output from the HLMS Editor)
             String mInProjectName; // The name of the project; without path and without extenstion
@@ -97,6 +130,7 @@ namespace Ogre
             Ogre::Item* mInItem; // The currently selected Item in the renderwidget
             Ogre::RenderWindow* mInRenderWindow; // The renderwindow of the renderwidget
             Ogre::SceneManager* mInSceneManager; // The scenemanager used in the renderwidget
+            std::map<std::string, PLUGIN_PROPERTY> mInPropertiesMap; // Used to pass property information (e.g. from a settings/properties dialog) to the plugin
 
             // Input/output (data is passed two-way)
 
@@ -106,10 +140,11 @@ namespace Ogre
              * Note, that there is a possibility that it becomes a problem to access data from the OgreHlmsPbs / OgreHlmsUnlit components
              */
             Ogre::HlmsDatablock* mInOutCurrentDatablock;
-
+            Ogre::IdString mInOutCurrentDatablockId;
 
             // Output (output from the plugin, input for the HLMS Editor)
             String mOutReference; // To be filled in by the plugin; this can be a (file) reference of the import or export
+            std::map<std::string, PLUGIN_PROPERTY> mOutReferencesMap; // Pass multiple references (as a property map) from the plugin to the HLMS editor; these are not the properties
             String mOutSuccessText; // In case the function was executed correctly, this text can be displayed
             String mOutErrorText; // In case the function was not executed correctly, this errortext can be displayed
 
@@ -177,6 +212,11 @@ namespace Ogre
 
             // The plugin can also inform the editor to perform a pre- or post action
             virtual unsigned int getActionFlag (void) = 0;
+
+            // The plugin can determine the properties and passes them to the HLMS editor
+            // This funtion is optional and only called if PAF_PRE_ACTION_SETTINGS_DIALOG is set
+            // in the getActionFlag()
+            virtual std::map<std::string, HlmsEditorPluginData::PLUGIN_PROPERTY> getProperties (void) {return std::map<std::string, HlmsEditorPluginData::PLUGIN_PROPERTY>();}
     };
 }
 

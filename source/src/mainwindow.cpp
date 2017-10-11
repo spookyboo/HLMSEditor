@@ -49,6 +49,7 @@
 #include "hlms_editor_plugin_action.h"
 #include "config_dialog.h"
 #include "asset_propertywidget_xy.h"
+#include "hlms_editor_plugin_properties_dialog.h"
 #include <fstream>
 
 //****************************************************************************/
@@ -1512,28 +1513,11 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
     QString text;
     constructHlmsEditorPluginData(&data);
 
-    // Is a filedialog needed before import (to select the file to be imported)?
-    if (plugin->getActionFlag() & Ogre::PAF_PRE_IMPORT_OPEN_FILE_DIALOG)
-    {
-        QString fileName;
-        fileName = QFileDialog::getOpenFileName(this, QString("Import"),
-                                                QString(""),
-                                                QString("(*.*)"));
+    // Is a filedialog needed before import? (to select the file to be imported)?
+    doImportOpenFileDialog (plugin, &data);
 
-        if (!fileName.isEmpty())
-        {
-            QFileInfo info(fileName);
-            data.mInFileDialogName = info.fileName().toStdString();
-            data.mInFileDialogBaseName = info.baseName().toStdString();
-            data.mInFileDialogPath = (info.absolutePath() + QString("/")).toStdString();
-            data.mInExportPath = data.mInFileDialogPath;
-        }
-        else
-        {
-            QMessageBox::information(0, QString("Error"), QString("No file selected"));
-            return;
-        }
-    }
+    // Is a properties dialog needed before import?
+    doImportExportPropertiesDialog (plugin, &data);
 
     // Perform pre-import actions (by the editor)
     if (plugin->getActionFlag() & Ogre::PAF_PRE_IMPORT_MK_DIR)
@@ -1614,6 +1598,32 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
 }
 
 //****************************************************************************/
+void MainWindow::doImportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data)
+{
+    if (plugin->getActionFlag() & Ogre::PAF_PRE_IMPORT_OPEN_FILE_DIALOG)
+    {
+        QString fileName;
+        fileName = QFileDialog::getOpenFileName(this, QString("Import"),
+                                                QString(""),
+                                                QString("(*.*)"));
+
+        if (!fileName.isEmpty())
+        {
+            QFileInfo info(fileName);
+            data->mInFileDialogName = info.fileName().toStdString();
+            data->mInFileDialogBaseName = info.baseName().toStdString();
+            data->mInFileDialogPath = (info.absolutePath() + QString("/")).toStdString();
+            data->mInExportPath = data->mInFileDialogPath;
+        }
+        else
+        {
+            QMessageBox::information(0, QString("Error"), QString("No file selected"));
+            return;
+        }
+    }
+}
+
+//****************************************************************************/
 void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
 {
     // Make sure that the materials are not attached to the entity before they are deleted
@@ -1632,28 +1642,10 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
     constructHlmsEditorPluginData(&data);
 
     // Is a filedialog needed before export (to select the dir to be exported)?
-    if (plugin->getActionFlag() & Ogre::PAF_PRE_EXPORT_OPEN_DIR_DIALOG)
-    {
-        QString path;
-        QFileDialog dialog;
-        dialog.setFileMode(QFileDialog::Directory);
-        if (dialog.exec())
-        {
-            QStringList fileNames = dialog.selectedFiles();
-            path = fileNames.at(0);
-        }
+    doExportOpenFileDialog(plugin, &data);
 
-        if (!path.isEmpty())
-        {
-            data.mInFileDialogPath = (path + QString("/")).toStdString();
-            data.mInExportPath = data.mInFileDialogPath;
-        }
-        else
-        {
-            QMessageBox::information(0, QString("Error"), QString("No directory"));
-            return;
-        }
-    }
+    // Is a properties dialog needed before export?
+    doImportExportPropertiesDialog (plugin, &data);
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
@@ -1748,7 +1740,60 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
 }
 
 //****************************************************************************/
-void MainWindow::constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data)
+void MainWindow::doExportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data)
+{
+    if (plugin->getActionFlag() & Ogre::PAF_PRE_EXPORT_OPEN_DIR_DIALOG)
+    {
+        QString path;
+        QFileDialog dialog;
+        dialog.setFileMode(QFileDialog::Directory);
+        if (dialog.exec())
+        {
+            QStringList fileNames = dialog.selectedFiles();
+            path = fileNames.at(0);
+        }
+
+        if (!path.isEmpty())
+        {
+            data->mInFileDialogPath = (path + QString("/")).toStdString();
+            data->mInExportPath = data->mInFileDialogPath;
+        }
+        else
+        {
+            QMessageBox::information(0, QString("Error"), QString("No directory"));
+            return;
+        }
+    }
+}
+
+//****************************************************************************/
+void MainWindow::doImportExportPropertiesDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data)
+{
+    if (plugin->getActionFlag() & Ogre::PAF_PRE_ACTION_SETTINGS_DIALOG)
+    {
+        // Create the dialog dynamically and fill it with properties from the plugin
+        PluginPropertiesDialog dialog (this);
+        std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY> properties = plugin->getProperties();
+        std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY>::iterator it;
+        std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY>::iterator itEnd = properties.end();
+        Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY property;
+        for (it = properties.begin(); it != itEnd; ++it)
+        {
+            property = it->second;
+            dialog.addProperty(property);
+        }
+
+        // Set the (changed) property back in the data object
+        if (dialog.exec())
+        {
+            // Set the values from the dialog back to the data object
+            data->mInPropertiesMap = dialog.getProperties();
+        }
+    }
+}
+
+//****************************************************************************/
+void MainWindow::constructHlmsEditorPluginData (Ogre::HlmsEditorPluginData* data)
 {
     QOgreWidget* widget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
     Ogre::Item* item = widget->getItem();
