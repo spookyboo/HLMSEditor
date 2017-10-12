@@ -1514,7 +1514,8 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
     constructHlmsEditorPluginData(&data);
 
     // Is a filedialog needed before import? (to select the file to be imported)?
-    doImportOpenFileDialog (plugin, &data);
+    if (!doImportOpenFileDialog (plugin, &data))
+        return;
 
     // Is a properties dialog needed before import?
     doImportExportPropertiesDialog (plugin, &data);
@@ -1525,10 +1526,10 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
         // Create the project directory
         QString path = QString::fromStdString(data.mInImportPath + data.mInFileDialogBaseName);
         QDir dir(path);
-        if (!dir.exists())
-        {
+        if (dir.exists())
+            dir.removeRecursively();
+
           dir.mkdir(".");
-        }
     }
 
     // Perform pre-import actions (by the editor)
@@ -1593,12 +1594,20 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
         if (!fileName.isEmpty())
             loadMesh(fileName);
     }
+    if (plugin->getActionFlag() & Ogre::PAF_POST_IMPORT_LOAD_MESH_MAPREF)
+    {
+        // Load a mesh file
+        //QString fileName = QString::fromStdString(data.mOutReference);
+        QString fileName = getStringPropertyFromReferenceMap ("load_mesh", &data);
+        if (!fileName.isEmpty())
+            loadMesh(fileName);
+    }
 
     QApplication::restoreOverrideCursor();
 }
 
 //****************************************************************************/
-void MainWindow::doImportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data)
+bool MainWindow::doImportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data)
 {
     if (plugin->getActionFlag() & Ogre::PAF_PRE_IMPORT_OPEN_FILE_DIALOG)
     {
@@ -1618,8 +1627,24 @@ void MainWindow::doImportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::H
         else
         {
             QMessageBox::information(0, QString("Error"), QString("No file selected"));
-            return;
+            return false;
         }
+    }
+
+    return true;
+}
+
+//****************************************************************************/
+const QString& MainWindow::getStringPropertyFromReferenceMap (const std::string& propertyName, Ogre::HlmsEditorPluginData* data)
+{
+    std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY> outputProperties = data->mOutReferencesMap;
+    std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY>::iterator it = outputProperties.find(propertyName);
+    if (it != outputProperties.end())
+    {
+        // Property found; return its value
+        mTempString = QString::fromStdString((it->second).stringValue);
+        Ogre::LogManager::getSingleton().logMessage("Load mesh: " + mTempString.toStdString()); // TEST
+        return mTempString;
     }
 }
 
@@ -1642,7 +1667,8 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
     constructHlmsEditorPluginData(&data);
 
     // Is a filedialog needed before export (to select the dir to be exported)?
-    doExportOpenFileDialog(plugin, &data);
+    if (!doExportOpenFileDialog(plugin, &data))
+        return;
 
     // Is a properties dialog needed before export?
     doImportExportPropertiesDialog (plugin, &data);
@@ -1740,7 +1766,7 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
 }
 
 //****************************************************************************/
-void MainWindow::doExportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data)
+bool MainWindow::doExportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data)
 {
     if (plugin->getActionFlag() & Ogre::PAF_PRE_EXPORT_OPEN_DIR_DIALOG)
     {
@@ -1761,9 +1787,11 @@ void MainWindow::doExportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::H
         else
         {
             QMessageBox::information(0, QString("Error"), QString("No directory"));
-            return;
+            return false;
         }
     }
+
+    return true;
 }
 
 //****************************************************************************/

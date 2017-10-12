@@ -76,7 +76,13 @@ namespace Ogre
 
         // Displays a settings dialog before the import or export begins
         // Use the properties map to pass settings to the plugin
-        PAF_PRE_ACTION_SETTINGS_DIALOG = 1 << 10
+        PAF_PRE_ACTION_SETTINGS_DIALOG = 1 << 10,
+
+        // Load a project after the import (mOutReferencesMap contains the property to the project; use 'load_project')
+        PAF_POST_IMPORT_OPEN_PROJECT_MAPREF = 1 << 11,
+
+        // Load a mesh after the import (mOutReferencesMap contains the property to the project; use 'load_mesh')
+        PAF_POST_IMPORT_LOAD_MESH_MAPREF = 1 << 12
 };
 
     /** Class to pass data from Hlms editor to plugins */

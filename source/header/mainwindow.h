@@ -149,6 +149,7 @@ class MainWindow : public QMainWindow
         Ogre::DataStreamPtr openFile(Ogre::String source);
         void clearNamesAndRemovePaintLayers (void);
         void deleteTempPathRecursive(void);
+        const QString& getStringPropertyFromReferenceMap (const std::string& propertyName, Ogre::HlmsEditorPluginData* data);
 
 	private slots:
         void doNewProjectAction(void);
@@ -180,9 +181,9 @@ class MainWindow : public QMainWindow
         void handleTextureMutationOccured(void);
         void saveTextureBrowserCfg(void);
         void doImport(Ogre::HlmsEditorPlugin* plugin);
-        void doImportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data);
+        bool doImportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data);
         void doExport(Ogre::HlmsEditorPlugin* plugin);
-        void doExportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data);
+        bool doExportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data);
         void doImportExportPropertiesDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data);
         void constructHlmsEditorPluginData(Ogre::HlmsEditorPluginData* data);
         void doRecentMaterialFileAction(const QString& fileName);

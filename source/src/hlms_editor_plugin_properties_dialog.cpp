@@ -27,7 +27,6 @@
 PluginPropertiesDialog::PluginPropertiesDialog (MainWindow* parent) : QDialog(parent)
 {
     setWindowTitle("Plugin properties");
-    setMinimumSize(600, 800);
     mMainLayout = new QVBoxLayout;
     mPropertiesLayout = new QVBoxLayout;
 
