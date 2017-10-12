@@ -1585,7 +1585,15 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
     {
         // Open a project (referered to by means of data.mOutExportReference)
         QString fileName = QString::fromStdString(data.mOutReference);
-        loadProject(fileName);
+        if (!fileName.isEmpty())
+            loadProject(fileName);
+    }
+    if (plugin->getActionFlag() & Ogre::PAF_POST_IMPORT_OPEN_PROJECT_MAPREF)
+    {
+        // Open a project (referered to by means of data.mOutReferencesMap)
+        QString fileName = getStringPropertyFromReferenceMap ("load_project", &data);
+        if (!fileName.isEmpty())
+            loadProject(fileName);
     }
     if (plugin->getActionFlag() & Ogre::PAF_POST_IMPORT_LOAD_MESH)
     {
@@ -1597,7 +1605,6 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
     if (plugin->getActionFlag() & Ogre::PAF_POST_IMPORT_LOAD_MESH_MAPREF)
     {
         // Load a mesh file
-        //QString fileName = QString::fromStdString(data.mOutReference);
         QString fileName = getStringPropertyFromReferenceMap ("load_mesh", &data);
         if (!fileName.isEmpty())
             loadMesh(fileName);
