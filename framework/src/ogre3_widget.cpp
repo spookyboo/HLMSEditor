@@ -39,6 +39,7 @@
 #include "OgreImage.h"
 #include "constants.h"
 #include "renderwindow_dockwidget.h"
+#include "OgreMeshManager2.h"
 
 namespace Magus
 {
@@ -482,10 +483,20 @@ namespace Magus
             // Delete the old item if available
             if (mItem)
             {
+                // Set the default material to the item
                 datablockNameStr = *(mItem->getSubItem(0)->getDatablock()->getNameStr());
                 setDefaultDatablockItem();
+
+                // Delete the item
                 mSceneNode->detachAllObjects();
                 mSceneManager->destroyItem(mItem);
+
+                // Also delete the mesh, because meshes with the same name (although different meshes) may be loaded
+                Ogre::MeshManager* man = Ogre::MeshManager::getSingletonPtr();
+                if (man->getResourceByName(meshName))
+                {
+                    man->remove(meshName);
+                }
             }
 
             // Create a new item
