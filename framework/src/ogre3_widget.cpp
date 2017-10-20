@@ -631,6 +631,17 @@ namespace Magus
     }
 
     //****************************************************************************/
+    void QOgreWidget::setDefaultDatablockInSubItem(int index)
+    {
+        if (mItem)
+        {
+            Ogre::SubItem* subItem = mItem->getSubItem(index);
+            if (subItem)
+                setDefaultDatablockSubItem(subItem);
+        }
+    }
+
+    //****************************************************************************/
     void QOgreWidget::setDefaultDatablockItemRttHoover(void)
     {
         resetHighlight();
@@ -1315,7 +1326,13 @@ namespace Magus
     }
 
     //****************************************************************************/
-    const Ogre::String& QOgreWidget::getDatablockNameOfHighlightedSubmesh()
+    int QOgreWidget::getIndexOfHighlightedSubmesh(void)
+    {
+        return mLatestSubItemIndexHighlighted;
+    }
+
+    //****************************************************************************/
+    const Ogre::String& QOgreWidget::getDatablockNameOfHighlightedSubmesh(void)
     {
         // Retrieve the latest datablock instead of the current datablock, because the mouse may be hoovering
         // over the submesh, meaning that the 'green' highlighted datablock is returned instead; this is not
@@ -1332,6 +1349,26 @@ namespace Magus
 
         mHelperString = Ogre::String(*mLatestSubItemDatablock->getNameStr());
         return mHelperString;
+    }
+
+    //****************************************************************************/
+    const Ogre::IdString& QOgreWidget::getDatablockOfHighlightedSubmesh(void)
+    {
+        // Retrieve the latest datablock instead of the current datablock, because the mouse may be hoovering
+        // over the submesh, meaning that the 'green' highlighted datablock is returned instead; this is not
+        // what we want.
+        mHelperIdString = "";
+        if (!mItem || !mLatestSubItemDatablock)
+            return mHelperIdString;
+
+        if (mLatestSubItemIndexHighlighted == -1)
+            return mHelperIdString;
+
+        if (mLatestSubItemIndexHighlighted >= 0 && mLatestSubItemIndexHighlighted >= mItem->getNumSubItems())
+            return mHelperIdString;
+
+        mHelperIdString = mLatestSubItemDatablock->getName();
+        return mHelperIdString;
     }
 
     //****************************************************************************/

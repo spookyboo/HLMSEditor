@@ -537,7 +537,22 @@ void HlmsUtilsManager::destroyDatablock(const Ogre::IdString& datablockId)
         datablock = hlmsPbs->getDatablock(datablockId);
         if (datablock)
         {
-            // Only destroy the datablocks. In principle The textures should also be destroyed (using destroyAllTextures...), but this only causes large wait times
+            /*
+            if (datablock->getLinkedRenderables().size() > 0)
+            {
+                // Detach datablock
+                const Ogre::vector<Ogre::Renderable*>::type linkedRenderables = datablock->getLinkedRenderables();
+                Ogre::vector<Ogre::Renderable*>::type::const_iterator it;
+                Ogre::vector<Ogre::Renderable*>::type::const_iterator itEnd = linkedRenderables.end();
+                Ogre::Renderable* renderable;
+                for (it = linkedRenderables.begin(); it != itEnd; ++it)
+                {
+                    renderable = *it;
+                    renderable->setMaterialName(DEFAULT_DATABLOCK_NAME, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+                }
+            }
+            */
+            // Only destroy the datablocks. In principle the textures should also be destroyed (using destroyAllTextures...), but this only causes large wait times
             hlmsPbs->destroyDatablock(datablockId);
             destroyed = true;
         }
@@ -569,7 +584,6 @@ void HlmsUtilsManager::destroyDatablock(const Ogre::IdString& datablockId)
         ++itRegisteredDatablocks;
     }
 }
-
 
 //****************************************************************************/
 bool HlmsUtilsManager::isInRegisteredDatablocksVec (const Ogre::String& datablockNameStr)

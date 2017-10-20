@@ -79,6 +79,7 @@ namespace Magus
             void setPosition(const Ogre::Vector3& position);
             void setDefaultDatablockItem(void);
             void setDefaultDatablockSubItem(Ogre::SubItem* subItem);
+            void setDefaultDatablockInSubItem(int index); // Set default datablock in sub item
             void setDefaultDatablockItemRttHoover(void); // Set the mItem to default
             void saveToFile(const Ogre::String& fileName);
 
@@ -131,8 +132,10 @@ namespace Magus
             void setSkyBoxVisible (bool visible);
             void setPaintLayers(PaintLayers* paintLayers); // Set pointer to vector with PaintLayers
             int getSubItemIndexWithMouseOver(int mouseX, int mouseY); // Returns the subitem index of the subitem where the mouse hoovers over
+            int getIndexOfHighlightedSubmesh(void);
             void removeDatablockFromItem (const Ogre::IdString id);
-            const Ogre::String& getDatablockNameOfHighlightedSubmesh(); // Returns the name string of the datablock of the highlighted submesh
+            const Ogre::String& getDatablockNameOfHighlightedSubmesh(void); // Returns the name string of the datablock of the highlighted submesh
+            const Ogre::IdString& getDatablockOfHighlightedSubmesh(void);
 
         protected:
             Ogre::Root* mRoot;
@@ -194,6 +197,7 @@ namespace Magus
             Ogre::uint8 mUnlitTextureTypeOffsetTexture;
             bool mResetMousePos; // Used to indicate that diff between current mouse position and previous mouse position must be set to 0 to keep smoothness of mousemovent actions
             Ogre::String mHelperString;
+            Ogre::IdString mHelperIdString;
 
             virtual void createCompositor();
             virtual void createCompositorRenderToTexture();

@@ -230,6 +230,7 @@ class HlmsUtilsManager
         DatablockStruct mRegisteredDatablockStruct;
         Ogre::String helperString;
         Ogre::IdString mHelperIdString;
+        Ogre::String mHelperString;
 };
 
 #endif

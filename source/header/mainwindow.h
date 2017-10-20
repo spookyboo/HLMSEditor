@@ -99,6 +99,7 @@ class MainWindow : public QMainWindow
         void addResourceLocationFile (const QString& fileName);
         void addResourceLocationPath (const QString& path);
         void loadMaterialAndCreateNodeStructure(const QString jsonFileName); // Load the material and create the node structure (the material is not applied to the mesh (item))
+        void createNodeStructure (Ogre::IdString datablockId);
         void applyCurrentMaterialToMesh(void); // Apply the material to the whole mItem (so also all subitems)
         void applyEditMaterialOfSubmeshMenuAction(void); // Load the material corresponding to the datablock id of the selected (sub)mesh
 

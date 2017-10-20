@@ -622,6 +622,42 @@ void MainWindow::loadMaterialAndCreateNodeStructure(const QString jsonFileName)
 }
 
 //****************************************************************************/
+void MainWindow::createNodeStructure (Ogre::IdString datablockId)
+{
+     HlmsUtilsManager::DatablockStruct datablockStruct = mHlmsUtilsManager->getDatablock(datablockId);
+     mCurrentJsonFileName = datablockStruct.jsonFileName.c_str();
+     appendRecentMaterialToRecentlyUsed(datablockStruct.jsonFileName.c_str());
+     setCurrentDatablockIdAndNameStr (datablockStruct.datablockId, datablockStruct.datablockNameStr);
+
+     // Create the pbs node structure
+     if (datablockStruct.type == HLMS_PBS)
+     {
+         HlmsNodePbsDatablock* node = mNodeEditorDockWidget->createPbsNodeStructure(datablockStruct);
+         if (node)
+         {
+             node->setSelected(true);
+             mNodeEditorDockWidget->nodeSelected(node);
+         }
+         mPropertiesDockWidget->setTextureTypePropertyVisible(true);
+         mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(true);
+         mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(false);
+     }
+     else if (datablockStruct.type == HLMS_UNLIT)
+     {
+         // Create the unlit node structure
+         HlmsNodeUnlitDatablock* node = mNodeEditorDockWidget->createUnlitNodeStructure(datablockStruct);
+         if (node)
+         {
+             node->setSelected(true);
+             mNodeEditorDockWidget->nodeSelected(node);
+         }
+         mPropertiesDockWidget->setTextureTypePropertyVisible(false);
+         mPropertiesDockWidget->setDetailMapWOSPropertiesVisible(false);
+         mPropertiesDockWidget->setDetailMapAnimationPropertiesVisible(true);
+     }
+}
+
+//****************************************************************************/
 void MainWindow::doOpenMeshMenuAction(void)
 {
     // Load a mesh
@@ -1118,32 +1154,13 @@ void MainWindow::applyEditMaterialOfSubmeshMenuAction(void)
 {
     // Determine the datablock id of the selected (sub)mesh, load the corresponding material and apply it to the (sub)mesh
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
-    QMap<unsigned short, Ogre::String> indicesAndNameStrs = ogreWidget->getMaterialNamesFromCurrentMesh();
-    Ogre::String nameSelectedMaterial = ogreWidget->getDatablockNameOfHighlightedSubmesh();
+    int subItemIndex = ogreWidget->getIndexOfHighlightedSubmesh();
+    if (subItemIndex < 0)
+        return;
 
-    // Load all materials, so the relation between the full datablock name and the json filename can be made
-    loadAllMaterialsFromMaterialBrowser();
-
-    // Iterate through the map with materialnames/full datablock names
-    QMap <unsigned short, Ogre::String>::iterator it = indicesAndNameStrs.begin();
-    QMap <unsigned short, Ogre::String>::iterator itEnd = indicesAndNameStrs.end();
-    Ogre::String nameStr; // This is the full name of the datablock
-    unsigned short index;
-    HlmsUtilsManager::DatablockStruct datablockStruct;
-    while (it != itEnd)
-    {
-        nameStr = it.value();
-        index = it.key();
-        datablockStruct = mHlmsUtilsManager->getDatablockStructOfNameStr(nameStr);
-
-        if (datablockStruct.type != HLMS_NONE && datablockStruct.datablockNameStr == nameSelectedMaterial)
-        {
-            loadMaterialAndCreateNodeStructure(datablockStruct.jsonFileName.c_str());
-            break;
-        }
-
-        ++it;
-    }
+    Ogre::LogManager::getSingleton().logMessage("subItemIndex > -1: "); // TEST
+    Ogre::IdString id = ogreWidget->getDatablockOfHighlightedSubmesh(); // Get the current id of the material (not the 'green' one) of the highlighted submesh
+    createNodeStructure(id);
 }
 
 //****************************************************************************/
