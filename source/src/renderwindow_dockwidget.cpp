@@ -126,6 +126,7 @@ RenderwindowDockWidget::RenderwindowDockWidget(QString title, MainWindow* parent
     setContextMenuPolicy(Qt::CustomContextMenu);
     mContextMenu = new QMenu(this);
     mContextMenu->addAction(new QAction(ACTION_SET_CURRENT_MATERIAL, this));
+    mContextMenu->addAction(new QAction(ACTION_EDIT_SUBMESH_MATERIAL, this));
     mMeshesSubMenu = mContextMenu->addMenu("Select mesh");
     mActionGroupMeshes = new QActionGroup(mMeshesSubMenu);
     mActionGroupMeshes->setExclusive(true);
@@ -773,6 +774,11 @@ void RenderwindowDockWidget::contextMenuSelected(QAction* action)
     if (actionText == ACTION_SET_CURRENT_MATERIAL)
     {
         mOgreWidget->assignCurrentDatablock();
+        return;
+    }
+    else if (actionText == ACTION_EDIT_SUBMESH_MATERIAL)
+    {
+        mParent->applyEditMaterialOfSubmeshMenuAction();
         return;
     }
     else if (actionText == ACTION_TOGGLE_LIGHT_DIRECTION)

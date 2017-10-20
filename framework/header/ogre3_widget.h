@@ -132,6 +132,7 @@ namespace Magus
             void setPaintLayers(PaintLayers* paintLayers); // Set pointer to vector with PaintLayers
             int getSubItemIndexWithMouseOver(int mouseX, int mouseY); // Returns the subitem index of the subitem where the mouse hoovers over
             void removeDatablockFromItem (const Ogre::IdString id);
+            const Ogre::String& getDatablockNameOfHighlightedSubmesh(); // Returns the name string of the datablock of the highlighted submesh
 
         protected:
             Ogre::Root* mRoot;
@@ -192,6 +193,7 @@ namespace Magus
             Ogre::PbsTextureTypes mPbsTextureTypeOffsetTexture;
             Ogre::uint8 mUnlitTextureTypeOffsetTexture;
             bool mResetMousePos; // Used to indicate that diff between current mouse position and previous mouse position must be set to 0 to keep smoothness of mousemovent actions
+            Ogre::String mHelperString;
 
             virtual void createCompositor();
             virtual void createCompositorRenderToTexture();

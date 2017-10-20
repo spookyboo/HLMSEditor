@@ -1294,6 +1294,7 @@ namespace Magus
     {
         mRenderwindowDockWidget->leaveEventPublic (event); // The render dockwindow needs it
     }
+
     //****************************************************************************/
     void QOgreWidget::assignCurrentDatablock()
     {
@@ -1311,6 +1312,26 @@ namespace Magus
             else
                 mItem->setDatablock(mCurrentDatablockId);
         }
+    }
+
+    //****************************************************************************/
+    const Ogre::String& QOgreWidget::getDatablockNameOfHighlightedSubmesh()
+    {
+        // Retrieve the latest datablock instead of the current datablock, because the mouse may be hoovering
+        // over the submesh, meaning that the 'green' highlighted datablock is returned instead; this is not
+        // what we want.
+        mHelperString = "";
+        if (!mItem || !mLatestSubItemDatablock)
+            return mHelperString;
+
+        if (mLatestSubItemIndexHighlighted == -1)
+            return mHelperString;
+
+        if (mLatestSubItemIndexHighlighted >= 0 && mLatestSubItemIndexHighlighted >= mItem->getNumSubItems())
+            return mHelperString;
+
+        mHelperString = Ogre::String(*mLatestSubItemDatablock->getNameStr());
+        return mHelperString;
     }
 
     //****************************************************************************/

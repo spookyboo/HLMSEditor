@@ -100,6 +100,7 @@ class MainWindow : public QMainWindow
         void addResourceLocationPath (const QString& path);
         void loadMaterialAndCreateNodeStructure(const QString jsonFileName); // Load the material and create the node structure (the material is not applied to the mesh (item))
         void applyCurrentMaterialToMesh(void); // Apply the material to the whole mItem (so also all subitems)
+        void applyEditMaterialOfSubmeshMenuAction(void); // Load the material corresponding to the datablock id of the selected (sub)mesh
 
         // Public Paint functions
         PaintLayers* getPaintLayers(void); // Returns pointer to the paintlayers, managed by the PainLayerManager
@@ -139,6 +140,7 @@ class MainWindow : public QMainWindow
          // Saves the current datablock; if validatePaintLayers is true, the validation whether there are paintlayers must still be done
         void saveDatablock(bool validatePaintLayers);
         bool continueEvenIfThereArePaintLayers(void); // Validate whether there are paintlayers (before saving the datablock)
+        void loadAllMaterialsFromMaterialBrowser (void);
 
         void loadMaterialBrowserCfg(void);
         void saveMaterialBrowserCfg(void);
@@ -164,6 +166,7 @@ class MainWindow : public QMainWindow
         void doSaveAsDatablockMenuAction(void);
         void doSaveAsMeshMenuAction(void);
         void doMaterialSetMenuAction(void);
+        void doEditMaterialOfSubmeshMenuAction(void);
         void doMaterialBrowserOpenMenuAction(void);
         void doMaterialBrowserAddMenuAction(void);
         void doMaterialPresetMenuAction(void);
@@ -215,6 +218,7 @@ class MainWindow : public QMainWindow
         QAction* mSaveAsDatablockMenuAction;
         QAction* mSaveAsMeshMenuAction;
         QAction* mMaterialSetMenuAction;
+        QAction* mMaterialEditMenuAction;
         QAction* mMaterialPresetMenuAction;
         QAction* mMaterialClearMenuAction;
         QAction* mMaterialBrowserOpenMenuAction;

@@ -222,15 +222,22 @@ void MainWindow::createActions(void)
     mMaterialSetMenuAction = new QAction(QString("Apply current material to (sub)mesh"), this);
     mMaterialSetMenuAction->setShortcut(QKeySequence(QString("Ctrl+M")));
     connect(mMaterialSetMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialSetMenuAction()));
+
+    mMaterialEditMenuAction = new QAction(QString(ACTION_EDIT_SUBMESH_MATERIAL), this);
+    connect(mMaterialEditMenuAction, SIGNAL(triggered()), this, SLOT(doEditMaterialOfSubmeshMenuAction()));
+
     mMaterialBrowserOpenMenuAction = new QAction(QString("Open materialbrowser"), this);
     mMaterialBrowserOpenMenuAction->setShortcut(QKeySequence(QString("Ctrl+B")));
     connect(mMaterialBrowserOpenMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserOpenMenuAction()));
+
     mMaterialBrowserAddMenuAction = new QAction(QString("Add material to materialbrowser"), this);
     mMaterialBrowserAddMenuAction->setShortcut(QKeySequence(QString("Ctrl+H")));
     connect(mMaterialBrowserAddMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialBrowserAddMenuAction()));
+
     mMaterialPresetMenuAction = new QAction(QString("Material as preset"), this);
     mMaterialPresetMenuAction->setShortcut(QKeySequence(QString("Ctrl+C")));
     connect(mMaterialPresetMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialPresetMenuAction()));
+
     mMaterialClearMenuAction = new QAction(QString("Clear all materials (from memory)"), this);
     mMaterialClearMenuAction->setShortcut(QKeySequence(QString("Ctrl+Y")));
     connect(mMaterialClearMenuAction, SIGNAL(triggered()), this, SLOT(doMaterialClearMenuAction()));
@@ -359,6 +366,7 @@ void MainWindow::createMenus(void)
     // ******** Material browser ********
     mMaterialMenu = menuBar()->addMenu(QString("&Materials"));
     mMaterialMenu->addAction(mMaterialSetMenuAction);
+    mMaterialMenu->addAction(mMaterialEditMenuAction);
     mMaterialMenu->addAction(mMaterialBrowserOpenMenuAction);
     mMaterialMenu->addAction(mMaterialBrowserAddMenuAction);
     mMaterialMenu->addAction(mMaterialPresetMenuAction);
@@ -1078,6 +1086,64 @@ void MainWindow::doMaterialSetMenuAction(void)
 void MainWindow::applyCurrentMaterialToMesh(void)
 {
     mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW)->assignCurrentDatablock();
+}
+
+//****************************************************************************/
+void MainWindow::doEditMaterialOfSubmeshMenuAction(void)
+{
+    applyEditMaterialOfSubmeshMenuAction();
+}
+
+//****************************************************************************/
+void MainWindow::loadAllMaterialsFromMaterialBrowser (void)
+{
+    // Load all materials of the material browser (unfortunately), because the relation between the materialname
+    // of the mesh and the jsonfilename / datablock name can only be made when a resource is loaded.
+    // It is not 100% sure that the resourcename (stored in the material browser structure) is also
+    // the actual full datablock name. This can only be determined when the datablock is loaded;
+    // The mHlmsUtilsManager keeps track of the loaded resources and their full name, hash name, ...etc.
+    const QVector<Magus::QtResourceInfo*>& resources = mMaterialBrowser->getResources();
+    QVectorIterator<Magus::QtResourceInfo*> itResources(resources);
+    itResources.toFront();
+    Magus::QtResourceInfo* info;
+    while (itResources.hasNext())
+    {
+        info = itResources.next();
+        mHlmsUtilsManager->loadDatablock(info->fullQualifiedName);
+    }
+}
+
+//****************************************************************************/
+void MainWindow::applyEditMaterialOfSubmeshMenuAction(void)
+{
+    // Determine the datablock id of the selected (sub)mesh, load the corresponding material and apply it to the (sub)mesh
+    QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
+    QMap<unsigned short, Ogre::String> indicesAndNameStrs = ogreWidget->getMaterialNamesFromCurrentMesh();
+    Ogre::String nameSelectedMaterial = ogreWidget->getDatablockNameOfHighlightedSubmesh();
+
+    // Load all materials, so the relation between the full datablock name and the json filename can be made
+    loadAllMaterialsFromMaterialBrowser();
+
+    // Iterate through the map with materialnames/full datablock names
+    QMap <unsigned short, Ogre::String>::iterator it = indicesAndNameStrs.begin();
+    QMap <unsigned short, Ogre::String>::iterator itEnd = indicesAndNameStrs.end();
+    Ogre::String nameStr; // This is the full name of the datablock
+    unsigned short index;
+    HlmsUtilsManager::DatablockStruct datablockStruct;
+    while (it != itEnd)
+    {
+        nameStr = it.value();
+        index = it.key();
+        datablockStruct = mHlmsUtilsManager->getDatablockStructOfNameStr(nameStr);
+
+        if (datablockStruct.type != HLMS_NONE && datablockStruct.datablockNameStr == nameSelectedMaterial)
+        {
+            loadMaterialAndCreateNodeStructure(datablockStruct.jsonFileName.c_str());
+            break;
+        }
+
+        ++it;
+    }
 }
 
 //****************************************************************************/
@@ -2142,20 +2208,8 @@ void MainWindow::setDatablocksFromMaterialBrowserInItem(void)
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
     QMap<unsigned short, Ogre::String> indicesAndNameStrs = ogreWidget->getMaterialNamesFromCurrentMesh();
 
-    // Load all materials of the material browser (unfortunately), because the relation between the materialname
-    // of the mesh and the jsonfilename / datablock name can only be made when a resource is loaded.
-    // It is not 100% sure that the resourcename (stored in the material browser structure) is also
-    // the actual full datablock name. This can only be determined when the datablock is loaded;
-    // The mHlmsUtilsManager keeps track of the loaded resources and their full name, hash name, ...etc.
-    const QVector<Magus::QtResourceInfo*>& resources = mMaterialBrowser->getResources();
-    QVectorIterator<Magus::QtResourceInfo*> itResources(resources);
-    itResources.toFront();
-    Magus::QtResourceInfo* info;
-    while (itResources.hasNext())
-    {
-        info = itResources.next();
-        mHlmsUtilsManager->loadDatablock(info->fullQualifiedName);
-    }
+    // Load all materials, so the relation between the full datablock name and the json filename can be made
+    loadAllMaterialsFromMaterialBrowser();
 
     // Iterate through the map with materialnames/full datablock names and assign the datablocks to the subItems
     QMap <unsigned short, Ogre::String>::iterator it = indicesAndNameStrs.begin();

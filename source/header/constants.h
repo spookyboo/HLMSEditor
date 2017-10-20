@@ -241,6 +241,8 @@ static bool randomBool(void)
 
 // Contextmenu action
 static const QString ACTION_SET_CURRENT_MATERIAL = QString("Apply current material to (sub)mesh");
+static const QString ACTION_EDIT_SUBMESH_MATERIAL = QString("Edit material of selected (sub)mesh");
+static const QString ACTION_DELETE_SUBMESH = QString("Delete a submesh");
 static const QString ACTION_TOGGLE_LIGHT_DIRECTION = QString("Set light direction");
 static const QString ACTION_RESET_CAMERA = QString("Reset camera position/direction");
 static const QString ACTION_TOGGLE_SUBMESH_SELECTION = QString("Toggle Mesh/Submesh selection");
