@@ -56,8 +56,55 @@
 MainWindow::MainWindow(void) :
     mIsClosing(false),
     mFirst(true),
-    mSaveTextureBrowserTimerActive(false)
+    mSaveTextureBrowserTimerActive(false),
+    mMaterialBrowser(0),
+    mFileMenu(0),
+    mMaterialMenu(0),
+    mTextureMenu(0),
+    mWindowMenu(0),
+    mRecentMaterialsFilesMenu(0),
+    mRecentProjectFilesMenu(0),
+    mNewProjectAction(0),
+    mNewPbsMaterialAction(0),
+    mNewUnlitMaterialAction(0),
+    mOpenProjectMenuAction(0),
+    mOpenDatablockMenuAction(0),
+    mOpenMeshMenuAction(0),
+    mSaveProjectMenuAction(0),
+    mSaveDatablockMenuAction(0),
+    mSaveAsProjectMenuAction(0),
+    mSaveAsDatablockMenuAction(0),
+    mSaveAsMeshMenuAction(0),
+    mMaterialSetMenuAction(0),
+    mMaterialEditMenuAction(0),
+    mMaterialPresetMenuAction(0),
+    mMaterialClearMenuAction(0),
+    mMaterialBrowserOpenMenuAction(0),
+    mMaterialBrowserAddMenuAction(0),
+    mTextureBrowserImportMenuAction(0),
+    mNewPaintingLayerAction(0),
+    mEditPaintingLayerAction(0),
+    mDeleteSelectedPaintingLayersAction(0),
+    mConfigureMenuAction(0),
+    mTextureBrowserAddImageMenuAction(0),
+    mRecentMaterialsFilesMenuAction(0),
+    mRecentProjectFilesMenuAction(0),
+    mQuitMenuAction(0),
+    mResetWindowLayoutMenuAction(0),
+    mNodeEditorDockWidget(0),
+    mCentralDockWidget(0)
 {
+    mProjectName = "";
+    mProjectPath = "";
+    mMaterialFileName = "";
+    mTextureFileName = "";
+    QString mCurrentJsonFileName = "";
+    mCurrentDatablockId = "";
+    mCurrentDatablockNameStr = "";
+    mRecentMaterialsFiles.clear();
+    mRecentProjectFiles.clear();
+    helperIndices.clear();
+
     // Delete all files in the 'temp' directory
     deleteTempPathRecursive();
 
@@ -1156,6 +1203,11 @@ void MainWindow::applyEditMaterialOfSubmeshMenuAction(void)
     QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
     int subItemIndex = ogreWidget->getIndexOfHighlightedSubmesh();
     if (subItemIndex < 0)
+        return;
+
+    // The default datablock may not be editted
+    Ogre::String nameStr = ogreWidget->getDatablockNameOfHighlightedSubmesh();
+    if (nameStr == DEFAULT_DATABLOCK_NAME)
         return;
 
     Ogre::LogManager::getSingleton().logMessage("subItemIndex > -1: "); // TEST

@@ -177,6 +177,9 @@ namespace Ogre
                 mInMaterialFileNameVector.clear();
                 mInTextureFileNameVector.clear();
                 mInTexturesUsedByDatablocks.clear();
+                mInPropertiesMap.clear();
+                mInOutCurrentDatablockId= "";
+                mOutReferencesMap.clear();
             }
 
             // Destructor
