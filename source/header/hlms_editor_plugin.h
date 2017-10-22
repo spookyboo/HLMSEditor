@@ -41,49 +41,69 @@ namespace Ogre
      */
     enum PLUGIN_ACTION_FLAG
     {
-        // The plugin indicates that the HLMS Editor must open a filedialog before the
-        // executeImport() function is added. The filename (mInFileDialogName + mInFileDialogPath) is passed
-        PAF_PRE_IMPORT_OPEN_FILE_DIALOG = 1 << 0,
-
-        // Create a directory before importing
-        PAF_PRE_IMPORT_MK_DIR = 1 << 1,
-
-        // The plugin indicates that the HLMS Editor must open a filedialog before the
-        // executeExport () function is executed. The output directory (mInFileDialogPath) is passed
-        PAF_PRE_EXPORT_OPEN_DIR_DIALOG = 1 << 2,
-
-        // Delete all datablocks before the export is executed and keep the list of
-        // datablocks (files) to rebuild them after the export
-        PAF_PRE_EXPORT_DELETE_ALL_DATABLOCKS = 1 << 3,
-
-        // The HLMS editor fills the mInTexturesUsedByDatablocks vector.
-        // This is a performance improvement (otherwise the editor always provides the data even if not needed)
-        PAF_PRE_EXPORT_TEXTURES_USED_BY_DATABLOCK = 1 << 4,
-
-        // Load a project after the import (mOutReference contains the project file)
-        PAF_POST_IMPORT_OPEN_PROJECT = 1 << 5,
-
-        PAF_POST_IMPORT_SAVE_RESOURCE_LOCATIONS = 1 << 6,
-
-        // Load a mesh after the import (mOutReference contains the mesh file)
-        PAF_POST_IMPORT_LOAD_MESH = 1 << 7,
-
-        // Delete all datablocks after the export is executed
-        PAF_POST_EXPORT_DELETE_ALL_DATABLOCKS = 1 << 8,
-
-        // Do not display the 'ok' message after a succesful import or export
-        PAF_POST_ACTION_SUPPRESS_OK_MESSAGE = 1 << 9,
+        // **********************************************************************************************************************
+        // **************************************************** GENERIC FLAGS ****************************************************
+        // **********************************************************************************************************************
 
         // Displays a settings dialog before the import or export begins
         // Use the properties map to pass settings to the plugin
-        PAF_PRE_ACTION_SETTINGS_DIALOG = 1 << 10,
+        PAF_PRE_ACTION_SETTINGS_DIALOG = 1 << 1,
+
+        // Do not display the 'ok' message after a succesful import or export
+        PAF_POST_ACTION_SUPPRESS_OK_MESSAGE = 1 << 2,
+
+        // **********************************************************************************************************************
+        // **************************************************** IMPORT FLAGS ****************************************************
+        // **********************************************************************************************************************
+
+        // The plugin indicates that the HLMS Editor must open a filedialog before the
+        // executeImport() function is added. The filename (mInFileDialogName + mInFileDialogPath) is passed
+        PAF_PRE_IMPORT_OPEN_FILE_DIALOG = 1 << 3,
+
+        // Create a directory before importing
+        PAF_PRE_IMPORT_MK_DIR = 1 << 4,
+
+        // Displays a settings dialog before the import begins
+        // Use the properties map to pass settings to the plugin
+        PAF_PRE_IMPORT_SETTINGS_DIALOG = 1 << 5,
+
+        // Load a project after the import (mOutReference contains the project file)
+        PAF_POST_IMPORT_OPEN_PROJECT = 1 << 6,
+
+        PAF_POST_IMPORT_SAVE_RESOURCE_LOCATIONS = 1 << 7,
+
+        // Load a mesh after the import (mOutReference contains the mesh file)
+        PAF_POST_IMPORT_LOAD_MESH = 1 << 8,
 
         // Load a project after the import (mOutReferencesMap contains the property to the project; use 'load_project')
-        PAF_POST_IMPORT_OPEN_PROJECT_MAPREF = 1 << 11,
+        PAF_POST_IMPORT_OPEN_PROJECT_MAPREF = 1 << 9,
 
         // Load a mesh after the import (mOutReferencesMap contains the property to the project; use 'load_mesh')
-        PAF_POST_IMPORT_LOAD_MESH_MAPREF = 1 << 12
-};
+        PAF_POST_IMPORT_LOAD_MESH_MAPREF = 1 << 10,
+
+        // **********************************************************************************************************************
+        // **************************************************** EXPORT FLAGS ****************************************************
+        // **********************************************************************************************************************
+
+        // The plugin indicates that the HLMS Editor must open a filedialog before the
+        // executeExport () function is executed. The output directory (mInFileDialogPath) is passed
+        PAF_PRE_EXPORT_OPEN_DIR_DIALOG = 1 << 11,
+
+        // Delete all datablocks before the export is executed and keep the list of
+        // datablocks (files) to rebuild them after the export
+        PAF_PRE_EXPORT_DELETE_ALL_DATABLOCKS = 1 << 12,
+
+        // The HLMS editor fills the mInTexturesUsedByDatablocks vector.
+        // This is a performance improvement (otherwise the editor always provides the data even if not needed)
+        PAF_PRE_EXPORT_TEXTURES_USED_BY_DATABLOCK = 1 << 13,
+
+        // Displays a settings dialog before the export begins
+        // Use the properties map to pass settings to the plugin
+        PAF_PRE_EXPORT_SETTINGS_DIALOG = 1 << 14,
+
+        // Delete all datablocks after the export is executed
+        PAF_POST_EXPORT_DELETE_ALL_DATABLOCKS = 1 << 15
+    };
 
     /** Class to pass data from Hlms editor to plugins */
     class HlmsEditorPluginData
@@ -127,16 +147,16 @@ namespace Ogre
             String mInFileDialogName; // The full qualified name of the file selected by means of a filedialog (used for import/export)
             String mInFileDialogBaseName; // The name of the file selected by means of a filedialog (used for import/export), without path AND without extension
             String mInFileDialogPath; // The path of the file selected by means of a filedialog (used for import/export)
-            //String mInImportExportPath; // The default path used to import or export (= mInFileDialogPath when a filedialog is used)
             String mInImportPath; // The default path used to import
             String mInExportPath; // The default path used to export
             std::vector<String> mInMaterialFileNameVector; // Vector with material names (fileName) in the material browser
             std::vector<String> mInTextureFileNameVector; // Vector with texture names (fileName) in the texture browser
             std::vector<String> mInTexturesUsedByDatablocks; // Vector with texture basenames from all the Pbs and Unlit datablocks in the material browser
+            std::vector<String> mInMeshFileNames; // Vector with mesh filenames (fully qualified); in practice this may contain the current mesh
             Ogre::Item* mInItem; // The currently selected Item in the renderwidget
             Ogre::RenderWindow* mInRenderWindow; // The renderwindow of the renderwidget
             Ogre::SceneManager* mInSceneManager; // The scenemanager used in the renderwidget
-            std::map<std::string, PLUGIN_PROPERTY> mInPropertiesMap; // Used to pass property information (e.g. from a settings/properties dialog) to the plugin
+            std::map<String, PLUGIN_PROPERTY> mInPropertiesMap; // Used to pass property information (e.g. from a settings/properties dialog) to the plugin
 
             // Input/output (data is passed two-way)
 
@@ -150,9 +170,10 @@ namespace Ogre
 
             // Output (output from the plugin, input for the HLMS Editor)
             String mOutReference; // To be filled in by the plugin; this can be a (file) reference of the import or export
-            std::map<std::string, PLUGIN_PROPERTY> mOutReferencesMap; // Pass multiple references (as a property map) from the plugin to the HLMS editor; these are not the properties
+            std::map<String, PLUGIN_PROPERTY> mOutReferencesMap; // Pass multiple references (as a property map) from the plugin to the HLMS editor; these are not the properties
             String mOutSuccessText; // In case the function was executed correctly, this text can be displayed
             String mOutErrorText; // In case the function was not executed correctly, this errortext can be displayed
+            std::vector<String> mOutMeshFileNames; // Vector with mesh filenames (fully qualified)
 
             // Constructor
             HlmsEditorPluginData (void)
@@ -164,21 +185,22 @@ namespace Ogre
                 mInFileDialogName = "";
                 mInFileDialogBaseName = "";
                 mInFileDialogPath = "";
-                //mInImportExportPath = "";
                 mInImportPath = "";
                 mInExportPath = "";
                 mInItem = 0;
                 mInRenderWindow = 0;
                 mInSceneManager = 0;
-                mInOutCurrentDatablock = 0;
-                mOutErrorText = "Error while performing this function";
-                mOutReference = "";
-                mOutSuccessText = "";
                 mInMaterialFileNameVector.clear();
                 mInTextureFileNameVector.clear();
                 mInTexturesUsedByDatablocks.clear();
                 mInPropertiesMap.clear();
+
                 mInOutCurrentDatablockId= "";
+                mInOutCurrentDatablock = 0;
+
+                mOutErrorText = "Error while performing this function";
+                mOutReference = "";
+                mOutSuccessText = "";
                 mOutReferencesMap.clear();
             }
 

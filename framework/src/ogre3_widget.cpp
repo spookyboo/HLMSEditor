@@ -326,7 +326,20 @@ namespace Magus
         //if (hlmsPbs->getDatablock(DATABLOCK_DEBUG_CUBE))
             //hlmsPbs->destroyDatablock(DATABLOCK_DEBUG_CUBE);
 
-        // Create light
+        // Create static light; make it a bit warm
+        mSecondLight = mSceneManager->createLight();
+        mSecondLightNode = mSceneManager->getRootSceneNode( Ogre::SCENE_DYNAMIC )->createChildSceneNode( Ogre::SCENE_DYNAMIC );
+        mSecondLightNode->attachObject( mSecondLight );
+        mSecondLight->setDiffuseColour( 1.0f, 0.85f, 0.7f );
+        mSecondLight->setSpecularColour( 1.0f, 0.85f, 0.7f );
+        mSecondLight->setPowerScale( Ogre::Math::PI );
+        mSecondLight->setAttenuation(15000.0f, 0.0f, 0.0f, 0.0f);
+        mSecondLight->setType( Ogre::Light::LT_DIRECTIONAL );
+        mSecondLightNode->setPosition( 100.0f, 1000.0f, 300.0f );
+        mSecondLight->setDirection( Ogre::Vector3( -1, -10, -3 ).normalisedCopy() );
+        mSecondLight->setVisible(true);
+
+        // Create rotating light
         mLight = mSceneManager->createLight();
         mLightNode = mCameraManager->mCameraNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
         mLightNode->attachObject( mLight );
@@ -336,6 +349,7 @@ namespace Magus
         mLight->setDiffuseColour( Ogre::ColourValue::White );
         mLight->setSpecularColour( Ogre::ColourValue::White );
         mLight->setDirection(Ogre::Vector3(0, 1, 0));
+        mLight->setVisible(true);
 
         // Light axis node
         mLightAxisNode = mCameraManager->mCameraNode->createChildSceneNode(Ogre::SCENE_DYNAMIC);
@@ -356,7 +370,6 @@ namespace Magus
                                         Ogre::Vector3( 0, 1, 0 ).normalisedCopy());
 
         resetCamera();
-
 
         // Create the uv mapping colourmap
         createUnlitDatablockRttPaint();

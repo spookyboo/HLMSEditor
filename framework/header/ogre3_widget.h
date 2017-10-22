@@ -158,6 +158,7 @@ namespace Magus
             Ogre::SceneNode* mSceneNodeRttHoover;
             Ogre::SceneNode* mSceneNodeRttPaint;
             Ogre::SceneNode* mLightNode;
+            Ogre::SceneNode* mSecondLightNode;
             Ogre::SceneNode* mLightAxisNode;
             Ogre::CompositorWorkspace* mWorkspace;
             Ogre::CompositorWorkspace* mWorkspaceRttHoover;
@@ -167,6 +168,7 @@ namespace Magus
             bool mShiftDown;
             bool mMouseDown;
             Ogre::Light* mLight;
+            Ogre::Light* mSecondLight;
             Ogre::TexturePtr mCustomRenderTextureHoover;
             Ogre::TexturePtr mCustomRenderTexturePaint;
             Ogre::RenderTexture* mRttHoover;

@@ -1149,7 +1149,7 @@ const Ogre::String& HlmsUtilsManager::getResourcePath(const Ogre::String& resour
     Ogre::FileInfoListPtr fileInfoListPtr(Ogre::ResourceGroupManager::getSingleton().findResourceFileInfo(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, resourceName,false));
     Ogre::FileInfoList* fileInfoList = fileInfoListPtr.getPointer();
     Ogre::FileInfo &fileInfo = fileInfoList->front();
-    helperString = fileInfo.archive->getName() + + "/" + fileInfo.path;
+    helperString = fileInfo.archive->getName() + "/" + fileInfo.path;
 
     /*
     helperString = "";

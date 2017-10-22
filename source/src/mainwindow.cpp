@@ -1939,9 +1939,12 @@ bool MainWindow::doExportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::H
 //****************************************************************************/
 void MainWindow::doImportExportPropertiesDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data)
 {
-    if (plugin->getActionFlag() & Ogre::PAF_PRE_ACTION_SETTINGS_DIALOG)
+    if (plugin->getActionFlag() & (Ogre::PAF_PRE_ACTION_SETTINGS_DIALOG |
+                                   Ogre::PAF_PRE_IMPORT_SETTINGS_DIALOG |
+                                   Ogre::PAF_PRE_EXPORT_SETTINGS_DIALOG))
     {
         // Create the dialog dynamically and fill it with properties from the plugin
+        // Note, that this properties dialog has nothing to do with the PropertiesDockWidget
         PluginPropertiesDialog dialog (this);
         std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY> properties = plugin->getProperties();
         std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY>::iterator it;
@@ -2016,10 +2019,25 @@ void MainWindow::constructHlmsEditorPluginData (Ogre::HlmsEditorPluginData* data
     data->mInRenderWindow = widget->getRenderWindow();
     data->mInSceneManager = widget->getSceneManager();
     data->mInTextureFileName = mTextureFileName.toStdString();
+
+    // Retrieve filename of the current mesh
+    // Get the name of the mesh and search the name in the resource group manager for the fileinfo object
+    QOgreWidget* ogreWidget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
+    Ogre::String resourceName = ogreWidget->getCurrentMesh()->getName();
+    Ogre::FileInfoListPtr fileInfoListPtr(Ogre::ResourceGroupManager::getSingleton().findResourceFileInfo(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, resourceName, false));
+    Ogre::FileInfoList* fileInfoList = fileInfoListPtr.getPointer();
+    Ogre::FileInfo &fileInfo = fileInfoList->front();
+    if (fileInfo.archive->getType() == "FileSystem")
+    {
+        resourceName = fileInfo.archive->getName() + "/" + resourceName;
+        data->mInMeshFileNames.push_back(fileInfo.filename.c_str());
+    }
+
+    data->mInTexturesUsedByDatablocks.clear();
+
     data->mOutErrorText = "Error while performing this function";
     data->mOutReference = "";
     data->mOutSuccessText = "";
-    data->mInTexturesUsedByDatablocks.clear();
 }
 
 //****************************************************************************/
