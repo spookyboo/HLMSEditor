@@ -2030,7 +2030,7 @@ void MainWindow::constructHlmsEditorPluginData (Ogre::HlmsEditorPluginData* data
     if (fileInfo.archive->getType() == "FileSystem")
     {
         resourceName = fileInfo.archive->getName() + "/" + resourceName;
-        data->mInMeshFileNames.push_back(fileInfo.filename.c_str());
+        data->mInMeshFileNames.push_back(resourceName);
     }
 
     data->mInTexturesUsedByDatablocks.clear();
