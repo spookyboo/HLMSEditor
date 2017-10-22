@@ -95,6 +95,7 @@ static const QString DEFAULT_PROJECT_NAME = QString("project1");
 static const QString HEADER_PROJECT = QString("hlmsEditor v1.0");
 static const QString FILE_MATERIAL_BROWSER = QString("materials.cfg");
 static const QString FILE_TEXTURE_BROWSER = QString("textures.cfg");
+static const QString FILE_MESHES = QString("meshes.cfg");
 static const QString FILE_RECENT_HLMS_FILES = QString("rhlms.cfg");
 static const QString FILE_RECENT_PROJECT_FILES = QString("rprojects.cfg");
 static const QString FILE_NO_IMAGE = QString("../common/icons/noImage.png");

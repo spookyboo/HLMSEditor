@@ -98,6 +98,7 @@ MainWindow::MainWindow(void) :
     mProjectPath = "";
     mMaterialFileName = "";
     mTextureFileName = "";
+    mMeshesFileName = "";
     QString mCurrentJsonFileName = "";
     mCurrentDatablockId = "";
     mCurrentDatablockNameStr = "";
@@ -505,6 +506,7 @@ void MainWindow::newProjectName(void)
     setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
     mMaterialFileName = mProjectPath + mProjectName + QString ("_") + FILE_MATERIAL_BROWSER;
     mTextureFileName = mProjectPath + mProjectName + QString ("_") + FILE_TEXTURE_BROWSER;
+    mMeshesFileName = mProjectPath + mProjectName + QString ("_") + FILE_MESHES;
 }
 
 //****************************************************************************/
@@ -567,17 +569,19 @@ void MainWindow::loadProject(const QString& fileName)
                 QString materialFileName = readFile.readLine();
                 info.setFile(materialFileName);
                 if (info.exists() && info.isFile())
-                {
                     mMaterialFileName = materialFileName;
-                }
 
                 // Line 3
                 QString textureFileName = readFile.readLine();
                 info.setFile(textureFileName);
                 if (info.exists() && info.isFile())
-                {
                     mTextureFileName = textureFileName;
-                }
+
+                // Line 4
+                QString meshesFileName = readFile.readLine();
+                info.setFile(meshesFileName);
+                if (info.exists() && info.isFile())
+                    mMeshesFileName = meshesFileName;
 
                 // Load the material and texture config
                 loadMaterialBrowserCfg();
@@ -919,7 +923,12 @@ void MainWindow::doSaveProjectMenuAction(void)
     mTextureFileName = mProjectPath + mProjectName + QString ("_") + FILE_TEXTURE_BROWSER;
     saveTextureBrowserCfg();
 
+    // Save meshes config (only if it is explicitly set to save it together with the project)
+    mMeshesFileName = mProjectPath + mProjectName + QString ("_") + FILE_MESHES;
+    saveMeshesCfg();
+
     // Save a project file
+    // TODO: Implement it for meshes in mMeshesFileName (optional)
     QString fileName = mProjectPath + mProjectName + QString(".hlmp");
     QFile file(fileName);
     QString header = QString(HEADER_PROJECT);
@@ -1574,6 +1583,18 @@ void MainWindow::loadTextureBrowserCfg(void)
 }
 
 //****************************************************************************/
+void MainWindow::saveMeshesCfg (void)
+{
+    // TODO
+}
+
+//****************************************************************************/
+void MainWindow::loadMeshesCfg (void)
+{
+    // TODO
+}
+
+//****************************************************************************/
 void MainWindow::saveResources(const QString& fileName, const QVector<Magus::QtResourceInfo*>& resources)
 {
     // Save state of a resources from a resourcetree widget
@@ -1653,7 +1674,9 @@ void MainWindow::doImport(Ogre::HlmsEditorPlugin* plugin)
         return;
 
     // Is a properties dialog needed before import?
-    doImportExportPropertiesDialog (plugin, &data);
+    if (plugin->getActionFlag() & (Ogre::PAF_PRE_ACTION_SETTINGS_DIALOG |
+                                   Ogre::PAF_PRE_IMPORT_SETTINGS_DIALOG))
+        doImportExportPropertiesDialog (plugin, &data);
 
     // Perform pre-import actions (by the editor)
     if (plugin->getActionFlag() & Ogre::PAF_PRE_IMPORT_MK_DIR)
@@ -1813,7 +1836,9 @@ void MainWindow::doExport(Ogre::HlmsEditorPlugin* plugin)
         return;
 
     // Is a properties dialog needed before export?
-    doImportExportPropertiesDialog (plugin, &data);
+    if (plugin->getActionFlag() & (Ogre::PAF_PRE_ACTION_SETTINGS_DIALOG |
+                                   Ogre::PAF_PRE_EXPORT_SETTINGS_DIALOG))
+        doImportExportPropertiesDialog (plugin, &data);
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
@@ -1939,29 +1964,24 @@ bool MainWindow::doExportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::H
 //****************************************************************************/
 void MainWindow::doImportExportPropertiesDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data)
 {
-    if (plugin->getActionFlag() & (Ogre::PAF_PRE_ACTION_SETTINGS_DIALOG |
-                                   Ogre::PAF_PRE_IMPORT_SETTINGS_DIALOG |
-                                   Ogre::PAF_PRE_EXPORT_SETTINGS_DIALOG))
+    // Create the dialog dynamically and fill it with properties from the plugin
+    // Note, that this properties dialog has nothing to do with the PropertiesDockWidget
+    PluginPropertiesDialog dialog (this);
+    std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY> properties = plugin->getProperties();
+    std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY>::iterator it;
+    std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY>::iterator itEnd = properties.end();
+    Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY property;
+    for (it = properties.begin(); it != itEnd; ++it)
     {
-        // Create the dialog dynamically and fill it with properties from the plugin
-        // Note, that this properties dialog has nothing to do with the PropertiesDockWidget
-        PluginPropertiesDialog dialog (this);
-        std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY> properties = plugin->getProperties();
-        std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY>::iterator it;
-        std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY>::iterator itEnd = properties.end();
-        Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY property;
-        for (it = properties.begin(); it != itEnd; ++it)
-        {
-            property = it->second;
-            dialog.addProperty(property);
-        }
+        property = it->second;
+        dialog.addProperty(property);
+    }
 
-        // Set the (changed) property back in the data object
-        if (dialog.exec())
-        {
-            // Set the values from the dialog back to the data object
-            data->mInPropertiesMap = dialog.getProperties();
-        }
+    // Set the (changed) property back in the data object
+    if (dialog.exec())
+    {
+        // Set the values from the dialog back to the data object
+        data->mInPropertiesMap = dialog.getProperties();
     }
 }
 
@@ -1987,7 +2007,6 @@ void MainWindow::constructHlmsEditorPluginData (Ogre::HlmsEditorPluginData* data
             data->mInMaterialFileNameVector.push_back(info->fullQualifiedName.toStdString());
     }
 
-    // mInTextureFileNameVector
     data->mInTextureFileName = mTextureFileName.toStdString();
     const QVector<Magus::QtResourceInfo*>& textureResources = mTextureDockWidget->getResources();
     QVectorIterator<Magus::QtResourceInfo*> itTextures(textureResources);

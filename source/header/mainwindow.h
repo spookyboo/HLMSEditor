@@ -81,7 +81,9 @@ class MainWindow : public QMainWindow
         void initCurrentMaterialFileName(void); // Set the name of the current json file to ""
         void getListOfResources(void); // Function to test which resources are loaded
         EditorHlmsTypes getCurrentDatablockType(void); // Returns the current hlms type
-        void loadTextureBrowserCfg(void);
+        void loadTextureBrowserCfg(void); // Load the config file containing a list with textures
+        void saveMeshesCfg (void); // Save the config file containing a list with meshes
+        void loadMeshesCfg (void); // Load the config file containing a list with meshes
         void setCurrentDatablockIdAndNameStr(const Ogre::IdString& datablockId, const Ogre::String& nameStr);
         QVector<int> getSubItemIndicesWithDatablockAndReplaceWithDefault(const Ogre::IdString& datablockId); // Get list of indeces, which have datablock 'datablockId'
         void replaceCurrentDatablock(QVector<int> indices, Ogre::IdString datablockId); // Set the datablocks in the subItems, identified by 'indices'
@@ -142,9 +144,8 @@ class MainWindow : public QMainWindow
         void saveDatablock(bool validatePaintLayers);
         bool continueEvenIfThereArePaintLayers(void); // Validate whether there are paintlayers (before saving the datablock)
         void loadAllMaterialsFromMaterialBrowser (void);
-
-        void loadMaterialBrowserCfg(void);
-        void saveMaterialBrowserCfg(void);
+        void loadMaterialBrowserCfg(void); // Load the config file containing a list with materials
+        void saveMaterialBrowserCfg(void); // Save the config file containing a list with materials
         void loadRecentMaterialFilesCfg(void);
         void saveRecentMaterialFilesCfg(void);
         void loadRecentProjectFilesCfg(void);
@@ -183,7 +184,7 @@ class MainWindow : public QMainWindow
         void handleTextureDoubleClicked(const QString& fileName, const QString& baseName);
         void handleCustomContextMenuItemSelected(const QString& menuItemText);
         void handleTextureMutationOccured(void);
-        void saveTextureBrowserCfg(void);
+        void saveTextureBrowserCfg(void); // Save the config file containing a list with textures
         void doImport(Ogre::HlmsEditorPlugin* plugin);
         bool doImportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::HlmsEditorPluginData* data);
         void doExport(Ogre::HlmsEditorPlugin* plugin);
@@ -239,8 +240,9 @@ class MainWindow : public QMainWindow
         Magus::OgreManager* mOgreManager;
         QString mProjectName;
         QString mProjectPath;
-        QString mMaterialFileName;
-        QString mTextureFileName;
+        QString mMaterialFileName; // Location of the material config file
+        QString mTextureFileName; // Location of the texture config file
+        QString mMeshesFileName; // Location of the meshes config file (pending implementation)
         QString mCurrentJsonFileName; // Used to determine whether a material was already saved; contains the json filename of the currently active material
         Ogre::IdString mCurrentDatablockId; // The datablock id
         Ogre::String mCurrentDatablockNameStr; // The datablocks' name
