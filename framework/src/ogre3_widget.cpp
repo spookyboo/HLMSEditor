@@ -334,9 +334,9 @@ namespace Magus
         mSecondLight->setSpecularColour( 1.0f, 0.85f, 0.7f );
         mSecondLight->setPowerScale( Ogre::Math::PI );
         mSecondLight->setAttenuation(15000.0f, 0.0f, 0.0f, 0.0f);
-        mSecondLight->setType( Ogre::Light::LT_DIRECTIONAL );
-        mSecondLightNode->setPosition( 100.0f, 1000.0f, 300.0f );
-        mSecondLight->setDirection( Ogre::Vector3( -1, -10, -3 ).normalisedCopy() );
+        mSecondLight->setType( Ogre::Light::LT_DIRECTIONAL);
+        mSecondLightNode->setPosition( 100.0f, 500.0f, 300.0f );
+        mSecondLight->setDirection( Ogre::Vector3( -1, -5, -3 ).normalisedCopy() );
         mSecondLight->setVisible(true);
 
         // Create rotating light

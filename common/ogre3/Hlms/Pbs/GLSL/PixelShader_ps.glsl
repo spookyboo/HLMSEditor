@@ -3,6 +3,7 @@
 @property( hlms_tex_gather )#extension GL_ARB_texture_gather: require@end
 @end
 @property( hlms_amd_trinary_minmax )#extension GL_AMD_shader_trinary_minmax: require@end
+@insertpiece( SetCompatibilityLayer )
 
 layout(std140) uniform;
 #define FRAG_COLOR		0
@@ -59,17 +60,19 @@ in vec4 gl_FragCoord;
 @end
 @insertpiece( custom_ps_uniformDeclaration )
 // END UNIFORM DECLARATION
+@property( !hlms_shadowcaster || !hlms_shadow_uses_depth_texture || alpha_test || exponential_shadow_maps )
 in block
 {
 @insertpiece( VStoPS_block )
 } inPs;
+@end
 
 @property( !hlms_shadowcaster )
 
 @property( hlms_forwardplus )
 /*layout(binding = 1) */uniform usamplerBuffer f3dGrid;
-/*layout(binding = 2) */uniform samplerBuffer f3dLightList;@end
-
+/*layout(binding = 2) */uniform samplerBuffer f3dLightList;
+@end
 @property( irradiance_volumes )
 	uniform sampler3D irradianceVolume;
 @end
@@ -335,7 +338,7 @@ void main()
 
 @property( !hlms_prepass )
 	//Everything's in Camera space
-@property( hlms_lights_spot || use_envprobe_map || hlms_use_ssr || use_planar_reflections || hlms_forwardplus )
+@property( hlms_lights_spot || use_envprobe_map || hlms_use_ssr || use_planar_reflections || ambient_hemisphere || hlms_forwardplus )
 	vec3 viewDir	= normalize( -inPs.pos );
 	float NdotV		= clamp( dot( nNormal, viewDir ), 0.0, 1.0 );
 @end

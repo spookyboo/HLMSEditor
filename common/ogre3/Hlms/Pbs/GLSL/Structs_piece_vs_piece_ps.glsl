@@ -24,7 +24,7 @@ struct Light
 @insertpiece( DeclCubemapProbeStruct )
 
 //Uniforms that change per pass
-layout(binding = 0) uniform PassBuffer
+layout_constbuffer(binding = 0) uniform PassBuffer
 {
 	//Vertex shader (common to both receiver and casters)
 	mat4 viewProj;
@@ -66,8 +66,12 @@ layout(binding = 0) uniform PassBuffer
 	mat4 invView;
 @end
 
-@property( hlms_pssm_splits )@foreach( hlms_pssm_splits, n )
+@property( hlms_pssm_splits )@psub( hlms_pssm_splits_minus_one, hlms_pssm_splits, 1 )@foreach( hlms_pssm_splits, n )
 	float pssmSplitPoints@n;@end @end
+@property( hlms_pssm_blend )@foreach( hlms_pssm_splits_minus_one, n )
+	float pssmBlendPoints@n;@end @end
+@property( hlms_pssm_fade )
+	float pssmFadePoint;@end
 	@property( hlms_lights_spot )Light lights[@value(hlms_lights_spot)];@end
 @end @property( hlms_shadowcaster )
 	//Vertex shader
@@ -130,9 +134,11 @@ struct Material
 	uvec4 indices0_3;
 	//uintBitsToFloat( indices4_7.w ) contains mNormalMapWeight.
 	uvec4 indices4_7;
+
+	@insertpiece( custom_materialBuffer )
 };
 
-layout(binding = 1) uniform MaterialBuf
+layout_constbuffer(binding = 1) uniform MaterialBuf
 {
 	Material m[@value( materials_per_buffer )];
 } materialArray;
@@ -140,7 +146,7 @@ layout(binding = 1) uniform MaterialBuf
 
 @piece( InstanceDecl )
 //Uniforms that change per Item/Entity
-layout(binding = 2) uniform InstanceBuffer
+layout_constbuffer(binding = 2) uniform InstanceBuffer
 {
     //.x =
 	//The lower 9 bits contain the material's start index.
@@ -159,7 +165,7 @@ layout(binding = 2) uniform InstanceBuffer
 
 @property( envprobe_map && envprobe_map != target_envprobe_map && use_parallax_correct_cubemaps )
 @piece( PccManualProbeDecl )
-layout(binding = 3) uniform ManualProbe
+layout_constbuffer(binding = 3) uniform ManualProbe
 {
 	CubemapProbe probe;
 } manualProbe;

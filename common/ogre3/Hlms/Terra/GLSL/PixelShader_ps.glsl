@@ -1,5 +1,6 @@
 @property( false )
 @insertpiece( SetCrossPlatformSettings )
+@insertpiece( SetCompatibilityLayer )
 
 layout(std140) uniform;
 #define FRAG_COLOR		0
@@ -24,6 +25,7 @@ void main()
 @property( hlms_tex_gather )#extension GL_ARB_texture_gather: require@end
 @end
 @property( hlms_amd_trinary_minmax )#extension GL_AMD_shader_trinary_minmax: require@end
+@insertpiece( SetCompatibilityLayer )
 
 layout(std140) uniform;
 #define FRAG_COLOR		0
@@ -49,7 +51,8 @@ uniform sampler2D terrainShadows;
 
 @property( hlms_forwardplus )
 /*layout(binding = 1) */uniform usamplerBuffer f3dGrid;
-/*layout(binding = 2) */uniform samplerBuffer f3dLightList;@end
+/*layout(binding = 2) */uniform samplerBuffer f3dLightList;
+@end
 @property( num_textures )uniform sampler2DArray textureMaps[@value( num_textures )];@end
 @property( envprobe_map )uniform samplerCube	texEnvProbeMap;@end
 
@@ -242,7 +245,7 @@ void main()
 
 	//Point lights
 @foreach( hlms_lights_point, n, hlms_lights_directional_non_caster )
-	lightDir = passBuf.lights[@n].position - inPs.pos;
+	lightDir = passBuf.lights[@n].position.xyz - inPs.pos;
 	fDistance= length( lightDir );
 	if( fDistance <= passBuf.lights[@n].attenuation.x )
 	{
@@ -257,10 +260,10 @@ void main()
 	//spotParams[@value(spot_params)].y = cos( OuterAngle / 2 )
 	//spotParams[@value(spot_params)].z = falloff
 @foreach( hlms_lights_spot, n, hlms_lights_point )
-	lightDir = passBuf.lights[@n].position - inPs.pos;
+	lightDir = passBuf.lights[@n].position.xyz - inPs.pos;
 	fDistance= length( lightDir );
-@property( !hlms_lights_spot_textured )	spotCosAngle = dot( normalize( inPs.pos - passBuf.lights[@n].position ), passBuf.lights[@n].spotDirection );@end
-@property( hlms_lights_spot_textured )	spotCosAngle = dot( normalize( inPs.pos - passBuf.lights[@n].position ), zAxis( passBuf.lights[@n].spotQuaternion ) );@end
+@property( !hlms_lights_spot_textured )	spotCosAngle = dot( normalize( inPs.pos - passBuf.lights[@n].position.xyz ), passBuf.lights[@n].spotDirection );@end
+@property( hlms_lights_spot_textured )	spotCosAngle = dot( normalize( inPs.pos - passBuf.lights[@n].position.xyz ), zAxis( passBuf.lights[@n].spotQuaternion ) );@end
 	if( fDistance <= passBuf.lights[@n].attenuation.x && spotCosAngle >= passBuf.lights[@n].spotParams.y )
 	{
 		lightDir *= 1.0 / fDistance;
