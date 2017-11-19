@@ -144,6 +144,7 @@ namespace Ogre
             String mInProjectPath; // The path where the projectfile, material configfile and texture configfile are stored
             String mInMaterialFileName; // The name of the material configfile
             String mInTextureFileName; // The name of the texture configfile
+            String mInMeshesFileName; // The name of the meshes configfile
             String mInFileDialogName; // The full qualified name of the file selected by means of a filedialog (used for import/export)
             String mInFileDialogBaseName; // The name of the file selected by means of a filedialog (used for import/export), without path AND without extension
             String mInFileDialogPath; // The path of the file selected by means of a filedialog (used for import/export)
@@ -182,6 +183,7 @@ namespace Ogre
                 mInProjectPath = "";
                 mInMaterialFileName = "";
                 mInTextureFileName = "";
+                mInMeshesFileName = "";
                 mInFileDialogName = "";
                 mInFileDialogBaseName = "";
                 mInFileDialogPath = "";

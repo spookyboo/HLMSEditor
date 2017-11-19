@@ -583,9 +583,10 @@ void MainWindow::loadProject(const QString& fileName)
                 if (info.exists() && info.isFile())
                     mMeshesFileName = meshesFileName;
 
-                // Load the material and texture config
+                // Load the materials, textures and meshes config
                 loadMaterialBrowserCfg();
                 loadTextureBrowserCfg();
+                loadMeshesBrowserCfg();
                 file.close();
                 setWindowTitle(WINDOW_TITLE + QString (" - ") + mProjectName);
                 appendRecentProjectToRecentlyUsed(fileName);
@@ -928,7 +929,6 @@ void MainWindow::doSaveProjectMenuAction(void)
     saveMeshesCfg();
 
     // Save a project file
-    // TODO: Implement it for meshes in mMeshesFileName (optional)
     QString fileName = mProjectPath + mProjectName + QString(".hlmp");
     QFile file(fileName);
     QString header = QString(HEADER_PROJECT);
@@ -940,7 +940,10 @@ void MainWindow::doSaveProjectMenuAction(void)
                << mMaterialFileName
                << "\n"
                << mTextureFileName
+               << "\n"
+               << mMeshesFileName
                << "\n";
+
         file.close();
 
         // Set title
@@ -1505,7 +1508,7 @@ void MainWindow::handleCustomContextMenuItemSelected(const QString& menuItemText
 }
 
 //****************************************************************************/
-void MainWindow::handleTextureMutationOccured(void)
+void MainWindow::handleTextureMutationOccured (void)
 {
     // Do not save immediately, but only after some time; this is to prevent that saveTextureBrowserCfg
     // is called for every mutation in the texture tree (deletion of 100 textures in one go
@@ -1519,7 +1522,7 @@ void MainWindow::handleTextureMutationOccured(void)
 }
 
 //****************************************************************************/
-void MainWindow::saveTextureBrowserCfg(void)
+void MainWindow::saveTextureBrowserCfg (void)
 {
     mSaveTextureBrowserTimerActive = false;
     const QVector<Magus::QtResourceInfo*>& resources = mTextureDockWidget->getResources();
@@ -1527,7 +1530,7 @@ void MainWindow::saveTextureBrowserCfg(void)
 }
 
 //****************************************************************************/
-void MainWindow::loadTextureBrowserCfg(void)
+void MainWindow::loadTextureBrowserCfg (void)
 {
     QVector<Magus::QtResourceInfo*> resources;
     QFile file(mTextureFileName);
@@ -1583,9 +1586,43 @@ void MainWindow::loadTextureBrowserCfg(void)
 }
 
 //****************************************************************************/
+void MainWindow::loadMeshesBrowserCfg (void)
+{
+    if (mMeshesFileName.isEmpty())
+        return;
+
+    QFile file(mMeshesFileName);
+    QString line;
+    if (file.open(QFile::ReadOnly))
+    {
+        QTextStream readFile(&file);
+        while (!readFile.atEnd())
+        {
+            line = readFile.readLine();
+            loadMesh(line);
+            break; // Only load one mesh for now, even if the file contains more entries
+        }
+    }
+
+    file.close();
+}
+
+//****************************************************************************/
 void MainWindow::saveMeshesCfg (void)
 {
-    // TODO
+    QFile file(mMeshesFileName);
+    QOgreWidget* widget = mOgreManager->getOgreWidget(OGRE_WIDGET_RENDERWINDOW);
+    Ogre::Mesh* mesh = widget->getCurrentMesh().getPointer();
+    if (!mesh)
+        return;
+
+    if (file.open(QFile::WriteOnly|QFile::Truncate))
+    {
+        // Write a line to the cfg file. For now, only the current mesh is added to the meshes config file
+        QTextStream stream(&file);
+        stream << mesh->getName().c_str() << "\n";
+        file.close();
+    }
 }
 
 //****************************************************************************/
@@ -2008,6 +2045,7 @@ void MainWindow::constructHlmsEditorPluginData (Ogre::HlmsEditorPluginData* data
     }
 
     data->mInTextureFileName = mTextureFileName.toStdString();
+    data->mInMeshesFileName = mMeshesFileName.toStdString();
     const QVector<Magus::QtResourceInfo*>& textureResources = mTextureDockWidget->getResources();
     QVectorIterator<Magus::QtResourceInfo*> itTextures(textureResources);
     itTextures.toFront();
