@@ -139,6 +139,8 @@ void PaintLayerDockWidget::setTextureType (int layerId, const QString& textureTy
         type = Ogre::PBSM_DETAIL2_NM;
     else if (textureType == PBSM_DETAIL3_NM_QSTRING)
         type = Ogre::PBSM_DETAIL3_NM;
+    else if (textureType == PBSM_EMISSIVE_QSTRING)
+        type = Ogre::PBSM_EMISSIVE;
     else if (textureType == PBSM_REFLECTION_QSTRING)
         type = Ogre::PBSM_REFLECTION;
     else
@@ -202,6 +204,9 @@ const QString& PaintLayerDockWidget::getTextureType(int layerId)
 
             if (textureType == Ogre::PBSM_DETAIL3_NM)
                 mHelperString = PBSM_DETAIL3_NM_QSTRING;
+
+            if (textureType == Ogre::PBSM_EMISSIVE)
+                mHelperString = PBSM_EMISSIVE_QSTRING;
 
             if (textureType == Ogre::PBSM_REFLECTION)
                 mHelperString = PBSM_REFLECTION_QSTRING;
@@ -269,6 +274,9 @@ QStringList PaintLayerDockWidget::getAvailableTextureTypes(void)
 
             if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL3_NM).isNull())
                 mAvailableTextureTypes << PBSM_DETAIL3_NM_QSTRING;
+
+            if (!pbsDatablock->getTexture(Ogre::PBSM_EMISSIVE).isNull())
+                mAvailableTextureTypes << PBSM_EMISSIVE_QSTRING;
 
             if (!pbsDatablock->getTexture(Ogre::PBSM_REFLECTION).isNull())
                 mAvailableTextureTypes << PBSM_REFLECTION_QSTRING;

@@ -46,6 +46,9 @@ HlmsNodeSamplerblock::HlmsNodeSamplerblock(QString title, QGraphicsItem* parent)
     mUvSet(0),
     mBlendMode(0),
     mMapWeight(1.0f),
+    mEmissiveColourRed(0.0f),
+    mEmissiveColourGreen(0.0f),
+    mEmissiveColourBlue(0.0f),
     mAnimationEnabled(false),
     mSequenceNumber(-1)
 {

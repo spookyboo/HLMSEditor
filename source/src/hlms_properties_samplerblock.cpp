@@ -31,6 +31,7 @@
 #include "hlms_properties_samplerblock.h"
 #include "properties_dockwidget.h"
 #include "hlms_node_samplerblock.h"
+#include "hlms_pbs_builder.h"
 #include "properties_dockwidget.h"
 #include "rapidjson/document.h"
 
@@ -90,13 +91,14 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
                              QString("Detail normal map 1") <<
                              QString("Detail normal map 2") <<
                              QString("Detail normal map 3") <<
+                             QString("Emissive map") <<
                              QString("Env. probe map");
     mTextureTypeSelectProperty = static_cast<Magus::QtSelectProperty*>
             (mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_GENERAL,
                                           PROPERTY_SAMPLERBLOCK_TEXTURE_TYPE,
                                           QString("Texture type"),
                                           Magus::QtProperty::SELECT));
-    mTextureTypeSelectProperty->addValues(stringListTextureType, 14);
+    mTextureTypeSelectProperty->addValues(stringListTextureType, 15); // Set to 15 and not to 14 so the last item is more visible on the screen
     mTextureTypeSelectProperty->setCurentIndex(-1); // To trigger propertyValueChanged when the texture is set
 
     // ******** Min filter ********
@@ -276,6 +278,12 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
     xyProperty->setLabelY("V");
     xyProperty->setVisible(false); // Make invisible by default
 
+    // ******** Emissive: Colour ********
+    mAssetWidget->createProperty(CONTAINER_SAMPLERBLOCK_DETAIL_MAP_DETAILS,
+                                 PROPERTY_SAMPLERBLOCK_EMISSIVE_COLOUR,
+                                 QString("Emissive colour [0..255]"),
+                                 Magus::QtProperty::COLOR);
+
     // ******** Animation Matrix (unlit only) ********
     // Decompose in Scale, Rotate and Transform
     Magus::QtCheckBoxProperty* checkboxProperty = static_cast<Magus::QtCheckBoxProperty*>
@@ -335,7 +343,7 @@ void HlmsPropertiesSamplerblock::setTextureTypePropertyVisible (bool visible)
 //****************************************************************************/
 void HlmsPropertiesSamplerblock::setDetailMapWOSPropertiesVisible (bool visible)
 {
-    // Enable specific detail map properties, except for blend properties
+    // Enable specific detail map properties, except for blend properties and emissive properties
 
     // Even if 'visible' is set to true, it is only allowed when it is a Pbs detail map or detail normal map
     if (visible && mHlmsNodeSamplerblock && !isDetailMapOrDetailNormalMap(mHlmsNodeSamplerblock->getTextureType()))
@@ -352,6 +360,13 @@ void HlmsPropertiesSamplerblock::setDetailMapWOSPropertiesVisible (bool visible)
     sliderDecimalProperty->setVisible(visible);
     sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_OFFSET_V));
     sliderDecimalProperty->setVisible(visible);
+
+    // Emissive is handled different. Only in case there is an emissive map, it is displayed
+    Magus::QtColorProperty* colorProperty = static_cast<Magus::QtColorProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_EMISSIVE_COLOUR));
+    Magus::QtSelectProperty* selectProperty = static_cast<Magus::QtSelectProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_TEXTURE_TYPE));
+    HlmsPbsBuilder hlmsPbsBuilder(0);
+    bool emissiveVisible = hlmsPbsBuilder.getIndexFromTextureType (Ogre::PBSM_EMISSIVE) == selectProperty->getCurrentIndex();
+    colorProperty->setVisible(emissiveVisible);
 }
 
 //****************************************************************************/
@@ -493,6 +508,13 @@ void HlmsPropertiesSamplerblock::setObject (HlmsNodeSamplerblock* hlmsNodeSample
     //xyProperty->setXY(v2.x(), v2.y());
     xyProperty->setX(v2.x());
     xyProperty->setY(v2.y());
+
+    // ******** Emissive: Colour ********
+    colorProperty = static_cast<Magus::QtColorProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_EMISSIVE_COLOUR));
+    colorProperty->setColor(mHlmsNodeSamplerblock->getEmissiveColourRed(),
+                            mHlmsNodeSamplerblock->getEmissiveColourGreen(),
+                            mHlmsNodeSamplerblock->getEmissiveColourBlue(),
+                            255.0f);
 
     // ******** Animation Matrix (unlit only) ********
     // Decompose in Scale, Rotate and Transform
@@ -687,6 +709,15 @@ void HlmsPropertiesSamplerblock::propertyValueChanged(QtProperty* property)
             v2.setX(xyProperty->getX());
             v2.setY(xyProperty->getY());
             mHlmsNodeSamplerblock->setScale(v2);
+        }
+        break;
+
+        case PROPERTY_SAMPLERBLOCK_EMISSIVE_COLOUR:
+        {
+            colorProperty = static_cast<Magus::QtColorProperty*>(property);
+            mHlmsNodeSamplerblock->setEmissiveColourRed(colorProperty->getRed());
+            mHlmsNodeSamplerblock->setEmissiveColourGreen(colorProperty->getGreen());
+            mHlmsNodeSamplerblock->setEmissiveColourBlue(colorProperty->getBlue());
         }
         break;
 
@@ -1019,6 +1050,15 @@ void HlmsPropertiesSamplerblock::loadProperties (const QString& propertiesName, 
             sliderDecimalProperty = static_cast<Magus::QtSliderDecimalProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE_V));
             sliderDecimalProperty->setValue(static_cast<float>(array[1].GetDouble()));
         }
+        if (name == "emissive_colour" && it->value.IsArray())
+        {
+            colorProperty = static_cast<Magus::QtColorProperty*>(mAssetWidget->getPropertyWidget(PROPERTY_SAMPLERBLOCK_EMISSIVE_COLOUR));
+            const rapidjson::Value& array = it->value;
+            float red = static_cast<float>(array[0].GetDouble());
+            float green = static_cast<float>(array[1].GetDouble());
+            float blue = static_cast<float>(array[2].GetDouble());
+            colorProperty->setColor(red, green, blue, 255.0f);
+        }
 
         ++it;
     }
@@ -1182,6 +1222,16 @@ const QString& HlmsPropertiesSamplerblock::saveProperties (const QString& proper
     jsonString += QVariant(v2.x()).toString();
     jsonString += ",";
     jsonString += QVariant(v2.y()).toString();
+    jsonString += "],\n";
+
+    // ******** Emissive: Colour ********
+    jsonString += TWO_TAB_QSTRING;
+    jsonString += "\"emissive_colour\" : [";
+    jsonString += QVariant(mHlmsNodeSamplerblock->getEmissiveColourRed()).toString();
+    jsonString += ",";
+    jsonString += QVariant(mHlmsNodeSamplerblock->getEmissiveColourGreen()).toString();
+    jsonString += ",";
+    jsonString += QVariant(mHlmsNodeSamplerblock->getEmissiveColourBlue()).toString();
     jsonString += "],\n";
 
     // ******** Animation Matrix (unlit only) ********

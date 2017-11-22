@@ -128,6 +128,7 @@ static const QString PBSM_DETAIL0_NM_QSTRING = QString("Detail normal map 0");
 static const QString PBSM_DETAIL1_NM_QSTRING = QString("Detail normal map 1");
 static const QString PBSM_DETAIL2_NM_QSTRING = QString("Detail normal map 2");
 static const QString PBSM_DETAIL3_NM_QSTRING = QString("Detail normal map 3");
+static const QString PBSM_EMISSIVE_QSTRING = QString("Emissive map");
 static const QString PBSM_REFLECTION_QSTRING = QString("Env. probe map");
 static const QString PAINT_EFFECT_COLOR_QSTRING = QString("Colour");
 static const QString PAINT_EFFECT_ERASE_QSTRING = QString("Erase");
@@ -328,11 +329,12 @@ static const int PROPERTY_SAMPLERBLOCK_MAP_WEIGTH = 57;
 static const int PROPERTY_SAMPLERBLOCK_OFFSET_U = 58;
 static const int PROPERTY_SAMPLERBLOCK_OFFSET_V = 59;
 static const int PROPERTY_SAMPLERBLOCK_SCALE = 60;
-static const int PROPERTY_SAMPLERBLOCK_ANIM_ENABLED = 61;
-static const int PROPERTY_SAMPLERBLOCK_ANIM_SCALE = 62;
-static const int PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE_U = 63;
-static const int PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE_V = 64;
-static const int PROPERTY_SAMPLERBLOCK_ANIM_ROTATE = 65;
+static const int PROPERTY_SAMPLERBLOCK_EMISSIVE_COLOUR = 61;
+static const int PROPERTY_SAMPLERBLOCK_ANIM_ENABLED = 62;
+static const int PROPERTY_SAMPLERBLOCK_ANIM_SCALE = 63;
+static const int PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE_U = 64;
+static const int PROPERTY_SAMPLERBLOCK_ANIM_TRANSLATE_V = 65;
+static const int PROPERTY_SAMPLERBLOCK_ANIM_ROTATE = 66;
 
 // Macroblock properties
 static const int PROPERTY_MACROBLOCK_ENABLED = 70;

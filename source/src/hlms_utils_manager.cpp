@@ -726,6 +726,7 @@ bool HlmsUtilsManager::parseJsonAndRetrieveDetails (HlmsUtilsManager::DatablockS
             parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_normal1", Ogre::PBSM_DETAIL1_NM);
             parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_normal2", Ogre::PBSM_DETAIL2_NM);
             parsePbsTextureType(datablockStruct, itorDatablock->value, "detail_normal3", Ogre::PBSM_DETAIL3);
+            parsePbsTextureType(datablockStruct, itorDatablock->value, "emissive", Ogre::PBSM_EMISSIVE);
             parsePbsTextureType(datablockStruct, itorDatablock->value, "reflection", Ogre::PBSM_REFLECTION);
         }
     }

@@ -92,6 +92,7 @@ struct PassData
 	float4 f3dData;
 	@property( hlms_forwardplus == forward3d )
 		float4 f3dGridHWW[@value( forward3d_num_slices )];
+		float4 f3dViewportOffset;
 	@end
 	@property( hlms_forwardplus != forward3d )
 		float4 fwdScreenToGrid;
@@ -129,8 +130,9 @@ struct Material
 	float4 F0;
 	float4 normalWeights;
 	float4 cDetailWeights;
-	float4 detailOffsetScaleD[4];
-	float4 detailOffsetScaleN[4];
+	float4 detailOffsetScale[4];
+	float4 emissive;		//emissive.w contains mNormalMapWeight.
+	float4 reserved[3];
 
 	//uint4 indices0_3;
 	ushort diffuseIdx;
@@ -148,8 +150,8 @@ struct Material
 	ushort detailNormMapIdx1;
 	ushort detailNormMapIdx2;
 	ushort detailNormMapIdx3;
+	ushort emissiveMapIdx;
 	ushort envMapIdx;
-	float mNormalMapWeight;
 
 	@insertpiece( custom_materialBuffer )
 };@end

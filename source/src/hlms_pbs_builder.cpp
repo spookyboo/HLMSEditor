@@ -213,6 +213,9 @@ HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNodeStructure(Magus::OgreManager*
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_DETAIL3_NM);
         enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_DETAIL3_NM);
 
+        samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_EMISSIVE);
+        enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_EMISSIVE);
+
         samplernode = createSamplerNode(datablock, pbsnode, Ogre::PBSM_REFLECTION);
         enrichSamplerNode(samplernode, datablock, datablockStruct, Ogre::PBSM_REFLECTION);
 
@@ -535,6 +538,11 @@ void HlmsPbsBuilder::enrichSamplerNode (HlmsNodeSamplerblock* samplernode,
             samplernode->setScale(v2);
         }
     }
+
+    // ******** Emissive Colour ********
+    samplernode->setEmissiveColourRed(255.0f * datablock->getEmissive().x);
+    samplernode->setEmissiveColourGreen(255.0f * datablock->getEmissive().y);
+    samplernode->setEmissiveColourBlue(255.0f * datablock->getEmissive().z);
 }
 
 //****************************************************************************/
@@ -811,6 +819,13 @@ void HlmsPbsBuilder::enrichSamplerblock (Ogre::HlmsPbsDatablock* datablock,
             datablock->setDetailMapOffsetScale(index, v4);
         }
     }
+
+    // ******** Emissive Colour ********
+    Ogre::Vector3 colour;
+    colour.x = (float)samplernode->getEmissiveColourRed() / 255.0f;
+    colour.y = (float)samplernode->getEmissiveColourGreen() / 255.0f;
+    colour.z = (float)samplernode->getEmissiveColourBlue() / 255.0f;
+    datablock->setEmissive(colour);
 }
 
 //****************************************************************************/
@@ -1052,8 +1067,11 @@ unsigned int HlmsPbsBuilder::getIndexFromTextureType(Ogre::PbsTextureTypes textu
         case Ogre::PBSM_DETAIL3_NM:
             return 12;
         break;
-        case Ogre::PBSM_REFLECTION:
+        case Ogre::PBSM_EMISSIVE:
             return 13;
+        break;
+        case Ogre::PBSM_REFLECTION:
+            return 14;
         break;
     }
     return 0;
@@ -1105,6 +1123,9 @@ Ogre::PbsTextureTypes HlmsPbsBuilder::getPbsTextureTypeFromSamplerNode(HlmsNodeS
             return Ogre::PBSM_DETAIL3_NM;
         break;
         case 13:
+            return Ogre::PBSM_EMISSIVE;
+        break;
+        case 14:
             return Ogre::PBSM_REFLECTION;
         break;
     }
@@ -1157,6 +1178,9 @@ Ogre::HlmsTextureManager::TextureMapType HlmsPbsBuilder::getTextureMapTypeFromPb
         break;
         case Ogre::PBSM_DETAIL3_NM:
             return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP;
+        break;
+        case Ogre::PBSM_EMISSIVE:
+            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
         break;
         case Ogre::PBSM_REFLECTION:
             return Ogre::HlmsTextureManager::TEXTURE_TYPE_ENV_MAP;
@@ -1211,6 +1235,9 @@ Ogre::HlmsTextureManager::TextureMapType HlmsPbsBuilder::getTextureMapTypeFromSa
             return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP;
         break;
         case 13:
+            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
+        break;
+        case 14:
             return Ogre::HlmsTextureManager::TEXTURE_TYPE_ENV_MAP;
         break;
     }

@@ -70,6 +70,9 @@ class HlmsNodeSamplerblock : public Magus::QtNode
         float getMapWeight (void) const {return mMapWeight;}
         QVector2D getOffset (void) const {return mOffset;}
         QVector2D getScale (void) const {return mScale;}
+        float getEmissiveColourRed (void) const {return mEmissiveColourRed;}
+        float getEmissiveColourGreen (void) const {return mEmissiveColourGreen;}
+        float getEmissiveColourBlue (void) const {return mEmissiveColourBlue;}
         bool getAnimationEnabled (void) const {return mAnimationEnabled;} // Unlit only
         QVector2D getAnimationScale (void) const {return mAnimationScale;} // Unlit only
         QQuaternion getAnimationOrientation (void) const {return mAnimationOrientation;} // Unlit only
@@ -101,6 +104,9 @@ class HlmsNodeSamplerblock : public Magus::QtNode
         void setMapWeight (float mapWeight) {mMapWeight = mapWeight;}
         void setOffset (QVector2D offset) {mOffset = offset;}
         void setScale (QVector2D scale) {mScale = scale;}
+        void setEmissiveColourRed (float emissiveColourRed) {mEmissiveColourRed = emissiveColourRed;}
+        void setEmissiveColourGreen (float emissiveColourGreen) {mEmissiveColourGreen = emissiveColourGreen;}
+        void setEmissiveColourBlue (float emissiveColourBlue) {mEmissiveColourBlue = emissiveColourBlue;}
         void setAnimationEnabled (bool animationEnabled) {mAnimationEnabled = animationEnabled;} // Unlit only
         void setAnimationScale (QVector2D animationScale) {mAnimationScale = animationScale;} // Unlit only
         void setAnimationOrientation (QQuaternion animationOrientation) {mAnimationOrientation = animationOrientation;} // Unlit only
@@ -134,6 +140,9 @@ class HlmsNodeSamplerblock : public Magus::QtNode
         float mMapWeight; // For normal map and detail maps
         QVector2D mOffset;
         QVector2D mScale;
+        float mEmissiveColourRed;
+        float mEmissiveColourGreen;
+        float mEmissiveColourBlue;
         bool mAnimationEnabled;
         QVector2D mAnimationScale; // Unlit only
         QQuaternion mAnimationOrientation; // Unlit only
