@@ -51,3 +51,6 @@ Step 5b. Start CMake (download gui version on https://cmake.org/)
 Step 6b. Browse location 'Where is the source code' and 'Where to build the binaries' and click 'Configure'  
 Step 7b. Click 'Generate'  
 (note, that CMakeLists.txt may need some more attention)
+
+Note regarding cmake for Linux users: The CMakeLists.txt file expect that Ogre has been installed on the system in both Debug and Release modes. If you installed Ogre using "make install", you need to have built Ogre in Debug mode in an additional binary directory configured with `cmake -DCMAKE_BUILD_TYPE=Debug`
+
