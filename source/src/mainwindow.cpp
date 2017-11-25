@@ -1839,6 +1839,7 @@ bool MainWindow::doImportOpenFileDialog (Ogre::HlmsEditorPlugin* plugin, Ogre::H
 //****************************************************************************/
 const QString& MainWindow::getStringPropertyFromReferenceMap (const std::string& propertyName, Ogre::HlmsEditorPluginData* data)
 {
+    mTempString = "";
     std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY> outputProperties = data->mOutReferencesMap;
     std::map<std::string, Ogre::HlmsEditorPluginData::PLUGIN_PROPERTY>::iterator it = outputProperties.find(propertyName);
     if (it != outputProperties.end())
@@ -1848,6 +1849,7 @@ const QString& MainWindow::getStringPropertyFromReferenceMap (const std::string&
         Ogre::LogManager::getSingleton().logMessage("Load mesh: " + mTempString.toStdString()); // TEST
         return mTempString;
     }
+    return mTempString;
 }
 
 //****************************************************************************/
