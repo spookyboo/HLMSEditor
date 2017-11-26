@@ -48,9 +48,9 @@ set(CMAKE_DEBUG_POSTFIX "_d")
 project(HLMSEditor)
 
 if(WIN32)
-    set(CMAKE_MODULE_PATH ${OGRE_HOME}/CMake)
+    set(CMAKE_MODULE_PATH ${OGRE_HOME}/CMake;${CMAKE_MODULE_PATH})
 endif()
-    
+
 
 if(WIN32 OR APPLE)
 	set(Boost_USE_STATIC_LIBS TRUE)
@@ -118,32 +118,22 @@ if(UNIX)
 	file(COPY ${OGRE_MEDIA_DIR}/../plugins.cfg DESTINATION ${CMAKE_BINARY_DIR})
 	file(COPY ${OGRE_MEDIA_DIR}/../plugins_d.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
-        #install resources
-        file(COPY ${PROJECT_SOURCE_DIR}/common
-            DESTINATION ${CMAKE_BINARY_DIR}/../)
+    #install resources
+    file(COPY ${PROJECT_SOURCE_DIR}/common
+        DESTINATION ${CMAKE_BINARY_DIR}/../)
 
 	#install resources from /bin
 	file(COPY ${PROJECT_SOURCE_DIR}/bin/resources.cfg ${PROJECT_SOURCE_DIR}/bin/resources_d.cfg
-			${PROJECT_SOURCE_DIR}/bin/resources_default.cfg ${PROJECT_SOURCE_DIR}/bin/settings.cfg
-			${PROJECT_SOURCE_DIR}/bin/settings_default.cfg ${PROJECT_SOURCE_DIR}/bin/models.cfg
-			#QSS
-			${PROJECT_SOURCE_DIR}/bin/dark.qss
-			DESTINATION ${CMAKE_BINARY_DIR})
+		${PROJECT_SOURCE_DIR}/bin/resources_default.cfg ${PROJECT_SOURCE_DIR}/bin/settings.cfg
+		${PROJECT_SOURCE_DIR}/bin/settings_default.cfg ${PROJECT_SOURCE_DIR}/bin/models.cfg
+		#QSS
+		${PROJECT_SOURCE_DIR}/bin/dark.qss
+		DESTINATION ${CMAKE_BINARY_DIR})
 endif()
 
 # MSVC debugging
 if(MSVC)
 	# Create file for msvc debugging environment
-    #set(OUTPUT_DEBUG_FILE "${CMAKE_CURRENT_BINARY_DIR}/HLMSEditor.vcxproj.user")
-    #file(WRITE ${OUTPUT_DEBUG_FILE} "<?xml version='1.0' encoding='utf-8'?>\n")
-    #file(APPEND ${OUTPUT_DEBUG_FILE} "<Project ToolsVersion='12.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>\n")
-    #file(APPEND ${OUTPUT_DEBUG_FILE} "  <PropertyGroup>\n")
-    #file(APPEND ${OUTPUT_DEBUG_FILE} "    <QTDIR>${QTDIR}</QTDIR>\n")
-    #file(APPEND ${OUTPUT_DEBUG_FILE} "    <OGRE_HOME>${OGRE_HOME}</OGRE_HOME>\n")
-    #file(APPEND ${OUTPUT_DEBUG_FILE} "    <LocalDebuggerEnvironment>PATH=$(QTDIR)\\bin%3b$(OGRE_HOME)\\bin\\$(Configuration)%3b$(PATH)</LocalDebuggerEnvironment>\n")
-    #file(APPEND ${OUTPUT_DEBUG_FILE} "    <LocalDebuggerWorkingDirectory>${CMAKE_BINARY_DIR}</LocalDebuggerWorkingDirectory>\n")
-    #file(APPEND ${OUTPUT_DEBUG_FILE} "  </PropertyGroup>\n")
-    #file(APPEND ${OUTPUT_DEBUG_FILE} "</Project>\n")
 	set(OUTPUT_DEBUG_FILE "${CMAKE_CURRENT_BINARY_DIR}/Debug/resources_d.cfg")
 	file(WRITE ${OUTPUT_DEBUG_FILE} "[Autodetect]\n")
 	file(APPEND ${OUTPUT_DEBUG_FILE} "[General]\n")
@@ -155,5 +145,5 @@ if(MSVC)
 	file(APPEND ${OUTPUT_DEBUG_FILE} "DoNotUseAsResource = ../common/ogre3\n")
 	file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/bin/models.cfg" "${CMAKE_CURRENT_SOURCE_DIR}/bin/plugins_d.cfg" "${CMAKE_CURRENT_SOURCE_DIR}/bin/dark.qss" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/Debug")
 	add_custom_command(TARGET HLMSEditor POST_BUILD COMMAND "${CMAKE_COMMAND}" -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/common" "${CMAKE_CURRENT_BINARY_DIR}/common")
-	
+
 endif()
