@@ -4,8 +4,8 @@
 out gl_PerVertex
 {
 	vec4 gl_Position;
-@property( hlms_global_clip_distances )
-	float gl_ClipDistance[1];
+@property( hlms_global_clip_planes )
+	float gl_ClipDistance[@value(hlms_global_clip_planes)];
 @end
 };
 
@@ -128,6 +128,7 @@ out block
 @piece( CalculatePsPos )(@insertpiece(local_vertex) * @insertpiece( worldViewMat )).xyz@end
 
 @piece( VertexTransform )
+@insertpiece( custom_vs_preTransform )
 	//Lighting is in view space
 	@property( hlms_normal || hlms_qtangent )outVs.pos		= @insertpiece( CalculatePsPos );@end
 	@property( hlms_normal || hlms_qtangent )outVs.normal	= @insertpiece(local_normal) * mat3(@insertpiece( worldViewMat ));@end
@@ -152,14 +153,14 @@ void main()
 @end
 
     @insertpiece( custom_vs_preExecution )
-    
+
 @property( !hlms_skeleton )
-    
+
     mat3x4 worldMat = UNPACK_MAT3x4( worldMatBuf, drawId @property( !hlms_shadowcaster )<< 1u@end );
 	@property( hlms_normal || hlms_qtangent )
 	mat4 worldView = UNPACK_MAT4( worldMatBuf, (drawId << 1u) + 1u );
 	@end
-    
+
 	vec4 worldPos = vec4( (vertex * worldMat).xyz, 1.0f );
 @end
 
@@ -189,7 +190,7 @@ void main()
 		outVs.zwDepth.xy = outVs.gl_Position.zw;
 	@end
 
-@property( hlms_global_clip_distances )
+@property( hlms_global_clip_planes )
 	gl_ClipDistance[0] = dot( float4( worldPos.xyz, 1.0 ), passBuf.clipPlane0.xyzw );
 @end
 

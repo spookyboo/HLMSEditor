@@ -327,6 +327,10 @@ HlmsPropertiesSamplerblock::HlmsPropertiesSamplerblock(const QString& fileNameIc
     mainLayout->addWidget(mAssetWidget);
     setLayout(mainLayout);
     mAssetWidget->expandAllContainers();
+
+    QSizePolicy sizePolicypRetain = sizePolicy();
+    sizePolicypRetain.setRetainSizeWhenHidden(true);
+    setSizePolicy(sizePolicypRetain);
 }
 
 //****************************************************************************/

@@ -318,8 +318,8 @@ namespace Magus
         createItem ("materialball.mesh", scale);
 
         // Remove the datablock currently set on this item
-        Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
-        Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
+        //Ogre::HlmsManager* hlmsManager = mRoot->getHlmsManager();
+        //Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
 
         setDefaultDatablockItem();
 

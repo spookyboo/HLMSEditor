@@ -82,7 +82,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::loadDatablock(const QString&
         QByteArray ba = jsonString.toLatin1();
         char* jsonChar = ba.data();
         Ogre::String fname = jsonFileName.toStdString();
-        Ogre::HlmsJson hlmsJson(hlmsManager);
+        Ogre::HlmsJson hlmsJson(hlmsManager, 0);
         try
         {
             if (makeSnaphot)
@@ -92,7 +92,7 @@ HlmsUtilsManager::DatablockStruct HlmsUtilsManager::loadDatablock(const QString&
             }
 
             // Load the json file and create the datablock(s)
-            hlmsJson.loadMaterials(fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, jsonChar);
+            hlmsJson.loadMaterials(fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, jsonChar, "");
         }
 
         catch (Ogre::Exception e)

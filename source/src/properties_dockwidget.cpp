@@ -60,14 +60,7 @@ PropertiesDockWidget::PropertiesDockWidget(QString title, MainWindow* parent, Qt
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     QRect rec = QApplication::desktop()->screenGeometry();
     setMinimumWidth(0.2 * rec.width());
-    //layout()->setSizeConstraint(QLayout::SetMinAndMaxSize);
-
-    mHlmsPropertiesPbsDatablock->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    mHlmsPropertiesPbsDatablock->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    mHlmsPropertiesUnlitDatablock->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    mHlmsPropertiesBlendblock->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    mHlmsPropertiesMacroblock->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    mHlmsPropertiesSamplerblock->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    layout()->setSizeConstraint(QLayout::SetMinAndMaxSize);
 }
 
 //****************************************************************************/

@@ -1047,13 +1047,13 @@ void MainWindow::saveDatablock(bool validatePaintLayers)
                 mHlmsUtilsManager->replaceTextureInPbsDatablock(datablock->getName(), type, filename);
             }
         }
-        hlmsManager->saveMaterial (datablock, fname);
+        hlmsManager->saveMaterial (datablock, fname, 0, "");
         loadMaterialAndCreateNodeStructure(fname.c_str()); // Reload, because this also updates everything in the editor
     }
     else
     {
         // Just save the datablock
-        hlmsManager->saveMaterial (datablock, fname);
+        hlmsManager->saveMaterial (datablock, fname, 0, "");
     }
 
     appendRecentMaterialToRecentlyUsed(mCurrentJsonFileName);
