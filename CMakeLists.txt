@@ -3,7 +3,7 @@
 # free to make use of it in any way you like.
 #-------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.0.2...4.0)
 
 # Use relative paths
 if(WIN32)
@@ -65,11 +65,22 @@ endif()
 find_package(OGRE COMPONENTS HlmsPbs HlmsUnlit REQUIRED)
 if(OGRE_FOUND)
 	if(${OGRE_VERSION} VERSION_LESS "2.1.0")
-		message(FATAL_ERROR "Ogre 2.1.0 is required!")
+		# message(FATAL_ERROR "Ogre 2.1.0 is required!")
 	endif()
 endif()
 
-find_package(Rapidjson REQUIRED)
+set( OGRE_INCLUDE_DIRS "/home/matias/Projects/SDK/Ogre2-Hlms-private/OgreMain/include" "/home/matias/Projects/SDK/Ogre2-Hlms-private/build/Debug/include" )
+set( OGRE_HlmsPbs_INCLUDE_DIRS "/home/matias/Projects/SDK/Ogre2-Hlms-private/Components/Hlms/Pbs/include" "/home/matias/Projects/SDK/Ogre2-Hlms-private/Components/Hlms/Common/include" )
+set( OGRE_HlmsUnlit_INCLUDE_DIRS "/home/matias/Projects/SDK/Ogre2-Hlms-private/Components/Hlms/Unlit/include" )
+set( OGRE_MEDIA_DIR "/home/matias/Projects/SDK/Ogre2-Hlms-private/Samples/Media" )
+
+set( OGRE_LIBRARIES /home/matias/Projects/SDK/Ogre2-Hlms-private/build/Debug/lib/libOgreNextMain_d.so )
+set( OGRE_HlmsPbs_LIBRARIES /home/matias/Projects/SDK/Ogre2-Hlms-private/build/Debug/lib/libOgreNextHlmsPbs_d.so )
+set( OGRE_HlmsUnlit_LIBRARIES /home/matias/Projects/SDK/Ogre2-Hlms-private/build/Debug/lib/libOgreNextHlmsUnlit_d.so )
+
+# find_package(Rapidjson REQUIRED)
+
+set( Rapidjson_INCLUDE_DIR "/home/matias/Projects/SDK/Ogre2-Hlms-private/Dependencies/include" )
 
 include_directories( ${Rapidjson_INCLUDE_DIR} )
 include_directories( ${OGRE_INCLUDE_DIRS} )
@@ -115,8 +126,8 @@ qt5_use_modules( HLMSEditor Multimedia)
 if(UNIX)
 	target_link_libraries( HLMSEditor ${GTK2_LIBRARIES} )
 	target_link_libraries( HLMSEditor ${OPENGL_LIBRARIES} )
-	file(COPY ${OGRE_MEDIA_DIR}/../plugins.cfg DESTINATION ${CMAKE_BINARY_DIR})
-	file(COPY ${OGRE_MEDIA_DIR}/../plugins_d.cfg DESTINATION ${CMAKE_BINARY_DIR})
+	# file(COPY ${OGRE_MEDIA_DIR}/../plugins.cfg DESTINATION ${CMAKE_BINARY_DIR})
+	# file(COPY ${OGRE_MEDIA_DIR}/../plugins_d.cfg DESTINATION ${CMAKE_BINARY_DIR})
 
     #install resources
     file(COPY ${PROJECT_SOURCE_DIR}/common

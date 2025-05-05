@@ -22,7 +22,7 @@
 #define MAGUS_OGRE_RENDERMANAGER_H
 
 #include "OgreRoot.h"
-#include "OgreRenderWindow.h"
+#include "OgreWindow.h"
 #include "OgreRenderSystem.h"
 #include "OgreString.h"
 #include "OgreTimer.h"
@@ -35,18 +35,17 @@ namespace Ogre
 {
     class MyCompositorPassProvider : public CompositorPassProvider
     {
-        public:
-            virtual CompositorPassDef* addPassDef( CompositorPassType passType,
-                                                   IdString customId,
-                                                   CompositorTargetDef *parentTargetDef,
-                                                   CompositorNodeDef *parentNodeDef )
+    public:
+        CompositorPassDef *addPassDef( CompositorPassType passType, IdString customId,
+                                       CompositorTargetDef *parentTargetDef,
+                                       CompositorNodeDef *parentNodeDef ) override
         {
             return 0;
         }
 
-            virtual CompositorPass* addPass( const CompositorPassDef *definition, Camera *defaultCamera,
-                                             CompositorNode *parentNode, const CompositorChannel &target,
-                                             SceneManager *sceneManager )
+        CompositorPass *addPass( const CompositorPassDef *definition, Camera *defaultCamera,
+                                 CompositorNode *parentNode, const RenderTargetViewDef *rtvDef,
+                                 SceneManager *sceneManager ) override
         {
             return 0;
         }

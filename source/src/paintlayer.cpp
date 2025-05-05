@@ -213,45 +213,47 @@ void PaintLayer::paint(float u, float v, bool start)
             mCalculatedTexturePositionX = calculateTexturePositionX(u, x);
             mCalculatedTexturePositionY = calculateTexturePositionY(v, y);
 
+            const Ogre::PixelFormatGpu pixelFormat = mBrush.getPixelFormat();
+
             if (mPaintEffect == PAINT_EFFECT_COLOR)
             {
                 // Paint with colour
-                mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
+                mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0, pixelFormat).a;
                 mFinalColour = mAlpha * mPaintColour;
                 mFinalColour = (1.0f - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(mCalculatedTexturePositionX,
                                                                                                              mCalculatedTexturePositionY,
-                                                                                                             0) + mFinalColour;
+                                                                                                             0, pixelFormat) + mFinalColour;
             }
             else if (mPaintEffect == PAINT_EFFECT_ERASE)
             {
                 // Erase: Retrieve the colourvalue of the original texture and blend it with the colour value of the texture on which is painted
-                mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
+                mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0, pixelFormat).a;
                 mFinalColour = mAlpha * mTextureLayer->mPixelboxOriginalTexture.getColourAt(mCalculatedTexturePositionX,
                                                                                             mCalculatedTexturePositionY,
-                                                                                            0);
+                                                                                            0, pixelFormat);
 
                 mFinalColour = (1.0f - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(mCalculatedTexturePositionX,
                                                                                                             mCalculatedTexturePositionY,
-                                                                                                            0) + mFinalColour;
+                                                                                                            0, pixelFormat) + mFinalColour;
             }
             else if (mPaintEffect == PAINT_EFFECT_ALPHA)
             {
                 // Paint with alpha value of the brush (note, that the texture must have alpha!)
-                mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
+                mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0, pixelFormat).a;
                 mFinalColour = mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(mCalculatedTexturePositionX,
                                                                                            mCalculatedTexturePositionY,
-                                                                                           0);
+                                                                                           0, pixelFormat);
                 mFinalColour.a -= mAlpha;
             }
             else if (mPaintEffect == PAINT_EFFECT_TEXTURE)
             {
                 // Paint with textured brush
-                mFinalColour = mPixelboxBrush.getColourAt(mPosX, mPosY, 0);
+                mFinalColour = mPixelboxBrush.getColourAt(mPosX, mPosY, 0, pixelFormat);
                 mAlpha = mForce * mFinalColour.a;
                 mFinalColour *= mAlpha;
                 mFinalColour = (1.0f - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(mCalculatedTexturePositionX,
                                                                                                             mCalculatedTexturePositionY,
-                                                                                                            0) + mFinalColour;
+                                                                                                            0, pixelFormat) + mFinalColour;
             }
             else if (mPaintEffect == PAINT_EFFECT_CARBON_COPY)
             {
@@ -259,22 +261,22 @@ void PaintLayer::paint(float u, float v, bool start)
                 // The shape of the brush is used to copy the Carbon Copy texture on the target texture (similar to carbon copy)
                 mFinalColour = mPixelboxCarbonCopyTexture.getColourAt(mCalculatedTexturePositionX,
                                                                       mCalculatedTexturePositionY,
-                                                                      0);
-                mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
+                                                                      0, pixelFormat);
+                mAlpha = mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0, pixelFormat).a;
                 mAlpha *= mFinalColour.a;
                 mFinalColour *= mAlpha;
                 mFinalColour = (1.0f - mAlpha) * mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(mCalculatedTexturePositionX,
                                                                                                             mCalculatedTexturePositionY,
-                                                                                                            0) + mFinalColour;
+                                                                                                            0, pixelFormat) + mFinalColour;
             }
             else if (mPaintEffect == PAINT_EFFECT_SMUDGE)
             {
                 // First get the colour from the target map
                 Ogre::ColourValue targetTextureColour = mTextureLayer->mPixelboxTextureOnWhichIsPainted.getColourAt(mCalculatedTexturePositionX,
                                                                                                                     mCalculatedTexturePositionY,
-                                                                                                                    0);
+                                                                                                                    0, pixelFormat);
                 // Determine alpha from brush
-                mAlpha = mAlphaDecay * mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0).a;
+                mAlpha = mAlphaDecay * mForce * mPixelboxBrush.getColourAt(mPosX, mPosY, 0, pixelFormat).a;
                 //mAlpha = mAlpha > 1.0f ? 1.0f : mAlpha;
                 //mAlpha = mAlpha < 0.0f ? 0.0f : mAlpha;
 
@@ -284,12 +286,12 @@ void PaintLayer::paint(float u, float v, bool start)
                     // The pixelbox smudge colour is equal to the target map colour
                     // Gradually fill the mPixelboxBrushSmudge with the targetTextureColour
                     mFinalColour = targetTextureColour;
-                    mPixelboxBrushSmudge.setColourAt(targetTextureColour, mPosX, mPosY, 0);
+                    mPixelboxBrushSmudge.setColourAt(targetTextureColour, mPosX, mPosY, 0, pixelFormat);
                 }
                 else
                 {
                     // Determine colour of pixelbox smudge
-                    mFinalColour = mPixelboxBrushSmudge.getColourAt(mPosX, mPosY, 0);
+                    mFinalColour = mPixelboxBrushSmudge.getColourAt(mPosX, mPosY, 0, pixelFormat);
                 }
 
                 // Create the final colour for the target map
@@ -300,7 +302,7 @@ void PaintLayer::paint(float u, float v, bool start)
             mTextureLayer->mPixelboxTextureOnWhichIsPainted.setColourAt(mFinalColour,
                                                                         mCalculatedTexturePositionX,
                                                                         mCalculatedTexturePositionY,
-                                                                        0);
+                                                                        0, pixelFormat);
         }
     }
 
@@ -331,7 +333,7 @@ void PaintLayer::setBrush (const Ogre::String& brushFileName)
     {
         mBrushFileName = brushFileName;
         mBrush.load(brushFileName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-        mPixelboxBrush = mBrush.getPixelBox(0, 0);
+        mPixelboxBrush = mBrush.getData(0u);
         mBrushWidth = mBrush.getWidth();
         mHalfBrushWidth = 0.5f * mBrushWidth;
         mHalfBrushWidthScaled = mScale * mHalfBrushWidth;
@@ -343,10 +345,13 @@ void PaintLayer::setBrush (const Ogre::String& brushFileName)
         mTranslationX = mTranslationFactorX * mBrushWidth;
         mTranslationY = mTranslationFactorY * mBrushHeight;
         mBrushSmudge = mBrush; // To get an image with the same dimensions as the brush
-        mPixelboxBrushSmudge = mBrushSmudge.getPixelBox(0, 0);
+        mPixelboxBrushSmudge = mBrushSmudge.getData(0u);
+        const Ogre::PixelFormatGpu pixelFormat = mBrushSmudge.getPixelFormat();
         for (size_t y = 0; y < mBrushHeight; y++)
+        {
             for (size_t x = 0; x < mBrushWidth; x++)
-                mPixelboxBrushSmudge.setColourAt(Ogre::ColourValue::Black, x, y, 0);
+                mPixelboxBrushSmudge.setColourAt(Ogre::ColourValue::Black, x, y, 0, pixelFormat);
+        }
     }
     catch (Ogre::Exception e) {}
 }
@@ -933,7 +938,7 @@ void PaintLayer::createCarbonCopyTexture (void)
     if (!mTextureLayer)
         return;
 
-    Ogre::Image tempCarbonCopyTexture;
+    Ogre::Image2 tempCarbonCopyTexture;
 
     // Load the Carbon Copy texture; take scaling into account (scaling is implemented as a resize)
     Ogre::uint32 w = mTextureLayer->mTextureOnWhichIsPaintedWidth;
@@ -955,14 +960,17 @@ void PaintLayer::createCarbonCopyTexture (void)
     }
 
     // Create an empty image and fill it with the loaded texture
-    size_t formatSize = Ogre::PixelUtil::getNumElemBytes(Ogre::PF_R8G8B8A8);
-    mCarbonCopydata = new uchar[w * h * formatSize];
-    mCarbonCopyTexture.loadDynamicImage(mCarbonCopydata, w, h, Ogre::PF_A8R8G8B8);
+    const uint32_t rowAlignment = 4u;
+    const size_t requiredBytes = Ogre::PixelFormatGpuUtils::calculateSizeBytes(
+        w, h, 1u, 1u, Ogre::PFG_RGBA8_UNORM, 1u, rowAlignment );
+    mCarbonCopydata = new uchar[requiredBytes];
+    mCarbonCopyTexture.loadDynamicImage( mCarbonCopydata, w, h, 1u, Ogre::TextureTypes::Type2D,
+                                         Ogre::PFG_RGBA8_UNORM, false );
 
     // Copy the loaded texture data into the final Carbon Copy texture
     // Take the dimensions into account
-    Ogre::PixelBox tempPixelboxCarbonCopyTexture = tempCarbonCopyTexture.getPixelBox(0, 0);
-    mPixelboxCarbonCopyTexture = mCarbonCopyTexture.getPixelBox(0, 0);
+    Ogre::TextureBox tempPixelboxCarbonCopyTexture = tempCarbonCopyTexture.getData(0u);
+    mPixelboxCarbonCopyTexture = mCarbonCopyTexture.getData(0u);
     Ogre::ColourValue col;
     for (Ogre::uint32 y = 0; y < h; y++)
     {
@@ -971,8 +979,8 @@ void PaintLayer::createCarbonCopyTexture (void)
         {
             // Determine the colour value
             xMapped = x % widthLoadedImage;
-            col = tempPixelboxCarbonCopyTexture.getColourAt(xMapped, yMapped, 0);
-            mPixelboxCarbonCopyTexture.setColourAt(col, x, y, 0);
+            col = tempPixelboxCarbonCopyTexture.getColourAt(xMapped, yMapped, 0, Ogre::PFG_RGBA8_UNORM);
+            mPixelboxCarbonCopyTexture.setColourAt(col, x, y, 0, Ogre::PFG_RGBA8_UNORM);
         }
     }
 }

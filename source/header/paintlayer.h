@@ -22,17 +22,14 @@
 #define PAINT_LAYER_H
 
 #include "OgreRoot.h"
-#include "OgreImage.h"
-#include "OgreTexture.h"
+#include "OgreImage2.h"
+#include "OgreTextureGpu.h"
 #include "OgreMath.h"
 #include "OgreVector2.h"
 #include "OgreColourValue.h"
-#include "OgreTexture.h"
-#include "OgrePixelBox.h"
 #include "OgreItem.h"
 #include "OgreHlmsPbsDatablock.h"
 #include "OgreHlmsDatablock.h"
-#include "OgreHardwarePixelBuffer.h"
 #include "texturelayer.h"
 #include <ctime>
 
@@ -348,11 +345,11 @@ class PaintLayer
             clock_t mEndTime;
             bool mEnabled;                                  // If enabled, the layer is painted, otherwise it is skipped
             bool mVisible;                                  // If visible, the layer can be painted on, otherwise it is skipped (even if it was enabled)
-            Ogre::Image mBrush;                             // Image of the brush
+            Ogre::Image2 mBrush;                            // Image of the brush
             Ogre::String mBrushFileName;                    // Full qualified name of the brush file
-            Ogre::PixelBox mPixelboxBrush;                  // Pixelbox of mBrush; for speed purposes, it is created when the brush is set
-            Ogre::Image mBrushSmudge;                       // Image of the smudge brush
-            Ogre::PixelBox mPixelboxBrushSmudge;            // Pixelbox of the target texture, using the shape of the brush; used for smudge effect
+            Ogre::TextureBox mPixelboxBrush;                // Pixelbox of mBrush; for speed purposes, it is created when the brush is set
+            Ogre::Image2 mBrushSmudge;                      // Image of the smudge brush
+            Ogre::TextureBox mPixelboxBrushSmudge;          // Pixelbox of the target texture, using the shape of the brush; used for smudge effect
             size_t mBrushWidth;                             // Width of mBrush
             size_t mBrushHeight;                            // Height of mBrush
             size_t mHalfBrushWidth;                         // For efficient calculation
@@ -429,9 +426,9 @@ class PaintLayer
             Ogre::IdString dummyDatablockId;
             Ogre::Vector2 mHelperVector2;
             Ogre::String mHelperOgreString;
-            Ogre::Image mCarbonCopyTexture;                 // The (final) texture used for the Carbon Copy effect
+            Ogre::Image2 mCarbonCopyTexture;                // The (final) texture used for the Carbon Copy effect
                                                             // It is build from a loaded texture which may have different dimensions
-            Ogre::PixelBox mPixelboxCarbonCopyTexture;      // Pixelbox of the final Carbon Copy texture
+            Ogre::TextureBox mPixelboxCarbonCopyTexture;    // Pixelbox of the final Carbon Copy texture
             Ogre::String  mCarbonCopyTextureFileName;       // Full qualified name of the texture file used in a Carbon Copy effect; this attribute is private,
                                                             // because the acces must be done by means of the get/set functions, which contain additional actions
             uchar* mCarbonCopydata;                         // Data used for the Carbon Copy texture

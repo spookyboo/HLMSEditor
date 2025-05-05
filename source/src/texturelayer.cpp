@@ -20,6 +20,7 @@
 
 #include "constants.h"
 #include "texturelayer.h"
+#include "hlms_pbs_builder.h"
 #include "OgreHlmsPbs.h"
 #include "OgreHlmsManager.h"
 #include "OgreLogManager.h"
@@ -61,7 +62,7 @@ void TextureLayer::setDatablockIdAndTexture (const Ogre::IdString& datablockId,
 
     // Create the pixelbox of the original texture; this MUST be a separate image
     mOriginalTexture.load(textureFileName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    mPixelboxOriginalTexture = mOriginalTexture.getPixelBox(0, 0);
+    mPixelboxOriginalTexture = mOriginalTexture.getData(0u);
 
     // Debug texture
     //Ogre::LogManager::getSingleton().logMessage("Debug texture: " + textureFileName);
@@ -82,7 +83,7 @@ void TextureLayer::blitTexture (void)
      */
     Ogre::HlmsDatablock* datablock;
     Ogre::HlmsPbsDatablock* datablockPbs;
-    Ogre::TexturePtr texture;
+    Ogre::TextureGpu *texture;
     Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
     Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>(hlmsManager->getHlms(Ogre::HLMS_PBS));
     datablock = hlmsPbs->getDatablock(mDatablockId);
@@ -93,7 +94,7 @@ void TextureLayer::blitTexture (void)
     try
     {
         // Get texture on GPU
-        if (!datablockPbs->getTexture(mTextureType).isNull())
+        if (datablockPbs->getTexture(mTextureType))
         {
             texture = datablockPbs->getTexture(mTextureType); // TextureType MUST exist, otherwise the application crashes
             mNumMipMaps = texture->getNumMipmaps();
@@ -101,27 +102,19 @@ void TextureLayer::blitTexture (void)
     }
     catch (Ogre::Exception e){}
 
-    if (texture.isNull())
+    if (!texture)
         return;
 
-    Ogre::uint8 maxMipMaps = mNumMipMaps + 1; // Increase with one, because there is always one image to blit
+    Ogre::uint8 maxMipMaps = mNumMipMaps; // Increase with one, because there is always one image to blit
     maxMipMaps = maxMipMaps > PAINT_MAX_MIP_MAPS ? PAINT_MAX_MIP_MAPS : maxMipMaps; // Just paint a few mipmaps (not all)
-    Ogre::Image textureOnWhichIsPaintedScaled = mTextureOnWhichIsPainted; // Temporary image must be used, otherwise painting doesn't work
+    Ogre::Image2 textureOnWhichIsPaintedScaled = mTextureOnWhichIsPainted; // Temporary image must be used, otherwise painting doesn't work
     size_t w = mTextureOnWhichIsPaintedWidth;
     size_t h = mTextureOnWhichIsPaintedHeight;
-    Ogre::v1::HardwarePixelBuffer* buffer;
-    for (Ogre::uint8 i = 0; i < maxMipMaps; ++i)
-    {
-        buffer = texture->getBuffer(0, i).getPointer();
-        buffer->blitFromMemory(textureOnWhichIsPaintedScaled.getPixelBox(0, 0), Ogre::Box(0, 0, 0, w, h, 1));
-        w*=0.5f; // Mipmaps always are half of the previous one
-        h*=0.5f;
-        if (w < 1.0f || h < 1.0f)
-            break; // Stop when the mipmaps are too small
 
-        textureOnWhichIsPaintedScaled.resize(w, h);
-
-    }
+    textureOnWhichIsPaintedScaled.generateMipmaps(
+        HlmsPbsBuilder::getTextureMapTypeFromPbsTextureTypes( mTextureType ) ==
+        Ogre::CommonTextureTypes::Diffuse );
+    textureOnWhichIsPaintedScaled.uploadTo(texture, 0u, maxMipMaps);
     textureOnWhichIsPaintedScaled.freeMemory();
 }
 
@@ -155,10 +148,10 @@ void TextureLayer::loadTextureGeneration (const Ogre::String& filename)
 {
     // Assume the filename exists
     mTextureOnWhichIsPainted.load(filename, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getPixelBox(0, 0);
-    mTextureOnWhichIsPaintedHasAlpha = mTextureOnWhichIsPainted.getHasAlpha();
-    mTextureOnWhichIsPaintedWidth = mPixelboxTextureOnWhichIsPainted.getWidth();
-    mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.getHeight();
+    mPixelboxTextureOnWhichIsPainted = mTextureOnWhichIsPainted.getData(0u);
+    mTextureOnWhichIsPaintedHasAlpha = Ogre::PixelFormatGpuUtils::hasAlpha(mTextureOnWhichIsPainted.getPixelFormat());
+    mTextureOnWhichIsPaintedWidth = mPixelboxTextureOnWhichIsPainted.width;
+    mTextureOnWhichIsPaintedHeight = mPixelboxTextureOnWhichIsPainted.height;
     // In theory, createCarbonCopyTexture() of all related paintlayers should be called,
     // but the texture size doesn't change in practice.
 
@@ -197,7 +190,7 @@ const Ogre::String& TextureLayer::saveTextureWithTimeStampToImportDir (void)
             Ogre::StringConverter::toString((size_t)time(0)) +
             extension;
 
-    mTextureOnWhichIsPainted.save(DEFAULT_IMPORT_PATH.toStdString() + mHelperString); // Saving to the import dir doesn't have to be in the background
+    mTextureOnWhichIsPainted.save(DEFAULT_IMPORT_PATH.toStdString() + mHelperString, 0u, 1u); // Saving to the import dir doesn't have to be in the background
     return mHelperString; // Return the basename
 }
 

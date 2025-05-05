@@ -23,17 +23,15 @@
 
 #include <QThread>
 #include "OgreRoot.h"
-#include "OgreImage.h"
-#include "OgreTexture.h"
+#include "OgreImage2.h"
+#include "OgreTextureGpu.h"
 #include "OgreMath.h"
 #include "OgreVector2.h"
 #include "OgreColourValue.h"
-#include "OgreTexture.h"
-#include "OgrePixelBox.h"
 #include "OgreItem.h"
+#include "OgreTextureBox.h"
 #include "OgreHlmsPbsDatablock.h"
 #include "OgreHlmsDatablock.h"
-#include "OgreHardwarePixelBuffer.h"
 
 /****************************************************************************
  The TextureSaveWorker class is used to save a texture generation
@@ -44,7 +42,7 @@ class TextureSaveWorker : public QObject
     Q_OBJECT
 
     public:
-        TextureSaveWorker (const Ogre::Image& image, const Ogre::String& filename) :
+        TextureSaveWorker (const Ogre::Image2& image, const Ogre::String& filename) :
             mImage(image)
         {
             mImage = image;
@@ -56,12 +54,12 @@ class TextureSaveWorker : public QObject
     public slots:
         void saveImage (void)
         {
-            mImage.save(mFilename);
+            mImage.save(mFilename, 0u, 1u);
             emit finished();
         }
 
     private:
-        Ogre::Image mImage;
+        Ogre::Image2 mImage;
         Ogre::String mFilename;
  };
 
@@ -75,7 +73,7 @@ class TextureLayer : public QObject
 {
     Q_OBJECT
 
-	public:
+    public:
         TextureLayer(void);
         ~TextureLayer(void);
 
@@ -140,15 +138,15 @@ class TextureLayer : public QObject
         Ogre::PbsTextureTypes mTextureType;
         Ogre::String mTextureFileName;                          // Full qualified name of the texture file
         Ogre::uint8 mNumMipMaps;                                // Number of mipmaps of texture (on the GPU)
-        Ogre::Image mOriginalTexture;                           // The original texture image
-        Ogre::PixelBox mPixelboxOriginalTexture;                // Pixelbox of the original texture
-        Ogre::Image mTextureOnWhichIsPainted;                   // Contains a texture Image; this image is uploaded to the texture layer of the Hlms (on GPU), every time
+        Ogre::Image2 mOriginalTexture;                           // The original texture image
+        Ogre::TextureBox mPixelboxOriginalTexture;                // Pixelbox of the original texture
+        Ogre::Image2 mTextureOnWhichIsPainted;                   // Contains a texture Image; this image is uploaded to the texture layer of the Hlms (on GPU), every time
                                                                 // the applyPaintEffect() function is called. This basically updates the texture layer in the Pbs.
                                                                 // Initially, textureOnWhichIsPainted is the same image from disk, also loaded in the Pbs.
                                                                 // mTextureOnWhichIsPainted is changed while painting. Intermediate versions of mTextureOnWhichIsPainted
                                                                 // are stored (example: texturename.png, texturename_01.png, texturename_02.png. texturename_03.png, ...)
                                                                 // and can be used for 'undo'.
-        Ogre::PixelBox mPixelboxTextureOnWhichIsPainted;        // Pixelbox of mTextureOnWhichIsPainted; for speed purposes, it is created when the texture is set
+        Ogre::TextureBox mPixelboxTextureOnWhichIsPainted;        // Pixelbox of mTextureOnWhichIsPainted; for speed purposes, it is created when the texture is set
         Ogre::uint32 mTextureOnWhichIsPaintedWidth;             // Width of mTextureOnWhichIsPainted; must be the same as the width of mTexture
         Ogre::uint32 mTextureOnWhichIsPaintedHeight;            // Height of mTextureOnWhichIsPainted; must be the same as the height of mTexture
         bool mTextureOnWhichIsPaintedHasAlpha;                  // Painting effect depends on the fact whether the texture has alpha enabled

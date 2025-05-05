@@ -27,16 +27,16 @@
 #include "Compositor/Pass/OgreCompositorPassDef.h"
 #include "Compositor/Pass/PassClear/OgreCompositorPassClearDef.h"
 #include "OgreRenderSystem.h"
-#include "OgreHardwarePixelBuffer.h"
 #include "OgreCommon.h"
-#include "OgreTextureManager.h"
+#include "OgreTextureGpuManager.h"
 #include "OgreTimer.h"
+#include "OgrePlatformInformation.h"
 #include "OgreHlmsManager.h"
 #include "OgreHlmsPbs.h"
 #include "OgreHlmsUnlit.h"
 #include "OgreMesh2.h"
 #include "OgreSubMesh2.h"
-#include "OgreImage.h"
+#include "OgreImage2.h"
 #include "constants.h"
 #include "renderwindow_dockwidget.h"
 #include "OgreMeshManager2.h"
@@ -51,8 +51,6 @@ namespace Magus
         mWorkspaceRttHoover(0),
         mWorkspaceRttPaint(0),
         mWorkspaceRttSkyBox(0),
-        mRttHoover(0),
-        mRttPaint(0),
         mOgreRenderWindow(0),
         mCamera(0),
         mCameraManager(0),
@@ -99,8 +97,8 @@ namespace Magus
         mAbsolute = Ogre::Vector2::ZERO;
         mRelative = Ogre::Vector2::ZERO;
         mHelpColour = Ogre::ColourValue::Red;
-        mCustomRenderTextureHoover.setNull();
-        mCustomRenderTexturePaint.setNull();
+        mCustomRenderTextureHoover = 0;
+        mCustomRenderTexturePaint = 0;
         mSnapshotDatablocks.clear();
         helperIndicesAndNames.clear();
 
@@ -194,14 +192,13 @@ namespace Magus
         mWorkspaceRttHoover = 0;
         mWorkspaceRttPaint = 0;
 
-        mCustomRenderTextureHoover->unload();
-        mCustomRenderTexturePaint->unload();
-        Ogre::TextureManager::getSingleton().unload(mRenderTextureNameHoover);
-        Ogre::TextureManager::getSingleton().remove(mRenderTextureNameHoover);
-        Ogre::TextureManager::getSingleton().unload(mRenderTextureNamePaint);
-        Ogre::TextureManager::getSingleton().remove(mRenderTextureNamePaint);
-        mCustomRenderTextureHoover.setNull();
-        mCustomRenderTexturePaint.setNull();
+        mCustomRenderTextureHoover->scheduleTransitionTo(Ogre::GpuResidency::OnStorage);
+        mCustomRenderTexturePaint->scheduleTransitionTo(Ogre::GpuResidency::OnStorage);
+        Ogre::TextureGpuManager *textureMgr = mRoot->getRenderSystem()->getTextureGpuManager();
+        textureMgr->destroyTexture(mCustomRenderTextureHoover);
+        textureMgr->destroyTexture(mCustomRenderTexturePaint);
+        mCustomRenderTextureHoover = 0;
+        mCustomRenderTexturePaint = 0;
     }
 
     //****************************************************************************/
@@ -264,7 +261,7 @@ namespace Magus
                                                       this->height(),
                                                       false,
                                                       &parameters);
-        mOgreRenderWindow->setVisible(true);
+        mOgreRenderWindow->setHidden(false);
 
         // Determine whether the GL context can be reused
         if (ogreManager->isRenderSystemGL() && !glContext)
@@ -276,8 +273,7 @@ namespace Magus
 
         // Create scene manager
         const size_t numThreads = std::max<int>(1, Ogre::PlatformInformation::getNumLogicalCores());
-        Ogre::InstancingThreadedCullingMethod threadedCullingMethod = (numThreads > 1) ? Ogre::INSTANCING_CULLING_THREADED : Ogre::INSTANCING_CULLING_SINGLETHREAD;
-        mSceneManager = mRoot->createSceneManager(Ogre::ST_GENERIC, numThreads, threadedCullingMethod);
+        mSceneManager = mRoot->createSceneManager(Ogre::ST_GENERIC, numThreads);
         mSceneManager->getRenderQueue()->setRenderQueueMode(1, Ogre::RenderQueue::FAST);
         mSceneManager->getRenderQueue()->setRenderQueueMode(2, Ogre::RenderQueue::FAST);
         mSceneManager->getRenderQueue()->setRenderQueueMode(3, Ogre::RenderQueue::FAST);
@@ -799,12 +795,13 @@ namespace Magus
                                                    Ogre::HlmsParamVec()));
 
             // Attach samplerblock
-            Ogre::HlmsTextureManager* hlmsTextureManager = hlmsManager->getTextureManager();
-            Ogre::HlmsTextureManager::TextureLocation texLocation = hlmsTextureManager->createOrRetrieveTexture(
-                        UV_MAPPING_TEXTURE_NAME,
-                        Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE);
+            Ogre::TextureGpuManager* textureManager = mRoot->getRenderSystem()->getTextureGpuManager();
+            Ogre::TextureGpu *texture = textureManager->createOrRetrieveTexture(
+                UV_MAPPING_TEXTURE_NAME, Ogre::GpuPageOutStrategy::Discard,
+                Ogre::CommonTextureTypes::Diffuse,
+                Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
             Ogre::HlmsSamplerblock samplerblock;
-            datablock->setTexture(0, texLocation.xIdx, texLocation.texture);
+            datablock->setTexture(0, texture);
             datablock->setSamplerblock(0, samplerblock);
             setUnlitDatablockRttPaint();
         }
@@ -913,7 +910,7 @@ namespace Magus
                         if (Ogre::PASS_CLEAR == passDef->getType())
                         {
                             clearDef = static_cast<Ogre::CompositorPassClearDef*>( passDef );
-                            clearDef->mColourValue = colour;
+                            clearDef->mClearColour[0] = colour;
                         }
                     }
                 }
@@ -928,44 +925,39 @@ namespace Magus
         const Ogre::String workspaceName = Ogre::StringConverter::toString(mRoot->getTimer()->getMicroseconds());
         const Ogre::IdString workspaceNameHash = workspaceName;
         compositorManager->createBasicWorkspaceDef(workspaceName, mBackground);
-        mWorkspace = compositorManager->addWorkspace(mSceneManager, mOgreRenderWindow, mCamera, workspaceNameHash, true); // Auto-update, because manual update gives issues
+        mWorkspace = compositorManager->addWorkspace(mSceneManager, mOgreRenderWindow->getTexture(), mCamera, workspaceNameHash, true); // Auto-update, because manual update gives issues
     }
 
     //****************************************************************************/
     void QOgreWidget::createCompositorRenderToTexture(void)
     {
+        Ogre::TextureGpuManager *textureManager =
+            Ogre::Root::getSingleton().getRenderSystem()->getTextureGpuManager();
+
         // Create a render-texture to determine on which subitem the mouse pointer is pointing at
-        mCustomRenderTextureHoover = Ogre::TextureManager::getSingleton().createManual(mRenderTextureNameHoover,
-                                                                                       Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                                                                       Ogre::TEX_TYPE_2D,
-                                                                                       RTT_HOOVER_SIZE_X,
-                                                                                       RTT_HOOVER_SIZE_Y,
-                                                                                       1,
-                                                                                       Ogre::PF_R8G8B8A8,
-                                                                                       Ogre::TU_RENDERTARGET);
-        mCustomRenderTextureHoover->load();
-        mRttHoover = mCustomRenderTextureHoover->getBuffer(0)->getRenderTarget();
+        mCustomRenderTextureHoover = textureManager->createTexture(
+            mRenderTextureNameHoover, Ogre::GpuPageOutStrategy::Discard,
+            Ogre::TextureFlags::RenderToTexture, Ogre::TextureTypes::Type2D );
+        mCustomRenderTextureHoover->setResolution(RTT_HOOVER_SIZE_X, RTT_HOOVER_SIZE_Y);
+        mCustomRenderTextureHoover->setPixelFormat(Ogre::PFG_RGBA8_UNORM);
+        mCustomRenderTextureHoover->scheduleTransitionTo(Ogre::GpuResidency::Resident);
         Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
         const Ogre::String workspaceNameHoover = Ogre::StringConverter::toString(mRoot->getTimer()->getMicroseconds());
         const Ogre::IdString workspaceNameHooverHash = workspaceNameHoover;
         compositorManager->createBasicWorkspaceDef(workspaceNameHoover, Ogre::ColourValue::Black);
-        mWorkspaceRttHoover = compositorManager->addWorkspace(mSceneManager, (Ogre::RenderTarget*)mRttHoover, mCamera, workspaceNameHooverHash, false);
+        mWorkspaceRttHoover = compositorManager->addWorkspace(mSceneManager, mCustomRenderTextureHoover, mCamera, workspaceNameHooverHash, false);
 
         // Create a render-texture for painting
-        mCustomRenderTexturePaint = Ogre::TextureManager::getSingleton().createManual(mRenderTextureNamePaint,
-                                                                                      Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                                                                      Ogre::TEX_TYPE_2D,
-                                                                                      RTT_PAINT_SIZE_X,
-                                                                                      RTT_PAINT_SIZE_Y,
-                                                                                      1,
-                                                                                      Ogre::PF_R8G8B8A8,
-                                                                                      Ogre::TU_RENDERTARGET);
-        mCustomRenderTexturePaint->load();
-        mRttPaint = mCustomRenderTexturePaint->getBuffer(0)->getRenderTarget();
+        mCustomRenderTexturePaint = textureManager->createTexture(
+            mRenderTextureNamePaint, Ogre::GpuPageOutStrategy::Discard,
+            Ogre::TextureFlags::RenderToTexture, Ogre::TextureTypes::Type2D );
+        mCustomRenderTexturePaint->setResolution(RTT_PAINT_SIZE_X, RTT_PAINT_SIZE_Y);
+        mCustomRenderTexturePaint->setPixelFormat(Ogre::PFG_RGBA8_UNORM);
+        mCustomRenderTexturePaint->scheduleTransitionTo(Ogre::GpuResidency::Resident);
         const Ogre::String workspaceNamePaint = Ogre::StringConverter::toString(mRoot->getTimer()->getMicroseconds());
         const Ogre::IdString workspaceNamePaintHash = workspaceNamePaint;
         compositorManager->createBasicWorkspaceDef(workspaceNamePaint, Ogre::ColourValue::Black);
-        mWorkspaceRttPaint = compositorManager->addWorkspace(mSceneManager, (Ogre::RenderTarget*)mRttPaint, mCamera, workspaceNamePaintHash, false);
+        mWorkspaceRttPaint = compositorManager->addWorkspace(mSceneManager, mCustomRenderTexturePaint, mCamera, workspaceNamePaintHash, false);
 
     }
 
@@ -973,7 +965,7 @@ namespace Magus
     void QOgreWidget::createSkyBoxCompositor()
     {
         Ogre::CompositorManager2* compositorManager = mRoot->getCompositorManager2();
-        mWorkspaceRttSkyBox = compositorManager->addWorkspace(mSceneManager, mOgreRenderWindow, mCamera, SKYBOX_WORKSPACE, true);
+        mWorkspaceRttSkyBox = compositorManager->addWorkspace(mSceneManager, mOgreRenderWindow->getTexture(), mCamera, SKYBOX_WORKSPACE, true);
         mWorkspaceRttSkyBox->setEnabled(false);
     }
 
@@ -1072,7 +1064,7 @@ namespace Magus
             mSize = e->size();
             if(mCamera && mOgreRenderWindow)
             {
-                mOgreRenderWindow->resize(mSize.width(), mSize.height());
+                mOgreRenderWindow->requestResolution(mSize.width(), mSize.height());
                 mOgreRenderWindow->windowMovedOrResized();
                 Ogre::Real aspectRatio = Ogre::Real(mSize.width()) / Ogre::Real(mSize.height());
                 mCamera->setAspectRatio(aspectRatio);
@@ -1096,11 +1088,19 @@ namespace Magus
 
             // Testcode to write the render-texture to a file
             if(ev->key() == Qt::Key_S)
-                mRttHoover->writeContentsToFile("rtt_hoover.png");
+            {
+                Ogre::Image2 tmp;
+                tmp.convertFromTexture(mCustomRenderTextureHoover, 0u, 0u);
+                tmp.save( "rtt_hoover.png", 0u, 0u );
+            }
 
             //#ifdef CREATE_UV_MAPPING_TEXTURE
                 if(ev->key() == Qt::Key_P)
-                    mRttPaint->writeContentsToFile("rtt_paint.png");
+                {
+                    Ogre::Image2 tmp;
+                    tmp.convertFromTexture(mCustomRenderTexturePaint, 0u, 0u);
+                    tmp.save( "rtt_paint.png", 0u, 0u );
+                }
             //#endif
         }
     }
@@ -1419,7 +1419,9 @@ namespace Magus
     //****************************************************************************/
     void QOgreWidget::saveToFile(const Ogre::String& fileName)
     {
-        mOgreRenderWindow->writeContentsToFile(fileName);
+        Ogre::Image2 tmp;
+        tmp.convertFromTexture(mOgreRenderWindow->getTexture(), 0u, 0u);
+        tmp.save(fileName, 0u, 1u);
     }
 
     //****************************************************************************/
@@ -1433,12 +1435,9 @@ namespace Magus
         if (x > RTT_HOOVER_SIZE_X || y > RTT_HOOVER_SIZE_Y)
             return mHelpColour;
 
-        size_t formatSize = Ogre::PixelUtil::getNumElemBytes(Ogre::PF_R8G8B8A8);
-        Ogre::uchar* data = OGRE_ALLOC_T(Ogre::uchar, RTT_HOOVER_SIZE_X * RTT_HOOVER_SIZE_Y * formatSize, Ogre::MEMCATEGORY_RENDERSYS);
-        Ogre::PixelBox pixelbox (RTT_HOOVER_SIZE_X, RTT_HOOVER_SIZE_Y, 1, Ogre::PF_R8G8B8A8, data);
-        mRttHoover->copyContentsToMemory(pixelbox, Ogre::RenderTarget::FB_AUTO);
-        mHelpColour = pixelbox.getColourAt(x, y, 0);
-        OGRE_FREE(data, Ogre::MEMCATEGORY_RENDERSYS);
+        Ogre::Image2 tmp;
+        tmp.convertFromTexture( mCustomRenderTextureHoover, 0u, 0u );
+        mHelpColour = tmp.getData( 0u ).getColourAt( x, y, 0, tmp.getPixelFormat() );
         return mHelpColour;
     }
 
@@ -1946,12 +1945,9 @@ namespace Magus
         if (x > RTT_PAINT_SIZE_X || y > RTT_PAINT_SIZE_Y)
             return mHelpColour;
 
-        size_t formatSize = Ogre::PixelUtil::getNumElemBytes(Ogre::PF_R8G8B8A8);
-        Ogre::uchar* data = OGRE_ALLOC_T(Ogre::uchar, RTT_PAINT_SIZE_X * RTT_PAINT_SIZE_Y * formatSize, Ogre::MEMCATEGORY_RENDERSYS);
-        Ogre::PixelBox pixelbox (RTT_PAINT_SIZE_X, RTT_PAINT_SIZE_Y, 1, Ogre::PF_R8G8B8A8, data);
-        mRttPaint->copyContentsToMemory(pixelbox, Ogre::RenderTarget::FB_AUTO);
-        mHelpColour = pixelbox.getColourAt(x, y, 0);
-        OGRE_FREE(data, Ogre::MEMCATEGORY_RENDERSYS);
+        Ogre::Image2 tmp;
+        tmp.convertFromTexture( mCustomRenderTexturePaint, 0u, 0u );
+        mHelpColour = tmp.getData( 0u ).getColourAt( x, y, 0, tmp.getPixelFormat() );
         return mHelpColour;
     }
 

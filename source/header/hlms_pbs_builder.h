@@ -28,6 +28,7 @@
 #include "hlms_utils_manager.h"
 #include "OgreHlmsPbs.h"
 #include "OgreHlmsPbsDatablock.h"
+#include "OgreTextureGpuManager.h"
 #include "node_editorwidget.h"
 
 /****************************************************************************
@@ -36,7 +37,7 @@
  ***************************************************************************/
 class HlmsPbsBuilder : public HlmsBuilder
 {
-	public:
+    public:
         HlmsPbsBuilder(Magus::QtNodeEditor* nodeEditor);
         ~HlmsPbsBuilder(void);
 
@@ -90,13 +91,14 @@ class HlmsPbsBuilder : public HlmsBuilder
         unsigned int getDetailNormalMapIndexFromTextureType (Ogre::PbsTextureTypes textureType);
 
         // Returns the TextureMapType for a given Pbs textureType
-        Ogre::HlmsTextureManager::TextureMapType getTextureMapTypeFromPbsTextureTypes(Ogre::PbsTextureTypes textureType);
+        static Ogre::CommonTextureTypes::CommonTextureTypes getTextureMapTypeFromPbsTextureTypes(
+            Ogre::PbsTextureTypes textureType );
 
         // Returns the TextureMapType for a given Pbs textureType
         bool isDetailMapOrDetailNormalMap (Ogre::PbsTextureTypes textureType);
 
         unsigned int getIndexFromTextureType(Ogre::PbsTextureTypes textureType);
-        Ogre::HlmsTextureManager::TextureMapType getTextureMapTypeFromSamplerNode(HlmsNodeSamplerblock* samplerNode);
+        Ogre::CommonTextureTypes::CommonTextureTypes getTextureMapTypeFromSamplerNode(HlmsNodeSamplerblock* samplerNode);
 
     private:
         Magus::QtNodeEditor* mNodeEditor;
