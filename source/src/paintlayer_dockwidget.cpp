@@ -236,49 +236,49 @@ QStringList PaintLayerDockWidget::getAvailableTextureTypes(void)
         {
             // Get the textures
             Ogre::HlmsPbsDatablock* pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(datablock);
-            if (!pbsDatablock->getTexture(Ogre::PBSM_DIFFUSE).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_DIFFUSE))
                 mAvailableTextureTypes << PBSM_DIFFUSE_QSTRING;
 
-            if (!pbsDatablock->getTexture(Ogre::PBSM_NORMAL).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_NORMAL))
                 mAvailableTextureTypes << PBSM_NORMAL_QSTRING;
 
-            if (!pbsDatablock->getTexture(Ogre::PBSM_SPECULAR).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_SPECULAR))
                 mAvailableTextureTypes << PBSM_SPECULAR_QSTRING;
 
-            if (!pbsDatablock->getTexture(Ogre::PBSM_ROUGHNESS).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_ROUGHNESS))
                 mAvailableTextureTypes << PBSM_ROUGHNESS_QSTRING;
 
-            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL_WEIGHT).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_DETAIL_WEIGHT))
                 mAvailableTextureTypes << PBSM_DETAIL_WEIGHT_QSTRING;
 
-            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL0).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_DETAIL0))
                 mAvailableTextureTypes << PBSM_DETAIL0_QSTRING;
 
-            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL1).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_DETAIL1))
                 mAvailableTextureTypes << PBSM_DETAIL1_QSTRING;
 
-            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL2).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_DETAIL2))
                 mAvailableTextureTypes << PBSM_DETAIL2_QSTRING;
 
-            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL3).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_DETAIL3))
                 mAvailableTextureTypes << PBSM_DETAIL3_QSTRING;
 
-            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL0_NM).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_DETAIL0_NM))
                 mAvailableTextureTypes << PBSM_DETAIL0_NM_QSTRING;
 
-            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL1_NM).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_DETAIL1_NM))
                 mAvailableTextureTypes << PBSM_DETAIL1_NM_QSTRING;
 
-            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL2_NM).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_DETAIL2_NM))
                 mAvailableTextureTypes << PBSM_DETAIL2_NM_QSTRING;
 
-            if (!pbsDatablock->getTexture(Ogre::PBSM_DETAIL3_NM).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_DETAIL3_NM))
                 mAvailableTextureTypes << PBSM_DETAIL3_NM_QSTRING;
 
-            if (!pbsDatablock->getTexture(Ogre::PBSM_EMISSIVE).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_EMISSIVE))
                 mAvailableTextureTypes << PBSM_EMISSIVE_QSTRING;
 
-            if (!pbsDatablock->getTexture(Ogre::PBSM_REFLECTION).isNull())
+            if (pbsDatablock->getTexture(Ogre::PBSM_REFLECTION))
                 mAvailableTextureTypes << PBSM_REFLECTION_QSTRING;
         }
     }

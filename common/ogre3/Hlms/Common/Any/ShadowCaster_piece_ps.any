@@ -6,7 +6,7 @@
 ///--------------------------------------------------------------------------------------
 
 @piece( DeclShadowCasterMacros )
-	@property( syntax == glsl )
+	@property( syntax == glsl || syntax == glsles || syntax == glslvk )
 		@property( !hlms_render_depth_only )
 			@property( GL3+ )
 				#define outDepth outColour
@@ -33,8 +33,12 @@
 		float distanceToCamera = length( inPs.toCameraWS );
 		@property( !exponential_shadow_maps )
 			outDepth = (distanceToCamera - passBuf.depthRange.x) * passBuf.depthRange.y + inPs.constBias;
-		@end @property( exponential_shadow_maps )
+		@else
 			outDepth = (distanceToCamera - passBuf.depthRange.x) * passBuf.depthRange.y;
+		@end
+
+		@property( !hlms_no_reverse_depth && !exponential_shadow_maps )
+			outDepth = 1.0 - outDepth;
 		@end
 	@end
 @end

@@ -912,24 +912,9 @@ const Ogre::String& HlmsUtilsManager::getTextureFileNameOfPbs (const Ogre::IdStr
         {
             // Get the texture
             Ogre::HlmsPbsDatablock* pbsDatablock = static_cast<Ogre::HlmsPbsDatablock*>(datablock);
-            if (!pbsDatablock->getTexture(textureType).isNull())
-            {
-                Ogre::HlmsTextureManager::TextureLocation texLocation;
-                Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
-                texLocation.texture = pbsDatablock->getTexture(textureType);
-                if( !texLocation.texture.isNull() )
-                {
-                    texLocation.xIdx = pbsDatablock->_getTextureIdx(textureType);
-                    texLocation.yIdx = 0;
-                    texLocation.divisor = 1;
-                    const Ogre::String *texName = hlmsManager->getTextureManager()->findAliasName(texLocation);
-
-                    if(texName)
-                    {
-                        helperString = *texName; // Contains the base name
-                    }
-                }
-            }
+            Ogre::TextureGpu *texture = pbsDatablock->getTexture( textureType );
+            if( texture )
+                helperString = texture->getNameStr();
         }
     }
     catch (Ogre::Exception e) {}
@@ -1009,23 +994,13 @@ void HlmsUtilsManager::enrichTextureMapFromPbs(DatablockStruct* datablockStruct)
     datablockStruct->textureMap.clear();
     for (size_t index = 0; index < Ogre::PbsTextureTypes::NUM_PBSM_TEXTURE_TYPES; ++index)
     {
-        if (!pbsDatablock->getTexture(index).isNull())
+        if (pbsDatablock->getTexture(index))
         {
-            Ogre::HlmsTextureManager::TextureLocation texLocation;
-            Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
-            texLocation.texture = pbsDatablock->getTexture(index);
-            if( !texLocation.texture.isNull() )
+            Ogre::TextureGpu *texture = pbsDatablock->getTexture(index);
+            if( texture )
             {
-                texLocation.xIdx = pbsDatablock->_getTextureIdx((Ogre::PbsTextureTypes)index);
-                texLocation.yIdx = 0;
-                texLocation.divisor = 1;
-                const Ogre::String *texName = hlmsManager->getTextureManager()->findAliasName(texLocation);
-
-                if(texName)
-                {
-                    helperString = *texName;
-                    datablockStruct->textureMap[index] = helperString;
-                }
+                helperString = texture->getNameStr();
+                datablockStruct->textureMap[index] = helperString;
             }
         }
     }
@@ -1042,24 +1017,12 @@ void HlmsUtilsManager::enrichTextureMapFromUnlit(DatablockStruct* datablockStruc
     datablockStruct->textureMap.clear();
     for (size_t index = 0; index < Ogre::UnlitTextureTypes::NUM_UNLIT_TEXTURE_TYPES; ++index)
     {
-        if (!unlitDatablock->getTexture(index).isNull())
+        // Get the texture
+        Ogre::TextureGpu *texture = unlitDatablock->getTexture(index);
+        if( texture )
         {
-            Ogre::HlmsTextureManager::TextureLocation texLocation;
-            Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
-            texLocation.texture = unlitDatablock->getTexture(index);
-            if( !texLocation.texture.isNull() )
-            {
-                texLocation.xIdx = unlitDatablock->_getTextureIdx(index);
-                texLocation.yIdx = 0;
-                texLocation.divisor = 1;
-                const Ogre::String *texName = hlmsManager->getTextureManager()->findAliasName(texLocation);
-
-                if(texName)
-                {
-                    helperString = *texName;
-                    datablockStruct->textureMap[index] = helperString;
-                }
-            }
+            helperString = texture->getNameStr();
+            datablockStruct->textureMap[index] = helperString;
         }
     }
 }
@@ -1135,12 +1098,11 @@ void HlmsUtilsManager::replaceTextureInPbsDatablock (const Ogre::IdString& datab
     if (sampler)
     {
         Ogre::HlmsPbsDatablock* datablock = getPbsDatablock(datablockId);
-        Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
-        Ogre::HlmsTextureManager* hlmsTextureManager = hlmsManager->getTextureManager();
+        Ogre::TextureGpuManager* textureManager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getTextureGpuManager();
         HlmsPbsBuilder builder(0);
-        Ogre::HlmsTextureManager::TextureMapType textureMapType = builder.getTextureMapTypeFromPbsTextureTypes(textureType);
-        Ogre::HlmsTextureManager::TextureLocation texLocation = hlmsTextureManager->createOrRetrieveTexture(fileNameTexture, textureMapType);
-        datablock->setTexture(textureType, texLocation.xIdx, texLocation.texture);
+        Ogre::CommonTextureTypes::CommonTextureTypes textureMapType = builder.getTextureMapTypeFromPbsTextureTypes(textureType);
+        Ogre::TextureGpu *texture = textureManager->createOrRetrieveTexture(fileNameTexture, Ogre::GpuPageOutStrategy::Discard, textureMapType, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+        datablock->setTexture(textureType, texture);
     }
 }
 
@@ -1211,31 +1173,15 @@ void HlmsUtilsManager::destroyAllTexturesOfPbsDatablock(const Ogre::IdString& da
 //****************************************************************************/
 void HlmsUtilsManager::destroyAllTexturesOfPbsDatablock(Ogre::HlmsPbsDatablock* pbsDatablock)
 {
-    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
-    Ogre::HlmsTextureManager* hlmsTextureManager = hlmsManager->getTextureManager();
-    Ogre::IdString alias;
+    Ogre::TextureGpuManager* textureManager = Ogre::Root::getSingletonPtr()->getRenderSystem()->getTextureGpuManager();
 
     for (size_t index = 0; index < Ogre::PbsTextureTypes::NUM_PBSM_TEXTURE_TYPES; ++index)
     {
         try
         {
-            if (!pbsDatablock->getTexture(index).isNull())
+            if (pbsDatablock->getTexture(index))
             {
-                Ogre::HlmsTextureManager::TextureLocation texLocation;
-                texLocation.texture = pbsDatablock->getTexture(index);
-                if( !texLocation.texture.isNull() )
-                {
-                    texLocation.xIdx = pbsDatablock->_getTextureIdx((Ogre::PbsTextureTypes)index);
-                    texLocation.yIdx = 0;
-                    texLocation.divisor = 1;
-                    const Ogre::String *texName = hlmsTextureManager->findAliasName(texLocation);
-
-                    if(texName)
-                    {
-                        alias = *texName;
-                        hlmsTextureManager->destroyTexture(alias);
-                    }
-                }
+                textureManager->destroyTexture(pbsDatablock->getTexture(index));
             }
         }
         catch (Ogre::Exception e) {}
@@ -1264,31 +1210,16 @@ void HlmsUtilsManager::destroyAllTexturesOfUnlitDatablock(const Ogre::IdString& 
 //****************************************************************************/
 void HlmsUtilsManager::destroyAllTexturesOfUnlitDatablock(Ogre::HlmsUnlitDatablock* unlitDatablock)
 {
-    Ogre::HlmsManager* hlmsManager = Ogre::Root::getSingletonPtr()->getHlmsManager();
-    Ogre::HlmsTextureManager* hlmsTextureManager = hlmsManager->getTextureManager();
+    Ogre::TextureGpuManager* textureManager = Ogre::Root::getSingleton().getRenderSystem()->getTextureGpuManager();
     Ogre::IdString alias;
 
     for (size_t index = 0; index < Ogre::UnlitTextureTypes::NUM_UNLIT_TEXTURE_TYPES; ++index)
     {
         try
         {
-            if (!unlitDatablock->getTexture(index).isNull())
+            if (unlitDatablock->getTexture(index))
             {
-                Ogre::HlmsTextureManager::TextureLocation texLocation;
-                texLocation.texture = unlitDatablock->getTexture(index);
-                if( !texLocation.texture.isNull() )
-                {
-                    texLocation.xIdx = unlitDatablock->_getTextureIdx(index);
-                    texLocation.yIdx = 0;
-                    texLocation.divisor = 1;
-                    const Ogre::String *texName = hlmsTextureManager->findAliasName(texLocation);
-
-                    if(texName)
-                    {
-                        alias = *texName;
-                        hlmsTextureManager->destroyTexture(alias);
-                    }
-                }
+                textureManager->destroyTexture(unlitDatablock->getTexture(index));
             }
         }
         catch (Ogre::Exception e) {}

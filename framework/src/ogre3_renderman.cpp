@@ -28,6 +28,7 @@
 #include "OgreHlmsCommon.h"
 #include "OgreLogManager.h"
 #include "OgreFrameStats.h"
+#include "OgreAbiUtils.h"
 
 namespace Magus
 {
@@ -47,7 +48,10 @@ namespace Magus
         #endif
 
         // Create Ogre tt and initialize
-        mRoot = new Ogre::Root(mPluginsCfg);
+            {
+                const Ogre::AbiCookie abiCookie = Ogre::generateAbiCookie();
+                mRoot = new Ogre::Root( &abiCookie, mPluginsCfg );
+            }
 
         // Setup renderer
         mCurrentRenderSystem = 0;
@@ -222,40 +226,61 @@ namespace Magus
         else if( renderSystem->getName() == OGRE_RENDERSYSTEM_METAL )
             shaderSyntax = "Metal";
 
-        Ogre::Archive* archiveLibrary = Ogre::ArchiveManager::getSingletonPtr()->load(
-                        dataFolder + "Hlms/Common/" + shaderSyntax,
-                        "FileSystem", true );
-        Ogre::Archive* archiveLibraryAny = Ogre::ArchiveManager::getSingletonPtr()->load(
-                        dataFolder + "Hlms/Common/Any",
-                        "FileSystem", true );
-        Ogre::Archive* archivePbsLibraryAny = Ogre::ArchiveManager::getSingletonPtr()->load(
-                        dataFolder + "Hlms/Pbs/Any",
-                        "FileSystem", true );
-        Ogre::Archive* archiveUnlitLibraryAny = Ogre::ArchiveManager::getSingletonPtr()->load(
-                        dataFolder + "Hlms/Unlit/Any",
-                        "FileSystem", true );
+        Ogre::HlmsUnlit *hlmsUnlit = 0;
+        Ogre::HlmsPbs *hlmsPbs = 0;
 
-        Ogre::ArchiveVec library;
-        library.push_back( archiveLibrary );
-        library.push_back( archiveLibraryAny );
+        Ogre::String mainFolderPath;
+        Ogre::StringVector libraryFoldersPaths;
+        Ogre::StringVector::const_iterator libraryFolderPathIt;
+        Ogre::StringVector::const_iterator libraryFolderPathEn;
+
+        Ogre::ArchiveManager &archiveManager = Ogre::ArchiveManager::getSingleton();
+        {
+            Ogre::HlmsUnlit::getDefaultPaths( mainFolderPath, libraryFoldersPaths );
+            Ogre::Archive *archiveUnlit =
+                archiveManager.load( dataFolder + mainFolderPath, "FileSystem", true );
+            Ogre::ArchiveVec archiveUnlitLibraryFolders;
+            libraryFolderPathIt = libraryFoldersPaths.begin();
+            libraryFolderPathEn = libraryFoldersPaths.end();
+            while( libraryFolderPathIt != libraryFolderPathEn )
+            {
+                Ogre::Archive *archiveLibrary =
+                    archiveManager.load( dataFolder + *libraryFolderPathIt, "FileSystem", true );
+                archiveUnlitLibraryFolders.push_back( archiveLibrary );
+                ++libraryFolderPathIt;
+            }
+
+            hlmsUnlit = OGRE_NEW Ogre::HlmsUnlit( archiveUnlit, &archiveUnlitLibraryFolders );
+            mRoot->getHlmsManager()->registerHlms( hlmsUnlit );
+        }
 
         Ogre::Archive* archiveUnlit = Ogre::ArchiveManager::getSingletonPtr()->load(
                         dataFolder + "Hlms/Unlit/" + shaderSyntax,
                         "FileSystem", true );
 
-        library.push_back( archiveUnlitLibraryAny );
-        Ogre::HlmsUnlit* hlmsUnlit = OGRE_NEW Ogre::HlmsUnlit( archiveUnlit, &library );
-        mRoot->getHlmsManager()->registerHlms( hlmsUnlit );
-        library.pop_back();
+        {
+            // Create & Register HlmsPbs
+            // Do the same for HlmsPbs:
+            Ogre::HlmsPbs::getDefaultPaths( mainFolderPath, libraryFoldersPaths );
+            Ogre::Archive *archivePbs =
+                archiveManager.load( dataFolder + mainFolderPath, "FileSystem", true );
 
-        Ogre::Archive* archivePbs = Ogre::ArchiveManager::getSingletonPtr()->load(
-                        dataFolder + "Hlms/Pbs/" + shaderSyntax,
-                        "FileSystem", true );
+            // Get the library archive(s)
+            Ogre::ArchiveVec archivePbsLibraryFolders;
+            libraryFolderPathIt = libraryFoldersPaths.begin();
+            libraryFolderPathEn = libraryFoldersPaths.end();
+            while( libraryFolderPathIt != libraryFolderPathEn )
+            {
+                Ogre::Archive *archiveLibrary =
+                    archiveManager.load( dataFolder + *libraryFolderPathIt, "FileSystem", true );
+                archivePbsLibraryFolders.push_back( archiveLibrary );
+                ++libraryFolderPathIt;
+            }
 
-        library.push_back( archivePbsLibraryAny );
-        Ogre::HlmsPbs* hlmsPbs = OGRE_NEW Ogre::HlmsPbs( archivePbs, &library );
-        mRoot->getHlmsManager()->registerHlms( hlmsPbs );
-        library.pop_back();
+            // Create and register
+            hlmsPbs = OGRE_NEW Ogre::HlmsPbs( archivePbs, &archivePbsLibraryFolders );
+            Ogre::Root::getSingleton().getHlmsManager()->registerHlms( hlmsPbs );
+        }
 
         if( renderSystem->getName() == "Direct3D11 Rendering Subsystem" )
         {
@@ -303,7 +328,12 @@ namespace Magus
                 // Put in a try-catch, because sometimes the application crashes after loading a big mesh
                 mRoot->renderOneFrame();
             }
-            catch (Ogre::Exception e) {}
+            catch (Ogre::Exception e) {
+                // TODO: This is no longer viable. If renderOneFrame() throws, OgreNext
+                // will likely be left in an inconsistent state and crash later on.
+                // It becomes an assert fest if we reach here.
+                fprintf( stderr, "%s", e.getFullDescription().c_str() );
+            }
         }
 
         //const Ogre::FrameStats* framestats = Ogre::Root::getSingletonPtr()->getFrameStats(); // DEBUG

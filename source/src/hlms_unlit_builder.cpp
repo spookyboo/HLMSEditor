@@ -25,6 +25,7 @@
 #include "hlms_unlit_builder.h"
 #include "OgreItem.h"
 #include "OgreResourceGroupManager.h"
+#include "OgreTextureGpuManager.h"
 
 //****************************************************************************/
 HlmsUnlitBuilder::HlmsUnlitBuilder(Magus::QtNodeEditor* nodeEditor) :
@@ -48,7 +49,7 @@ Ogre::HlmsUnlitDatablock* HlmsUnlitBuilder::createUnlitDatablock (Magus::OgreMan
 
     // Create an Unlit datablock
     Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
-    Ogre::HlmsTextureManager* hlmsTextureManager = hlmsManager->getTextureManager();
+    Ogre::TextureGpuManager* textureManager = root->getRenderSystem()->getTextureGpuManager();
     Ogre::HlmsUnlit* hlmsUnlit = static_cast<Ogre::HlmsUnlit*>( hlmsManager->getHlms(Ogre::HLMS_UNLIT) );
 
     // Determine whether a macro node is attached (and enabled)
@@ -122,14 +123,14 @@ Ogre::HlmsUnlitDatablock* HlmsUnlitBuilder::createUnlitDatablock (Magus::OgreMan
                             }
 
                             // Get the texture from the samplernode
-                            Ogre::HlmsTextureManager::TextureLocation texLocation = hlmsTextureManager->
-                                    createOrRetrieveTexture(texName, Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE);
+                            Ogre::TextureGpu *texture = textureManager->
+                                    createOrRetrieveTexture(texName, Ogre::GpuPageOutStrategy::Discard, Ogre::CommonTextureTypes::Diffuse);
 
                             // Create a samplerblock and add it to the datablock
                             Ogre::HlmsSamplerblock samplerblock;
                             samplernode->setTextureIndex(texUnit); // Needed to identify the corresponding texture when enriching the samplerblock
                             enrichSamplerblock(datablock, &samplerblock, samplernode);
-                            datablock->setTexture(texUnit, texLocation.xIdx, texLocation.texture);
+                            datablock->setTexture(texUnit, texture);
                             datablock->setSamplerblock(texUnit, samplerblock);
                             ++texUnit;
                         }
@@ -222,7 +223,7 @@ HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNodeStructure(Magus::OgreMa
 
         // Create and fill properties of the blendnode with the values of the blendblock and connect the node to the unlit node
         const Ogre::HlmsBlendblock* blendblock = datablock->getBlendblock(mNodeEditor);
-        if (!(!blendblock->mAlphaToCoverageEnabled &&
+        if (!(!blendblock->mAlphaToCoverage == Ogre::HlmsBlendblock::A2cDisabled &&
               blendblock->mBlendChannelMask == Ogre::HlmsBlendblock::BlendChannelAll &&
               !blendblock->mIsTransparent &&
               !blendblock->mSeparateBlend &&
@@ -236,8 +237,9 @@ HlmsNodeUnlitDatablock* HlmsUnlitBuilder::createUnlitNodeStructure(Magus::OgreMa
             // It is not a default blendblock, so create a new blend node and set it in the unlit
             HlmsNodeBlendblock* blendnode = createBlendNode(mNodeEditor);
             blendnode->setBlendblockEnabled(true);
-            blendnode->setAlphaToCoverageEnabled(blendblock->mAlphaToCoverageEnabled);
-            switch (blendblock->mBlendChannelMask)
+            blendnode->setAlphaToCoverageEnabled( blendblock->mAlphaToCoverage !=
+                                                  Ogre::HlmsBlendblock::A2cDisabled );
+            switch( blendblock->mBlendChannelMask )
             {
                 case Ogre::HlmsBlendblock::BlendChannelRed:
                     blendnode->setBlendChannelMask(0);

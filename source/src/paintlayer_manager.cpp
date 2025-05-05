@@ -237,7 +237,7 @@ const MeshIndexUvMapType& PaintLayerManager::getMinMaxUVFromMesh (const Ogre::Me
             // Get the first LOD level
             Ogre::VertexArrayObject *vao = vaos[0];
 
-            Ogre::VertexArrayObject::ReadRequestsArray readRequests;
+            Ogre::VertexArrayObject::ReadRequestsVec readRequests;
             Ogre::VertexElement2VecVec vertexDeclaration = vao->getVertexDeclaration();
             Ogre::VertexElement2VecVec::const_iterator it0 = vertexDeclaration.begin();
             Ogre::VertexElement2VecVec::const_iterator en0 = vertexDeclaration.end();

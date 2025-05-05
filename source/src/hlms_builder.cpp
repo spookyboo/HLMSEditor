@@ -199,8 +199,10 @@ void HlmsBuilder::enrichMacroblock(HlmsNodeMacroblock* macronode, Ogre::HlmsMacr
 //****************************************************************************/
 void HlmsBuilder::enrichBlendblock(HlmsNodeBlendblock* blendnode, Ogre::HlmsBlendblock* blendblock)
 {
-    blendblock->mAlphaToCoverageEnabled = blendnode->getAlphaToCoverageEnabled();
-    switch (blendnode->getBlendChannelMask())
+    blendblock->mAlphaToCoverage = blendnode->getAlphaToCoverageEnabled()
+                                       ? Ogre::HlmsBlendblock::A2cDisabled
+                                       : Ogre::HlmsBlendblock::A2cEnabledMsaaOnly;
+    switch( blendnode->getBlendChannelMask() )
     {
         case 0:
             blendblock->mBlendChannelMask = Ogre::HlmsBlendblock::BlendChannelRed;

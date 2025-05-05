@@ -1,14 +1,18 @@
+
+//#include "SyntaxHighlightingMisc.h"
+
 @insertpiece( SetCrossPlatformSettings )
 
-// START UNIFORM STRUCT DECLARATION
-@insertpiece( PassStructDecl )
-@insertpiece( custom_vs_uniformStructDeclaration )
-// END UNIFORM STRUCT DECLARATION
+@insertpiece( DefaultHeaderVS )
 
 struct VS_INPUT
 {
+@property( !hlms_particle_system )
 	float4 position [[attribute(VES_POSITION)]];
-@property( hlms_colour )	float4 colour [[attribute(VES_DIFFUSE)]];@end
+@end
+@property( hlms_colour && !hlms_particle_system )
+	float4 colour [[attribute(VES_DIFFUSE)]];
+@end
 @foreach( hlms_uv_count, n )
 	float@value( hlms_uv_count@n ) uv@n [[attribute(VES_TEXTURE_COORDINATES@n)]];@end
 @property( !iOS )
@@ -21,20 +25,11 @@ struct PS_INPUT
 {
 @insertpiece( VStoPS_block )
 	float4 gl_Position [[position]];
-	@foreach( n, hlms_pso_clip_distances )
-		float gl_ClipDistance@n [[clip_distance]];
+
+	@property( hlms_pso_clip_distances )
+		float gl_ClipDistance [[clip_distance]] [@value( hlms_pso_clip_distances )];
 	@end
 };
-
-@property( !hlms_identity_world )
-	@piece( worldViewProj )worldViewProj@end
-@end @property( hlms_identity_world )
-	@property( !hlms_identity_viewproj_dynamic )
-		@piece( worldViewProj )passBuf.viewProj[@value(hlms_identity_viewproj)]@end
-	@end @property( hlms_identity_viewproj_dynamic )
-		@piece( worldViewProj )passBuf.viewProj[worldMaterialIdx[finalDrawId].z]@end
-	@end
-@end
 
 vertex PS_INPUT main_metal
 (
@@ -45,67 +40,30 @@ vertex PS_INPUT main_metal
 	@end
 	// START UNIFORM DECLARATION
 	@insertpiece( PassDecl )
+	@property( ( !hlms_shadowcaster || alpha_test || hlms_alpha_hash ) && hlms_colour && diffuse )
+		@insertpiece( MaterialDecl )
+	@end
 	@insertpiece( InstanceDecl )
-	, device const float4x4 *worldMatBuf [[buffer(TEX_SLOT_START+0)]]
-	@property( texture_matrix ), device const float4x4 *animationMatrixBuf [[buffer(TEX_SLOT_START+1)]]@end
+	@property( !hlms_particle_system )
+		, device const float4 *worldMatBuf [[buffer(TEX_SLOT_START+0)]]
+	@end
+	@property( texture_matrix )
+		, device const float4 *animationMatrixBuf [[buffer(TEX_SLOT_START+@value( texture_matrix ))]]
+	@end
+
+	@insertpiece( ParticleSystemDeclVS )
+
+	@property( hlms_vertex_id )
+		, uint inVs_vertexId [[vertex_id]]
+		, uint baseVertexID [[base_vertex]]
+	@end
 	@insertpiece( custom_vs_uniformDeclaration )
 	// END UNIFORM DECLARATION
 )
 {
-	@property( iOS )
-		ushort drawId = baseInstance + instanceId;
-	@end @property( !iOS )
-		ushort drawId = input.drawId;
-	@end
-
 	PS_INPUT outVs;
 	@insertpiece( custom_vs_preExecution )
-
-	@property( !hlms_identity_world )
-		float4x4 worldViewProj;
-		worldViewProj = worldMatBuf[finalDrawId];
-	@end
-
-@property( !hlms_dual_paraboloid_mapping )
-	outVs.gl_Position = input.position * @insertpiece( worldViewProj );
-@end
-
-@property( hlms_dual_paraboloid_mapping )
-	//Dual Paraboloid Mapping
-	outVs.gl_Position.w		= 1.0f;
-	outVs.gl_Position.xyz	= ( input.position * @insertpiece( worldViewProj ) ).xyz;
-	float L = length( outVs.gl_Position.xyz );
-	outVs.gl_Position.z		+= 1.0f;
-	outVs.gl_Position.xy	/= outVs.gl_Position.z;
-	outVs.gl_Position.z	= (L - NearPlane) / (FarPlane - NearPlane);
-@end
-
-@property( !hlms_shadowcaster )
-@property( hlms_colour )	outVs.colour = input.colour;@end
-
-@property( texture_matrix )	float4x4 textureMatrix;@end
-
-@foreach( out_uv_count, n )
-	@property( out_uv@n_texture_matrix )
-		textureMatrix = animationMatrixBuf[(worldMaterialIdx[finalDrawId].x << 4u) + @value( out_uv@n_tex_unit )];
-		outVs.uv@value( out_uv@n_out_uv ).@insertpiece( out_uv@n_swizzle ) = (float4( input.uv@value( out_uv@n_source_uv ).xy, 0, 1 ) * textureMatrix).xy;
-	@end @property( !out_uv@n_texture_matrix )
-		outVs.uv@value( out_uv@n_out_uv ).@insertpiece( out_uv@n_swizzle ) = input.uv@value( out_uv@n_source_uv ).xy;
-	@end @end
-
-	outVs.materialId = (ushort)worldMaterialIdx[finalDrawId].x;
-
-@end
-
-	@property( hlms_global_clip_planes || (hlms_shadowcaster && (exponential_shadow_maps || hlms_shadowcaster_point)) )
-		float3 worldPos = (outVs.gl_Position * passBuf.invViewProj).xyz;
-	@end
-	@insertpiece( DoShadowCasterVS )
-
-@property( hlms_global_clip_planes )
-	outVs.gl_ClipDistance0 = dot( float4( worldPos.xyz, 1.0 ), passBuf.clipPlane0.xyzw );
-@end
-
+	@insertpiece( DefaultBodyVS )
 	@insertpiece( custom_vs_posExecution )
 
 	return outVs;

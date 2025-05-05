@@ -26,6 +26,7 @@
 #include "OgreItem.h"
 #include "OgreResourceGroupManager.h"
 #include "OgreHlmsManager.h"
+#include "OgreTextureGpuManager.h"
 
 //****************************************************************************/
 HlmsPbsBuilder::HlmsPbsBuilder(Magus::QtNodeEditor* nodeEditor) :
@@ -49,7 +50,7 @@ Ogre::HlmsPbsDatablock* HlmsPbsBuilder::createPbsDatablock (Magus::OgreManager* 
 
     // Create a Pbs datablock
     Ogre::HlmsManager* hlmsManager = root->getHlmsManager();
-    Ogre::HlmsTextureManager* hlmsTextureManager = hlmsManager->getTextureManager();
+    Ogre::TextureGpuManager* textureManager = root->getRenderSystem()->getTextureGpuManager();
     Ogre::HlmsPbs* hlmsPbs = static_cast<Ogre::HlmsPbs*>( hlmsManager->getHlms(Ogre::HLMS_PBS) );
 
     // Determine whether a macro node is attached (and enabled)
@@ -94,7 +95,7 @@ Ogre::HlmsPbsDatablock* HlmsPbsBuilder::createPbsDatablock (Magus::OgreManager* 
     // Run through all nodes connected to the pbsnode
     QVector<Magus::QtNode*> nodes = pbsnode->getNodes();
     Ogre::PbsTextureTypes textureType;
-    Ogre::HlmsTextureManager::TextureMapType textureMapType;
+    Ogre::CommonTextureTypes::CommonTextureTypes textureMapType;
     Ogre::String texName;
     Ogre::String dataFolder;
     foreach(Magus::QtNode* node, nodes)
@@ -126,13 +127,15 @@ Ogre::HlmsPbsDatablock* HlmsPbsBuilder::createPbsDatablock (Magus::OgreManager* 
                             }
 
                             // Get the texture from the samplernode
-                            Ogre::HlmsTextureManager::TextureLocation texLocation = hlmsTextureManager->
-                                    createOrRetrieveTexture(texName, textureMapType);
+                            Ogre::TextureGpu *texture =
+                                textureManager->createOrRetrieveTexture(
+                                    texName, Ogre::GpuPageOutStrategy::Discard, textureMapType,
+                                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME );
 
                             // Create a samplerblock and add it to the datablock
                             Ogre::HlmsSamplerblock samplerblock;
                             enrichSamplerblock(datablock, &samplerblock, samplernode);
-                            datablock->setTexture(textureType, texLocation.xIdx, texLocation.texture);
+                            datablock->setTexture(textureType, texture);
                             datablock->setSamplerblock(textureType, samplerblock);
                         }
                     }
@@ -270,7 +273,7 @@ HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNodeStructure(Magus::OgreManager*
 
         // Create and fill properties of the blendnode with the values of the blendblock and connect the node to the pbs node
         const Ogre::HlmsBlendblock* blendblock = datablock->getBlendblock();
-        if (!(!blendblock->mAlphaToCoverageEnabled &&
+        if (!(blendblock->mAlphaToCoverage == Ogre::HlmsBlendblock::A2cDisabled &&
               blendblock->mBlendChannelMask == Ogre::HlmsBlendblock::BlendChannelAll &&
               !blendblock->mIsTransparent &&
               !blendblock->mSeparateBlend &&
@@ -284,8 +287,9 @@ HlmsNodePbsDatablock* HlmsPbsBuilder::createPbsNodeStructure(Magus::OgreManager*
             // It is not a default blendblock, so create a new blend node and set it in the pbs
             HlmsNodeBlendblock* blendnode = createBlendNode(mNodeEditor);
             blendnode->setBlendblockEnabled(true);
-            blendnode->setAlphaToCoverageEnabled(blendblock->mAlphaToCoverageEnabled);
-            switch (blendblock->mBlendChannelMask)
+            blendnode->setAlphaToCoverageEnabled( blendblock->mAlphaToCoverage !=
+                                                  Ogre::HlmsBlendblock::A2cDisabled );
+            switch( blendblock->mBlendChannelMask )
             {
                 case Ogre::HlmsBlendblock::BlendChannelRed:
                     blendnode->setBlendChannelMask(0);
@@ -555,10 +559,9 @@ HlmsNodeSamplerblock* HlmsPbsBuilder::createSamplerNode(Ogre::HlmsPbsDatablock* 
     if (textureType != Ogre::PBSM_DIFFUSE && getIndexFromTextureType(textureType) == 0)
         return 0;
 
-    Ogre::TexturePtr tex;
     HlmsNodeSamplerblock* samplernode = 0;
-    tex = datablock->getTexture(textureType);
-    if (!tex.isNull())
+    Ogre::TextureGpu *tex = datablock->getTexture(textureType);
+    if (tex)
     {
         samplernode = createSamplerNode(mNodeEditor);
         connectNodes(pbsnode, samplernode); // Connect both nodes
@@ -1133,115 +1136,115 @@ Ogre::PbsTextureTypes HlmsPbsBuilder::getPbsTextureTypeFromSamplerNode(HlmsNodeS
 }
 
 //****************************************************************************/
-Ogre::HlmsTextureManager::TextureMapType HlmsPbsBuilder::getTextureMapTypeFromPbsTextureTypes(Ogre::PbsTextureTypes textureType)
+Ogre::CommonTextureTypes::CommonTextureTypes HlmsPbsBuilder::getTextureMapTypeFromPbsTextureTypes(Ogre::PbsTextureTypes textureType)
 {
     switch (textureType)
     {
         case Ogre::PBSM_DIFFUSE:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
+            return Ogre::CommonTextureTypes::Diffuse;
         break;
         case Ogre::PBSM_NORMAL:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_NORMALS;
+            return Ogre::CommonTextureTypes::NormalMap;
         break;
         case Ogre::PBSM_SPECULAR:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
+            return Ogre::CommonTextureTypes::Diffuse;
         break;
         //case Ogre::PBSM_METALLIC:
             //return Ogre::HlmsTextureManager::TEXTURE_TYPE_MONOCHROME;
         //break;
         case Ogre::PBSM_ROUGHNESS:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_MONOCHROME;
+            return Ogre::CommonTextureTypes::Monochrome;
         break;
         case Ogre::PBSM_DETAIL_WEIGHT:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_NON_COLOR_DATA;
+            return Ogre::CommonTextureTypes::NonColourData;
         break;
         case Ogre::PBSM_DETAIL0:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL;
+            return Ogre::CommonTextureTypes::Diffuse;
         break;
         case Ogre::PBSM_DETAIL1:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL;
+            return Ogre::CommonTextureTypes::Diffuse;
         break;
         case Ogre::PBSM_DETAIL2:
-        return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL;
+        return Ogre::CommonTextureTypes::Diffuse;
         break;
         case Ogre::PBSM_DETAIL3:
-        return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL;
+        return Ogre::CommonTextureTypes::Diffuse;
         break;
         case Ogre::PBSM_DETAIL0_NM:
-        return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP;
+        return Ogre::CommonTextureTypes::NormalMap;
         break;
         case Ogre::PBSM_DETAIL1_NM:
-        return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP;
+        return Ogre::CommonTextureTypes::NormalMap;
         break;
         case Ogre::PBSM_DETAIL2_NM:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP;
+            return Ogre::CommonTextureTypes::NormalMap;
         break;
         case Ogre::PBSM_DETAIL3_NM:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP;
+            return Ogre::CommonTextureTypes::NormalMap;
         break;
         case Ogre::PBSM_EMISSIVE:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
+            return Ogre::CommonTextureTypes::Diffuse;
         break;
         case Ogre::PBSM_REFLECTION:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_ENV_MAP;
+            return Ogre::CommonTextureTypes::EnvMap;
         break;
     }
-    return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
+    return Ogre::CommonTextureTypes::Diffuse;
 }
 
 //****************************************************************************/
-Ogre::HlmsTextureManager::TextureMapType HlmsPbsBuilder::getTextureMapTypeFromSamplerNode(HlmsNodeSamplerblock* samplernode)
+Ogre::CommonTextureTypes::CommonTextureTypes HlmsPbsBuilder::getTextureMapTypeFromSamplerNode(HlmsNodeSamplerblock* samplernode)
 {
     unsigned int index = samplernode->getTextureType();
     switch (index)
     {
         case 0:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
+            return Ogre::CommonTextureTypes::Diffuse;
         break;
         case 1:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_NORMALS;
+            return Ogre::CommonTextureTypes::NormalMap;
         break;
         case 2:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
+            return Ogre::CommonTextureTypes::Diffuse;
         break;
         case 3:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_MONOCHROME;
+            return Ogre::CommonTextureTypes::Monochrome;
         break;
         case 4:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_NON_COLOR_DATA;
+            return Ogre::CommonTextureTypes::NonColourData;
         break;
         case 5:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL;
+            return Ogre::CommonTextureTypes::Diffuse;
         break;
         case 6:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL;
+            return Ogre::CommonTextureTypes::Diffuse;
         break;
         case 7:
-        return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL;
+        return Ogre::CommonTextureTypes::Diffuse;
         break;
         case 8:
-        return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL;
+        return Ogre::CommonTextureTypes::Diffuse;
         break;
         case 9:
-        return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP;
+        return Ogre::CommonTextureTypes::NormalMap;
         break;
         case 10:
-        return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP;
+        return Ogre::CommonTextureTypes::NormalMap;
         break;
         case 11:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP;
+            return Ogre::CommonTextureTypes::NormalMap;
         break;
         case 12:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DETAIL_NORMAL_MAP;
+            return Ogre::CommonTextureTypes::NormalMap;
         break;
         case 13:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
+            return Ogre::CommonTextureTypes::Diffuse;
         break;
         case 14:
-            return Ogre::HlmsTextureManager::TEXTURE_TYPE_ENV_MAP;
+            return Ogre::CommonTextureTypes::EnvMap;
         break;
     }
-    return Ogre::HlmsTextureManager::TEXTURE_TYPE_DIFFUSE;
+    return Ogre::CommonTextureTypes::Diffuse;
 }
 
 //****************************************************************************/

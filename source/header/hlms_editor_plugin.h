@@ -155,7 +155,7 @@ namespace Ogre
             std::vector<String> mInTexturesUsedByDatablocks; // Vector with texture basenames from all the Pbs and Unlit datablocks in the material browser
             std::vector<String> mInMeshFileNames; // Vector with mesh filenames (fully qualified); in practice this may contain the current mesh
             Ogre::Item* mInItem; // The currently selected Item in the renderwidget
-            Ogre::RenderWindow* mInRenderWindow; // The renderwindow of the renderwidget
+            Ogre::Window* mInRenderWindow; // The renderwindow of the renderwidget
             Ogre::SceneManager* mInSceneManager; // The scenemanager used in the renderwidget
             std::map<String, PLUGIN_PROPERTY> mInPropertiesMap; // Used to pass property information (e.g. from a settings/properties dialog) to the plugin
 

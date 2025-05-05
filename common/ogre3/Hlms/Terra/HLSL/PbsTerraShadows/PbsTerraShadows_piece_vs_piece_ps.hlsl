@@ -1,7 +1,7 @@
 @property( !hlms_shadowcaster && terra_enabled )
 
 @piece( custom_VStoPS )
-    float terrainShadow : TEXCOORD@counter(texcoord);
+	midf terrainShadow : TEXCOORD@counter(texcoord);
 @end
 
 /// Extra per-pass global data we need for applying our
@@ -15,23 +15,30 @@
 
 /// Add the shadows' texture to the vertex shader
 @piece( custom_vs_uniformDeclaration )
-	SamplerState terrainShadowSampler : register(s12);
-    Texture2D<unorm float4> terrainShadows : register(t12);
+	SamplerState terrainShadowSampler : register(s@value(terrainShadows));
+	Texture2D<unorm float4> terrainShadows : register(t@value(terrainShadows));
 @end
 
 /// Evaluate the shadow based on world XZ position & height in the vertex shader.
 /// Doing it at the pixel shader level would be more accurate, but the difference
 /// is barely noticeable, and slower
 @piece( custom_vs_posExecution )
-    float3 terraShadowData = terrainShadows.SampleLevel( terrainShadowSampler, worldPos.xz * passBuf.invTerraBounds.xz + passBuf.terraOrigin.xz, 0 ).xyz;
-    float terraHeightWeight = worldPos.y * passBuf.invTerraBounds.y + passBuf.terraOrigin.y;
+	@property( z_up )
+		float3 terraWorldPos = float3( worldPos.x, -worldPos.z, worldPos.y );
+	@else
+		float3 terraWorldPos = worldPos.xyz;
+	@end
+	float3 terraShadowData = terrainShadows.SampleLevel( terrainShadowSampler,
+								terraWorldPos.xz * passBuf.invTerraBounds.xz + passBuf.terraOrigin.xz,
+								0 ).xyz;
+	float terraHeightWeight = terraWorldPos.y * passBuf.invTerraBounds.y + passBuf.terraOrigin.y;
     terraHeightWeight = (terraHeightWeight - terraShadowData.y) * terraShadowData.z * 1023.0;
-    outVs.terrainShadow = lerp( terraShadowData.x, 1.0, saturate( terraHeightWeight ) );
+	outVs.terrainShadow = lerp( midf_c( terraShadowData.x ), _h( 1.0 ), midf_c( saturate( terraHeightWeight ) ) );
 @end
 
-@property( hlms_num_shadow_map_lights )
+@property( hlms_lights_directional && hlms_num_shadow_map_lights )
     @piece( custom_ps_preLights )fShadow *= inPs.terrainShadow;@end
-@end @property( !hlms_num_shadow_map_lights )
+@else
     @piece( custom_ps_preLights )float fShadow = inPs.terrainShadow;@end
     @piece( DarkenWithShadowFirstLight )* fShadow@end
 @end

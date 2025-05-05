@@ -24,7 +24,7 @@
 #include <QWidget>
 #include <QPaintEngine>
 #include "OgreRoot.h"
-#include "OgreRenderWindow.h"
+#include "OgreWindow.h"
 #include "OgreString.h"
 #include "OgreCamera.h"
 #include "OgreColourValue.h"
@@ -71,7 +71,7 @@ namespace Magus
             void createRenderWindow(OgreManager* ogreManager);
             void createScene();
             Ogre::Item* getItem(void) {return mItem;}
-            Ogre::RenderWindow* getRenderWindow(void) {return mOgreRenderWindow;}
+            Ogre::Window* getRenderWindow(void) {return mOgreRenderWindow;}
             Ogre::SceneManager* getSceneManager(void) {return mSceneManager;}
             const Ogre::Vector3 getItemScale(void);
             void setItemScale(const Ogre::Vector3& scale);
@@ -139,7 +139,7 @@ namespace Magus
 
         protected:
             Ogre::Root* mRoot;
-            Ogre::RenderWindow* mOgreRenderWindow;
+            Ogre::Window* mOgreRenderWindow;
             Ogre::SceneManager* mSceneManager;
             Ogre::SceneManager* mSceneManagerTest;
             Ogre::Camera* mCamera;
@@ -169,10 +169,8 @@ namespace Magus
             bool mMouseDown;
             Ogre::Light* mLight;
             Ogre::Light* mSecondLight;
-            Ogre::TexturePtr mCustomRenderTextureHoover;
-            Ogre::TexturePtr mCustomRenderTexturePaint;
-            Ogre::RenderTexture* mRttHoover;
-            Ogre::RenderTexture* mRttPaint;
+            Ogre::TextureGpu *mCustomRenderTextureHoover;
+            Ogre::TextureGpu *mCustomRenderTexturePaint;
             Ogre::ColourValue mHelpColour;
             Ogre::String mRenderTextureNameHoover;
             Ogre::String mRenderTextureNamePaint;
